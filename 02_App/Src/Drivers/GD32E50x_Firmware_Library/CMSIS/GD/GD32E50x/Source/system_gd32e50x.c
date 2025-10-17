@@ -34,13 +34,14 @@
 /* This file refers the CMSIS standard, some adjustments are made according to GigaDevice chips */
 
 #include "gd32e50x.h"
+#include "SysCfg.h"
 
 /* system frequency define */
 #define __IRC8M           (IRC8M_VALUE)            /* internal 8 MHz RC oscillator frequency */
 #define __HXTAL           (HXTAL_VALUE)            /* high speed crystal oscillator frequency */
 #define __SYS_OSC_CLK     (__IRC8M)                /* main oscillator frequency */
 
-#define VECT_TAB_OFFSET  (uint32_t)0x00            /* vector table base offset */
+#define VECT_TAB_OFFSET  (uint32_t)SYSCFG_VECT_TAB_OFFSET  /* vector table base offset */
 
 /* select a system clock by uncommenting the following line */
 /* use IRC8M */
