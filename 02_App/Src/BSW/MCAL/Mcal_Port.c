@@ -39,7 +39,16 @@
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
-
+typedef struct 
+{
+	McalPortPinChanel_Enum  ePinChannel;
+    rcu_periph_enum     rcu_periph;
+    uint32_t            gpio_periph;
+	uint32_t            mode;
+	uint32_t            speed;
+    uint32_t            pin;
+    bit_status          sta_init;
+}McalPortPinConfig_Struct;
 
 
 /*******************************************************************************

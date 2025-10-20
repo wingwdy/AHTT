@@ -406,11 +406,6 @@
               <FilePath>..\Src\BSW\MCAL\Mcal_Mcu.c</FilePath>
             </File>
             <File>
-              <FileName>Mcal_io.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\BSW\MCAL\Mcal_io.c</FilePath>
-            </File>
-            <File>
               <FileName>Mcal_Port.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\MCAL\Mcal_Port.c</FilePath>
