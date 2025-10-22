@@ -70,7 +70,7 @@
     { eMcalPortPinChanel_PC12_4GTX,           RCU_GPIOC,  GPIOC,  GPIO_MODE_AF_PP,        GPIO_OSPEED_50MHZ,  GPIO_PIN_12,  RESET  },\
     { eMcalPortPinChanel_PC13_Reserve,        RCU_GPIOC,  GPIOC,  GPIO_MODE_OUT_PP,       GPIO_OSPEED_50MHZ,  GPIO_PIN_13,  RESET  },\
     { eMcalPortPinChanel_PC14_4GPwrKeyEn,     RCU_GPIOC,  GPIOC,  GPIO_MODE_OUT_PP,       GPIO_OSPEED_50MHZ,  GPIO_PIN_14,  SET    },\
-    { eMcalPortPinChanel_PC15_4GPwrEn,        RCU_GPIOC,  GPIOC,  GPIO_MODE_OUT_PP,       GPIO_OSPEED_50MHZ,  GPIO_PIN_14,  SET    },\
+    { eMcalPortPinChanel_PC15_4GPwrEn,        RCU_GPIOC,  GPIOC,  GPIO_MODE_OUT_PP,       GPIO_OSPEED_50MHZ,  GPIO_PIN_15,  SET    },\
     \
     { eMcalPortPinChanel_PD2_4GRX,            RCU_GPIOD,  GPIOD,  GPIO_MODE_IN_FLOATING,  GPIO_OSPEED_50MHZ,  GPIO_PIN_2,   RESET  },\
 }

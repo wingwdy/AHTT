@@ -17,8 +17,8 @@
 *    Header File Inclusion
 *******************************************************************************/
 #include "Mcal_Port_Config.h"
-#include "Common.h"
 
+#include "gd32e50x_rcu.h"
 
 
 /*******************************************************************************
@@ -69,28 +69,26 @@ static void McalPort_ConfigPin(const McalPortPinConfig_Struct *pPortPinConfig);
 
 static void McalPort_ConfigPin(const McalPortPinConfig_Struct *pPortPinConfig)
 {
-    if (pPortPinConfig != NULL)
-    {
-        rcu_periph_clock_enable(pPortPinConfig->rcu_periph);
-        gpio_init(pPortPinConfig->rcu_periph, pPortPinConfig->mode, pPortPinConfig->speed, pPortPinConfig->pin);
+    PARA_ASSERT(pPortPinConfig != NULL);
 
-        if (pPortPinConfig->mode == GPIO_MODE_OUT_PP || pPortPinConfig->mode == GPIO_MODE_OUT_OD)
-        {
-            gpio_bit_write(pPortPinConfig->rcu_periph, pPortPinConfig->pin, pPortPinConfig->sta_init);
-        }
+    rcu_periph_clock_enable(pPortPinConfig->rcu_periph);
+    gpio_init(pPortPinConfig->gpio_periph, pPortPinConfig->mode, pPortPinConfig->speed, pPortPinConfig->pin);
+
+    if (pPortPinConfig->mode == GPIO_MODE_OUT_PP || pPortPinConfig->mode == GPIO_MODE_OUT_OD)
+    {
+        gpio_bit_write(pPortPinConfig->gpio_periph, pPortPinConfig->pin, pPortPinConfig->sta_init);
     }
 }
 
 void McalPort_WritePin(McalPortPinChanel_Enum ePinChannel, uint8_t pinVal)
 {
+    PARA_ASSERT(ePinChannel < eMcalPortPinChanel_Count);
+
     uint8_t val = (pinVal != MCALPORT_PIN_LOW) ? MCALPORT_PIN_HIGH : MCALPORT_PIN_LOW;
     const McalPortPinConfig_Struct *pPortPinConfig = NULL;
 
-    if (ePinChannel < eMcalPortPinChanel_Count)
-    {
-        pPortPinConfig = &c_stPorPinConfigTable[ePinChannel];
-        gpio_bit_write(pPortPinConfig->rcu_periph, pPortPinConfig->pin, val);
-    }
+    pPortPinConfig = &c_stPorPinConfigTable[ePinChannel];
+    gpio_bit_write(pPortPinConfig->gpio_periph, pPortPinConfig->pin, val);
 }
 
 void McalPort_SetPin(McalPortPinChanel_Enum ePinChannel)
