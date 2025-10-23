@@ -1,4 +1,3 @@
-
 /******************************************************************************
 * File Name          : Mcal_Port.c
 * Description        : Code for Pin-level configuration module for hardware
@@ -109,6 +108,8 @@ void McalPort_Init(void)
     {
         McalPort_ConfigPin(&c_stPorPinConfigTable[index]);
     }
+
+    rcu_periph_clock_enable(RCU_AF);
 }
 
 

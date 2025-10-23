@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "common.h": "c",
+        "mcal_port_config.h": "c",
+        "gd32e50x_rcu.h": "c",
+        "mcal_port.h": "c",
+        "mcal_pwm.h": "c"
+    }
+}

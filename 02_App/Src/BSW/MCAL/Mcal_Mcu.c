@@ -1,4 +1,3 @@
-
 /******************************************************************************
 * File Name          : Mcal_Mcu.c
 * Description        : Code for the driver for Mcu

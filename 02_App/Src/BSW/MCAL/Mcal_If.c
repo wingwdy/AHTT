@@ -1,4 +1,3 @@
-
 /******************************************************************************
 * File Name          : Mcal_if.c
 * Description        : Code for the interface for the layer of MCAL
@@ -19,6 +18,7 @@
 *******************************************************************************/
 #include "Mcal_Mcu.h"
 #include "Mcal_Port.h"
+#include "Mcal_PWM.h"
 
 
 
@@ -63,6 +63,8 @@ void McalIf_Init(void)
     McalMCU_SystickInit();
 
     McalPort_Init();
+
+    McalPWM_Init();
 }
 
 

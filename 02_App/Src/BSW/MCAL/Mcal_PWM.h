@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_Mcu.h
-* Description        : Code for the driver for Mcu
+* File Name          : Mcal_PWM.h
+* Description        : Code for the driver for General timer PWM output
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,8 +11,8 @@
 *2025/10/10      V1.0.0      Chenls    初版创建
 *
 ******************************************************************************/
-#ifndef MCAL_MCU_H_
-#define MCAL_MCU_H_
+#ifndef MCAL_PWM_H_
+#define MCAL_PWM_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
@@ -36,10 +36,10 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void McalMCU_SystickInit(void);
+void McalPWM_Init(void);
 
-#endif /* MCAL_MCU_H_ */
 
+#endif /* MCAL_PWM_H_ */
 
 
 

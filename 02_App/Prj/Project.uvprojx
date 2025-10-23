@@ -49,7 +49,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\GD32E503\build\</OutputDirectory>
-          <OutputName>APP_GD32E503</OutputName>
+          <OutputName>D3_A32FB_GD32E503</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -409,6 +409,11 @@
               <FileName>Mcal_Port.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\MCAL\Mcal_Port.c</FilePath>
+            </File>
+            <File>
+              <FileName>Mcal_PWM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MCAL\Mcal_PWM.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -1,4 +1,3 @@
-
 /******************************************************************************
 * File Name          : Mcal_Port.h
 * Description        : Code for Pin-level configuration module for hardware
@@ -12,7 +11,8 @@
 *2025/10/10      V1.0.0      Chenls    初版创建
 *
 ******************************************************************************/
-
+#ifndef MCAL_PORT_H_
+#define MCAL_PORT_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
@@ -91,7 +91,7 @@ void McalPort_ResetPin(McalPortPinChanel_Enum ePinChannel);
 void McalPort_SetPin(McalPortPinChanel_Enum ePinChannel);
 void McalPort_WritePin(McalPortPinChanel_Enum ePinChannel, uint8_t pinVal);
 
-
+#endif /* MCAL_PORT_H_ */
 
 
 
