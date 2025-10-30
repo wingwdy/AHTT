@@ -15,9 +15,8 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "Mcal_Port_Config.h"
+#include "Mcal_PortConfig.h"
 
-#include "gd32e50x_rcu.h"
 
 
 /*******************************************************************************
@@ -38,22 +37,11 @@
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
-typedef struct 
-{
-	McalPortPinChanel_Enum  ePinChannel;
-    rcu_periph_enum     rcu_periph;
-    uint32_t            gpio_periph;
-	uint32_t            mode;
-	uint32_t            speed;
-    uint32_t            pin;
-    bit_status          sta_init;
-}McalPortPinConfig_Struct;
 
 
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-const McalPortPinConfig_Struct c_stPorPinConfigTable[] = McalPort_CFG_PinLISTArray;
 
 
 /*******************************************************************************
@@ -71,7 +59,14 @@ static void McalPort_ConfigPin(const McalPortPinConfig_Struct *pPortPinConfig)
     PARA_ASSERT(pPortPinConfig != NULL);
 
     rcu_periph_clock_enable(pPortPinConfig->rcu_periph);
+
+    if (pPortPinConfig->remap_cfg != MCALPORT_CFG_INVALID_REMAP_CFG)
+    {
+        gpio_pin_remap_config(pPortPinConfig->remap_cfg, ENABLE);
+    }
+
     gpio_init(pPortPinConfig->gpio_periph, pPortPinConfig->mode, pPortPinConfig->speed, pPortPinConfig->pin);
+
 
     if (pPortPinConfig->mode == GPIO_MODE_OUT_PP || pPortPinConfig->mode == GPIO_MODE_OUT_OD)
     {
@@ -98,13 +93,22 @@ void McalPort_SetPin(McalPortPinChanel_Enum ePinChannel)
 void McalPort_ResetPin(McalPortPinChanel_Enum ePinChannel)
 {
     McalPort_WritePin(ePinChannel, MCALPORT_PIN_LOW);
+
+}
+
+void MalPort_TogglePin(McalPortPinChanel_Enum ePinChannel)
+{
+    static uint8_t val = MCALPORT_PIN_LOW;
+
+    val = (val != MCALPORT_PIN_LOW) ? MCALPORT_PIN_LOW : MCALPORT_PIN_HIGH;
+    McalPort_WritePin(ePinChannel, val);
 }
 
 void McalPort_Init(void)
 {
     uint8_t index = 0;
 
-    for (index = 0; index < ARRAY_SIZE(c_stPorPinConfigTable); index++)
+    for (index = 0; index < eMcalPortPinChanel_Count; index++)
     {
         McalPort_ConfigPin(&c_stPorPinConfigTable[index]);
     }

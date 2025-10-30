@@ -19,6 +19,7 @@
 #include "Mcal_Mcu.h"
 #include "Mcal_Port.h"
 #include "Mcal_PWM.h"
+#include "Mcal_ADC.h"
 
 
 
@@ -63,6 +64,8 @@ void McalIf_Init(void)
     McalMCU_SystickInit();
 
     McalPort_Init();
+
+    McalADC_Init();
 
     McalPWM_Init();
 }

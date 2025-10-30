@@ -84,13 +84,19 @@ typedef enum
 
 
 /******************************************************************************
+*    Global variables Declaration
+******************************************************************************/
+
+
+
+/******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
 void McalPort_Init(void);
 void McalPort_ResetPin(McalPortPinChanel_Enum ePinChannel);
 void McalPort_SetPin(McalPortPinChanel_Enum ePinChannel);
 void McalPort_WritePin(McalPortPinChanel_Enum ePinChannel, uint8_t pinVal);
-
+void MalPort_TogglePin(McalPortPinChanel_Enum ePinChannel);
 #endif /* MCAL_PORT_H_ */
 
 

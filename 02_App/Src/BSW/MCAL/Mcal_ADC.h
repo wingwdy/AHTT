@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_if.h
-* Description        : Code for the interface for the layer of MCAL
+* File Name          : Mcal_ADC.h
+* Description        : Code for ADC configuration module for hardware
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,22 +11,29 @@
 *2025/10/10      V1.0.0      Chenls    初版创建
 *
 ******************************************************************************/
-#ifndef MCAL_IF_H_
-#define MCAL_IF_H_
+#ifndef MCAL_ADC_H_
+#define MCAL_ADC_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-
+#include "Common.h" 
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
 
-
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-
+typedef enum
+{
+    eMcalADCChanel_CP,
+    eMcalADCChanel_ShortCircuit,
+    eMcalADCChanel_GunNTC,
+    eMcalADCChanel_EnvNtc,
+    eMcalADCChannel_PE,
+    eMcalADCChanel_Count,
+}McalADCChanel_Enum;
 
 /******************************************************************************
 *    Typedef Definition
@@ -42,11 +49,10 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void McalIf_Init(void);
-#endif /* MCAL_IF_H_ */
-
-
-
+void McalADC_Init(void);
+void McalADC_GetChannelData(McalADCChanel_Enum ch, uint16_t *pOutBuf, uint8_t count);
+void McalADC_Test(void);
+#endif /* MCAL_ADC_H_ */
 
 
 

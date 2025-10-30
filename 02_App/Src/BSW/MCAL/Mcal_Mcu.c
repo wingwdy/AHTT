@@ -17,8 +17,7 @@
 *    Header File Inclusion
 *******************************************************************************/
 #include "gd32e50x_misc.h"
-
-
+#include "FreeRTOS.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -66,7 +65,22 @@ void McalMCU_SystickInit(void)
     }
 }
 
+void SysTick_Handler(void)
+{
+    xPortSysTickHandler();
+}
 
+void NMI_Handler(void)
+{
+
+}
+
+void HardFault_Handler(void)
+{
+    /* if Hard Fault exception occurs, go to infinite loop */
+    while(1)
+    {}
+}
 
 
 

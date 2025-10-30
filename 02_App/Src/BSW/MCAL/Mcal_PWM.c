@@ -16,28 +16,18 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "gd32e50x_rcu.h"
-#include "gd32e50x_timer.h"
-#include "Common.h"
+#include "Mcal_PWMConfig.h"
 
 
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
-#define MCALPWM_MODE_FORCE_HIGH         TIMER_OC_MODE_HIGH
-#define MCALPWM_MODE_FORCE_LOW          TIMER_OC_MODE_HIGH
-#define MCALPWM_MODE_FORCE_PWM          TIMER_OC_MODE_PWM0
+
 
 /*******************************************************************************
 *    Enum Definition
 *******************************************************************************/
-typedef enum
-{
-    eMcalPWMOCChannel_Led,
-    eMcalPWMOCChannel_CP,
-    eMcalPWMOCChannel_Relay,
-    eMcalPWMOCChannel_Count,
-}McalPWMOCChannel_Enum;
+
 
 
 
@@ -51,133 +41,83 @@ typedef enum
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-#if 0
-typedef struct 
-{
 
 
-
-
-
-
-
-}McalPWMOCDMA_Struct;
-
-typedef struct Mcal_PWM
-{
-
-    uint16_t phyChannel;
-
-
-
-
-}McalPWMOCChannelCfg_Struct;
-
-
-typedef struct 
-{
-    McalPWMOCChannel_Enum ePWMOCChannel;
-    uint32_t timer_periph;
-    rcu_periph_enum rcu_periph;
-    timer_parameter_struct *pTimer_initpara;
-    timer_oc_parameter_struct *pTimer_ocintpara;
-    uint8_t DMAEn;
-}McalPWMOC_Struct;
-#endif
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-
+static void McalPWM_CfgChannel(McalPWMOC_Struct *pPwmOCCfg);
 
 
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-#if 0
 static void McalPWM_CfgChannel(McalPWMOC_Struct *pPwmOCCfg)
 {
-    PARA_ASSERT(pPwmOCCfg != NULL)
-    PARA_ASSERT(pPwmOCCfg->pTimer_initpara != NULL)
+    PARA_ASSERT(pPwmOCCfg != NULL);
 
-    rcu_periph_clock_enable(pPwmOCCfg->rcu_periph);
+    if (pPwmOCCfg->DMAEn)
+    {
+        rcu_periph_clock_enable(pPwmOCCfg->DMA_Cfg.rcu_DMA_periph);
+        dma_deinit(pPwmOCCfg->DMA_Cfg.DMA_periph, pPwmOCCfg->DMA_Cfg.DMA_ch);
+        dma_init(pPwmOCCfg->DMA_Cfg.DMA_periph, pPwmOCCfg->DMA_Cfg.DMA_ch ,&pPwmOCCfg->DMA_Cfg.DMA_parameter);
+
+        if (pPwmOCCfg->DMA_Cfg.circulationEn)
+        {
+            dma_circulation_enable(pPwmOCCfg->DMA_Cfg.DMA_periph, pPwmOCCfg->DMA_Cfg.DMA_ch);
+        }
+
+        if (pPwmOCCfg->DMA_Cfg.DMA_intEn)
+        {
+            dma_interrupt_enable(pPwmOCCfg->DMA_Cfg.DMA_periph, pPwmOCCfg->DMA_Cfg.DMA_ch, pPwmOCCfg->DMA_Cfg.DMA_int.DMA_intSrc);
+            nvic_irq_enable(pPwmOCCfg->DMA_Cfg.DMA_int.nvic_irq, pPwmOCCfg->DMA_Cfg.DMA_int.nvic_irq_pre_priority, 
+                pPwmOCCfg->DMA_Cfg.DMA_int.nvic_irq_sub_priority);            
+        }
+
+        dma_transfer_number_config(pPwmOCCfg->DMA_Cfg.DMA_periph, pPwmOCCfg->DMA_Cfg.DMA_ch, pPwmOCCfg->DMA_Cfg.DMA_parameter.number);
+        dma_channel_enable(pPwmOCCfg->DMA_Cfg.DMA_periph, pPwmOCCfg->DMA_Cfg.DMA_ch);
+    }
+
+    rcu_periph_clock_enable(pPwmOCCfg->rcu_timer_periph);
     timer_deinit(pPwmOCCfg->timer_periph);
-    timer_init(pPwmOCCfg->pTimer_initpara);
+    timer_init(pPwmOCCfg->timer_periph, &pPwmOCCfg->timer_initpara);
+    timer_channel_output_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, &pPwmOCCfg->timer_ocintpara);
+
+    if (pPwmOCCfg->initOutputSrcTrigo != MCALPWM_CFG_INVALID_SRC_OC_TRIGO)
+    {
+        timer_master_output_trigger_source_select(pPwmOCCfg->timer_periph, pPwmOCCfg->initOutputSrcTrigo);
+        timer_primary_output_config(pPwmOCCfg->timer_periph, ENABLE);
+    }
+
+    timer_counter_value_config(pPwmOCCfg->timer_periph, 0);
+    timer_channel_output_pulse_value_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, pPwmOCCfg->initOutputPulse);
+    timer_channel_output_mode_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, pPwmOCCfg->initOutputMode);
+    timer_channel_output_shadow_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, TIMER_OC_SHADOW_DISABLE);
+    timer_auto_reload_shadow_enable(pPwmOCCfg->timer_periph);
+
+    if (pPwmOCCfg->timer_intEn)
+    {
+        timer_interrupt_enable(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_int.timer_int_ch);
+        nvic_irq_enable(pPwmOCCfg->timer_int.nvic_irq, pPwmOCCfg->timer_int.nvic_irq_pre_priority,
+        pPwmOCCfg->timer_int.nvic_irq_sub_priority);
+    }
+
+    if (pPwmOCCfg->DMAEn)
+    {
+        timer_channel_dma_request_source_select(pPwmOCCfg->timer_periph, TIMER_DMAREQUEST_UPDATEEVENT);
+        timer_dma_transfer_config(pPwmOCCfg->timer_periph, pPwmOCCfg->DMA_Cfg.DMA_dataCV,TIMER_DMACFG_DMATC_1TRANSFER);
+        timer_dma_enable(pPwmOCCfg->timer_periph, TIMER_DMA_UPD);
+    }
+
+    timer_enable(pPwmOCCfg->timer_periph);
 }
-
-void McalPWM_SetMode(McalPWMOCChannel_Enum ePWMOCChannel, uint8_t pwmMode)
-{
-
-
-
-
-}
-
-#endif
 
 void McalPWM_Init(void)
 {
-    timer_oc_parameter_struct timer_ocintpara;
-    timer_parameter_struct timer_initpara;
+    uint8_t index = 0;
 
-    rcu_periph_clock_enable(RCU_TIMER12);
-
-    timer_deinit(TIMER12);
-
-    /* TIMER1 configuration */
-    timer_initpara.prescaler         = 179;
-    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
-    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
-    timer_initpara.period            = 1000 - 1;
-    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
-    timer_initpara.repetitioncounter = 0;
-    timer_init(TIMER12,&timer_initpara);
-
-    /* CH0,CH1 and CH2 configuration in PWM mode */
-    timer_ocintpara.outputstate  = TIMER_CCX_ENABLE;
-    timer_ocintpara.outputnstate = TIMER_CCXN_DISABLE;
-    timer_ocintpara.ocpolarity   = TIMER_OC_POLARITY_HIGH;
-    timer_ocintpara.ocnpolarity  = TIMER_OCN_POLARITY_HIGH;
-    timer_ocintpara.ocidlestate  = TIMER_OC_IDLE_STATE_LOW;
-    timer_ocintpara.ocnidlestate = TIMER_OCN_IDLE_STATE_LOW;
-
-    timer_channel_output_config(TIMER12,TIMER_CH_0,&timer_ocintpara);
-
-    /* CH0 configuration in PWM mode0,duty cycle 25% */ 
-    timer_channel_output_pulse_value_config(TIMER12,TIMER_CH_0,500);
-    timer_channel_output_mode_config(TIMER12,TIMER_CH_0,TIMER_OC_MODE_PWM0);
-    timer_channel_output_shadow_config(TIMER12,TIMER_CH_0,TIMER_OC_SHADOW_DISABLE);
-
-    /* auto-reload preload enable */
-    timer_auto_reload_shadow_enable(TIMER12);
-    /* auto-reload preload enable */
-    timer_enable(TIMER12);
+    for (index = 0; index < eMcalPWMOCChannel_Count; index++)
+    {
+        McalPWM_CfgChannel((McalPWMOC_Struct *)&c_TimerOCParaTable[index]);
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

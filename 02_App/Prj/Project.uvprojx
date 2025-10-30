@@ -411,9 +411,29 @@
               <FilePath>..\Src\BSW\MCAL\Mcal_Port.c</FilePath>
             </File>
             <File>
+              <FileName>Mcal_PortConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MCAL\Mcal_PortConfig.c</FilePath>
+            </File>
+            <File>
               <FileName>Mcal_PWM.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\MCAL\Mcal_PWM.c</FilePath>
+            </File>
+            <File>
+              <FileName>Mcal_PWMConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MCAL\Mcal_PWMConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>Mcal_ADC.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MCAL\Mcal_ADC.c</FilePath>
+            </File>
+            <File>
+              <FileName>Mcal_ADCConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MCAL\Mcal_ADCConfig.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -602,11 +622,6 @@
               <FileName>startup_gd32e50x_hd.s</FileName>
               <FileType>2</FileType>
               <FilePath>..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Source\ARM\startup_gd32e50x_hd.s</FilePath>
-            </File>
-            <File>
-              <FileName>gd32e50x_it.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\Core\Src\gd32e50x_it.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>

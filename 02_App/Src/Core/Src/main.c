@@ -6,17 +6,15 @@
 
 TaskHandle_t testTaskHandle;
 
+extern void McalADC_Test(void);
+
 void Task_Test(void)
 {
-	uint8_t runLedState = 1;
-
-	McalPort_WritePin(eMcalPortPinChanel_PB0_RelayEn, runLedState);
-
 	while (1)
 	{
-		runLedState = !runLedState;
-		McalPort_WritePin(eMcalPortPinChanel_PA1_RunLed, runLedState);
+		MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
 		vTaskDelay(1000);
+		McalADC_Test();
 	}
 }
 
@@ -26,7 +24,7 @@ void TaskStartMain(void)
 	BaseType_t xResult = pdFALSE;
 	xResult = xTaskCreate((void *)Task_Test, 
 						"TestTaskHandle",
-						256,
+						512,
 						NULL,
 						8,
 						&testTaskHandle
