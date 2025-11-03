@@ -82,7 +82,7 @@ typedef struct
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-extern const McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count];
+extern McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count];
 
 
 /******************************************************************************

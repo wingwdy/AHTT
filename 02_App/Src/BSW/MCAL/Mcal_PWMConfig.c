@@ -52,7 +52,7 @@ static uint8_t g_TimerLedDMAMemoryBuf[MCAL_PWM_CFG_LED_COUNT][MCAL_PWM_CFG_LED_P
      11, 11, 11, 11, 11, 11, 11, 11},
 };
 
-const McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
+McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
 {
     [eMcalPWMOCChannel_Led] =
     {

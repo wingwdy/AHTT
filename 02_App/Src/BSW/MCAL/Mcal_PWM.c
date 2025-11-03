@@ -121,3 +121,26 @@ void McalPWM_Init(void)
         McalPWM_CfgChannel((McalPWMOC_Struct *)&c_TimerOCParaTable[index]);
     }
 }
+
+void McalPWM_CtrlSetMode(McalPWMOCChannel_Enum ch,  uint8_t mode)
+{
+    PARA_ASSERT(ch < eMcalPWMOCChannel_Count);
+    PARA_ASSERT(mode == MCALPWM_MODE_FORCE_HIGH || 
+        mode == MCALPWM_MODE_FORCE_LOW || 
+        mode == MCALPWM_MODE_FORCE_PWM);
+
+    McalPWMOC_Struct *pPwmOCCfg = &c_TimerOCParaTable[ch];
+    timer_channel_output_mode_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, mode);
+}
+
+
+void McalPWM_CtrlSetsSingleChannelDuty(McalPWMOCChannel_Enum ch,  uint16_t duty)
+{
+    PARA_ASSERT(ch < eMcalPWMOCChannel_Count);
+
+    McalPWMOC_Struct *pPwmOCCfg = &c_TimerOCParaTable[ch];
+    uint16_t pulse = 0;
+    pulse = duty * pPwmOCCfg->timer_initpara.period / 1000;
+    timer_channel_output_pulse_value_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, pulse);
+}
+

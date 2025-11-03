@@ -21,7 +21,7 @@
 *    Macro Definition
 ******************************************************************************/
 #define MCALPWM_MODE_FORCE_HIGH         TIMER_OC_MODE_HIGH
-#define MCALPWM_MODE_FORCE_LOW          TIMER_OC_MODE_HIGH
+#define MCALPWM_MODE_FORCE_LOW          TIMER_OC_MODE_LOW
 #define MCALPWM_MODE_FORCE_PWM          TIMER_OC_MODE_PWM0
 
 /******************************************************************************
@@ -52,8 +52,8 @@ typedef enum
 *    Global Function Prototypes
 ******************************************************************************/
 void McalPWM_Init(void);
-
-
+void McalPWM_CtrlSetMode(McalPWMOCChannel_Enum ch,  uint8_t mode);
+void McalPWM_CtrlSetsSingleChannelDuty(McalPWMOCChannel_Enum ch,  uint16_t duty);
 #endif /* MCAL_PWM_H_ */
 
 
