@@ -17,6 +17,9 @@
 *    Header File Inclusion
 ******************************************************************************/
 #include "Common.h"
+#include "gd32e50x_rcu.h"
+#include "gd32e50x_timer.h"
+#include "gd32e50x_dma.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -52,8 +55,10 @@ typedef enum
 *    Global Function Prototypes
 ******************************************************************************/
 void McalPWM_Init(void);
-void McalPWM_CtrlSetMode(McalPWMOCChannel_Enum ch,  uint8_t mode);
-void McalPWM_CtrlSetsSingleChannelDuty(McalPWMOCChannel_Enum ch,  uint16_t duty);
+void McalPWM_SetOutputMode(McalPWMOCChannel_Enum ch,  uint8_t mode);
+void McalPWM_SetSingleDuty(McalPWMOCChannel_Enum ch,  uint16_t duty);
+void McalPWM_SetMultiDuty(McalPWMOCChannel_Enum ch,  uint16_t* duty,  uint16_t dutyCount);
+void McalPWM_Test(void);
 #endif /* MCAL_PWM_H_ */
 
 

@@ -13,6 +13,8 @@
         "mcal_adcconfig.h": "c",
         "mcal_adc.h": "c",
         "gd32e50x_timer.h": "c",
-        "gd32e50x_dma.h": "c"
+        "gd32e50x_dma.h": "c",
+        "mcal_uartconfig.h": "c",
+        "mcal_uart.h": "c"
     }
 }

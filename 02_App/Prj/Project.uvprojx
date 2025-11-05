@@ -435,6 +435,16 @@
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\MCAL\Mcal_ADCConfig.c</FilePath>
             </File>
+            <File>
+              <FileName>Mcal_Uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MCAL\Mcal_Uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>Mcal_UartConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MCAL\Mcal_UartConfig.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

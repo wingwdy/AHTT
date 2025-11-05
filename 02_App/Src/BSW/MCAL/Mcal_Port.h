@@ -51,7 +51,7 @@ typedef enum
     eMcalPortPinChanel_PB6_Reserve,                 /* 预留 */ 
     eMcalPortPinChanel_PB7_Reserve,                 /* 预留 */ 
     eMcalPortPinChanel_PB8_NorFlashSpiCS,           /* NorFlash的spi片选教CS */
-    eMcalPortPinChanel_PB9_LTEReset,                /* 4G模组的复位脚 */  
+    eMcalPortPinChanel_PB9_4GReset,                 /* 4G模组的复位脚 */  
     eMcalPortPinChanel_PB10_RCDRms,                 /* RCD RMS */  
     eMcalPortPinChanel_PB11_RCDTest,                /* RCD TEST */ 
     eMcalPortPinChanel_PB12_Reserve,                /* 预留 */ 

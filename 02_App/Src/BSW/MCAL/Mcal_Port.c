@@ -76,10 +76,10 @@ static void McalPort_ConfigPin(const McalPortPinConfig_Struct *pPortPinConfig)
 
 void McalPort_WritePin(McalPortPinChanel_Enum ePinChannel, uint8_t pinVal)
 {
-    PARA_ASSERT(ePinChannel < eMcalPortPinChanel_Count);
-
     uint8_t val = (pinVal != MCALPORT_PIN_LOW) ? MCALPORT_PIN_HIGH : MCALPORT_PIN_LOW;
     const McalPortPinConfig_Struct *pPortPinConfig = NULL;
+
+    PARA_ASSERT(ePinChannel < eMcalPortPinChanel_Count);
 
     pPortPinConfig = &c_stPorPinConfigTable[ePinChannel];
     gpio_bit_write(pPortPinConfig->gpio_periph, pPortPinConfig->pin, val);
@@ -98,10 +98,14 @@ void McalPort_ResetPin(McalPortPinChanel_Enum ePinChannel)
 
 void MalPort_TogglePin(McalPortPinChanel_Enum ePinChannel)
 {
-    static uint8_t val = MCALPORT_PIN_LOW;
+    const McalPortPinConfig_Struct *pPortPinConfig = NULL;
+    FlagStatus flag;
 
-    val = (val != MCALPORT_PIN_LOW) ? MCALPORT_PIN_LOW : MCALPORT_PIN_HIGH;
-    McalPort_WritePin(ePinChannel, val);
+    PARA_ASSERT(ePinChannel < eMcalPortPinChanel_Count);
+
+    pPortPinConfig = &c_stPorPinConfigTable[ePinChannel];
+    flag = (gpio_output_bit_get(pPortPinConfig->gpio_periph, pPortPinConfig->pin) == SET) ? RESET : SET;
+    gpio_bit_write(pPortPinConfig->gpio_periph, pPortPinConfig->pin, flag);
 }
 
 void McalPort_Init(void)

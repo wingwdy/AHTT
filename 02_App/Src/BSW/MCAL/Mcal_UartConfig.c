@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_if.h
-* Description        : Code for the interface for the layer of MCAL
+* File Name          : Mcal_UartConfig.c
+* Description        : Code for the driver for Uart Communication
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,17 +11,15 @@
 *2025/10/10      V1.0.0      Chenls    初版创建
 *
 ******************************************************************************/
-#ifndef MCAL_IF_H_
-#define MCAL_IF_H_
+
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-
+#include "Mcal_UartConfig.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-
 
 /******************************************************************************
 *    Enum Definition
@@ -38,13 +36,26 @@
 ******************************************************************************/
 
 
+/*******************************************************************************
+*    Static Local Functions Declaration
+*******************************************************************************/
+static uint8_t g_Uart5RecvBuf[MCALUART_CFG_UART5_RECVBUF_SIZE] = { 0 };
+static uint8_t g_Uart5SendBuf[MCALUART_CFG_UART5_SENDBUF_SIZE] = { 0 };
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void McalIf_Init(void);
-void McalIf_Test(void);
-#endif /* MCAL_IF_H_ */
+
+const McalUartConfig_Struct c_UartConfigTable[] = 
+{
+    [eMcalUartChanel_Debug] = {
+        .rcu_periph = RCU_USART5,
+        .uart_periph = USART5,
+        .baudRate = 115200,
+        .paritycfg = USART_PM_NONE,
+        .DMARx_En = FALSE,
+    },
+};
 
 
 

@@ -20,6 +20,7 @@
 #include "Mcal_Port.h"
 #include "Mcal_PWM.h"
 #include "Mcal_ADC.h"
+#include "Mcal_Uart.h"
 
 
 
@@ -68,6 +69,43 @@ void McalIf_Init(void)
     McalADC_Init();
 
     McalPWM_Init();
+
+    McalUart_Init();
+}
+
+void McalIf_Test(void)
+{
+    McalPWM_Test();
+    McalADC_Test();
+
+    MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
+
+    static uint32_t StateCnt = 0;
+    if (StateCnt < 6)
+    {
+        StateCnt++;
+    }
+
+    if (StateCnt == 1)
+    {
+        McalPort_SetPin(eMcalPortPinChanel_PC15_4GPwrEn);
+    }
+    else if (StateCnt == 3)
+    {
+        McalPort_ResetPin(eMcalPortPinChanel_PC15_4GPwrEn);
+    }
+    else if (StateCnt == 3)
+    {
+        McalPort_SetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn);
+    }
+    else if (StateCnt == 5)
+    {
+        McalPort_ResetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn); 
+    } 
+    else if (StateCnt == 6)
+    {
+        McalUart_Test();
+    }
 }
 
 

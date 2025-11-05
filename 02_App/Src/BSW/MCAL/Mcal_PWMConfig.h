@@ -17,16 +17,17 @@
 *    Header File Inclusion
 ******************************************************************************/
 #include "Mcal_PWM.h"
-#include "gd32e50x_rcu.h"
-#include "gd32e50x_timer.h"
-#include "gd32e50x_dma.h"
-
 
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define MCALPWM_CFG_INVALID_SRC_OC_TRIGO              (0xFFU)          
+#define MCALPWM_CFG_INVALID_SRC_OC_TRIGO              (0xFFU)     
+
+/* led控制, DMABuf长度 当前3个灯 */
+#define MCALPWM_CFG_LED_COUNT             3
+#define MCALPWM_CFG_LED_POINT            24
+#define MCALPWM_CFG_LED_DMABUF_LEN       (MCALPWM_CFG_LED_COUNT * MCALPWM_CFG_LED_POINT)     
 
 /******************************************************************************
 *    Enum Definition
@@ -73,6 +74,7 @@ typedef struct
     uint16_t initOutputMode;
     uint16_t initOutputPulse;
     uint16_t initOutputSrcTrigo;
+    uint16_t initCounterVal;
     uint8_t timer_intEn;
     McalPWMTimerIntCfg_Struct timer_int;
     uint8_t DMAEn;
@@ -82,7 +84,7 @@ typedef struct
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-extern McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count];
+extern const McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count];
 
 
 /******************************************************************************

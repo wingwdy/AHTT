@@ -20,9 +20,7 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define MCAL_PWM_CFG_LED_COUNT            3
-#define MCAL_PWM_CFG_LED_POINT            24
-#define MCALPWM_CFG_LED_DMABUF_LEN        (MCAL_PWM_CFG_LED_COUNT * MCAL_PWM_CFG_LED_POINT)     /* led控制, DMABuf长度 当前3个灯 */
+
 
 /******************************************************************************
 *    Enum Definition
@@ -37,22 +35,23 @@
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-static uint8_t g_TimerLedDMAMemoryBuf[MCAL_PWM_CFG_LED_COUNT][MCAL_PWM_CFG_LED_POINT] = 
+static uint8_t g_TimerLedDMAMemoryBuf[MCALPWM_CFG_LED_COUNT][MCALPWM_CFG_LED_POINT] =
 {
-    {11, 11, 11, 11, 11, 11, 11, 11,
-     11, 11, 11, 11, 11, 11, 11, 11,
-     11, 11, 11, 11, 11, 11, 11, 11},
+    {63, 63, 63, 63, 63, 63, 63, 63,
+    63, 63, 63, 63, 63, 63, 63, 63,
+    63, 63, 63, 63, 63, 63, 63, 63},
 
-    {11, 11, 11, 11, 11, 11, 11, 11,
-     11, 11, 11, 11, 11, 11, 11, 11,
-     11, 11, 11, 11, 11, 11, 11, 11},
+    {63, 63, 63, 63, 63, 63, 63, 63,
+    63, 63, 63, 63, 63, 63, 63, 63,
+    63, 63, 63, 63, 63, 63, 63, 63},
 
-    {11, 11, 11, 11, 11, 11, 11, 11,
-     11, 11, 11, 11, 11, 11, 11, 11,
-     11, 11, 11, 11, 11, 11, 11, 11},
+    {63, 63, 63, 63, 63, 63, 63, 63,
+    63, 63, 63, 63, 63, 63, 63, 63,
+    63, 63, 63, 63, 63, 63, 63, 63},
 };
+;
 
-McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
+const McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
 {
     [eMcalPWMOCChannel_Led] =
     {
@@ -60,10 +59,10 @@ McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
         .timer_periph = TIMER7,
         .timer_ch = TIMER_CH_2,
         .timer_initpara = {
-            .prescaler = 10 - 1,
+            .prescaler = 1 - 1,
             .alignedmode = TIMER_COUNTER_EDGE,
             .counterdirection = TIMER_COUNTER_UP,
-            .period = 23 - 1,
+            .period = 225 - 1,
             .clockdivision = TIMER_CKDIV_DIV1,
             .repetitioncounter = 0,
         },
@@ -78,8 +77,9 @@ McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
         },
 
         .initOutputMode = TIMER_OC_MODE_PWM0,
-        .initOutputPulse = 300,
+        .initOutputPulse = 0,
         .initOutputSrcTrigo = MCALPWM_CFG_INVALID_SRC_OC_TRIGO,
+        .initCounterVal = 0,
 
         .timer_intEn = FALSE,
         .DMAEn = TRUE,
@@ -92,12 +92,12 @@ McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
                 .direction = DMA_MEMORY_TO_PERIPHERAL,
                 .periph_addr = (uint32_t)&TIMER_CH2CV(TIMER7),
                 .periph_inc = DMA_PERIPH_INCREASE_DISABLE,
-                .periph_width = DMA_PERIPHERAL_WIDTH_32BIT,
+                .periph_width = DMA_PERIPHERAL_WIDTH_16BIT,
                 .memory_addr = (uint32_t)g_TimerLedDMAMemoryBuf,
                 .memory_inc = DMA_MEMORY_INCREASE_ENABLE,   
                 .memory_width = DMA_MEMORY_WIDTH_8BIT,
                 .number = MCALPWM_CFG_LED_DMABUF_LEN,        
-                .priority = DMA_PRIORITY_HIGH,   
+                .priority = DMA_PRIORITY_ULTRA_HIGH,   
             },
             .circulationEn = FALSE,
             .DMA_intEn = TRUE,
@@ -135,6 +135,7 @@ McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
         .initOutputMode = TIMER_OC_MODE_PWM0,
         .initOutputPulse = 500,
         .initOutputSrcTrigo = MCALPWM_CFG_INVALID_SRC_OC_TRIGO,
+        .initCounterVal = 0,
 
         .timer_intEn = FALSE,
         .DMAEn = FALSE,
@@ -165,6 +166,7 @@ McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
         .initOutputMode = TIMER_OC_MODE_PWM0,
         .initOutputPulse = 250,
         .initOutputSrcTrigo = TIMER_TRI_OUT_SRC_O1CPRE,
+        .initCounterVal = 0,
 
         .timer_intEn = TRUE,
         .timer_int = 
@@ -177,6 +179,7 @@ McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
         .DMAEn = FALSE,
     },
 
+#if 1
     [eMcalPWMOCChannel_Relay] =
     {
         .rcu_timer_periph = RCU_TIMER2,
@@ -199,13 +202,15 @@ McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
             .ocnidlestate = TIMER_OCN_IDLE_STATE_LOW,
         },
 
-        .initOutputMode = TIMER_OC_MODE_HIGH,
+        .initOutputMode = TIMER_OC_MODE_LOW,
         .initOutputPulse = 0,
         .initOutputSrcTrigo = MCALPWM_CFG_INVALID_SRC_OC_TRIGO,
+        .initCounterVal = 0,
 
         .timer_intEn = FALSE,
         .DMAEn = FALSE,
     },
+#endif
 };
 
 /*******************************************************************************
@@ -230,10 +235,11 @@ void DMA1_Channel0_IRQHandler(void)
 {
     if(dma_interrupt_flag_get(DMA1, DMA_CH0, DMA_INT_FLAG_FTF))
     {
-        dma_interrupt_flag_clear(DMA1, DMA_CH0, DMA_INT_FLAG_FTF);
         timer_disable(TIMER7);
+        dma_interrupt_flag_clear(DMA1, DMA_CH0, DMA_INT_FLAG_FTF);
         timer_channel_output_pulse_value_config(TIMER7, TIMER_CH_2, 0);
         dma_channel_disable(DMA1, DMA_CH0);
+        dma_transfer_number_config(DMA1, DMA_CH0, MCALPWM_CFG_LED_DMABUF_LEN);
     }
 }
 

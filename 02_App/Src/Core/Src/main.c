@@ -2,7 +2,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "Mcal_If.h"
-#include "Mcal_Port.h"
 
 TaskHandle_t testTaskHandle;
 
@@ -12,9 +11,9 @@ void Task_Test(void)
 {
 	while (1)
 	{
-		MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
+		
 		vTaskDelay(1000);
-		McalADC_Test();
+		McalIf_Test();
 	}
 }
 
@@ -43,7 +42,7 @@ void TaskStartMain(void)
 
 
 int main(void)
-{
+ {
  	McalIf_Init();
 	TaskStartMain();
 	/* Start the scheduler. */

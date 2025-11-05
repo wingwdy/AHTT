@@ -17,6 +17,7 @@
 *    Header File Inclusion
 *******************************************************************************/
 #include "Mcal_PWMConfig.h"
+#include "string.h"
 
 
 /*******************************************************************************
@@ -85,15 +86,15 @@ static void McalPWM_CfgChannel(McalPWMOC_Struct *pPwmOCCfg)
 
     if (pPwmOCCfg->initOutputSrcTrigo != MCALPWM_CFG_INVALID_SRC_OC_TRIGO)
     {
-        timer_master_output_trigger_source_select(pPwmOCCfg->timer_periph, pPwmOCCfg->initOutputSrcTrigo);
-        timer_primary_output_config(pPwmOCCfg->timer_periph, ENABLE);
+//        timer_master_output_trigger_source_select(pPwmOCCfg->timer_periph, pPwmOCCfg->initOutputSrcTrigo);
     }
 
-    timer_counter_value_config(pPwmOCCfg->timer_periph, 0);
+    timer_counter_value_config(pPwmOCCfg->timer_periph, pPwmOCCfg->initCounterVal);
     timer_channel_output_pulse_value_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, pPwmOCCfg->initOutputPulse);
     timer_channel_output_mode_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, pPwmOCCfg->initOutputMode);
     timer_channel_output_shadow_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, TIMER_OC_SHADOW_DISABLE);
-    timer_auto_reload_shadow_enable(pPwmOCCfg->timer_periph);
+    timer_auto_reload_shadow_disable(pPwmOCCfg->timer_periph);
+    timer_primary_output_config(pPwmOCCfg->timer_periph, ENABLE);
 
     if (pPwmOCCfg->timer_intEn)
     {
@@ -105,8 +106,8 @@ static void McalPWM_CfgChannel(McalPWMOC_Struct *pPwmOCCfg)
     if (pPwmOCCfg->DMAEn)
     {
         timer_channel_dma_request_source_select(pPwmOCCfg->timer_periph, TIMER_DMAREQUEST_UPDATEEVENT);
-        timer_dma_transfer_config(pPwmOCCfg->timer_periph, pPwmOCCfg->DMA_Cfg.DMA_dataCV,TIMER_DMACFG_DMATC_1TRANSFER);
-        timer_dma_enable(pPwmOCCfg->timer_periph, TIMER_DMA_UPD);
+        timer_dma_transfer_config(pPwmOCCfg->timer_periph, pPwmOCCfg->DMA_Cfg.DMA_dataCV, TIMER_DMACFG_DMATC_1TRANSFER);
+        timer_dma_enable(pPwmOCCfg->timer_periph, TIMER_DMA_CH2D);
     }
 
     timer_enable(pPwmOCCfg->timer_periph);
@@ -122,25 +123,100 @@ void McalPWM_Init(void)
     }
 }
 
-void McalPWM_CtrlSetMode(McalPWMOCChannel_Enum ch,  uint8_t mode)
+void McalPWM_SetOutputMode(McalPWMOCChannel_Enum ch,  uint8_t mode)
 {
     PARA_ASSERT(ch < eMcalPWMOCChannel_Count);
-    PARA_ASSERT(mode == MCALPWM_MODE_FORCE_HIGH || 
-        mode == MCALPWM_MODE_FORCE_LOW || 
-        mode == MCALPWM_MODE_FORCE_PWM);
+ //   PARA_ASSERT(mode == MCALPWM_MODE_FORCE_HIGH || mode == MCALPWM_MODE_FORCE_LOW || mode == MCALPWM_MODE_FORCE_PWM);
 
-    McalPWMOC_Struct *pPwmOCCfg = &c_TimerOCParaTable[ch];
+    const McalPWMOC_Struct *pPwmOCCfg = &c_TimerOCParaTable[ch];
+
     timer_channel_output_mode_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, mode);
 }
 
-
-void McalPWM_CtrlSetsSingleChannelDuty(McalPWMOCChannel_Enum ch,  uint16_t duty)
+void McalPWM_SetSingleDuty(McalPWMOCChannel_Enum ch,  uint16_t duty)
 {
     PARA_ASSERT(ch < eMcalPWMOCChannel_Count);
-
-    McalPWMOC_Struct *pPwmOCCfg = &c_TimerOCParaTable[ch];
+    const McalPWMOC_Struct *pPwmOCCfg = &c_TimerOCParaTable[ch];
     uint16_t pulse = 0;
+
     pulse = duty * pPwmOCCfg->timer_initpara.period / 1000;
     timer_channel_output_pulse_value_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, pulse);
 }
 
+void McalPWM_SetMultiDuty(McalPWMOCChannel_Enum ch,  uint16_t* duty,  uint16_t dutyCount)
+{
+    PARA_ASSERT(ch < eMcalPWMOCChannel_Count);
+    PARA_ASSERT(dutyCount > 0);
+    PARA_ASSERT(duty != NULL);
+
+    const McalPWMOC_Struct *pPwmOCCfg = &c_TimerOCParaTable[ch];
+    uint8_t index = 0;
+    uint16_t pulse = 0;
+    uint32_t memoryWidth = 0;
+    uint8_t copysize = 0;
+
+    if (pPwmOCCfg->DMAEn == TRUE && dutyCount == pPwmOCCfg->DMA_Cfg.DMA_parameter.number)
+    {
+        memoryWidth = pPwmOCCfg->DMA_Cfg.DMA_parameter.memory_width;
+        copysize = (memoryWidth == DMA_MEMORY_WIDTH_8BIT) ? 1 : (memoryWidth == DMA_MEMORY_WIDTH_16BIT) ? 2 : 4;
+
+        for (index = 0; index < dutyCount; index++)
+        {
+            pulse = duty[index] * pPwmOCCfg->timer_initpara.period / 1000;
+            memcpy((uint8_t *)pPwmOCCfg->DMA_Cfg.DMA_parameter.memory_addr + (index * copysize), &pulse, copysize);
+        }
+
+        dma_channel_enable(pPwmOCCfg->DMA_Cfg.DMA_periph, pPwmOCCfg->DMA_Cfg.DMA_ch);
+        timer_enable(pPwmOCCfg->timer_periph);
+    }
+}
+
+
+void McalPWM_Test(void)
+{
+    static uint8_t flag = 0;
+
+    uint16_t timerLedDMAMemoryBuf[MCALPWM_CFG_LED_COUNT][MCALPWM_CFG_LED_POINT] = 
+    {
+        {502, 502, 502, 502, 502, 502, 502, 502,
+        280, 280, 280, 280, 280, 280, 280, 280,
+        502, 502, 502, 502, 502, 502, 502, 502},
+
+        {502, 502, 502, 502, 502, 502, 502, 502,
+        280, 280, 280, 280, 280, 280, 280, 280,
+        502, 502, 502, 502, 502, 502, 502, 502},
+
+        {502, 502, 502, 502, 502, 502, 502, 502,
+        280, 280, 280, 280, 280, 280, 280, 280,
+        502, 502, 502, 502, 502, 502, 502, 502},
+    };
+
+    uint16_t timerLedDMAMemoryBuf1[MCALPWM_CFG_LED_COUNT][MCALPWM_CFG_LED_POINT] = 
+    {
+        {280, 280, 280, 280, 280, 280, 280, 280,
+        280, 280, 280, 280, 280, 280, 280, 280,
+        280, 280, 280, 280, 280, 280, 280, 280},
+
+        {280, 280, 280, 280, 280, 280, 280, 280,
+        280, 280, 280, 280, 280, 280, 280, 280,
+        280, 280, 280, 280, 280, 280, 280, 280},
+
+        {280, 280, 280, 280, 280, 280, 280, 280,
+        280, 280, 280, 280, 280, 280, 280, 280,
+        280, 280, 280, 280, 280, 280, 280, 280},
+    };
+
+    uint16_t *pArray = NULL;
+
+    if (flag)
+    {
+        pArray = (uint16_t *)timerLedDMAMemoryBuf;
+    }
+    else
+    {
+        pArray = (uint16_t *)timerLedDMAMemoryBuf1;
+    }
+ 
+    flag = !flag;
+    McalPWM_SetMultiDuty(eMcalPWMOCChannel_Led, pArray, MCALPWM_CFG_LED_DMABUF_LEN);
+}
