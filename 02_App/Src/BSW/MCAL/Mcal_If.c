@@ -78,10 +78,10 @@ void McalIf_Test(void)
     McalPWM_Test();
     McalADC_Test();
 
-    MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
+  //  MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
 
     static uint32_t StateCnt = 0;
-    if (StateCnt < 6)
+    if (StateCnt < 8)
     {
         StateCnt++;
     }
@@ -94,15 +94,15 @@ void McalIf_Test(void)
     {
         McalPort_ResetPin(eMcalPortPinChanel_PC15_4GPwrEn);
     }
-    else if (StateCnt == 3)
+    else if (StateCnt == 5)
     {
         McalPort_SetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn);
     }
-    else if (StateCnt == 5)
+    else if (StateCnt == 7)
     {
         McalPort_ResetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn); 
     } 
-    else if (StateCnt == 6)
+    else if (StateCnt == 8)
     {
         McalUart_Test();
     }

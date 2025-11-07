@@ -42,6 +42,7 @@ typedef enum
     eMcalPortPinChanel_PA11_DebugTx,                /* 调试口，发送 */
     eMcalPortPinChanel_PA12_DebugRx,                /* 调试口，接收 */
     eMcalPortPinChanel_PA15_Reserve,                /* 预留 */ 
+
     eMcalPortPinChanel_PB0_RelayEn,                 /* 继电器控制口 */
     eMcalPortPinChanel_PB1_RCDTrip,                 /* RCD trip 漏电反馈 */
     eMcalPortPinChanel_PB2_RCDZero,                 /* RCD Zero 校0口 */
@@ -58,6 +59,7 @@ typedef enum
     eMcalPortPinChanel_PB13_Reserve,                /* 预留 */ 
     eMcalPortPinChanel_PB14_Reserve,                /* 预留 */ 
     eMcalPortPinChanel_PB15_Reserve,                /* 预留 */ 
+
     eMcalPortPinChanel_PC0_FCTPin,                  /* FCT测试脚 */ 
     eMcalPortPinChanel_PC1_Reserve,                 /* 预留 */ 
     eMcalPortPinChanel_PC2_SC_CHK,                  /* 短路检测反馈 */
@@ -74,6 +76,7 @@ typedef enum
     eMcalPortPinChanel_PC13_Reserve,                /* 预留 */
     eMcalPortPinChanel_PC14_4GPwrKeyEn,             /* 4G开机脚 */
     eMcalPortPinChanel_PC15_4GPwrEn,                /* 4G电源控制 */
+    
     eMcalPortPinChanel_PD2_4GRX,                    /* 4G接收脚 */
     eMcalPortPinChanel_Count,
 }McalPortPinChanel_Enum;

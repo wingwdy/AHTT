@@ -2,6 +2,10 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "Mcal_If.h"
+#include "Filter.h"
+// #include "Asw_Monitor.h"
+// #include "Asw_Charge.h"
+// #include "Asw_NFC.h"
 
 TaskHandle_t testTaskHandle;
 
@@ -11,7 +15,6 @@ void Task_Test(void)
 {
 	while (1)
 	{
-		
 		vTaskDelay(1000);
 		McalIf_Test();
 	}
@@ -19,6 +22,9 @@ void Task_Test(void)
 
 void TaskStartMain(void)
 {
+	// Asw_Monitor_Task();
+	// Asw_Charge_Task();
+	// Asw_NFC_Task();
 	//RGB灯语线程
 	BaseType_t xResult = pdFALSE;
 	xResult = xTaskCreate((void *)Task_Test, 

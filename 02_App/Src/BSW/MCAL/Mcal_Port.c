@@ -108,9 +108,21 @@ void MalPort_TogglePin(McalPortPinChanel_Enum ePinChannel)
     gpio_bit_write(pPortPinConfig->gpio_periph, pPortPinConfig->pin, flag);
 }
 
+
+uint8_t McalPort_GetPin(McalPortPinChanel_Enum ePinChannel)
+{
+    PARA_ASSERT(ePinChannel < eMcalPortPinChanel_Count);
+    const McalPortPinConfig_Struct *pPortPinConfig = NULL;
+
+    pPortPinConfig = &c_stPorPinConfigTable[ePinChannel];
+
+    return gpio_input_bit_get(pPortPinConfig->gpio_periph, pPortPinConfig->pin);
+}
+
 void McalPort_Init(void)
 {
     uint8_t index = 0;
+    gpio_pin_remap_config(GPIO_SWJ_SWDPENABLE_REMAP, ENABLE);
 
     for (index = 0; index < eMcalPortPinChanel_Count; index++)
     {

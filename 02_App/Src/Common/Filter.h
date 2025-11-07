@@ -11,21 +11,25 @@
 *2025/10/10      V1.0.0      Chenls    初版创建
 *
 ******************************************************************************/
-#ifndef COMMON_H_
-#define COMMON_H_
+#ifndef Filter_H_
+#define Filter_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "stdint.h"
-#include "stdlib.h"
-#include "math.h"
-#include "string.h"
-#include "gd32e50x.h"
-#include "Global.h"
+#include "Common.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+#define FILTER_FIFO_IO_POINT_COUNT        (10U)     /* 对于IO的FIFO, 每个FIFO可存储的最大点数 */
+
+#define FILTER_FIFO_IO_COUNT              (5U)      /* IO的FIFO的个数 */
+
+#define FILTER_FIFO_ANALOG_POINT_COUNT    (10U)     /* 对于模拟量的FIFO, 每个FIFO可存储的最大点数 */
+
+#define FILTER_FIFO_ANALOG_COUNT          (5U)      /* 模拟量的FIFO的个数 */
+
+
 
 /******************************************************************************
 *    Enum Definition
@@ -45,13 +49,14 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void Common_InsertSort(uint16_t *a, uint16_t n);
-
-#endif /* COMMON_H_ */
-
-
+GlobalRet_Enum Filter_IO_CreatFIFO(uint8_t *pIOFilterID, uint8_t pointCount, uint8_t initVal);
+GlobalRet_Enum Filter_IO_InsertFIFO(uint8_t ioFilterID, uint8_t ioVal);
+GlobalRet_Enum Filter_IO_GetVal(uint8_t ioFilterID, uint8_t *pIoVal);
 
 
+
+
+#endif /* Filter_H_ */
 
 
 

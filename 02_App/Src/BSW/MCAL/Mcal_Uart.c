@@ -102,7 +102,7 @@ void McalUart_Init(void)
 int fputc(int ch, FILE *f)
 {
     usart_data_transmit(USART5, (uint8_t)ch);
-    while(RESET == usart_flag_get(USART5, USART5_FLAG_TBE));
+    while(RESET == usart5_flag_get(USART5, USART5_FLAG_TBE));
     return ch;
 }
 

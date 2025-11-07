@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Common.h
-* Description        : Code for Common function
+* File Name          : Global.h
+* Description        : Code for Global Definition
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,26 +11,49 @@
 *2025/10/10      V1.0.0      Chenls    初版创建
 *
 ******************************************************************************/
-#ifndef COMMON_H_
-#define COMMON_H_
+
+#ifndef Global_H_
+#define Global_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
 #include "stdint.h"
-#include "stdlib.h"
-#include "math.h"
-#include "string.h"
-#include "gd32e50x.h"
-#include "Global.h"
+
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+#ifndef NULL
+#define NULL  0
+#endif
+
+#ifndef TRUE
+#define TRUE  1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#define ARRAY_SIZE(x)      sizeof(x) / sizeof(x[0])
+#define PARA_ASSERT(x)     do \
+                           {}while(x != TRUE)
 
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-
+typedef enum
+{
+    eGlobalRet_OK,
+    eGlobalRet_Error,
+    eGlobalRet_NotEnoughFIFO,
+    eGlobalRet_FIFONotFull,
+    eGlobalRet_ParaInvalid,
+    eGlobalRet_NotInit,
+    eGlobalRet_NotEnoughBuf,
+    eGlobalRet_UnexpectedError,
+    
+}GlobalRet_Enum;
 
 /******************************************************************************
 *    Typedef Definition
@@ -45,11 +68,9 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void Common_InsertSort(uint16_t *a, uint16_t n);
-
-#endif /* COMMON_H_ */
 
 
+#endif /* Global_H_ */
 
 
 

@@ -132,8 +132,8 @@ const McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
             .ocnidlestate = TIMER_OCN_IDLE_STATE_LOW,
         },
 
-        .initOutputMode = TIMER_OC_MODE_PWM0,
-        .initOutputPulse = 500,
+        .initOutputMode = TIMER_OC_MODE_HIGH,
+        .initOutputPulse = 0,
         .initOutputSrcTrigo = MCALPWM_CFG_INVALID_SRC_OC_TRIGO,
         .initCounterVal = 0,
 
@@ -186,10 +186,10 @@ const McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
         .timer_periph = TIMER2,
         .timer_ch = TIMER_CH_2,
         .timer_initpara = {
-            .prescaler = 180 - 1,
+            .prescaler = 18 - 1,
             .alignedmode = TIMER_COUNTER_EDGE,
             .counterdirection = TIMER_COUNTER_UP,
-            .period = 1000 - 1,
+            .period = 500 - 1,
             .clockdivision = TIMER_CKDIV_DIV1,
             .repetitioncounter = 0,
         },
