@@ -57,7 +57,7 @@ typedef struct
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-static FilterIOCtrlBlk_Struct  g_filterIOCtrlBlkTable[FILTER_FIFO_IO_COUNT] = { 0 };
+static FilterIOCtrlBlk_Struct  g_filterIOCtrlBlkTable[eFilterIOChannel_Count] = { 0 };
 
 
 /*******************************************************************************
@@ -98,46 +98,40 @@ static uint8_t FIlter_IO_Check(uint8_t *pBuf, uint16_t count, uint8_t *pResultVa
 	return ret;
 }
 
-GlobalRet_Enum Filter_IO_CreatFIFO(uint8_t *pIOFilterID, uint8_t pointCount, uint8_t initVal)
+GlobalRet_Enum Filter_IO_CreatFIFO(FilterIOChannel_Enum eCH, uint8_t pointCount, uint8_t initVal)
 {
 	FilterIOCtrlBlk_Struct *pFilterIOCtrlBlk = NULL;
-	uint8_t index = 0;
 	GlobalRet_Enum eRet = eGlobalRet_NotEnoughFIFO;
 
-	if ((pointCount > FILTER_FIFO_IO_POINT_COUNT) || (pIOFilterID == NULL) || (pointCount == 0))
+	if ((pointCount > FILTER_FIFO_IO_POINT_COUNT) || (pointCount == 0) || (eCH >= eFilterIOChannel_Count))
 	{
 		eRet = eGlobalRet_ParaInvalid;
 	}
 	else
 	{
-		for (index = 0; index < FILTER_FIFO_IO_COUNT; index++)
-		{
-			pFilterIOCtrlBlk = &g_filterIOCtrlBlkTable[index];
+		pFilterIOCtrlBlk = &g_filterIOCtrlBlkTable[eCH];
 
-			if (pFilterIOCtrlBlk->isUsed != TRUE)
-			{
-				memset(&pFilterIOCtrlBlk->strCtrlBlk, 0x00, sizeof(FilterIOCtrl_Struct));
-				pFilterIOCtrlBlk->strCtrlBlk.curInsertCount = 0;
-				pFilterIOCtrlBlk->strCtrlBlk.totalCount = pointCount;
-				pFilterIOCtrlBlk->strCtrlBlk.filterState = initVal;
-				pFilterIOCtrlBlk->strCtrlBlk.isFull = FALSE;
-				pIOFilterID[0] = index;
-				eRet = eGlobalRet_OK;
-				pFilterIOCtrlBlk->isUsed = TRUE;
-				break;
-			}
+		if (pFilterIOCtrlBlk->isUsed != TRUE)
+		{
+			memset(&pFilterIOCtrlBlk->strCtrlBlk, 0x00, sizeof(FilterIOCtrl_Struct));
+			pFilterIOCtrlBlk->strCtrlBlk.curInsertCount = 0;
+			pFilterIOCtrlBlk->strCtrlBlk.totalCount = pointCount;
+			pFilterIOCtrlBlk->strCtrlBlk.filterState = initVal;
+			pFilterIOCtrlBlk->strCtrlBlk.isFull = FALSE;
+			eRet = eGlobalRet_OK;
+			pFilterIOCtrlBlk->isUsed = TRUE;
 		}
 	}
 
 	return eRet;
 }
 
-GlobalRet_Enum Filter_IO_InsertFIFO(uint8_t ioFilterID, uint8_t ioVal)
+GlobalRet_Enum Filter_IO_InsertFIFO(FilterIOChannel_Enum eCH, uint8_t ioVal)
 {
-	FilterIOCtrlBlk_Struct *pFilterIOCtrlBlk = &g_filterIOCtrlBlkTable[ioFilterID];
+	FilterIOCtrlBlk_Struct *pFilterIOCtrlBlk = &g_filterIOCtrlBlkTable[eCH];
 	GlobalRet_Enum eRet = eGlobalRet_OK;
 
-	if (ioFilterID > FILTER_FIFO_IO_COUNT)
+	if (eCH >= eFilterIOChannel_Count)
 	{
 		eRet = eGlobalRet_ParaInvalid;
 	}
@@ -164,14 +158,14 @@ GlobalRet_Enum Filter_IO_InsertFIFO(uint8_t ioFilterID, uint8_t ioVal)
 	return eRet;
 }
 
-GlobalRet_Enum Filter_IO_GetVal(uint8_t ioFilterID, uint8_t *pIoVal)
+GlobalRet_Enum Filter_IO_GetVal(FilterIOChannel_Enum eCH, uint8_t *pIoVal)
 {
-	FilterIOCtrlBlk_Struct *pFilterIOCtrlBlk = &g_filterIOCtrlBlkTable[ioFilterID];
+	FilterIOCtrlBlk_Struct *pFilterIOCtrlBlk = &g_filterIOCtrlBlkTable[eCH];
 	GlobalRet_Enum eRet = eGlobalRet_OK;
 	uint16_t index = 0;
 	uint8_t temp = 0;
 
-	if (ioFilterID > FILTER_FIFO_IO_COUNT || pIoVal == 	NULL)
+	if (eCH >= eFilterIOChannel_Count || pIoVal == 	NULL)
 	{
 		eRet = eGlobalRet_ParaInvalid;
 	}

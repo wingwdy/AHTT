@@ -23,18 +23,26 @@
 ******************************************************************************/
 #define FILTER_FIFO_IO_POINT_COUNT        (10U)     /* 对于IO的FIFO, 每个FIFO可存储的最大点数 */
 
-#define FILTER_FIFO_IO_COUNT              (5U)      /* IO的FIFO的个数 */
-
 #define FILTER_FIFO_ANALOG_POINT_COUNT    (10U)     /* 对于模拟量的FIFO, 每个FIFO可存储的最大点数 */
-
-#define FILTER_FIFO_ANALOG_COUNT          (5U)      /* 模拟量的FIFO的个数 */
-
-
 
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
+typedef enum
+{
+    eFilterIOChannel_RCD,
+    eFilterIOChannel_Count,
+}FilterIOChannel_Enum;
 
+typedef enum
+{
+    eFilterAnalogChannel_CP,
+    eFilterAnalogChannel_EnvNtc,
+    eFilterAnalogChannel_GunNtc,
+    eFilterAnalogChannel_ShortCut,
+    eFilterAnalogChannel_PE,
+    eFilterAnalogChannel_Count,
+}FilterAnalogChannel_Enum;
 
 /******************************************************************************
 *    Typedef Definition
@@ -49,9 +57,9 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-GlobalRet_Enum Filter_IO_CreatFIFO(uint8_t *pIOFilterID, uint8_t pointCount, uint8_t initVal);
-GlobalRet_Enum Filter_IO_InsertFIFO(uint8_t ioFilterID, uint8_t ioVal);
-GlobalRet_Enum Filter_IO_GetVal(uint8_t ioFilterID, uint8_t *pIoVal);
+GlobalRet_Enum Filter_IO_CreatFIFO(FilterIOChannel_Enum eCH, uint8_t pointCount, uint8_t initVal);
+GlobalRet_Enum Filter_IO_InsertFIFO(FilterIOChannel_Enum eCH, uint8_t ioVal);
+GlobalRet_Enum Filter_IO_GetVal(FilterIOChannel_Enum eCH, uint8_t *pIoVal);
 
 
 
