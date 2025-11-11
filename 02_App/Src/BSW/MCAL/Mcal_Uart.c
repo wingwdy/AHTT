@@ -231,19 +231,6 @@ GlobalRet_Enum McalUart_CheckDataLen(McalUartChanel_Enum eCh, uint16_t* pRemainL
     return CycleBuf_CheckDataLen(pUartCfg->uartBufCtrl.rxCycleBufID, pRemainLen);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 void McalUart_Test(void)
 {
     char buf[16] = "Hello world\r\n";

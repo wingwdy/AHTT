@@ -20,6 +20,7 @@
         "filter.h": "c",
         "cyclebuf.h": "c",
         "gd32e50x_usart.h": "c",
-        "gd32e50x.h": "c"
+        "gd32e50x.h": "c",
+        "mcal_iwdg.h": "c"
     }
 }

@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_if.c
-* Description        : Code for the interface for the layer of MCAL
+* File Name          : Mcal_IWDG.c
+* Description        : Code for the Internel watch dog
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -16,14 +16,9 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "Mcal_Mcu.h"
-#include "Mcal_Port.h"
-#include "Mcal_PWM.h"
-#include "Mcal_ADC.h"
-#include "Mcal_Uart.h"
-#include "CycleBuf.h"
+#include "gd32e50x_fwdgt.h"
 #include "Mcal_IWDG.h"
-
+#include "Common.h"
 
 
 /*******************************************************************************
@@ -62,58 +57,25 @@
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-void McalIf_Init(void)
+void McalIWDG_Init(void)
 {
-    McalMCU_SystickInit();
-    
-    McalIWDG_Init();
+#if defined(MCALIWDG_CFG_ENABLE)
+    dbg_periph_enable(DBG_FWDGT_HOLD);
 
-    CycleBuf_Init();
+    rcu_osci_on(RCU_IRC40K);
 
-    McalPort_Init();
+    while(ERROR == rcu_osci_stab_wait(RCU_IRC40K)) {}
 
-    McalUart_Init();
+    fwdgt_config(MCALIWDG_CFG_OVERFOLW_VALUE, MCALIWDG_CFG_PRESCALER);
 
-    McalADC_Init();
-
-    McalPWM_Init();
+    fwdgt_enable();
+#endif
 }
 
-void McalIf_Test(void)
+void McalIWDG_FeedWatchDog(void)
 {
-    McalPWM_Test();
-    McalADC_Test();
-
-  //  MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
-
-    static uint32_t StateCnt = 0;
-    if (StateCnt < 8)
-    {
-        StateCnt++;
-    }
-
-    if (StateCnt == 1)
-    {
-        McalPort_SetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    }
-    else if (StateCnt == 3)
-    {
-        McalPort_ResetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    }
-    else if (StateCnt == 5)
-    {
-        McalPort_SetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn);
-    }
-    else if (StateCnt == 7)
-    {
-        McalPort_ResetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn); 
-    } 
-    else if (StateCnt == 8)
-    {
-        McalUart_Test();
-    }
+    fwdgt_counter_reload();
 }
-
 
 
 

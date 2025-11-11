@@ -445,6 +445,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\MCAL\Mcal_UartConfig.c</FilePath>
             </File>
+            <File>
+              <FileName>Mcal_IWDG.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MCAL\Mcal_IWDG.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
