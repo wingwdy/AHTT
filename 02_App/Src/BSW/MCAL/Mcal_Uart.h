@@ -50,6 +50,9 @@ typedef enum
 ******************************************************************************/
 void McalUart_Init(void);
 GlobalRet_Enum McalUart_WriteData(McalUartChanel_Enum eCh, uint8_t *pBuf, uint16_t dataLen);
+GlobalRet_Enum McalUart_PreviewReadData(McalUartChanel_Enum eCh, uint8_t *pBuf, uint16_t dataLen);
+GlobalRet_Enum McalUart_ReadData(McalUartChanel_Enum eCh, uint8_t *pBuf, uint16_t dataLen);
+GlobalRet_Enum McalUart_CheckDataLen(McalUartChanel_Enum eCh, uint16_t* pRemainLen);
 void McalUart_Test(void);
 #endif /* Mcal_Uart.h */
 

@@ -189,6 +189,61 @@ GlobalRet_Enum McalUart_WriteData(McalUartChanel_Enum eCh, uint8_t *pBuf, uint16
     return eRet;
 }
 
+GlobalRet_Enum McalUart_ReadData(McalUartChanel_Enum eCh, uint8_t *pBuf, uint16_t dataLen)
+{
+    McalUartConfig_Struct *pUartCfg = &g_UartConfigTable[eCh];
+    GlobalRet_Enum eRet = eGlobalRet_OK;
+    uint16_t remainLen = 0;
+    uint8_t byte = 0;
+
+    PARA_ASSERT_RET(eCh < eMcalUartChanel_Count, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(pBuf != NULL, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(pUartCfg->initFlag == TRUE, eGlobalRet_NotInit);
+
+    return CycleBuf_ReadData(pUartCfg->uartBufCtrl.rxCycleBufID, pBuf, dataLen);
+}
+
+GlobalRet_Enum McalUart_PreviewReadData(McalUartChanel_Enum eCh, uint8_t *pBuf, uint16_t dataLen)
+{
+    McalUartConfig_Struct *pUartCfg = &g_UartConfigTable[eCh];
+    GlobalRet_Enum eRet = eGlobalRet_OK;
+    uint16_t remainLen = 0;
+    uint8_t byte = 0;
+
+    PARA_ASSERT_RET(eCh < eMcalUartChanel_Count, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(pBuf != NULL, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(pUartCfg->initFlag == TRUE, eGlobalRet_NotInit);
+
+    return CycleBuf_PreviewReadData(pUartCfg->uartBufCtrl.rxCycleBufID, pBuf, dataLen);
+}
+
+GlobalRet_Enum McalUart_CheckDataLen(McalUartChanel_Enum eCh, uint16_t* pRemainLen)
+{
+    McalUartConfig_Struct *pUartCfg = &g_UartConfigTable[eCh];
+    GlobalRet_Enum eRet = eGlobalRet_OK;
+    uint16_t remainLen = 0;
+    uint8_t byte = 0;
+
+    PARA_ASSERT_RET(eCh < eMcalUartChanel_Count, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(pRemainLen != NULL, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(pUartCfg->initFlag == TRUE, eGlobalRet_NotInit);
+
+    return CycleBuf_CheckDataLen(pUartCfg->uartBufCtrl.rxCycleBufID, pRemainLen);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void McalUart_Test(void)
 {
     char buf[16] = "Hello world\r\n";
