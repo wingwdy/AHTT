@@ -23,6 +23,11 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+#define GLOBAL_OPT_STATE_IDLE                          (0U)
+#define GLOBAL_OPT_STATE_PROCESS                       (1U)
+#define GLOBAL_OPT_STATE_SUCCESS                       (2U)
+#define GLOBAL_OPT_STATE_FAIL                          (3U)
+
 #ifndef NULL
 #define NULL  0
 #endif
@@ -62,6 +67,8 @@ typedef enum
     eGlobalRet_NotEnoughData,
     eGlobalRet_UnexpectedError,
 }GlobalRet_Enum;
+
+
 
 /******************************************************************************
 *    Typedef Definition
