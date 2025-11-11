@@ -24,6 +24,7 @@
         "mcal_iwdg.h": "c",
         "gd32e50x_misc.h": "c",
         "mcal_mcu.h": "c",
-        "systemm.h": "c"
+        "systemm.h": "c",
+        "cdd_relay.h": "c"
     }
 }

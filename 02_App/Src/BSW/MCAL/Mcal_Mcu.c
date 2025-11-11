@@ -46,7 +46,7 @@
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-
+static uint32_t g_systick;
 
 
 /*******************************************************************************
@@ -112,6 +112,12 @@ void McalMcu_ClearResetFlags(void)
 void SysTick_Handler(void)
 {
     xPortSysTickHandler();
+    g_systick++;
+}
+
+uint32_t Mcal_GetSystick(void)
+{
+    return g_systick;
 }
 
 void NMI_Handler(void)

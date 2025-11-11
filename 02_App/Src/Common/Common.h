@@ -46,7 +46,8 @@
 *    Global Function Prototypes
 ******************************************************************************/
 void Common_InsertSort(uint16_t *a, uint16_t n);
-
+uint32_t Common_GetSystick(void);
+uint8_t Common_JudgeTimeoutMs(uint32_t startTick, uint32_t threshold);
 #endif /* COMMON_H_ */
 
 

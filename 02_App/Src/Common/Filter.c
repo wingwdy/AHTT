@@ -191,7 +191,41 @@ GlobalRet_Enum Filter_IO_GetVal(FilterIOChannel_Enum eCH, uint8_t *pIoVal)
 	return eRet;
 }
 
+uint8_t Filter_Profile1(FilterProfile1_Struct *pFilterStatus, uint16_t filterCnt)
+{
+    uint8_t  retValue = FALSE;
+    uint16_t filterMaxCnt = (uint16_t)0u;
 
+    if ((filterMaxCnt > (uint16_t)0u) && (filterMaxCnt < FILTER_PROFILE1_MAXVALUE_16))
+    {
+        filterMaxCnt = filterMaxCnt;
+    }
+    else
+    {
+        filterMaxCnt = FILTER_PROFILE1_MAXVALUE_16;
+    }
+
+    if (pFilterStatus->status != pFilterStatus->lastStatus)
+    {
+        pFilterStatus->lastStatus = pFilterStatus->status;
+        pFilterStatus->filterCount = (uint16_t)0u;
+    }
+
+    if (pFilterStatus->status != pFilterStatus->validStatus)
+    {
+        if ( pFilterStatus->filterCount < filterMaxCnt)
+        {
+            pFilterStatus->filterCount++;
+        }
+        else
+        {
+            pFilterStatus->validStatus = pFilterStatus->status;
+            retValue = TRUE;
+        }
+    }
+
+    return (retValue);
+}
 
 
 

@@ -25,6 +25,8 @@
 
 #define FILTER_FIFO_ANALOG_POINT_COUNT    (10U)     /* 对于模拟量的FIFO, 每个FIFO可存储的最大点数 */
 
+#define FILTER_PROFILE1_MAXVALUE_16       (0xFFFF)
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -47,7 +49,13 @@ typedef enum
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
-
+typedef struct 
+{
+    uint8_t status;
+    uint8_t lastStatus;
+    uint16_t validStatus;
+    uint16_t filterCount;
+} FilterProfile1_Struct;
 
 /******************************************************************************
 *    Global variables Declaration
@@ -60,7 +68,7 @@ typedef enum
 GlobalRet_Enum Filter_IO_CreatFIFO(FilterIOChannel_Enum eCH, uint8_t pointCount, uint8_t initVal);
 GlobalRet_Enum Filter_IO_InsertFIFO(FilterIOChannel_Enum eCH, uint8_t ioVal);
 GlobalRet_Enum Filter_IO_GetVal(FilterIOChannel_Enum eCH, uint8_t *pIoVal);
-
+uint8_t Filter_Profile1(FilterProfile1_Struct *pFilterStatus, uint16_t filterCnt);
 
 
 

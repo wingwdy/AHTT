@@ -17,7 +17,7 @@
 *    Header File Inclusion
 *******************************************************************************/
 #include "Common.h"
-
+#include "Mcal_Mcu.h"
 
 
 /*******************************************************************************
@@ -70,18 +70,33 @@ void Common_InsertSort(uint16_t *a, uint16_t n)
 	}
 }
 
+uint32_t Common_GetSystick(void)
+{
+	return Mcal_GetSystick();
+}
 
+uint8_t Common_JudgeTimeoutMs(uint32_t startTick, uint32_t threshold)
+{
+    uint32_t tickNow = Common_GetSystick();
+	uint8_t ret = FALSE;
 
+    if (tickNow >= startTick)
+    {
+        if ((tickNow - startTick) >= threshold)
+        {
+            ret = TRUE;
+        }
+    }
+    else
+    {
+        if ((0xFFFFFFFFU - startTick + tickNow + 1) >= threshold)
+        {
+            ret = TRUE;
+        }
+    }
 
-
-
-
-
-
-
-
-
-
+    return ret;
+}
 
 
 

@@ -16,7 +16,7 @@
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-
+#include "stdint.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -56,6 +56,7 @@ void McalMCU_SystickInit(void);
 void McalMcu_SystemReset(void);
 McalMcuResetSource_Enum McalMcu_GetResetSource(void);
 void McalMcu_ClearResetFlags(void);
+uint32_t Mcal_GetSystick(void);
 #endif /* MCAL_MCU_H_ */
 
 
