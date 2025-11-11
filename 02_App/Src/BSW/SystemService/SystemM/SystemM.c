@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_if.c
-* Description        : Code for the interface for the layer of MCAL
+* File Name          : SystemM.c
+* Description        : Code for the Implementation of the System Management
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      Chenls    初版创建
+*2025/11/11      V1.0.0      Chenls    初版创建
 *
 *******************************************************************************/
 
@@ -16,15 +16,11 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
+#include "Mcal_If.h"
 #include "Mcal_Mcu.h"
-#include "Mcal_Port.h"
-#include "Mcal_PWM.h"
-#include "Mcal_ADC.h"
 #include "Mcal_Uart.h"
-#include "CycleBuf.h"
-#include "Mcal_IWDG.h"
-
-
+#include "Common.h"
+#include "stdio.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -36,8 +32,6 @@
 /*******************************************************************************
 *    Enum Definition
 *******************************************************************************/
-
-
 
 
 
@@ -56,68 +50,54 @@
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-
+static void SystemM_ShowInfo(void);
 
 
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-void McalIf_Init(void)
+void SystemM_InitOne(void)
 {
-    McalMCU_SystickInit();
-
-    McalIWDG_Init();
-
-    CycleBuf_Init();
-
-    McalPort_Init();
-
-    McalUart_Init();
-
-    McalADC_Init();
-
-    McalPWM_Init();
+    McalIf_Init();
+    SystemM_ShowInfo();
+    McalMcu_ClearResetFlags();
 }
 
-void McalIf_Test(void)
+void SystemM_InitTwo(void)
 {
-    McalPWM_Test();
-    McalADC_Test();
 
-  //  MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
-    static uint32_t StateCnt = 0;
-    if (StateCnt < 8)
-    {
-        StateCnt++;
-    }
 
-    if (StateCnt == 1)
-    {
-        McalPort_SetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    }
-    else if (StateCnt == 3)
-    {
-        McalPort_ResetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    }
-    else if (StateCnt == 5)
-    {
-        McalPort_SetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn);
-    }
-    else if (StateCnt == 7)
-    {
-        McalPort_ResetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn); 
-    } 
-    else if (StateCnt == 8)
-    {
-
-    }
-
-     McalUart_Test();
+    
 }
 
+void SystemM_InitThree(void)
+{
 
+}
 
+static void SystemM_ShowInfo(void)
+{
+    McalMcuResetSource_Enum eResetSource = McalMcu_GetResetSource();
+    char printInfo[64] = {0};
 
+    struct 
+    {
+        McalMcuResetSource_Enum eResetSource;
+        char *cShowInfo;
+    }st[] = 
+    {
+        {eMcalMcuResetSource_Unknown, "未知"},
+        {eMcalMcuResetSource_Unknown, "外部引脚复位"},
+        {eMcalMcuResetSource_Unknown, "上电/掉电复位"},
+        {eMcalMcuResetSource_Unknown, "软件复位"},
+        {eMcalMcuResetSource_Unknown, "独立看门狗复位"},
+        {eMcalMcuResetSource_Unknown, "窗口看门狗复位"},
+        {eMcalMcuResetSource_Unknown, "低功耗复位"},
+    };
+
+    snprintf(printInfo, sizeof(printInfo), "复位源：%s\r\n", st[eResetSource].cShowInfo);
+    McalUart_WriteData(eMcalUartChanel_Debug, (uint8_t *)printInfo, strlen(printInfo));
+}
 
 
 

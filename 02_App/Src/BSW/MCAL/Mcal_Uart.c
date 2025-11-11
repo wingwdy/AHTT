@@ -92,7 +92,7 @@ static void McalUart_ConfigChannel(McalUartConfig_Struct *pUartConfig)
         }
 
         eRet1 = CycleBuf_CreatChannel(&pUartConfig->uartBufCtrl.txCycleBufID, pUartConfig->uartBufCtrl.pTxBuf,
-        pUartConfig->uartBufCtrl.txBufSize, CYCLEBUF_PROFILE_SINGLE);
+        pUartConfig->uartBufCtrl.txBufSize, pUartConfig->uartBufCtrl.txProfile);
 
         eRet2 = CycleBuf_CreatChannel(&pUartConfig->uartBufCtrl.rxCycleBufID, pUartConfig->uartBufCtrl.pRxBuf,
         pUartConfig->uartBufCtrl.rxBufSize, CYCLEBUF_PROFILE_CIRCLE);
@@ -241,7 +241,6 @@ void McalUart_Test(void)
 
     uint8_t txbuf[6] = {0x58, 0x18};
     McalUart_WriteData(eMcalUartChanel_MeterChip, (uint8_t *)txbuf, 2);
-
 }
 
 

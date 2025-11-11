@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_Mcu.h
-* Description        : Code for the driver for Mcu
+* File Name          : SystemM.h
+* Description        : Code for the Implementation of the System Management
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -8,11 +8,11 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      Chenls    初版创建
+*2025/11/11      V1.0.0      Chenls    初版创建
 *
 ******************************************************************************/
-#ifndef MCAL_MCU_H_
-#define MCAL_MCU_H_
+#ifndef SYSTEM_M_H_
+#define SYSTEM_M_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
@@ -26,21 +26,11 @@
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    eMcalMcuResetSource_Unknown = 0,   /* 未知 */
-    eMcalMcuResetSource_ExternalPin,   /* 外部引脚复位 */
-    eMcalMcuResetSource_PowerOn,       /* 上电/掉电复位 */
-    eMcalMcuResetSource_Software,      /* 软件复位 */
-    eMcalMcuResetSource_FWDGT,         /* 独立看门狗复位 */
-    eMcalMcuResetSource_WWDGT,         /* 窗口看门狗复位 */
-    eMcalMcuResetSource_Lowpower,      /* 低功耗复位 */
-}McalMcuResetSource_Enum;
+
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
-
 
 
 /******************************************************************************
@@ -52,11 +42,10 @@ typedef enum
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void McalMCU_SystickInit(void);
-void McalMcu_SystemReset(void);
-McalMcuResetSource_Enum McalMcu_GetResetSource(void);
-void McalMcu_ClearResetFlags(void);
-#endif /* MCAL_MCU_H_ */
+void SystemM_InitOne(void);
+void SystemM_InitTwo(void);
+void SystemM_InitThree(void);
+#endif /* SYSTEM_M_H_ */
 
 
 

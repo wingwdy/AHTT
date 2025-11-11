@@ -52,6 +52,7 @@ typedef struct
     uint8_t *pTxBuf;
     uint16_t txBufSize;
     uint8_t  txCycleBufID;
+    uint8_t  txProfile;
     uint8_t *pRxBuf;
     uint16_t rxBufSize;
     uint8_t rxCycleBufID;

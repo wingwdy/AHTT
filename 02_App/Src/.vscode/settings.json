@@ -21,6 +21,9 @@
         "cyclebuf.h": "c",
         "gd32e50x_usart.h": "c",
         "gd32e50x.h": "c",
-        "mcal_iwdg.h": "c"
+        "mcal_iwdg.h": "c",
+        "gd32e50x_misc.h": "c",
+        "mcal_mcu.h": "c",
+        "systemm.h": "c"
     }
 }

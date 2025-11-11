@@ -155,7 +155,7 @@ static GlobalRet_Enum CycleBuf_CircleWriteData(CycleBuf_Struct *pCycBuf, uint8_t
 
 static GlobalRet_Enum CycleBuf_CircleReadData(CycleBuf_Struct *pCycBuf, uint8_t * pOutData, uint16_t readSize)
 {
-    GlobalRet_Enum eRet = eGlobalRet_OK;
+    GlobalRet_Enum eRet = eGlobalRet_NotEnoughData;
     uint16_t dataIdx = 0u;
 	uint16_t remainDataSize = 0u;
 
@@ -180,10 +180,6 @@ static GlobalRet_Enum CycleBuf_CircleReadData(CycleBuf_Struct *pCycBuf, uint8_t 
             
             eRet = eGlobalRet_OK;
         }
-        else
-        {
-            eRet = eGlobalRet_NotEnoughData;
-        }
     }
 
     return eRet;
@@ -191,7 +187,7 @@ static GlobalRet_Enum CycleBuf_CircleReadData(CycleBuf_Struct *pCycBuf, uint8_t 
 
 static GlobalRet_Enum CycleBuf_SingleReadData(CycleBuf_Struct *pCycBuf, uint8_t * pOutData, uint16_t readSize)
 {
-    GlobalRet_Enum eRet = eGlobalRet_OK;
+    GlobalRet_Enum eRet = eGlobalRet_NotEnoughData;
     uint16_t dataIdx = 0u;
 	uint16_t remainDataSize = 0u;
 
@@ -210,12 +206,8 @@ static GlobalRet_Enum CycleBuf_SingleReadData(CycleBuf_Struct *pCycBuf, uint8_t 
             pCycBuf->readIdx = 0;
             pCycBuf->writeIdx = 0;
         }
-        
+
         eRet = eGlobalRet_OK;
-    }
-    else
-    {
-        eRet = eGlobalRet_NotEnoughData;
     }
 
     return eRet;

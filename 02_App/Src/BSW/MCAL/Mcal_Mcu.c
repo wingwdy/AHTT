@@ -18,7 +18,8 @@
 *******************************************************************************/
 #include "gd32e50x_misc.h"
 #include "FreeRTOS.h"
-
+#include "gd32e50x_rcu.h"
+#include "Mcal_Mcu.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -29,10 +30,6 @@
 /*******************************************************************************
 *    Enum Definition
 *******************************************************************************/
-
-
-
-
 
 /*******************************************************************************
 *    Typedef Definition
@@ -65,6 +62,53 @@ void McalMCU_SystickInit(void)
     }
 }
 
+void McalMcu_SystemReset(void)
+{
+    NVIC_SystemReset();
+}
+
+McalMcuResetSource_Enum McalMcu_GetResetSource(void)
+{
+    FlagStatus flag_status;
+    McalMcuResetSource_Enum eResetSource = eMcalMcuResetSource_Unknown;
+
+    if (SET == rcu_flag_get(RCU_FLAG_PORRST)) 
+    {
+        eResetSource = eMcalMcuResetSource_PowerOn;
+    } 
+    else if (SET == rcu_flag_get(RCU_FLAG_SWRST)) 
+    {
+        eResetSource =  eMcalMcuResetSource_Software;
+    } 
+    else if (SET == rcu_flag_get(RCU_FLAG_FWDGTRST)) 
+    {
+        eResetSource = eMcalMcuResetSource_FWDGT;
+    } 
+    else if (SET == rcu_flag_get(RCU_FLAG_WWDGTRST)) 
+    {
+        eResetSource = eMcalMcuResetSource_WWDGT;
+    } 
+    else if (SET == rcu_flag_get(RCU_FLAG_LPRST)) 
+    {
+        eResetSource = eMcalMcuResetSource_Lowpower;
+    }
+    else if (SET == rcu_flag_get(RCU_FLAG_EPRST))
+    {
+        eResetSource = eMcalMcuResetSource_ExternalPin;
+    }
+    else
+    {
+        eResetSource = eMcalMcuResetSource_Unknown;
+    }
+
+    return eResetSource;
+}
+
+void McalMcu_ClearResetFlags(void)
+{
+    rcu_all_reset_flag_clear();
+}
+
 void SysTick_Handler(void)
 {
     xPortSysTickHandler();
@@ -77,7 +121,6 @@ void NMI_Handler(void)
 
 void HardFault_Handler(void)
 {
-    /* if Hard Fault exception occurs, go to infinite loop */
     while(1)
     {}
 }
