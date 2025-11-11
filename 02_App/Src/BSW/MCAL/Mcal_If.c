@@ -21,6 +21,7 @@
 #include "Mcal_PWM.h"
 #include "Mcal_ADC.h"
 #include "Mcal_Uart.h"
+#include "CycleBuf.h"
 
 
 
@@ -63,6 +64,8 @@
 void McalIf_Init(void)
 {
     McalMCU_SystickInit();
+
+    CycleBuf_Init();
 
     McalPort_Init();
 

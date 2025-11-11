@@ -101,7 +101,7 @@ static uint8_t FIlter_IO_Check(uint8_t *pBuf, uint16_t count, uint8_t *pResultVa
 GlobalRet_Enum Filter_IO_CreatFIFO(FilterIOChannel_Enum eCH, uint8_t pointCount, uint8_t initVal)
 {
 	FilterIOCtrlBlk_Struct *pFilterIOCtrlBlk = NULL;
-	GlobalRet_Enum eRet = eGlobalRet_NotEnoughFIFO;
+	GlobalRet_Enum eRet = eGlobalRet_NotEnoughChannel;
 
 	if ((pointCount > FILTER_FIFO_IO_POINT_COUNT) || (pointCount == 0) || (eCH >= eFilterIOChannel_Count))
 	{

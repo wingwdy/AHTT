@@ -35,9 +35,17 @@
 #define FALSE 0
 #endif
 
-#define ARRAY_SIZE(x)      sizeof(x) / sizeof(x[0])
-#define PARA_ASSERT(x)     do \
-                           {}while(x != TRUE)
+#define ARRAY_SIZE(x)               sizeof(x) / sizeof(x[0])
+#define PARA_ASSERT(x)              do \
+                                    {}while(x != TRUE)
+
+#define PARA_ASSERT_RET(x, ret)     do \
+                                    {\
+                                        if (x != TRUE)\
+                                        {\
+                                            return ret;\
+                                        }\
+                                    }while(0)
 
 /******************************************************************************
 *    Enum Definition
@@ -46,13 +54,13 @@ typedef enum
 {
     eGlobalRet_OK,
     eGlobalRet_Error,
-    eGlobalRet_NotEnoughFIFO,
+    eGlobalRet_NotEnoughChannel,
     eGlobalRet_FIFONotFull,
     eGlobalRet_ParaInvalid,
     eGlobalRet_NotInit,
     eGlobalRet_NotEnoughBuf,
+    eGlobalRet_NotEnoughData,
     eGlobalRet_UnexpectedError,
-    
 }GlobalRet_Enum;
 
 /******************************************************************************

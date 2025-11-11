@@ -67,10 +67,14 @@ static void McalPort_ConfigPin(const McalPortPinConfig_Struct *pPortPinConfig)
 
     gpio_init(pPortPinConfig->gpio_periph, pPortPinConfig->mode, pPortPinConfig->speed, pPortPinConfig->pin);
 
-
     if (pPortPinConfig->mode == GPIO_MODE_OUT_PP || pPortPinConfig->mode == GPIO_MODE_OUT_OD)
     {
         gpio_bit_write(pPortPinConfig->gpio_periph, pPortPinConfig->pin, pPortPinConfig->sta_init);
+    }
+
+    if (pPortPinConfig->afio_cfg != MCALPORT_CFG_INVALID_AFIO_CFG)
+    {
+        gpio_afio_port_config(pPortPinConfig->afio_cfg, ENABLE);
     }
 }
 
@@ -123,13 +127,14 @@ void McalPort_Init(void)
 {
     uint8_t index = 0;
     gpio_pin_remap_config(GPIO_SWJ_SWDPENABLE_REMAP, ENABLE);
+    rcu_periph_clock_enable(RCU_AF);
 
     for (index = 0; index < eMcalPortPinChanel_Count; index++)
     {
         McalPort_ConfigPin(&c_stPorPinConfigTable[index]);
     }
 
-    rcu_periph_clock_enable(RCU_AF);
+    
 }
 
 

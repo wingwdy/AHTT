@@ -35,21 +35,7 @@
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-static uint8_t g_TimerLedDMAMemoryBuf[MCALPWM_CFG_LED_COUNT][MCALPWM_CFG_LED_POINT] =
-{
-    {63, 63, 63, 63, 63, 63, 63, 63,
-    63, 63, 63, 63, 63, 63, 63, 63,
-    63, 63, 63, 63, 63, 63, 63, 63},
-
-    {63, 63, 63, 63, 63, 63, 63, 63,
-    63, 63, 63, 63, 63, 63, 63, 63,
-    63, 63, 63, 63, 63, 63, 63, 63},
-
-    {63, 63, 63, 63, 63, 63, 63, 63,
-    63, 63, 63, 63, 63, 63, 63, 63,
-    63, 63, 63, 63, 63, 63, 63, 63},
-};
-;
+static uint8_t g_TimerLedDMAMemoryBuf[MCALPWM_CFG_LED_COUNT][MCALPWM_CFG_LED_POINT];
 
 const McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
 {
@@ -78,7 +64,6 @@ const McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
 
         .initOutputMode = TIMER_OC_MODE_PWM0,
         .initOutputPulse = 0,
-        .initOutputSrcTrigo = MCALPWM_CFG_INVALID_SRC_OC_TRIGO,
         .initCounterVal = 0,
 
         .timer_intEn = FALSE,
@@ -134,7 +119,6 @@ const McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
 
         .initOutputMode = TIMER_OC_MODE_HIGH,
         .initOutputPulse = 0,
-        .initOutputSrcTrigo = MCALPWM_CFG_INVALID_SRC_OC_TRIGO,
         .initCounterVal = 0,
 
         .timer_intEn = FALSE,
@@ -165,7 +149,6 @@ const McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
 
         .initOutputMode = TIMER_OC_MODE_PWM0,
         .initOutputPulse = 250,
-        .initOutputSrcTrigo = TIMER_TRI_OUT_SRC_O1CPRE,
         .initCounterVal = 0,
 
         .timer_intEn = TRUE,
@@ -204,7 +187,6 @@ const McalPWMOC_Struct c_TimerOCParaTable[eMcalPWMOCChannel_Count] =
 
         .initOutputMode = TIMER_OC_MODE_LOW,
         .initOutputPulse = 0,
-        .initOutputSrcTrigo = MCALPWM_CFG_INVALID_SRC_OC_TRIGO,
         .initCounterVal = 0,
 
         .timer_intEn = FALSE,

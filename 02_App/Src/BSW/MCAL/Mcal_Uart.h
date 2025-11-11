@@ -21,7 +21,8 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-
+#define MCALUART_TXSTATE_IDLE                    0
+#define MCALUART_TXSTATE_BUSY                    1
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -30,6 +31,7 @@ typedef enum
     eMcalUartChanel_Debug,
     eMcalUartChanel_4G,
     eMcalUartChanel_MeterChip,
+    eMcalUartChanel_Count,
 }McalUartChanel_Enum;
 
 /******************************************************************************
@@ -47,6 +49,7 @@ typedef enum
 *    Global Function Prototypes
 ******************************************************************************/
 void McalUart_Init(void);
+GlobalRet_Enum McalUart_WriteData(McalUartChanel_Enum eCh, uint8_t *pBuf, uint16_t dataLen);
 void McalUart_Test(void);
 #endif /* Mcal_Uart.h */
 

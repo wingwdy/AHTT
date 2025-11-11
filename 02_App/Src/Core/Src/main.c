@@ -29,7 +29,7 @@ void TaskStartMain(void)
 	BaseType_t xResult = pdFALSE;
 	xResult = xTaskCreate((void *)Task_Test, 
 						"TestTaskHandle",
-						512,
+						1536,
 						NULL,
 						8,
 						&testTaskHandle
@@ -50,6 +50,7 @@ void TaskStartMain(void)
 int main(void)
  {
  	McalIf_Init();
+	
 	TaskStartMain();
 	/* Start the scheduler. */
 	vTaskStartScheduler();

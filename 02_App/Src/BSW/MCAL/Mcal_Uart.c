@@ -53,100 +53,154 @@
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
+static void McalUart_ConfigChannel(McalUartConfig_Struct *pUartConfig)
+{
+    GlobalRet_Enum eRet1 = eGlobalRet_OK, eRet2 = eGlobalRet_OK;
+    PARA_ASSERT(pUartConfig != NULL);
+
+    if (pUartConfig->uartEnable == TRUE)
+    {
+        rcu_periph_clock_enable(pUartConfig->rcu_periph);
+        usart_deinit(pUartConfig->uart_periph);
+
+        usart_baudrate_set(pUartConfig->uart_periph, pUartConfig->baudRate);
+        usart_word_length_set(pUartConfig->uart_periph, USART_WL_8BIT);
+        usart_stop_bit_set(pUartConfig->uart_periph, USART_STB_1BIT);
+        usart_parity_config(pUartConfig->uart_periph, USART_PM_NONE);
+        usart_receive_config(pUartConfig->uart_periph, USART_RECEIVE_ENABLE);
+        usart_transmit_config(pUartConfig->uart_periph, USART_TRANSMIT_ENABLE);
+
+        if (pUartConfig->uartInt_En == TRUE)
+          {
+            nvic_irq_enable(pUartConfig->uartIntCfg.nvic_irq, 
+                pUartConfig->uartIntCfg.nvic_irq_pre_priority, pUartConfig->uartIntCfg.nvic_irq_sub_priority);
+        }
+  
+        if (pUartConfig->uart_periph == USART5)
+        {
+            usart5_flag_clear(pUartConfig->uart_periph, USART5_FLAG_IDLE);
+            usart5_flag_clear(pUartConfig->uart_periph, USART5_FLAG_RBNE);
+            usart5_interrupt_enable(pUartConfig->uart_periph, USART5_INT_RBNE);
+            usart5_interrupt_enable(pUartConfig->uart_periph, USART5_INT_IDLE);
+        }
+        else
+        {
+            usart_flag_clear(pUartConfig->uart_periph, USART_FLAG_IDLE);
+            usart_flag_clear(pUartConfig->uart_periph, USART_FLAG_RBNE);
+            usart_interrupt_enable(pUartConfig->uart_periph, USART_INT_RBNE);
+            usart_interrupt_enable(pUartConfig->uart_periph, USART_INT_IDLE);
+        }
+
+        eRet1 = CycleBuf_CreatChannel(&pUartConfig->uartBufCtrl.txCycleBufID, pUartConfig->uartBufCtrl.pTxBuf,
+        pUartConfig->uartBufCtrl.txBufSize, CYCLEBUF_PROFILE_SINGLE);
+
+        eRet2 = CycleBuf_CreatChannel(&pUartConfig->uartBufCtrl.rxCycleBufID, pUartConfig->uartBufCtrl.pRxBuf,
+        pUartConfig->uartBufCtrl.rxBufSize, CYCLEBUF_PROFILE_CIRCLE);
+
+        if (pUartConfig->DMATx_En == TRUE)
+        {
+            rcu_periph_clock_enable(pUartConfig->DMATx_Cfg.rcu_DMA_periph);
+            dma_deinit(pUartConfig->DMATx_Cfg.DMA_periph, pUartConfig->DMATx_Cfg.DMA_ch);
+            dma_init(pUartConfig->DMATx_Cfg.DMA_periph, pUartConfig->DMATx_Cfg.DMA_ch, &pUartConfig->DMATx_Cfg.DMA_parameter);
+            dma_circulation_disable(pUartConfig->DMATx_Cfg.DMA_periph, pUartConfig->DMATx_Cfg.DMA_ch);
+            dma_memory_to_memory_disable(pUartConfig->DMATx_Cfg.DMA_periph, pUartConfig->DMATx_Cfg.DMA_ch);
+            dma_channel_disable(pUartConfig->DMATx_Cfg.DMA_periph, pUartConfig->DMATx_Cfg.DMA_ch);
+        }
+
+        if (eRet1 == eGlobalRet_OK && eRet2 == eGlobalRet_OK)
+        {
+            usart_enable(pUartConfig->uart_periph);
+            pUartConfig->initFlag = TRUE;
+        }  
+    }
+}
+
 void McalUart_Init(void)
 {
-    rcu_periph_clock_enable(RCU_USART5);
-    /* configure USART5 Tx Rx as alternate function */
-    gpio_afio_port_config(AFIO_PA11_USART5_CFG, ENABLE);
-    gpio_afio_port_config(AFIO_PA12_USART5_CFG, ENABLE);
+    uint8_t index = 0;
 
-    /* USART configure */
-    usart_deinit(USART5);
-    usart_baudrate_set(USART5, 115200U);
-    usart_receive_config(USART5, USART_RECEIVE_ENABLE);
-    usart_transmit_config(USART5, USART_TRANSMIT_ENABLE);
-    usart_enable(USART5);
-
-    rcu_periph_clock_enable(RCU_UART4);
-    usart_deinit(UART4);
-    usart_baudrate_set(UART4, 115200U);
-    usart_word_length_set(UART4, USART_WL_8BIT);
-    usart_stop_bit_set(UART4, USART_STB_1BIT);
-    usart_parity_config(UART4, USART_PM_NONE);
-    usart_receive_config(UART4, USART_RECEIVE_ENABLE);
-    usart_transmit_config(UART4, USART_TRANSMIT_ENABLE);
-
-    usart_flag_clear(UART4, USART_FLAG_IDLE);
-    usart_flag_clear(UART4, USART_FLAG_RBNE);
-    usart_interrupt_enable(UART4, USART_INT_RBNE);
-    usart_interrupt_enable(UART4, USART_INT_IDLE);
-    usart_enable(UART4);
-
-    rcu_periph_clock_enable(RCU_USART1);
-    usart_deinit(USART1);
-    usart_baudrate_set(USART1, 4800);
-    usart_word_length_set(USART1, USART_WL_8BIT);
-    usart_stop_bit_set(USART1, USART_STB_1BIT);
-    usart_parity_config(USART1, USART_PM_NONE);
-    usart_receive_config(USART1, USART_RECEIVE_ENABLE);
-    usart_transmit_config(USART1, USART_TRANSMIT_ENABLE);
-
-    usart_flag_clear(USART1, USART_FLAG_IDLE);
-    usart_flag_clear(USART1, USART_FLAG_RBNE);
-    usart_interrupt_enable(USART1, USART_INT_RBNE);
-    usart_interrupt_enable(USART1, USART_INT_IDLE);
-    usart_enable(USART1);
-}
-
-
-int fputc(int ch, FILE *f)
-{
-    usart_data_transmit(USART5, (uint8_t)ch);
-    while(RESET == usart5_flag_get(USART5, USART5_FLAG_TBE));
-    return ch;
-}
-
-void McaUart_Uart4Tx(void)
-{
-    char txStr[16] = "ATI\r\n";
-    uint8_t count = strlen(txStr);
-    uint8_t read = 0;
-
-    while (count > 0)
+    for (index = 0; index < eMcalUartChanel_Count; index++)
     {
-        usart_data_transmit(UART4, txStr[read]);
-        while(RESET == usart_flag_get(UART4, USART_FLAG_TBE));
-        read++;
-        count--;
+        McalUart_ConfigChannel(&g_UartConfigTable[index]);
     }
 }
 
-void McaUart_Uart1Tx(void)
+GlobalRet_Enum McalUart_WriteData(McalUartChanel_Enum eCh, uint8_t *pBuf, uint16_t dataLen)
 {
-    char txStr[2] = {0x58, 0x18};
-    uint8_t count = 2;
-    uint8_t read = 0;
+    McalUartConfig_Struct *pUartCfg = &g_UartConfigTable[eCh];
+    GlobalRet_Enum eRet = eGlobalRet_OK;
+    uint16_t remainLen = 0;
+    uint8_t byte = 0;
 
-    while (count > 0)
+    PARA_ASSERT_RET(eCh < eMcalUartChanel_Count, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(pBuf != NULL, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(pUartCfg->initFlag == TRUE, eGlobalRet_NotInit);
+
+    eRet = CycleBuf_WriteData(pUartCfg->uartBufCtrl.txCycleBufID, pBuf, dataLen);
+
+    if (eRet == eGlobalRet_OK)
     {
-        usart_data_transmit(USART1, txStr[read]);
-        while(RESET == usart_flag_get(USART1, USART_FLAG_TBE));
-        read++;
-        count--;
-    }
-}
+        if (pUartCfg->uartCtrl.txtate == MCALUART_TXSTATE_IDLE)
+        {
+            pUartCfg->uartCtrl.txtate = MCALUART_TXSTATE_BUSY;
 
+            if (pUartCfg->uartCtrl.txMode == MCALUART_CFG_TXMODE_INT)
+            {
+                if (pUartCfg->uart_periph == USART5)
+                {
+                    usart5_interrupt_enable(pUartCfg->uart_periph, USART5_INT_TBE);
+                }
+                else
+                {
+                    usart_interrupt_enable(pUartCfg->uart_periph, USART_INT_TBE);
+                }
+            }
+            else if (pUartCfg->uartCtrl.txMode == MCALUART_CFG_TXMODE_DMA)
+            {
+                CycleBuf_CheckDataLen(pUartCfg->uartBufCtrl.txCycleBufID, &remainLen);
+                dma_channel_disable(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch);
+                dma_transfer_number_config(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch, remainLen);
+                dma_channel_enable(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch);
+                while (dma_flag_get(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch, DMA_FLAG_FTF)) {}
+                CycleBuf_ResetBuf(pUartCfg->uartBufCtrl.txCycleBufID);
+                pUartCfg->uartCtrl.txtate = MCALUART_TXSTATE_IDLE;
+            }
+            else
+            {
+                while (eGlobalRet_OK == CycleBuf_ReadData(pUartCfg->uartBufCtrl.txCycleBufID, &byte, 1))
+                {
+                    if (pUartCfg->uart_periph == USART5)
+                    {
+                        usart_data_transmit(pUartCfg->uart_periph, byte);
+                        while (RESET == usart5_flag_get(pUartCfg->uart_periph, USART5_FLAG_TBE)) {}
+                    }
+                    else
+                    {
+                        usart_data_transmit(pUartCfg->uart_periph, byte);
+                        while (RESET == usart_flag_get(pUartCfg->uart_periph, USART_FLAG_TBE)) {}
+                    }
+                }
+
+                pUartCfg->uartCtrl.txtate = MCALUART_TXSTATE_IDLE;
+            }
+        }
+    }
+
+    return eRet;
+}
 
 void McalUart_Test(void)
 {
-    printf("Hello world!\r\n");
+    char buf[16] = "Hello world\r\n";
+    McalUart_WriteData(eMcalUartChanel_Debug, (uint8_t *)buf, strlen(buf));
 
-    McaUart_Uart4Tx();
+    char txStr[16] = "ATI\r\n";
+    McalUart_WriteData(eMcalUartChanel_4G, (uint8_t *)txStr, strlen(txStr));
 
-    McaUart_Uart1Tx();
+    uint8_t txbuf[6] = {0x58, 0x18};
+    McalUart_WriteData(eMcalUartChanel_MeterChip, (uint8_t *)txbuf, 2);
+
 }
-
-
 
 
 

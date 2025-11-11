@@ -23,6 +23,8 @@
 ******************************************************************************/
 #define MCALPORT_CFG_INVALID_REMAP_CFG       (0xFFFFFFFF)
 
+#define MCALPORT_CFG_INVALID_AFIO_CFG        (0xFFFFFFFF)
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -41,6 +43,7 @@ typedef struct
     uint32_t            pin;
     bit_status          sta_init;
     uint32_t            remap_cfg;
+    uint32_t            afio_cfg;
 }McalPortPinConfig_Struct;
 
 /******************************************************************************

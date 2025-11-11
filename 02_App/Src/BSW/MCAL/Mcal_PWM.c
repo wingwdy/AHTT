@@ -84,11 +84,6 @@ static void McalPWM_CfgChannel(McalPWMOC_Struct *pPwmOCCfg)
     timer_init(pPwmOCCfg->timer_periph, &pPwmOCCfg->timer_initpara);
     timer_channel_output_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, &pPwmOCCfg->timer_ocintpara);
 
-    if (pPwmOCCfg->initOutputSrcTrigo != MCALPWM_CFG_INVALID_SRC_OC_TRIGO)
-    {
-//        timer_master_output_trigger_source_select(pPwmOCCfg->timer_periph, pPwmOCCfg->initOutputSrcTrigo);
-    }
-
     timer_counter_value_config(pPwmOCCfg->timer_periph, pPwmOCCfg->initCounterVal);
     timer_channel_output_pulse_value_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, pPwmOCCfg->initOutputPulse);
     timer_channel_output_mode_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, pPwmOCCfg->initOutputMode);
