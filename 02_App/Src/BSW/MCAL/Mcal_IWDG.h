@@ -16,7 +16,9 @@
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#define MCALIWDG_CFG_ENABLE            TRUE
+#include "SysCfg.h"
+
+#define MCALIWDG_CFG_ENABLE            SYSTEM_CFG_WATCHDOG_ENABLE
 
 #define MCALIWDG_CFG_PRESCALER         FWDGT_PSC_DIV256
 

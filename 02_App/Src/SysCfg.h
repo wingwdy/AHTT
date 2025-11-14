@@ -24,9 +24,9 @@
 
 #define   SYSCFG_VECT_TAB_OFFSET         0x0000
 
+#define   SYSTEM_CFG_WATCHDOG_ENABLE     FALSE
 
 #define   SYSCFG_CFG_GUN_NUM             1
-
 
 /******************************************************************************
 *    Enum Definition

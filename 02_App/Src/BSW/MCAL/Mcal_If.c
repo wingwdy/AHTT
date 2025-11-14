@@ -84,7 +84,8 @@ void McalIf_Test(void)
     McalPWM_Test();
     McalADC_Test();
 
-  //  MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
+    MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
+
     static uint32_t StateCnt = 0;
     if (StateCnt < 8)
     {
@@ -107,10 +108,8 @@ void McalIf_Test(void)
     {
         McalPort_ResetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn); 
     } 
-    else if (StateCnt == 8)
-    {
-
-    }
+    else 
+    {}
 
      McalUart_Test();
 }

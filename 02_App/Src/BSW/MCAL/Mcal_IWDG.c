@@ -59,7 +59,7 @@
 *******************************************************************************/
 void McalIWDG_Init(void)
 {
-#if defined(MCALIWDG_CFG_ENABLE)
+#if (MCALIWDG_CFG_ENABLE == TRUE)
     dbg_periph_enable(DBG_FWDGT_HOLD);
 
     rcu_osci_on(RCU_IRC40K);

@@ -233,7 +233,7 @@ GlobalRet_Enum McalUart_CheckDataLen(McalUartChanel_Enum eCh, uint16_t* pRemainL
 
 void McalUart_Test(void)
 {
-    char buf[16] = "Hello world\r\n";
+    char buf[16] = "Hello world!!!\r\n";
     McalUart_WriteData(eMcalUartChanel_Debug, (uint8_t *)buf, strlen(buf));
 
     char txStr[16] = "ATI\r\n";

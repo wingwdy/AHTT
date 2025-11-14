@@ -20,6 +20,7 @@
 #include "task.h"
 #include "Common.h"
 #include "Mcal_If.h"
+#include "Asw_ErrorHanlde.h"
 
 /*******************************************************************************
 *    Macro Definition

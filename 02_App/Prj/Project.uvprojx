@@ -408,14 +408,14 @@
           <GroupName>BSW/MCAL</GroupName>
           <Files>
             <File>
-              <FileName>Mcal_If.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\BSW\MCAL\Mcal_If.c</FilePath>
-            </File>
-            <File>
               <FileName>Mcal_Mcu.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\MCAL\Mcal_Mcu.c</FilePath>
+            </File>
+            <File>
+              <FileName>Mcal_If.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MCAL\Mcal_If.c</FilePath>
             </File>
             <File>
               <FileName>Mcal_Port.c</FileName>
