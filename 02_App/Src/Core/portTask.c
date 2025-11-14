@@ -20,7 +20,7 @@
 #include "task.h"
 #include "Common.h"
 #include "Mcal_If.h"
-#include "Asw_ErrorHanlde.h"
+
 
 /*******************************************************************************
 *    Macro Definition
@@ -95,12 +95,16 @@ void TaskStartMain(void)
 	}
 }
 
+#include "Cdd_Relay.h"
+
 static void Task_Test(void *arg)
 {
 	while (1)
 	{
-		vTaskDelay(1000);
-		McalIf_Test();
+        CddRelay_CtrlSwichOn(0);
+        CddRelay_MainFunction();
+		vTaskDelay(10);
+		// McalIf_Test();
 	}
 }
 

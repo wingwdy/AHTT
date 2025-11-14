@@ -16,7 +16,10 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "Asw_ErrorHanlde.h"
+#include "Asw_ErrorHandle.h"
+
+#include "Cdd_Relay.h"
+
 #include "Mcal_If.h"
 #include "Mcal_Mcu.h"
 #include "Mcal_Uart.h"
@@ -67,6 +70,8 @@ static void SystemM_InitOne(void)
 static void SystemM_InitTwo(void)
 {
     AswErrHandle_InitMemory();
+
+    CddRelay_InitMemory();
 }
 
 static void SystemM_InitThree(void)

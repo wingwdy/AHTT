@@ -29,6 +29,7 @@
         "cdd_relayconfig.h": "c",
         "asw_errorhandleconfig.h": "c",
         "syscfg.h": "c",
-        "porttask.h": "c"
+        "porttask.h": "c",
+        "asw_errorhandle.h": "c"
     }
 }
