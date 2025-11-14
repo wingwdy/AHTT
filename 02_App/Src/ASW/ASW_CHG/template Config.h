@@ -1,4 +1,3 @@
-
 /******************************************************************************
 * File Name          : template_Config.h
 * Description        : Code for xxxxxxxxxxx

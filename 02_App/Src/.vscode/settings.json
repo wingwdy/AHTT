@@ -25,6 +25,10 @@
         "gd32e50x_misc.h": "c",
         "mcal_mcu.h": "c",
         "systemm.h": "c",
-        "cdd_relay.h": "c"
+        "cdd_relay.h": "c",
+        "cdd_relayconfig.h": "c",
+        "asw_errorhandleconfig.h": "c",
+        "syscfg.h": "c",
+        "porttask.h": "c"
     }
 }

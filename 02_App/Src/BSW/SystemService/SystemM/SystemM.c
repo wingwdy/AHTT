@@ -16,6 +16,7 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
+#include "Asw_ErrorHanlde.h"
 #include "Mcal_If.h"
 #include "Mcal_Mcu.h"
 #include "Mcal_Uart.h"
@@ -56,21 +57,19 @@ static void SystemM_ShowInfo(void);
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-void SystemM_InitOne(void)
+static void SystemM_InitOne(void)
 {
     McalIf_Init();
     SystemM_ShowInfo();
     McalMcu_ClearResetFlags();
 }
 
-void SystemM_InitTwo(void)
+static void SystemM_InitTwo(void)
 {
-
-
-    
+    AswErrHandle_InitMemory();
 }
 
-void SystemM_InitThree(void)
+static void SystemM_InitThree(void)
 {
 
 }
@@ -82,24 +81,28 @@ static void SystemM_ShowInfo(void)
 
     struct 
     {
-        McalMcuResetSource_Enum eResetSource;
         char *cShowInfo;
     }st[] = 
     {
-        {eMcalMcuResetSource_Unknown, "未知"},
-        {eMcalMcuResetSource_Unknown, "外部引脚复位"},
-        {eMcalMcuResetSource_Unknown, "上电/掉电复位"},
-        {eMcalMcuResetSource_Unknown, "软件复位"},
-        {eMcalMcuResetSource_Unknown, "独立看门狗复位"},
-        {eMcalMcuResetSource_Unknown, "窗口看门狗复位"},
-        {eMcalMcuResetSource_Unknown, "低功耗复位"},
+        {"未知"},
+        {"外部引脚复位"},
+        {"上电/掉电复位"},
+        {"软件复位"},
+        {"独立看门狗复位"},
+        {"窗口看门狗复位"},
+        {"低功耗复位"},
     };
 
     snprintf(printInfo, sizeof(printInfo), "复位源：%s\r\n", st[eResetSource].cShowInfo);
     McalUart_WriteData(eMcalUartChanel_Debug, (uint8_t *)printInfo, strlen(printInfo));
 }
 
-
+void SystemM_Init(void)
+{
+    SystemM_InitOne();
+    SystemM_InitTwo();
+    SystemM_InitThree();
+}
 
 
 

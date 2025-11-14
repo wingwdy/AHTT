@@ -339,7 +339,7 @@
               <MiscControls>-Wno-invalid-source-encoding</MiscControls>
               <Define>GD32E50X,GD32E50X_HD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core\Inc;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\ASW\ASW_CHG;..\Src\BSW\SystemService\SystemM</IncludePath>
+              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\ASW\ASW_CHG;..\Src\BSW\SystemService\SystemM</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -382,6 +382,18 @@
       <Groups>
         <Group>
           <GroupName>ASW/CHG</GroupName>
+          <Files>
+            <File>
+              <FileName>Asw_ErrorHandleConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_CHG\Asw_ErrorHandleConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_ErrorHandle.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_CHG\Asw_ErrorHandle.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>ASW/COM</GroupName>
@@ -656,14 +668,24 @@
               <FilePath>..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Source\ARM\startup_gd32e50x_hd.s</FilePath>
             </File>
             <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\Core\Src\main.c</FilePath>
-            </File>
-            <File>
               <FileName>SysCfg.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Src\SysCfg.h</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Core\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>portTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Core\portTask.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Core\utils.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -733,7 +755,7 @@
             <File>
               <FileName>freertos.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\Core\Src\freertos.c</FilePath>
+              <FilePath>..\Src\Core\freertos.c</FilePath>
             </File>
           </Files>
         </Group>

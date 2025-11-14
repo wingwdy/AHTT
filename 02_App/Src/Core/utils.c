@@ -2,14 +2,14 @@
 To use this module, the following steps should be followed :
 
 1- in the _OS_Config.h file (ex. FreeRTOSConfig.h) enable the following macros :
-    - #define configUSE_IDLE_HOOK    1
-    - #define configUSE_TICK_HOOK    1
+ï¿½  ï¿½- #define configUSE_IDLE_HOOKï¿½  ï¿½1
+ï¿½  ï¿½- #define configUSE_TICK_HOOKï¿½  ï¿½1
 
 2- in the _OS_Config.h define the following macros :
-    - #define traceTASK_SWITCHED_IN()extern void StartIdleMonitor(void); \
-              OStartIdleMonitor()
-    - #define traceTASK_SWITCHED_OUT() extern void EndIdleMonitor(void); \
-            		EndIdleMonitor()
+ï¿½  ï¿½- #define traceTASK_SWITCHED_IN()extern void StartIdleMonitor(void); \
+ï¿½             OStartIdleMonitor()
+ï¿½  ï¿½- #define traceTASK_SWITCHED_OUT() extern void EndIdleMonitor(void); \
+ï¿½           		EndIdleMonitor()
 *******************************************************************************/
 
 
@@ -106,12 +106,3 @@ uint16_t osGetCPUUsage (void)
     return (uint16_t)osCPU_Usage;
 }
 
-//int fputc(int ch, FILE *f)
-//{
-//	usart_data_transmit(USART0, (uint8_t)ch);
-
-//	while (RESET == usart_flag_get(USART0, USART_FLAG_TC)) {
-//		;
-//	}
-//	return ch;
-//}

@@ -1,5 +1,5 @@
 /******************************************************************************
-* File Name          : template.c
+* File Name          : main.c
 * Description        : Code for xxxxxxxxxxx
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
@@ -16,7 +16,10 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-
+#include "SystemM.h"
+#include "portTask.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 
 
@@ -56,7 +59,19 @@
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
+int main(void)
+ {
+	SystemM_Init();
+	
+	TaskStartMain();
 
+	vTaskStartScheduler();
+	
+	while(1)
+	{}
+	
+	return 0;
+}
 
 
 
