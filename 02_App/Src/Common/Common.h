@@ -48,6 +48,7 @@
 void Common_InsertSort(uint16_t *a, uint16_t n);
 uint32_t Common_GetSystick(void);
 uint8_t Common_JudgeTimeoutMs(uint32_t startTick, uint32_t threshold);
+uint16_t Common_BinarySearch(uint16_t *arr, uint16_t count, uint16_t target);
 #endif /* COMMON_H_ */
 
 

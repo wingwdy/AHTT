@@ -98,7 +98,48 @@ uint8_t Common_JudgeTimeoutMs(uint32_t startTick, uint32_t threshold)
     return ret;
 }
 
+uint16_t Common_BinarySearch(uint16_t *arr, uint16_t count, uint16_t target) 
+{
+   uint16_t result = 0xFFFFu;  
 
+    /* 输入参数验证 */
+    if ((NULL != arr) && (0u != count))
+    {
+        uint16_t low = 0u;
+        uint16_t high = count - 1u;
+        uint16_t mid = 0u;
+        uint8_t found = 0u;  /* 查找标志 */
+
+        /* 主查找循环 */
+        while ((low <= high) && (0u == found))
+        {
+            /* 防溢出中间值计算 */
+            mid = (uint16_t)(low + ((uint16_t)(high - low) / 2u));
+            
+            if (target == arr[mid])
+            {
+                result = mid;   /* 记录结果 */
+                found = 1u;     /* 设置找到标志 */
+            }
+            else if (target > arr[mid])
+            {
+                /* 在右半部分继续查找 */
+                low = (uint16_t)(mid + 1u);
+            }
+            else
+            {
+                /* 在左半部分继续查找，防下溢 */
+                if (0u == mid)
+                {
+                    break;  /* 防止high减1下溢 */
+                }
+                high = (uint16_t)(mid - 1u);
+            }
+        }
+    }
+
+    return result;
+}
 
 
 
