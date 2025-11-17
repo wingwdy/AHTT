@@ -45,10 +45,11 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void Common_InsertSort(uint16_t *a, uint16_t n);
-uint32_t Common_GetSystick(void);
+void Common_InsertSort(uint16_t *pData, uint16_t n);
+void Common_BubbleSort(uint16_t *pData, uint16_t size);
 uint8_t Common_JudgeTimeoutMs(uint32_t startTick, uint32_t threshold);
-uint16_t Common_BinarySearch(uint16_t *arr, uint16_t count, uint16_t target);
+uint16_t Common_MedianU16Filter(uint16_t *pData, uint16_t sample_num, uint16_t discard_num);
+uint32_t Common_GetSystick(void);
 #endif /* COMMON_H_ */
 
 

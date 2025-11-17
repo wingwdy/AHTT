@@ -51,30 +51,32 @@
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-/* 排序,从小到大 */
-void Common_InsertSort(uint16_t *a, uint16_t n)
+/* 插入排序,从小到大 */
+void Common_InsertSort(uint16_t *pData, uint16_t n)
 {
 	uint16_t i = 0,j = 0;
 	uint16_t temp = 0;
 
 	for( i = 1;i < n; i++ )
 	{
-		temp = a[i]; /*temp为要插入的元素*/
+		temp = pData[i]; 
 		j = i;  
-		while( j > 0 && temp < a[j-1] )
-		{ /*从a[i-1]开始找比a[i]小的数，同时把数组元素向后移*/
-			a[j] = a[j-1];
+		while( j > 0 && temp < pData[j-1] )
+		{ 
+			pData[j] = pData[j-1];
 			j--;
 		}
-		a[j] = temp; /*插入*/
+		pData[j] = temp; 
 	}
 }
 
+/* 获取系统时钟tick */
 uint32_t Common_GetSystick(void)
 {
 	return Mcal_GetSystick();
 }
 
+/* 超时检测函数 */
 uint8_t Common_JudgeTimeoutMs(uint32_t startTick, uint32_t threshold)
 {
     uint32_t tickNow = Common_GetSystick();
@@ -98,53 +100,49 @@ uint8_t Common_JudgeTimeoutMs(uint32_t startTick, uint32_t threshold)
     return ret;
 }
 
-uint16_t Common_BinarySearch(uint16_t *arr, uint16_t count, uint16_t target) 
+
+/* 冒泡排序,从小到大 */
+void Common_BubbleSort(uint16_t *pData, uint16_t size)
 {
-   uint16_t result = 0xFFFFu;  
+    uint16_t i, j;
+    uint16_t temp;
 
-    /* 输入参数验证 */
-    if ((NULL != arr) && (0u != count))
+    for (j = 0; j < size; j++) //冒泡排序
     {
-        uint16_t low = 0u;
-        uint16_t high = count - 1u;
-        uint16_t mid = 0u;
-        uint8_t found = 0u;  /* 查找标志 */
-
-        /* 主查找循环 */
-        while ((low <= high) && (0u == found))
+        for (i = 0; i < (size - j - 1); i++)
         {
-            /* 防溢出中间值计算 */
-            mid = (uint16_t)(low + ((uint16_t)(high - low) / 2u));
-            
-            if (target == arr[mid])
+            if (pData[i] > pData[i + 1])
             {
-                result = mid;   /* 记录结果 */
-                found = 1u;     /* 设置找到标志 */
-            }
-            else if (target > arr[mid])
-            {
-                /* 在右半部分继续查找 */
-                low = (uint16_t)(mid + 1u);
-            }
-            else
-            {
-                /* 在左半部分继续查找，防下溢 */
-                if (0u == mid)
-                {
-                    break;  /* 防止high减1下溢 */
-                }
-                high = (uint16_t)(mid - 1u);
+                temp = pData[i];
+                pData[i] = pData[i + 1];
+                pData[i + 1] = temp; //大的下沉到数组高端
             }
         }
     }
-
-    return result;
 }
 
+/* 中位值滤波法 */
+uint16_t Common_MedianU16Filter(uint16_t *pData, uint16_t sample_num, uint16_t discard_num)
+{
+    uint16_t count = 0, sum = 0, ret = 0, tempDiscard = 0;
 
+    if (sample_num < 3 || discard_num >= sample_num || pData == NULL)
+    {
+        ret = 0;
+    }
+    else
+    {
+        Common_BubbleSort(pData, sample_num);
+        tempDiscard = (discard_num % 2 == 0) ? discard_num : (discard_num - 1);
 
+        for (count = discard_num / 2; count < (sample_num - discard_num / 2); count++) 
+        {
+            sum +=  pData[count];
+        }
 
+        ret = sum / (sample_num - discard_num);
+    }
 
-
-
+    return ret;
+}
 
