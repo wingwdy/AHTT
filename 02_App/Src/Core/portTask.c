@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      Chenls    初版创建
+*2025/10/10      V1.0.0      chenls    初版创建
 *
 *******************************************************************************/
 
@@ -20,6 +20,7 @@
 #include "task.h"
 #include "Common.h"
 #include "Mcal_If.h"
+#include "Cdd_CP.h"
 
 
 /*******************************************************************************
@@ -103,6 +104,7 @@ static void Task_Test(void *arg)
 	{
         CddRelay_CtrlSwichOn(0);
         CddRelay_MainFunction();
+        CddCP_MainFunction();
 		vTaskDelay(10);
 		// McalIf_Test();
 	}

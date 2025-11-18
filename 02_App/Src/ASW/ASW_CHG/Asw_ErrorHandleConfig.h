@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      Chenls    初版创建
+*2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
 #ifndef ASW_ERRORHANDLE_CONFIG_H_
@@ -18,6 +18,7 @@
 ******************************************************************************/
 #include "Asw_ErrorHandle.h"
 #include "stdint.h"
+#include "Cdd_CP.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -26,8 +27,12 @@
 
 #define ASWERR_CFG_MULTI_ENABLE                       TRUE
 
-#define ASWERR_CFG_ErrStateChangeNotice(port, eErr, flag)    do\
+#define ASWERR_CFG_ErrStateChangeNotice(port, eErr, flag, pErrHandle)  do\
                                                              {\
+                                                                 if (pErrHandle->eChargeCondition == eErrChargeCondition_Safety)\
+                                                                 {\
+                                                                    CddCP_SetErrNotice(port);\
+                                                                 }\
                                                              }while(0)
 
 /******************************************************************************

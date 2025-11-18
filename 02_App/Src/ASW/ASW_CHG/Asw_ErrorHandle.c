@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/11/12      V1.0.0      Chenls    初版创建
+*2025/11/12      V1.0.0      chenls    初版创建
 *
 *******************************************************************************/
 #include "Asw_ErrorHandleConfig.h"
@@ -97,7 +97,7 @@ static void AswErrHandle_SetErrHandle(uint8_t port, AswErrorHandle_Struct *pErro
         }
        
         AswErrHandle_RefreshChargeCondition(pErrorHandle);
-        ASWERR_CFG_ErrStateChangeNotice(port, errType, TRUE);
+        ASWERR_CFG_ErrStateChangeNotice(port, errType, TRUE, pErrorHandle);
     }
 }
 
@@ -126,7 +126,7 @@ static void AswErrHandle_ClearErrHandle(uint8_t port, AswErrorHandle_Struct *pEr
 
         pErrorHandle->arErrLevel[errType] = AswErrorLevel_0;
         AswErrHandle_RefreshChargeCondition(pErrorHandle);
-        ASWERR_CFG_ErrStateChangeNotice(port, errType, FALSE);
+        ASWERR_CFG_ErrStateChangeNotice(port, errType, FALSE, pErrorHandle);
     }
 }
 
@@ -160,9 +160,12 @@ static void AswErrHandle_SelfRecoverDetect(uint8_t port)
 
 static void AswErrHandle_RefreshChargeCondition(AswErrorHandle_Struct *pErrorHandle)
 {
-    if (pErrorHandle->arErrLevelCnt[AswErrorLevel_1] > 0 ||
-        pErrorHandle->arErrLevelCnt[AswErrorLevel_4] > 0 ||
-        pErrorHandle->arErrLevelCnt[AswErrorLevel_5] > 0)
+    if (pErrorHandle->arErrLevelCnt[AswErrorLevel_5] > 0)
+    {
+        pErrorHandle->eChargeCondition = eErrChargeCondition_Safety;
+    }
+    else if (pErrorHandle->arErrLevelCnt[AswErrorLevel_1] > 0 ||
+        pErrorHandle->arErrLevelCnt[AswErrorLevel_4] > 0)
     {
         pErrorHandle->eChargeCondition = eErrChargeCondition_Cancel;
     }

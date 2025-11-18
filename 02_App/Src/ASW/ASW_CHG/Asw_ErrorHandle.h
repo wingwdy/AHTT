@@ -9,7 +9,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      Chenls    初版创建
+*2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
 #ifndef ASW_ERRORHANDLE_H_
@@ -32,6 +32,7 @@ typedef enum
     eErrChargeCondition_Allow,      /* 允许充电 */
     eErrChargeCondition_Suspend,    /* 暂停充电 */
     eErrChargeCondition_Cancel,     /* 取消授权 */
+    eErrChargeCondition_Safety,     /* 安全态 */
 }AswErrChargeCondition_Enum;
 
 typedef enum

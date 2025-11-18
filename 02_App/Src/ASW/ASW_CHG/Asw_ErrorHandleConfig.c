@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/11/12      V1.0.0      Chenls    初版创建
+*2025/11/12      V1.0.0      chenls    初版创建
 *
 *******************************************************************************/
 
@@ -55,7 +55,7 @@ const AswErrorHandleConfig_Struct c_AswErrorHandleConfigTable[eErr_Num] =
     {eErr_CpGroundFault,      AswErrorOwner_Gun,   AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "CP对地短路"},
     {eErr_PEBreakFault,       AswErrorOwner_Pile,  AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "PE接地故障"},
     {eErr_EmergencyStop,      AswErrorOwner_Pile,  AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "急停故障"},
-    {eErr_InputLineReversed,  AswErrorOwner_Pile,  AswErrorLevel_5, AswErrorLevel_5, AswErrorClear_External,   1,     0,   "火零反接"},
+    {eErr_InputLineReversed,  AswErrorOwner_Pile,  AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "火零反接"},
     {eErr_LeakageCurrErr,     AswErrorOwner_Pile,  AswErrorLevel_5, AswErrorLevel_5, AswErrorClear_External,   1,     0,   "漏电流故障"},
     {eErr_ShortCircleErr,     AswErrorOwner_Gun,   AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "短路故障"},
     {eErr_RCDSelfcheckErr,    AswErrorOwner_Pile,  AswErrorLevel_5, AswErrorLevel_5, AswErrorClear_External,   1,     0,   "RCD自检故障"},

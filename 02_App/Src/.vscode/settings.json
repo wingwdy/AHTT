@@ -30,6 +30,8 @@
         "asw_errorhandleconfig.h": "c",
         "syscfg.h": "c",
         "porttask.h": "c",
-        "asw_errorhandle.h": "c"
+        "asw_errorhandle.h": "c",
+        "cdd_cpconfig.h": "c",
+        "cdd_cp.h": "c"
     }
 }

@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_ADC.h
-* Description        : Code for ADC configuration module for hardware
+* File Name          : Cdd_CP.h
+* Description        : Code for Control Pilot
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,33 +11,34 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef MCAL_ADC_H_
-#define MCAL_ADC_H_
+#ifndef CDD_CP_H_
+#define CDD_CP_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Common.h" 
+#include "stdint.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+
 
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
 typedef enum
 {
-    eMcalADCChanel_CP,
-    eMcalADCChanel_ShortCircuit,
-    eMcalADCChanel_GunNTC,
-    eMcalADCChanel_EnvNtc,
-    eMcalADCChannel_PE,
-    eMcalADCChanel_Count,
-}McalADCChanel_Enum;
+    eCddCPVolState_Ground,          /* 接地态 */
+    eCddCPVolState_6V,              /* 6V态 */
+    eCddCPVolState_9V,              /* 9V态 */
+    eCddCPVolState_12V,             /* 12V态 */
+    eCddCPVolState_Err,             /* 故障态 */
+}CddCPVolState_Enum;
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+
 
 
 /******************************************************************************
@@ -49,10 +50,23 @@ typedef enum
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void McalADC_Init(void);
-void McalADC_GetChannelData(McalADCChanel_Enum ch, uint16_t *pOutBuf, uint8_t count);
-void McalADC_Test(void);
-#endif /* MCAL_ADC_H_ */
+CddCPVolState_Enum CddCP_GetVolState(uint8_t port);
+int16_t CddCP_GetVoltage(uint8_t port);
+void CddCP_AdjustCurRateCurrent(uint8_t port, uint32_t current);
+void CddCP_StartCP(uint8_t port);
+void CddCP_StopCP(uint8_t port);
+void CddCP_SetErrNotice(uint8_t port);
+void CddCP_SetReqStartWakeup(uint8_t port);
+void CddCP_SetReqStopWakeUp(uint8_t port);
+void CddCP_SetReqDiodeExsitDetect(uint8_t port);
+uint8_t CddCP_GetDiodeExsitDetectResult(uint8_t port);
+void CddCP_MainFunction(void);
+void CddCP_InitMemory(void);
+#endif
+
+
+
+
 
 
 

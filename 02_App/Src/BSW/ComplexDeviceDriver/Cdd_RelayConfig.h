@@ -16,10 +16,10 @@
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-
 #include "Mcal_PWM.h"
 #include "Mcal_Port.h"
 #include "Cdd_Relay.h"
+#include "Cdd_CP.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -89,7 +89,7 @@
                                                                 {}\
                                                            }while(0)    
                                                              
-#define CDDRELAY_CFG_CheckGunPlugout(port)                 TRUE
+#define CDDRELAY_CFG_CheckGunPlugout(port)                (eCddCPVolState_12V == CddCP_GetVolState(port))
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

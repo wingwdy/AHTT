@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_ADC.h
-* Description        : Code for ADC configuration module for hardware
+* File Name          : Cdd_CPConfig.h
+* Description        : Code for Control Pilot
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,48 +11,79 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef MCAL_ADC_H_
-#define MCAL_ADC_H_
+#ifndef CDD_CP_CONFIG_H_
+#define CDD_CP_CONFIG_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Common.h" 
+#include "Common.h"
+#include "Cdd_CP.h"
+#include "SysCfg.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+#define CDDCP_CFG_CALL_CYCLE                  (10U)
+
+#define CDDCP_CFG_RATE_CURRENT                (32000)
+#define CDDCP_CFG_RATE_MIN_CURRENT            (6000)
+#define CDDCP_CFG_RATE_THRESOLD_CURRENT       (51000)
+
+#define CDDCP_CFG_ADC_BUFF_POINT              (8)
+
+#define CDDCP_CFG_IsQBStandardMode()          (FALSE)    
+
+#define CDDCP_CFG_GB_FILERCNT                 (50  / CDDCP_CFG_CALL_CYCLE)
+#define CDDCP_CFG_QB_FILERCNT                 (650 / CDDCP_CFG_CALL_CYCLE)
+
+#define CDDCP_CFG_DIODE_THREOLD               (-10000)
+
+#define CDDCP_CFG_DIODE_FILTER_POINT          (200 / CDDCP_CFG_CALL_CYCLE)
+
+#define CDDCP_CFG_DIODE_DETECT_TIMEOUT        (500)
+
+#define CDDCP_CFG_WAKEUP_LOW_HOLDTIME         1000
+#define CDDCP_CFG_WAKEUP_HIGH_HOLDTIME        1000
 
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    eMcalADCChanel_CP,
-    eMcalADCChanel_ShortCircuit,
-    eMcalADCChanel_GunNTC,
-    eMcalADCChanel_EnvNtc,
-    eMcalADCChannel_PE,
-    eMcalADCChanel_Count,
-}McalADCChanel_Enum;
+
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+typedef struct 
+{
+    float (*pFuncGetCpVol)(void);
+    void (*pFunSetPwmDuty)(uint16_t duty);
+}CddCPOpsConfig_Struct;
+
+typedef struct 
+{
+    uint16_t lowerVolLimit;
+    uint16_t upperVolLimit;
+    uint16_t statefiterCnt;
+    CddCPVolState_Enum eVoltageState;
+}CddCPVolStateFilter_Struct;
 
 
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-
-
-
+extern const CddCPOpsConfig_Struct c_stCddCPOpsConfigTable[SYSCFG_CFG_GUN_NUM];
+extern const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterGB[4];
+extern const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterQB[4];
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void McalADC_Init(void);
-void McalADC_GetChannelData(McalADCChanel_Enum ch, uint16_t *pOutBuf, uint8_t count);
-void McalADC_Test(void);
-#endif /* MCAL_ADC_H_ */
+
+#endif
+
+
+
+
+
 
 
 

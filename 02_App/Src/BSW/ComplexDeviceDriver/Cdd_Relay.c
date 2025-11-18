@@ -114,7 +114,7 @@ static void CddRelay_IdleHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
         if ((pRelayCtrl->stFilterAdhesionDetect.validStatus == TRUE) &&
            (TRUE == CDDRELAY_CFG_CheckGunPlugout(port)))
         {
-            memset(pRelayCtrl->stFilterMaloperationDetect, 0x00, sizeof(FilterProfile1_Struct));
+            memset(&pRelayCtrl->stFilterMaloperationDetect, 0x00, sizeof(FilterProfile1_Struct));
             AswErrhandle_ResetErrExsitCallback(port, eErr_JcqMaloperation);
         }
     }

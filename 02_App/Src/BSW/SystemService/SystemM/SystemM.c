@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/11/11      V1.0.0      Chenls    初版创建
+*2025/11/11      V1.0.0      chenls    初版创建
 *
 *******************************************************************************/
 
@@ -23,6 +23,7 @@
 #include "Mcal_If.h"
 #include "Mcal_Mcu.h"
 #include "Mcal_Uart.h"
+#include "Cdd_CP.h"
 #include "Common.h"
 #include "stdio.h"
 
@@ -72,6 +73,10 @@ static void SystemM_InitTwo(void)
     AswErrHandle_InitMemory();
 
     CddRelay_InitMemory();
+
+    CddCP_InitMemory();
+
+
 }
 
 static void SystemM_InitThree(void)
