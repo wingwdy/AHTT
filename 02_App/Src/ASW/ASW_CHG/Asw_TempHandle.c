@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/11/12      V1.0.0      Chenls    初版创建
+*2025/11/12      V1.0.0      chenls    初版创建
 *
 *******************************************************************************/
 #include "Asw_TempHandleConfig.h"
@@ -115,7 +115,7 @@ void AswGunTemp_Manage(uint8_t port)
     uint8_t i = 0;
     AswGunTempHandle_Struct *pTempHandle = &g_arAswGunTempHandle[port];
     
-    pTempHandle->temperatue = AswTemp_GetGunTemp(port);
+    pTempHandle->temperatue = ASWTEMP_CFG_GetGunTemp(port);
     
     for (i = 0; i < AswGunTempThrMax; i++)
     {
@@ -213,7 +213,7 @@ void AswEnvTemp_Manage(uint8_t port)
     uint8_t i = 0;
     AswEnvTempHandle_Struct *pTempHandle = &g_arAswEnvTempHandle[port];
     
-    pTempHandle->temperatue = AswTemp_GetEnvTemp(port);
+    pTempHandle->temperatue = ASWTEMP_CFG_GetEnvTemp(port);
     for (i = 0; i < AswEnvTempThrMax; i++)
     {
         pTempHandle->arFilterState[i].status = pTempHandle->temperatue >= pTempHandle->arFilterThr[i]? TRUE:FALSE;
@@ -279,7 +279,7 @@ void AswEnvTemp_Manage(uint8_t port)
 }
 
 
-uint16_t AswTemp_SetCurrent(uint8_t port)
+uint16_t AswTempHandle_SetCurrent(uint8_t port)
 {
     uint16_t current = 32000;/*32A*/
 
