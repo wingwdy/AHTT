@@ -29,7 +29,7 @@
 #define CDDCP_CFG_RATE_MIN_CURRENT            (6000)
 #define CDDCP_CFG_RATE_THRESOLD_CURRENT       (51000)
 
-#define CDDCP_CFG_ADC_BUFF_POINT              (8)
+#define CDDCP_CFG_ADC_BUFF_POINT              (MCALADC_ADC0_SAMPLE_CNT)
 
 #define CDDCP_CFG_IsQBStandardMode()          (FALSE)    
 
@@ -55,8 +55,8 @@
 ******************************************************************************/
 typedef struct 
 {
-    float (*pFuncGetCpVol)(void);
-    void (*pFunSetPwmDuty)(uint16_t duty);
+    float (*pFuncGetCpVol)(uint8_t port);
+    void (*pFunSetPwmDuty)(uint8_t port, uint16_t duty);
 }CddCPOpsConfig_Struct;
 
 typedef struct 
@@ -71,7 +71,7 @@ typedef struct
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-extern const CddCPOpsConfig_Struct c_stCddCPOpsConfigTable[SYSCFG_CFG_GUN_NUM];
+extern const CddCPOpsConfig_Struct c_stCddCPOpsConfigTable;
 extern const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterGB[4];
 extern const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterQB[4];
 /******************************************************************************

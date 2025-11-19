@@ -37,7 +37,7 @@ uint16_t g_adc0DMABuf[MCALADC_CFG_ADC0_SAMPLE_CNT][MCALADC_CFG_ADC0_CHANNEL_CNT]
 const McalADCChannelConfig_Struct c_adc0ChannelConfigTable[] = 
 {
     [eMcalADCChanel_CP] =           { 0,         ADC_CHANNEL_5  },
-    [eMcalADCChanel_ShortCircuit] = { 1,         ADC_CHANNEL_12 },
+    [eMcalADCChanel_ShortCut] =     { 1,         ADC_CHANNEL_12 },
     [eMcalADCChanel_GunNTC] =       { 2,         ADC_CHANNEL_7  },
     [eMcalADCChanel_EnvNtc] =       { 3,         ADC_CHANNEL_0  },
     [eMcalADCChannel_PE] =          { 4,         ADC_CHANNEL_15 },

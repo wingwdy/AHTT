@@ -408,6 +408,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\ASW\ASW_CHG\Asw_VoltCurHandleConfig.c</FilePath>
             </File>
+            <File>
+              <FileName>Asw_EVSE.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_CHG\Asw_EVSE.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -445,6 +450,11 @@
               <FileName>Cdd_SensorConfig.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_SensorConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_RelayConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_RelayConfig.c</FilePath>
             </File>
           </Files>
         </Group>

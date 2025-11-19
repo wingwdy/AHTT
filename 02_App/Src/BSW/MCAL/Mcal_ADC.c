@@ -156,7 +156,7 @@ void McalADC_Test(void)
     uint16_t TestData[MCALADC_CFG_ADC0_CHANNEL_CNT][MCALADC_CFG_ADC0_SAMPLE_CNT] = { 0 };
 
     McalADC_GetChannelData(eMcalADCChanel_CP, TestData[eMcalADCChanel_CP], 8);
-    McalADC_GetChannelData(eMcalADCChanel_ShortCircuit, TestData[eMcalADCChanel_ShortCircuit], 8);
+    McalADC_GetChannelData(eMcalADCChanel_ShortCut, TestData[eMcalADCChanel_ShortCut], 8);
     McalADC_GetChannelData(eMcalADCChanel_GunNTC, TestData[eMcalADCChanel_GunNTC], 8);
     McalADC_GetChannelData(eMcalADCChanel_EnvNtc, TestData[eMcalADCChanel_EnvNtc], 8);
     McalADC_GetChannelData(eMcalADCChannel_PE, TestData[eMcalADCChannel_PE], 5);

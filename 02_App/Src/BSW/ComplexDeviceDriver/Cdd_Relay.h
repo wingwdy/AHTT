@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      Chenls    初版创建
+*2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
 #ifndef CDD_RELAY_H_
@@ -51,6 +51,9 @@ void CddRelay_InitMemory(void);
 void CddRelay_CtrlSwichOn(uint8_t port);
 void CddRelay_CtrlSwichOff(uint8_t port);
 CddRelayState_Enum CddRelay_GetRelayState(uint8_t port);
+void CddRelay_SetReqStartShortCutDetect(uint8_t port);
+void CddRelay_SetReqStopShortCutDetect(uint8_t port);
+uint8_t CddRelay_GetShortCutStatus(uint8_t port);
 #endif /* CDD_RELAY_H_ */
 
 

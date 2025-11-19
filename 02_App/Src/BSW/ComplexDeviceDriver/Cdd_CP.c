@@ -84,7 +84,7 @@ static void CddCP_SetPwmDuty(uint8_t port, uint16_t duty)
     {
         pCpCtrl = &g_stCddCPCtrl[port];
         pCpCtrl->curSetCpDuty = duty;
-        c_stCddCPOpsConfigTable[port].pFunSetPwmDuty(duty);
+        c_stCddCPOpsConfigTable.pFunSetPwmDuty(port, duty);
     }
 }
 
@@ -94,7 +94,7 @@ static float CddCP_GetVol(uint8_t port)
     
     if (port < SYSCFG_CFG_GUN_NUM)
     {
-        ret = c_stCddCPOpsConfigTable[port].pFuncGetCpVol();
+        ret = c_stCddCPOpsConfigTable.pFuncGetCpVol(port);
     }
 
     return ret;

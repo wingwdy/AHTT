@@ -45,20 +45,17 @@
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-static float CddCPCfg_GetGun0CPVol(void);
-static void CddCPCfg_SetGun0PwmDuty(uint16_t duty);
+static float CddCPCfg_GetCPVol(uint8_t port);
+static void CddCPCfg_SetPwmDuty(uint8_t port, uint16_t duty);
 
 
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-const CddCPOpsConfig_Struct c_stCddCPOpsConfigTable[SYSCFG_CFG_GUN_NUM] = 
+const CddCPOpsConfig_Struct c_stCddCPOpsConfigTable = 
 {
-    [0] = 
-    {
-        .pFuncGetCpVol = CddCPCfg_GetGun0CPVol,
-        .pFunSetPwmDuty = CddCPCfg_SetGun0PwmDuty,
-    }
+    .pFuncGetCpVol = CddCPCfg_GetCPVol,
+    .pFunSetPwmDuty = CddCPCfg_SetPwmDuty,
 };
 
 const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterGB[4] = 
@@ -81,35 +78,41 @@ const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterQB[4] =
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-static float CddCPCfg_GetGun0CPVol(void)
+static float CddCPCfg_GetCPVol(uint8_t port)
 {
     uint16_t adcData[CDDCP_CFG_ADC_BUFF_POINT] = {0};
     uint16_t averageAdcData = 0;
     float cpVol = 0.0;
 
-    McalADC_GetChannelData(eMcalADCChanel_CP, adcData, CDDCP_CFG_ADC_BUFF_POINT);
-    averageAdcData = Common_MedianU16Filter(adcData, CDDCP_CFG_ADC_BUFF_POINT, CDDCP_CFG_ADC_BUFF_POINT / 2);
+    if (port == 0)
+    {
+        McalADC_GetChannelData(eMcalADCChanel_CP, adcData, CDDCP_CFG_ADC_BUFF_POINT);
+    }
 
+    averageAdcData = Common_MedianU16Filter(adcData, CDDCP_CFG_ADC_BUFF_POINT, CDDCP_CFG_ADC_BUFF_POINT / 2);
     cpVol = (averageAdcData / 4096.0 * 3.3  - 1.595) / 0.119 - 0.1;
     return cpVol;
 }
 
-static void CddCPCfg_SetGun0PwmDuty(uint16_t duty)
+static void CddCPCfg_SetPwmDuty(uint8_t port, uint16_t duty)
 {
-    if (duty == 0)
+    if (port == 0)
     {
-        McalPWM_SetOutputMode(eMcalPWMOCChannel_CP, MCALPWM_MODE_FORCE_LOW);
+        if (duty == 0)
+        {
+            McalPWM_SetOutputMode(eMcalPWMOCChannel_CP, MCALPWM_MODE_FORCE_LOW);
 
-    }
-    else if (duty >= 1000)
-    {
-        McalPWM_SetOutputMode(eMcalPWMOCChannel_CP, MCALPWM_MODE_FORCE_HIGH);
-    }
-    else
-    {
-        McalPWM_SetSingleDuty(eMcalPWMOCChannel_CP, duty);
-        McalPWM_SetSingleDuty(eMcalPWMOCChannel_CPDetect, duty);
-        McalPWM_SetOutputMode(eMcalPWMOCChannel_CP, MCALPWM_MODE_FORCE_PWM);
+        }
+        else if (duty >= 1000)
+        {
+            McalPWM_SetOutputMode(eMcalPWMOCChannel_CP, MCALPWM_MODE_FORCE_HIGH);
+        }
+        else
+        {
+            McalPWM_SetSingleDuty(eMcalPWMOCChannel_CP, duty);
+            McalPWM_SetSingleDuty(eMcalPWMOCChannel_CPDetect, duty);
+            McalPWM_SetOutputMode(eMcalPWMOCChannel_CP, MCALPWM_MODE_FORCE_PWM);
+        }
     }
 }
 

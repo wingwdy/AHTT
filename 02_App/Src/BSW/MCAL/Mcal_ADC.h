@@ -28,7 +28,7 @@
 typedef enum
 {
     eMcalADCChanel_CP,
-    eMcalADCChanel_ShortCircuit,
+    eMcalADCChanel_ShortCut,
     eMcalADCChanel_GunNTC,
     eMcalADCChanel_EnvNtc,
     eMcalADCChannel_PE,

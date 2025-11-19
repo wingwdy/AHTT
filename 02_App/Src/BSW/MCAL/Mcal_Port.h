@@ -36,7 +36,7 @@ typedef enum
     eMcalPortPinChanel_PA5_CPADC,                   /* CP电压采样 */ 
     eMcalPortPinChanel_PA6_CPPWMOut,                /* CP PWM输出 */ 
     eMcalPortPinChanel_PA7_GunNtc,                  /* 枪温采样 */ 
-    eMcalPortPinChanel_PA8_ShortCircuitEn,          /* 短路检测使能 */ 
+    eMcalPortPinChanel_PA8_ShortCutEn,              /* 短路检测使能 */ 
     eMcalPortPinChanel_PA9_CaliMeterTx,             /* 校表485口，发送 */
     eMcalPortPinChanel_PA10_CaliMeterRx,            /* 校表485口，接收 */
     eMcalPortPinChanel_PA11_DebugTx,                /* 调试口，发送 */

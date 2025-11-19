@@ -102,7 +102,6 @@ static void Task_Test(void *arg)
 {
 	while (1)
 	{
-        CddRelay_CtrlSwichOn(0);
         CddRelay_MainFunction();
         CddCP_MainFunction();
 		vTaskDelay(10);
