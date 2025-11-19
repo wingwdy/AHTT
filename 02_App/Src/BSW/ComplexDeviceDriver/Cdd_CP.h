@@ -63,17 +63,7 @@ uint8_t CddCP_GetDiodeExsitDetectResult(uint8_t port);
 void CddCP_MainFunction(void);
 void CddCP_InitMemory(void);
 #endif
-
-
-
-
-
-
-
-
-
-
-
+ 
 
 
 

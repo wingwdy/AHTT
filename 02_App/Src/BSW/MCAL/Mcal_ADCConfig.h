@@ -27,7 +27,7 @@
 
 #define MCALADC_CFG_CHANNEL_MAX_COUNT         5
 
-#define MCALADC_CFG_ADC0_SAMPLE_CNT           8
+#define MCALADC_CFG_ADC0_SAMPLE_CNT           MCALADC_ADC0_SAMPLE_CNT
 
 #define MCALADC_CFG_ADC0_CHANNEL_CNT          eMcalADCChanel_Count                
 

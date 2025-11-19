@@ -1,6 +1,7 @@
+
 /******************************************************************************
-* File Name          : Mcal_ADC.h
-* Description        : Code for ADC configuration module for hardware
+* File Name          : Asw_TempHandle.h
+* Description        : Code for TempHandle
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -8,36 +9,30 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      chenls    初版创建
+*2025/10/10      V1.0.0      Chenls    初版创建
 *
 ******************************************************************************/
-#ifndef MCAL_ADC_H_
-#define MCAL_ADC_H_
+#ifndef ASW_TEMPHANDLE_H_
+#define ASW_TEMPHANDLE_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Common.h" 
+#include "Common.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define MCALADC_ADC0_SAMPLE_CNT                 8   
+
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    eMcalADCChanel_CP,
-    eMcalADCChanel_ShortCircuit,
-    eMcalADCChanel_GunNTC,
-    eMcalADCChanel_EnvNtc,
-    eMcalADCChannel_PE,
-    eMcalADCChanel_Count,
-}McalADCChanel_Enum;
+
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+
 
 
 /******************************************************************************
@@ -49,10 +44,16 @@ typedef enum
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void McalADC_Init(void);
-void McalADC_GetChannelData(McalADCChanel_Enum ch, uint16_t *pOutBuf, uint8_t count);
-void McalADC_Test(void);
-#endif /* MCAL_ADC_H_ */
+extern void AswTempHandle_InitMemory(void);
+extern void AswTempHandle_MainFunction(void);
+extern uint16_t AswTemp_SetCurrent(uint8_t port);
+
+#endif /* ASW_ERRORHANDLE_H_ */
+
+
+
+
+
 
 
 

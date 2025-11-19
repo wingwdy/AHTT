@@ -1,6 +1,7 @@
+
 /******************************************************************************
-* File Name          : Mcal_ADC.h
-* Description        : Code for ADC configuration module for hardware
+* File Name          : Cdd_RcdConfig.h
+* Description        : Code for xxxxxxxxxxx
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -8,36 +9,47 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      chenls    初版创建
+*2025/10/10      V1.0.0      Chenls    初版创建
 *
 ******************************************************************************/
-#ifndef MCAL_ADC_H_
-#define MCAL_ADC_H_
+#ifndef CDD_RCD_CONFIG_H_
+#define CDD_RCD_CONFIG_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Common.h" 
-
+#include "Mcal_Port.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define MCALADC_ADC0_SAMPLE_CNT                 8   
+#define GetSysTick()										xTaskGetTickCount()
+
+#define CDDRCD_CFG_SetCalPin()				                McalPort_SetPin(eMcalPortPinChanel_PB2_RCDZero)
+#define CDDRCD_CFG_ResetCalPin()		                    McalPort_ResetPin(eMcalPortPinChanel_PB2_RCDZero)
+#define CDDRCD_CFG_SetTestPin()			                    McalPort_SetPin(eMcalPortPinChanel_PB11_RCDTest)
+#define CDDRCD_CFG_ResetTestPin()			                McalPort_ResetPin(eMcalPortPinChanel_PB11_RCDTest)
+#define CDDRCD_CFG_GetTripPin()					        	McalPort_GetPin(eMcalPortPinChanel_PB1_RCDTrip)
+
+
+#define CDDRCD_CFG_TASK_PERIOD                    		    (uint16_t)(10u)/*10ms*/
+#define CDDRCD_CFG_SELFCHECK_CAL_T2_TIME             	    ((uint16_t)80u / CDDRCD_CFG_TASK_PERIOD)/*50ms<=T2<=100ms*/
+#define CDDRCD_CFG_SELFCHECK_CAL_T3_TIME             	    ((uint16_t)500u  / CDDRCD_CFG_TASK_PERIOD)/*T3>=500ms*/
+#define CDDRCD_CFG_SELFCHECK_TEST_T5_TIME             	    ((uint16_t)200u  / CDDRCD_CFG_TASK_PERIOD)/*T5>=200ms*/
+#define CDDRCD_CFG_SELFCHECK_CHK_INT_TIME                   ((uint16_t)50u  / CDDRCD_CFG_TASK_PERIOD)/*50ms检测1次*/
+#define CDDRCD_CFG_SELFCHECK_CHK_MAX_TIME                   ((uint16_t)2000u  / CDDRCD_CFG_TASK_PERIOD)/*持续检测2000ms*/
+#define CDDRCD_CFG_SELFCHECK_EXIT_T6_TIME                   ((uint16_t)100u  / CDDRCD_CFG_TASK_PERIOD)/*T6>=100ms*/
+#define CDDRCD_
+
+
+#define RCD_DEBUG(fmt,...) 	//	LOG_DEBUG(LOG_MODULE_RCD,fmt,##__VA_ARGS__)
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    eMcalADCChanel_CP,
-    eMcalADCChanel_ShortCircuit,
-    eMcalADCChanel_GunNTC,
-    eMcalADCChanel_EnvNtc,
-    eMcalADCChannel_PE,
-    eMcalADCChanel_Count,
-}McalADCChanel_Enum;
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+
 
 
 /******************************************************************************
@@ -49,25 +61,7 @@ typedef enum
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void McalADC_Init(void);
-void McalADC_GetChannelData(McalADCChanel_Enum ch, uint16_t *pOutBuf, uint8_t count);
-void McalADC_Test(void);
-#endif /* MCAL_ADC_H_ */
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif /* CDD_RCD_CONFIG_H_ */
 

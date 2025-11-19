@@ -393,6 +393,21 @@
               <FileType>1</FileType>
               <FilePath>..\Src\ASW\ASW_CHG\Asw_ErrorHandle.c</FilePath>
             </File>
+            <File>
+              <FileName>Asw_TempHandle.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_CHG\Asw_TempHandle.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_VoltCurHandle.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_CHG\Asw_VoltCurHandle.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_VoltCurHandleConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_CHG\Asw_VoltCurHandleConfig.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -415,6 +430,21 @@
               <FileName>Cdd_CPConfig.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_CPConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_Rcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_Rcd.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_Sensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_Sensor.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_SensorConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_SensorConfig.c</FilePath>
             </File>
           </Files>
         </Group>

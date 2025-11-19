@@ -1,6 +1,7 @@
+
 /******************************************************************************
-* File Name          : Mcal_ADC.h
-* Description        : Code for ADC configuration module for hardware
+* File Name          : Cdd_Sensor.h
+* Description        : Code for xxxxxxxxxxx
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -8,32 +9,24 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      chenls    初版创建
+*2025/10/10      V1.0.0      Chenls    初版创建
 *
 ******************************************************************************/
-#ifndef MCAL_ADC_H_
-#define MCAL_ADC_H_
+#ifndef CDD_SENSOR_H_
+#define CDD_SENSOR_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Common.h" 
+#include "Cdd_SensorConfig.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define MCALADC_ADC0_SAMPLE_CNT                 8   
+
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    eMcalADCChanel_CP,
-    eMcalADCChanel_ShortCircuit,
-    eMcalADCChanel_GunNTC,
-    eMcalADCChanel_EnvNtc,
-    eMcalADCChannel_PE,
-    eMcalADCChanel_Count,
-}McalADCChanel_Enum;
 
 /******************************************************************************
 *    Typedef Definition
@@ -49,25 +42,10 @@ typedef enum
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void McalADC_Init(void);
-void McalADC_GetChannelData(McalADCChanel_Enum ch, uint16_t *pOutBuf, uint8_t count);
-void McalADC_Test(void);
-#endif /* MCAL_ADC_H_ */
+extern uint8_t CddSensor_GetEnvTempValue(uint8_t ucPort);
+extern uint8_t CddSensor_GetGunTempValue(uint8_t ucPort);
+extern void CddSensor_InitMemory(void);
+extern void CddSensor_MainFunction(void);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif /* CDD_SENSOR_H_ */
 

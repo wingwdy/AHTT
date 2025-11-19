@@ -39,16 +39,14 @@
 
 
 
-
-
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
 
 typedef struct 
 {
-    uint16_t volStatefilerTimer; 
-    CddCPVolState_Enum eTempCpVolState;
+    uint16_t volStatefilerTimer;              /* cp状态滤波计数器 */
+    CddCPVolState_Enum eTempCpVolState;       /* 滤波前的cp状态 */
 
     uint8_t wakeupStep;                       /* cp唤醒步骤 */
     uint32_t wakeupTick;                      /* cp唤醒计时 */
@@ -63,11 +61,6 @@ typedef struct
     CddCPVolState_Enum eValidCpVolState;      /* CP电压状态 */
     uint16_t curAjustCurrent;                 /* 当前调节电流值 */
 }CddCPCtrl_Struct; 
-
-
-
-
-
 
 /*******************************************************************************
 *    Global variables Declaration
