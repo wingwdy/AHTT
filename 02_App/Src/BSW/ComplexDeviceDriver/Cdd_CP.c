@@ -151,6 +151,7 @@ static void CddCP_DiodeExsitDetect(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
     {
         break;
     }
+
     case CDDCP_DIODE_DETECT_STEP1:
     {
         CddCP_SetPwmDuty(port, 0);
@@ -158,29 +159,34 @@ static void CddCP_DiodeExsitDetect(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
         pCPCtrl->diodeDetectStep = CDDCP_DIODE_DETECT_STEP2;
         break;
     }
+
     case CDDCP_DIODE_DETECT_STEP2:
     {
-        if (pCPCtrl->cpVol < CDDCP_CFG_DIODE_THREOLD)
-        {
-            pCPCtrl->diodeFilter.status = TRUE;
-        }
-        else
-        {
-            pCPCtrl->diodeFilter.status = FALSE;
-        }
-
-        if (Filter_Profile1(&pCPCtrl->diodeFilter, CDDCP_CFG_DIODE_FILTER_POINT))
-        {
-            pCPCtrl->diodeDetectStep = CDDCP_DIODE_DETECT_STEP0;
-            pCPCtrl->diodeDetectResult = GLOBAL_OPT_STATE_SUCCESS;
-            break;
-        }
-
         if (Common_JudgeTimeoutMs(pCPCtrl->diodeDetectStartTick, CDDCP_CFG_DIODE_DETECT_TIMEOUT))
         {
             pCPCtrl->diodeDetectStep = CDDCP_DIODE_DETECT_STEP0;
             pCPCtrl->diodeDetectResult = GLOBAL_OPT_STATE_FAIL;
+            CddCP_SetPwmDuty(port, 1000);
         }
+        else
+        {
+            if (pCPCtrl->cpVol < CDDCP_CFG_DIODE_THREOLD)
+            {
+                pCPCtrl->diodeFilter.status = TRUE;
+            }
+            else
+            {
+                pCPCtrl->diodeFilter.status = FALSE;
+            }
+
+            if (Filter_Profile1(&pCPCtrl->diodeFilter, CDDCP_CFG_DIODE_FILTER_POINT))
+            {
+                pCPCtrl->diodeDetectStep = CDDCP_DIODE_DETECT_STEP0;
+                pCPCtrl->diodeDetectResult = GLOBAL_OPT_STATE_SUCCESS;
+                 CddCP_SetPwmDuty(port, 1000);
+            }
+        }
+
         break;
     }
 
@@ -292,7 +298,7 @@ void CddCP_MainFunction(void)
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
         pCpCtrl = &g_stCddCPCtrl[port];
-        CddCP_VolStateHandle(port, pCpCtrl);
+        CddCP_VolStateHandle(port, pCpCtrl);  
         CddCP_DiodeExsitDetect(port, pCpCtrl);
         CddCP_WakeupHandle(port, pCpCtrl);
     }
@@ -308,29 +314,26 @@ void CddCP_AdjustCurRateCurrent(uint8_t port, uint32_t current)
     {
         pCpCtrl = &g_stCddCPCtrl[port];
 
-        if (current < CDDCP_CFG_RATE_CURRENT)
+        if (current <= CDDCP_CFG_RATE_CURRENT)
         {
             if (current >= CDDCP_CFG_RATE_MIN_CURRENT && current <= CDDCP_CFG_RATE_THRESOLD_CURRENT)
             {
                 duty = current  / 60;
                 validFlag = TRUE;
             }
+            else if (current < CDDCP_CFG_RATE_MIN_CURRENT)
+            {
+                duty = 1000;
+                validFlag = TRUE;
+            }
+            else
+            {}
         }
-        else if (current < CDDCP_CFG_RATE_MIN_CURRENT)
-        {
-            duty = 1000;
-            validFlag = TRUE;
-        }
-        else
-        {}
 
         if (validFlag == TRUE)
         {
-            if (pCpCtrl->curAjustCurrent != current)
-            {
-                pCpCtrl->curAjustCurrent = current;
-                CddCP_SetPwmDuty(port, duty);
-            }
+            pCpCtrl->curAjustCurrent = current;
+            CddCP_SetPwmDuty(port, duty);
         }
     }
 }
