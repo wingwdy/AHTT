@@ -1,6 +1,6 @@
 /******************************************************************************
 * File Name          : main.c
-* Description        : Code for xxxxxxxxxxx
+* Description        : Code for Main process
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ int main(void)
  {
 	SystemM_Init();
 	
-	TaskStartMain();
+	portTask_CreatAllTask();
 
 	vTaskStartScheduler();
 	

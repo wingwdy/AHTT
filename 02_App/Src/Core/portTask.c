@@ -16,12 +16,18 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
+#include "Asw_EVSE.h"
+
+#include "Cdd_CP.h"
+#include "Cdd_Relay.h"
+#include "Cdd_Rcd.h"
+#include "Cdd_Sensor.h"
+
+#include "Mcal_If.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "Common.h"
-#include "Mcal_If.h"
-#include "Cdd_CP.h"
-
 
 /*******************************************************************************
 *    Macro Definition
@@ -52,25 +58,27 @@ typedef struct
 
 
 /*******************************************************************************
-*    Global variables Declaration
-*******************************************************************************/
-static void Task_Test(void *arg);
-
-static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
-{
-	{"TestTaskHandle", Task_Test,  NULL, 1536,  6},
-};
-
-/*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
+static void Task_10ms(void *arg);
+static void Task_100ms(void *arg);
 
 
+
+
+/*******************************************************************************
+*    Global variables Declaration
+*******************************************************************************/
+static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
+{
+    {"App10ms",        Task_10ms,          NULL,         512,   6 } ,
+    {"App100ms",       Task_100ms,         NULL,         512,   6 } ,
+};
 
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-void TaskStartMain(void)
+void portTask_CreatAllTask(void)
 {
 	uint8_t index = 0;
 	portTask_CtrBlk *pTaskCtr = NULL;
@@ -87,29 +95,35 @@ void TaskStartMain(void)
                               pTaskCtr->uxPriority,
                               &pTaskCtr->taskHandle);
 
-#if 0
 	    if(xResult != pdTRUE)
         {
-            log_debug("[%s] task create error\n", pTaskCtr->cTaskName);
+//          log_debug("[%s] task create error\n", pTaskCtr->cTaskName);
         }
-#endif
 	}
 }
 
-#include "Cdd_Relay.h"
 
-static void Task_Test(void *arg)
+static void Task_10ms(void *arg)
 {
-	while (1)
-	{
+    while (1)
+    {
         CddRelay_MainFunction();
         CddCP_MainFunction();
-		vTaskDelay(10);
-		// McalIf_Test();
-	}
+        CddRcd_MainFunction();
+
+        AswEVSE_MainFunction();
+        vTaskDelay(10);
+    }
 }
 
-
+static void Task_100ms(void *arg)
+{
+    while (1)
+    {
+        CddSensor_MainFunction();
+        vTaskDelay(100);
+    }
+}
 
 
 

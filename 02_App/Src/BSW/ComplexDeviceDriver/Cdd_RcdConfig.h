@@ -1,4 +1,3 @@
-
 /******************************************************************************
 * File Name          : Cdd_RcdConfig.h
 * Description        : Code for xxxxxxxxxxx

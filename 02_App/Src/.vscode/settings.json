@@ -33,6 +33,10 @@
         "asw_errorhandle.h": "c",
         "cdd_cpconfig.h": "c",
         "cdd_cp.h": "c",
-        "asw_evseconfig.h": "c"
+        "asw_evseconfig.h": "c",
+        "asw_evse.h": "c",
+        "cdd_rcd.h": "c",
+        "cdd_sensor.h": "c",
+        "cdd_sensorconfig.h": "c"
     }
 }

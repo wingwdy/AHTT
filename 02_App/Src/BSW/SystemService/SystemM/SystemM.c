@@ -73,17 +73,15 @@ static void SystemM_InitOne(void)
 
 static void SystemM_InitTwo(void)
 {
-    CddRelay_InitMemory();
-    CddCP_InitMemory();
-
-    AswErrHandle_InitMemory();
 
 
 }
 
 static void SystemM_InitThree(void)
 {
-
+    CddRelay_InitMemory();
+    CddCP_InitMemory();
+    AswErrHandle_InitMemory();
 }
 
 static void SystemM_ShowInfo(void)
