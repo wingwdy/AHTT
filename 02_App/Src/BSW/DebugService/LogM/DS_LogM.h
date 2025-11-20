@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Common.h
-* Description        : Code for Common function
+* File Name          : DS_LogM.h
+* Description        : Code for log manage
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,32 +11,55 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef COMMON_H_
-#define COMMON_H_
+#ifndef DS_LOGM_H_
+#define DS_LOGM_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "stdint.h"
-#include "stdio.h"
-#include "stdarg.h"
-#include "stdlib.h"
-#include "math.h"
-#include "string.h"
-#include "gd32e50x.h"
-#include "Global.h"
 
+#include "Common.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-
+#define DSLOGM_Trace(module, fmt, ...)      DSLogM_Output(module, eDSLogOutputLevel_Trace,    "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
+#define DSLOGM_Debug(module, fmt, ...)      DSLogM_Output(module, eDSLogOutputLevel_Debug,    "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
+#define DSLOGM_Info(module, fmt, ...)       DSLogM_Output(module, eDSLogOutputLevel_Info,     "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
+#define DSLOGM_Warn(module, fmt, ...)       DSLogM_Output(module, eDSLogOutputLevel_Warn,     "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
+#define DSLOGM_Error(module, fmt, ...)      DSLogM_Output(module, eDSLogOutputLevel_Error,    "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
+#define DSLOGM_Critical(module, fmt, ...)   DSLogM_Output(module, eDSLogOutputLevel_Critical, "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
+typedef enum
+{
+    eDSLogOutputLevel_Trace,
+    eDSLogOutputLevel_Debug,
+    eDSLogOutputLevel_Info,
+    eDSLogOutputLevel_Warn,
+    eDSLogOutputLevel_Error,
+    eDSLogOutputLevel_Critical,   
+}DSLogOutputLevel_Enum;
 
+typedef enum
+{
+    /* ASW */
+    DSLogMModule_EVSE,
+    DSLogMModule_Charge,
+
+    /*CDD */
+    DSLogMModule_CDD,
+
+    /*System Service */
+    DSLogMModule_System,
+
+
+    DSLogMModule_Count,
+}DSLogMModule_Enum;
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+
 
 
 /******************************************************************************
@@ -44,18 +67,14 @@
 ******************************************************************************/
 
 
+
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void Common_InsertSort(uint16_t *pData, uint16_t n);
-void Common_BubbleSort(uint16_t *pData, uint16_t size);
-uint8_t Common_JudgeTimeoutMs(uint32_t startTick, uint32_t threshold);
-uint16_t Common_MedianU16Filter(uint16_t *pData, uint16_t sample_num, uint16_t discard_num);
-uint32_t Common_GetSystick(void);
-#endif /* COMMON_H_ */
-
-
-
+void DSLogM_Output(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum eLevel, const char *fmt, ...);
+const char* DSLogM_GetModuleName(DSLogMModule_Enum eModule);
+void DSLogM_InitMemory(void);
+#endif /* DS_LOGM_H_ */
 
 
 

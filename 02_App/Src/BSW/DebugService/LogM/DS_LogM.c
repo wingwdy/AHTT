@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : SS_SystemM.c
-* Description        : Code for the Implementation of the System Management
+* File Name          : DS_LogM.c
+* Description        : Code for log manage
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/11/11      V1.0.0      chenls    初版创建
+*2025/10/10      V1.0.0      chenls    初版创建
 *
 *******************************************************************************/
 
@@ -16,20 +16,9 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "Asw_ErrorHandle.h"
-#include "Asw_EVSE.h"
-#include "Asw_Charge.h"
-
-#include "Cdd_Relay.h"
-
-#include "DS_LogM.h"
-
-#include "Mcal_If.h"
-#include "Mcal_Mcu.h"
-#include "Cdd_CP.h"
-#include "Common.h"
-#include "stdio.h"
-
+#include "DS_LogMConfig.h"
+#include "FreeRTOS.h"
+#include "semphr.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -41,82 +30,83 @@
 /*******************************************************************************
 *    Enum Definition
 *******************************************************************************/
+typedef enum
+{
+    eDSLogMOutputDirection_Null,
+    eDSLogMOutputDirection_Uart,
+    eDSLogMOutputDirection_File,
+    eDSLogMOutputDirection_Count,
+}DSLogMOutputDirection_Enum;
 
+typedef enum
+{
+    eDSLogMOutputMode_Sync,
+    eDSLogMOutputMode_Asyn,
+}DSLogMOutputMode_Enum;
 
 
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
-
+typedef struct 
+{
+    DSLogMOutputDirection_Enum eOutputDirection;
+    SemaphoreHandle_t mutex;
+    DSLogOutputLevel_Enum eOutputLevel;
+    uint8_t cacheBuf[DSLOGM_CFG_ASYN_BUFF_SIZE];
+    uint16_t logDataLen;
+}DSLogMCtrl_Struct;
 
 
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-
+static DSLogMCtrl_Struct g_stLogMCtrl;
 
 
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-static void SSSystemM_ShowInfo(void);
-static void SSSystemM_InitOne(void);
-static void SSSystemM_InitTwo(void);
-static void SSSystemM_InitThree(void);
+static void DSLogM_OutputFilter(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum eLevel, const char *fmt, va_list args);
+
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-static void SSSystemM_InitOne(void)
+void DSLogM_Output(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum eLevel, const char *fmt, ...)
 {
-    McalIf_Init();
-    DSLogM_InitMemory();
-    SSSystemM_ShowInfo();
-    McalMcu_ClearResetFlags();
+    xSemaphoreTake(g_stLogMCtrl.mutex, portMAX_DELAY);
+    va_list args;
+    va_start(args, fmt);
+    DSLogM_OutputFilter(eModule, eLevel, fmt, args);
+    va_end(args);
+    xSemaphoreGive(g_stLogMCtrl.mutex);
 }
 
-static void SSSystemM_InitTwo(void)
+void DSLogM_InitMemory(void)
 {
-
-
+    memset(&g_stLogMCtrl, 0x00, sizeof(g_stLogMCtrl));
+    g_stLogMCtrl.mutex = xSemaphoreCreateMutex();
 }
 
-static void SSSystemM_InitThree(void)
+#include "Mcal_UartConfig.h"
+
+static void DSLogM_OutputFilter(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum eLevel, const char *fmt, va_list args)
 {
-    CddRelay_InitMemory();
-    CddCP_InitMemory();
-    AswErrHandle_InitMemory();
+    g_stLogMCtrl.logDataLen = vsprintf((char *)g_stLogMCtrl.cacheBuf, fmt, args);
+    McalUart_WriteData(eMcalUartChanel_Debug, g_stLogMCtrl.cacheBuf, g_stLogMCtrl.logDataLen);
 }
 
-static void SSSystemM_ShowInfo(void)
+const char* DSLogM_GetModuleName(DSLogMModule_Enum eModule)
 {
-    McalMcuResetSource_Enum eResetSource = McalMcu_GetResetSource();
-    char printInfo[64] = {0};
+    const char *p = NULL;
 
-    struct 
+    if (eModule < DSLogMModule_Count)
     {
-        char *cShowInfo;
-    }st[] = 
-    {
-        {"未知"},
-        {"外部引脚复位"},
-        {"上电/掉电复位"},
-        {"软件复位"},
-        {"独立看门狗复位"},
-        {"窗口看门狗复位"},
-        {"低功耗复位"},
-    };
+        p = g_logMModuleName[eModule];
+    }
 
-    snprintf(printInfo, sizeof(printInfo), "复位源：%s\r\n", st[eResetSource].cShowInfo);
-    DSLOGM_Debug(DSLogMModule_System, "%s", printInfo);
+    return p;
 }
-
-void SSSystemM_Init(void)
-{
-    SSSystemM_InitOne();
-    SSSystemM_InitTwo();
-    SSSystemM_InitThree();
-}
-
 
 
 

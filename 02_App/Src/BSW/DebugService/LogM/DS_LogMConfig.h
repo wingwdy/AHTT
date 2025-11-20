@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Common.h
-* Description        : Code for Common function
+* File Name          : DS_LogMConfig.h
+* Description        : Code for log manage
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,23 +11,21 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef COMMON_H_
-#define COMMON_H_
+#ifndef DS_LOGM_CONFIG_H_
+#define DS_LOGM_CONFIG_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "stdint.h"
-#include "stdio.h"
-#include "stdarg.h"
-#include "stdlib.h"
-#include "math.h"
-#include "string.h"
-#include "gd32e50x.h"
-#include "Global.h"
+#include "DS_LogM.h"
+
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+
+#define DSLOGM_CFG_OUTPUT_ASYN_ENABLE             TRUE           
+
+#define DSLOGM_CFG_ASYN_BUFF_SIZE                 1024
 
 /******************************************************************************
 *    Enum Definition
@@ -39,24 +37,19 @@
 ******************************************************************************/
 
 
+
+
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
+extern const char *g_logMModuleName[DSLogMModule_Count];
 
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void Common_InsertSort(uint16_t *pData, uint16_t n);
-void Common_BubbleSort(uint16_t *pData, uint16_t size);
-uint8_t Common_JudgeTimeoutMs(uint32_t startTick, uint32_t threshold);
-uint16_t Common_MedianU16Filter(uint16_t *pData, uint16_t sample_num, uint16_t discard_num);
-uint32_t Common_GetSystick(void);
-#endif /* COMMON_H_ */
 
-
-
-
+#endif /* DS_LOGM_CONFIG_H_ */
 
 
 

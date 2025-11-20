@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : SS_SystemM.c
-* Description        : Code for the Implementation of the System Management
+* File Name          : DS_LogMConfig.c
+* Description        : Code for log manage
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/11/11      V1.0.0      chenls    初版创建
+*2025/10/10      V1.0.0      chenls    初版创建
 *
 *******************************************************************************/
 
@@ -16,19 +16,8 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "Asw_ErrorHandle.h"
-#include "Asw_EVSE.h"
-#include "Asw_Charge.h"
+#include "DS_LogMConfig.h"
 
-#include "Cdd_Relay.h"
-
-#include "DS_LogM.h"
-
-#include "Mcal_If.h"
-#include "Mcal_Mcu.h"
-#include "Cdd_CP.h"
-#include "Common.h"
-#include "stdio.h"
 
 
 /*******************************************************************************
@@ -44,9 +33,12 @@
 
 
 
+
+
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
+
 
 
 
@@ -59,63 +51,23 @@
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-static void SSSystemM_ShowInfo(void);
-static void SSSystemM_InitOne(void);
-static void SSSystemM_InitTwo(void);
-static void SSSystemM_InitThree(void);
+
+
+
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-static void SSSystemM_InitOne(void)
+const char *g_logMModuleName[DSLogMModule_Count] = 
 {
-    McalIf_Init();
-    DSLogM_InitMemory();
-    SSSystemM_ShowInfo();
-    McalMcu_ClearResetFlags();
-}
+    "EVSE",
+    "Charge",
 
-static void SSSystemM_InitTwo(void)
-{
+    "Cdd",
+    
+    "System",
 
+};
 
-}
-
-static void SSSystemM_InitThree(void)
-{
-    CddRelay_InitMemory();
-    CddCP_InitMemory();
-    AswErrHandle_InitMemory();
-}
-
-static void SSSystemM_ShowInfo(void)
-{
-    McalMcuResetSource_Enum eResetSource = McalMcu_GetResetSource();
-    char printInfo[64] = {0};
-
-    struct 
-    {
-        char *cShowInfo;
-    }st[] = 
-    {
-        {"未知"},
-        {"外部引脚复位"},
-        {"上电/掉电复位"},
-        {"软件复位"},
-        {"独立看门狗复位"},
-        {"窗口看门狗复位"},
-        {"低功耗复位"},
-    };
-
-    snprintf(printInfo, sizeof(printInfo), "复位源：%s\r\n", st[eResetSource].cShowInfo);
-    DSLOGM_Debug(DSLogMModule_System, "%s", printInfo);
-}
-
-void SSSystemM_Init(void)
-{
-    SSSystemM_InitOne();
-    SSSystemM_InitTwo();
-    SSSystemM_InitThree();
-}
 
 
 
