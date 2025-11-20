@@ -74,13 +74,9 @@ static AswEVSECtrl_Struct g_stAswEVSECtrl[SYSCFG_CFG_GUN_NUM];
 *******************************************************************************/
 static void AswEVSE_StateEnterState0(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl)
 {
-    AswErrChargeCondition_Enum eChargeCondition = eErrChargeCondition_Allow;
-    
     if (pEVSECtrl->evseState != ASWEVSE_STATE_0)
     {
-        eChargeCondition = AswErrHandle_GetChargeCondition(port);
-
-        if (eChargeCondition != eErrChargeCondition_Allow)
+        if ((TRUE == AswErrHandle_IsExsistError(port)))
         {
             CddRelay_SetReqStopShortCutDetect(port);
             CddCP_StopPWM(port);
@@ -92,9 +88,7 @@ static void AswEVSE_StateEnterState0(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl
 
 static void AswEVSE_State0Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, CddCPVolState_Enum eCpState)
 {
-    AswErrChargeCondition_Enum eChargeCondition = AswErrHandle_GetChargeCondition(port);
-
-    if (eChargeCondition != eErrChargeCondition_Allow)
+    if (TRUE == AswErrHandle_IsExsistError(port))
     {
         pEVSECtrl->quitState0DelayTimer = Common_GetSystick();
     }

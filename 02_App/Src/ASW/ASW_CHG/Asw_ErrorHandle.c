@@ -300,7 +300,23 @@ void AswErrHandle_MainFunction(void)
 #endif
 }
 
+uint8_t AswErrHandle_IsExsistError(uint8_t port)
+{
+    AswErrorHandle_Struct *pErrorHandle = &g_stAswErrorHandle[port];
+    uint8_t ret = FALSE;
 
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        if (pErrorHandle->arErrLevelCnt[AswErrorLevel_3] > 0 || 
+            pErrorHandle->arErrLevelCnt[AswErrorLevel_4] > 0 ||   
+            pErrorHandle->arErrLevelCnt[AswErrorLevel_5] > 0)
+        {
+            ret = TRUE;
+        }   
+    }
+
+    return ret;
+}
 
 
 

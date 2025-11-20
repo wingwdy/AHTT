@@ -29,9 +29,9 @@
 ******************************************************************************/
 typedef enum
 {
-    eErrChargeCondition_Allow,      /* 允许充电 */
-    eErrChargeCondition_Suspend,    /* 暂停充电 */
-    eErrChargeCondition_Cancel,     /* 取消授权 */
+    eErrChargeCondition_Allow,         /* 允许充电 */
+    eErrChargeCondition_Suspend,       /* 暂停充电 */
+    eErrChargeCondition_Cancel,        /* 取消授权 */
 }AswErrChargeCondition_Enum;
 
 typedef enum
@@ -104,7 +104,7 @@ void AswErrHandle_ClearStopReason(uint8_t port);
 AswErrorType_Enum AswErrHandle_GetStopReason(uint8_t port);
 void AswErrHandle_InitMemory(void);
 void AswErrHandle_MainFunction(void);
-
+uint8_t AswErrHandle_IsExsistError(uint8_t port);
 
 #endif /* ASW_ERRORHANDLE_H_ */
 

@@ -25,7 +25,7 @@
 ******************************************************************************/
 #define ASWERR_CFG_CALLCYCLE                          (100U)
 
-#define ASWERR_CFG_MULTI_ENABLE                       TRUE
+#define ASWERR_CFG_MULTI_ENABLE                       FALSE
 
 #define ASWERR_CFG_ErrStateChangeNotice(port, eErr, flag, pErrHandle)  do\
                                                              {\
