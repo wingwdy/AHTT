@@ -37,6 +37,7 @@
         "asw_evse.h": "c",
         "cdd_rcd.h": "c",
         "cdd_sensor.h": "c",
-        "cdd_sensorconfig.h": "c"
+        "cdd_sensorconfig.h": "c",
+        "ss_systemm.h": "c"
     }
 }

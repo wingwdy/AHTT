@@ -1,5 +1,5 @@
 /******************************************************************************
-* File Name          : SystemM.c
+* File Name          : SS_SystemM.c
 * Description        : Code for the Implementation of the System Management
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
@@ -58,33 +58,34 @@
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-static void SystemM_ShowInfo(void);
-
-
+static void SSSystemM_ShowInfo(void);
+static void SSSystemM_InitOne(void);
+static void SSSystemM_InitTwo(void);
+static void SSSystemM_InitThree(void);
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-static void SystemM_InitOne(void)
+static void SSSystemM_InitOne(void)
 {
     McalIf_Init();
-    SystemM_ShowInfo();
+    SSSystemM_ShowInfo();
     McalMcu_ClearResetFlags();
 }
 
-static void SystemM_InitTwo(void)
+static void SSSystemM_InitTwo(void)
 {
 
 
 }
 
-static void SystemM_InitThree(void)
+static void SSSystemM_InitThree(void)
 {
     CddRelay_InitMemory();
     CddCP_InitMemory();
     AswErrHandle_InitMemory();
 }
 
-static void SystemM_ShowInfo(void)
+static void SSSystemM_ShowInfo(void)
 {
     McalMcuResetSource_Enum eResetSource = McalMcu_GetResetSource();
     char printInfo[64] = {0};
@@ -107,11 +108,11 @@ static void SystemM_ShowInfo(void)
     McalUart_WriteData(eMcalUartChanel_Debug, (uint8_t *)printInfo, strlen(printInfo));
 }
 
-void SystemM_Init(void)
+void SSSystemM_Init(void)
 {
-    SystemM_InitOne();
-    SystemM_InitTwo();
-    SystemM_InitThree();
+    SSSystemM_InitOne();
+    SSSystemM_InitTwo();
+    SSSystemM_InitThree();
 }
 
 

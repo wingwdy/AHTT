@@ -16,7 +16,7 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "SystemM.h"
+#include "SS_SystemM.h"
 #include "portTask.h"
 #include "FreeRTOS.h"
 #include "task.h"
@@ -61,7 +61,7 @@
 *******************************************************************************/
 int main(void)
  {
-	SystemM_Init();
+	SSSystemM_Init();
 	
 	portTask_CreatAllTask();
 

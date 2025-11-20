@@ -32,6 +32,7 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
+#include "SysCfg.h"
 /*-----------------------------------------------------------
  * Application specific definitions.
  *
@@ -70,7 +71,7 @@
 #define configCPU_CLOCK_HZ								SystemCoreClock
 #define configMINIMAL_STACK_SIZE						( ( uint16_t ) 128 )
 #define configMINIMAL_SECURE_STACK_SIZE					( 1024 )
-#define configTOTAL_HEAP_SIZE							( ( size_t ) ( 58 * 1024 ) )
+#define configTOTAL_HEAP_SIZE							( ( size_t ) ( SYSCFG_CFG_OS_HEAP_SIZE ) )
 #define configMAX_TASK_NAME_LEN							( 16 )
 #define configQUEUE_REGISTRY_SIZE                		8
 
