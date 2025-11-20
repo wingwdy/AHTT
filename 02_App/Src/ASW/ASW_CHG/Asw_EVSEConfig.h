@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Global.h
-* Description        : Code for Global Definition
+* File Name          : Asw_EVSEConfig.h
+* Description        : Code for EVSE State Manage
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,70 +11,30 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-
-#ifndef Global_H_
-#define Global_H_
+#ifndef ASW_EVSE_CONFIG_H_
+#define ASW_EVSE_CONFIG_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "stdint.h"
+
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define GLOBAL_OPT_STATE_IDLE                          (0U)
-#define GLOBAL_OPT_STATE_PROCESS                       (1U)
-#define GLOBAL_OPT_STATE_SUCCESS                       (2U)
-#define GLOBAL_OPT_STATE_FAIL                          (3U)
+#define ASWEVSE_CFG_CALL_CYCLE                       (10)
 
-#ifndef NULL
-#define NULL  0
-#endif
+#define ASWEVSE_CFG_QUIT_STATE0_TIMEOUT              (300)    
 
-#ifndef TRUE
-#define TRUE  1
-#endif
+#define ASWEVSE_CFG_DIODE_DETECT_ENABLE              (TRUE)
 
-#ifndef FALSE
-#define FALSE 0
-#endif
+#define ASWEVSE_CFG_ENTER_STATE2_DELAY               (1000)
 
-#define ARRAY_SIZE(x)               sizeof(x) / sizeof(x[0])
+#define ASWEVSE_CFG_RELAY_DETECT_DELAY               (1000)
 
-#define PARA_ASSERT(x)              do \
-                                    {}while(x != TRUE)
-                                    
-#define PARA_ASSERT_RET(x, ret)     do \
-                                    {\
-                                        if (x != TRUE)\
-                                        {\
-                                            return ret;\
-                                        }\
-                                    }while(0)
-
-#define CHECK_MAX_EQU(a, b)         ((a >= b) ? TRUE : FALSE)
-#define CHECK_MAX(a, b)             ((a > b) ? TRUE : FALSE)
-#define CHECK_MIN_EQU(a, b)         ((a <= b) ? TRUE : FALSE)
-#define CHECK_MIN(a, b)             ((a < b) ? TRUE : FALSE)
-#define CHECK_EQU(a, b)             ((a == b) ? TRUE : FALSE)
-
-            
+#define ASWEVSE_CFG_S2_CLOSE_TIMEOUT                 (6000)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    eGlobalRet_OK,
-    eGlobalRet_Error,
-    eGlobalRet_NotEnoughChannel,
-    eGlobalRet_FIFONotFull,
-    eGlobalRet_ParaInvalid,
-    eGlobalRet_NotInit,
-    eGlobalRet_NotEnoughBuf,
-    eGlobalRet_NotEnoughData,
-    eGlobalRet_UnexpectedError,
-}GlobalRet_Enum;
-
 
 
 /******************************************************************************
@@ -82,18 +42,18 @@ typedef enum
 ******************************************************************************/
 
 
+
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
+
 
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
 
-
-#endif /* Global_H_ */
-
+#endif /* ASW_EVSE_CONFIG_H_ */
 
 
 

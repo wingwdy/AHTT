@@ -1,4 +1,3 @@
-
 /******************************************************************************
 * File Name          : Cdd_Rcd.c
 * Description        : Code for xxxxxxxxxxx
@@ -118,7 +117,6 @@ static void CddRcd_SelfCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl)
 			pRcdCtrl->eSelfCheckStep = eRCDCalib_Wait;
 			break;
 		}
-		
 		case eRCDCalib_Wait:
 		{/* RCD CAL置低 50ms <= T2 <= 100ms */
 			pRcdCtrl->stepWaitCnt++;
@@ -130,7 +128,6 @@ static void CddRcd_SelfCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl)
 
 			break;
 		}
-		
         case eRCDCalib_Close:
         {/* RCD CAL置高 */
             CDDRCD_CFG_ResetCalPin();
@@ -138,7 +135,6 @@ static void CddRcd_SelfCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl)
             pRcdCtrl->eSelfCheckStep = eRCDCalib_Exit;
 			break;
         }
-        
         case eRCDCalib_Exit:
         {/* RCD CAL置高 T3 >= 500ms */
 			pRcdCtrl->stepWaitCnt++;
@@ -150,7 +146,6 @@ static void CddRcd_SelfCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl)
 
 			break;
         }
-        
         case eRCDTest_Open:
         {/* RCD TEST置高 */
             CDDRCD_CFG_SetTestPin();
@@ -158,7 +153,6 @@ static void CddRcd_SelfCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl)
             pRcdCtrl->eSelfCheckStep = eRCDTest_Wait;
 			break;
         }
-		
         case eRCDTest_Wait:
         {/* RCD TEST置高 T5 >= 120ms */
 			pRcdCtrl->stepWaitCnt++;
@@ -171,7 +165,6 @@ static void CddRcd_SelfCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl)
 
 			break;
         }
-        
 		case eRCDTest_Ready:
 		{
 			pRcdCtrl->stepWaitCnt++;
@@ -203,7 +196,6 @@ static void CddRcd_SelfCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl)
 
 			break;
 		}
-		
         case eRCDTest_Exit:
         {/* RCD TEST置低 T6 >= 100ms */
 			pRcdCtrl->stepWaitCnt++;
@@ -217,13 +209,11 @@ static void CddRcd_SelfCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl)
 
 			break;
         }
-
-
 		default:
 		{
 			pRcdCtrl->eSelfCheckStep = eRCDTest_Idle;
+			break;
 		}
-		break;
 	}
 }
 

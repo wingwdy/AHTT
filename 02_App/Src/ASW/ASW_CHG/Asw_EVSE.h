@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Global.h
-* Description        : Code for Global Definition
+* File Name          : Asw_EVSE.h
+* Description        : Code for EVSE State Manage
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,9 +11,8 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-
-#ifndef Global_H_
-#define Global_H_
+#ifndef ASW_EVSE_H_
+#define ASW_EVSE_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
@@ -22,59 +21,16 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define GLOBAL_OPT_STATE_IDLE                          (0U)
-#define GLOBAL_OPT_STATE_PROCESS                       (1U)
-#define GLOBAL_OPT_STATE_SUCCESS                       (2U)
-#define GLOBAL_OPT_STATE_FAIL                          (3U)
-
-#ifndef NULL
-#define NULL  0
-#endif
-
-#ifndef TRUE
-#define TRUE  1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#define ARRAY_SIZE(x)               sizeof(x) / sizeof(x[0])
-
-#define PARA_ASSERT(x)              do \
-                                    {}while(x != TRUE)
-                                    
-#define PARA_ASSERT_RET(x, ret)     do \
-                                    {\
-                                        if (x != TRUE)\
-                                        {\
-                                            return ret;\
-                                        }\
-                                    }while(0)
-
-#define CHECK_MAX_EQU(a, b)         ((a >= b) ? TRUE : FALSE)
-#define CHECK_MAX(a, b)             ((a > b) ? TRUE : FALSE)
-#define CHECK_MIN_EQU(a, b)         ((a <= b) ? TRUE : FALSE)
-#define CHECK_MIN(a, b)             ((a < b) ? TRUE : FALSE)
-#define CHECK_EQU(a, b)             ((a == b) ? TRUE : FALSE)
-
-            
+#define ASWEVSE_STATE_0             0         /* EVSE 状态0 */
+#define ASWEVSE_STATE_1             1         /* EVSE 状态1 */
+#define ASWEVSE_STATE_1_DOT         2         /* EVSE 状态1' */
+#define ASWEVSE_STATE_2             3         /* EVSE 状态2 */
+#define ASWEVSE_STATE_2_DOT         4         /* EVSE 状态2' */
+#define ASWEVSE_STATE_3             5         /* EVSE 状态3 */
+#define ASWEVSE_STATE_3_DOT         6         /* EVSE 状态3' */
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    eGlobalRet_OK,
-    eGlobalRet_Error,
-    eGlobalRet_NotEnoughChannel,
-    eGlobalRet_FIFONotFull,
-    eGlobalRet_ParaInvalid,
-    eGlobalRet_NotInit,
-    eGlobalRet_NotEnoughBuf,
-    eGlobalRet_NotEnoughData,
-    eGlobalRet_UnexpectedError,
-}GlobalRet_Enum;
-
 
 
 /******************************************************************************
@@ -82,21 +38,22 @@ typedef enum
 ******************************************************************************/
 
 
+
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
 
 
+
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-
-
-#endif /* Global_H_ */
-
-
-
-
+void AswEVSE_MainFunction(void);
+void AswEVSE_InitMemory(void);
+void AswEVSE_StartCharge(uint8_t port);
+void AswEVSE_StopCharge(uint8_t port);
+uint8_t AswEVSE_GetEVSEState(uint8_t port);
+#endif /* ASW_EVSE_H_ */
 
 
 

@@ -21,6 +21,7 @@
 #include "SysCfg.h"
 #include "Cdd_CPConfig.h"
 #include "Filter.h"
+#include "Asw_ErrorHandle.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -54,12 +55,12 @@ typedef struct
     uint8_t diodeDetectStep;                  /* 二极管检测步骤 */
     uint8_t diodeDetectResult;                /* 二极管检测结果 */
     uint32_t diodeDetectStartTick;            /* 二极管检测CP拉-12V计时 */
-    FilterProfile1_Struct diodeFilter;
+    FilterProfile1_Struct diodeFilter;        /* 二极管检测结果滤波 */
 
     uint16_t curSetCpDuty;                    /* 当前CP设置占空比 */ 
-    int16_t cpVol;                            /* CP电压 保留3位小数 */ 
+    int16_t cpVol;                            /* CP电压，保留3位小数，可为负值 */ 
     CddCPVolState_Enum eValidCpVolState;      /* CP电压状态 */
-    uint16_t curAjustCurrent;                 /* 当前调节电流值 */
+    uint16_t curAjustCurrent;                 /* 当前调节电流值，放大1000倍 */
 }CddCPCtrl_Struct; 
 
 /*******************************************************************************
@@ -130,7 +131,7 @@ static void CddCP_WakeupHandle(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
     {
         if (Common_JudgeTimeoutMs(pCPCtrl->wakeupTick, CDDCP_CFG_WAKEUP_HIGH_HOLDTIME))
         {
-            CddCP_StartCP(port);
+            CddCP_StartPWM(port);
             pCPCtrl->wakeupStep = CDDCP_WAKEUP_STEP0;
         }
 
@@ -167,6 +168,7 @@ static void CddCP_DiodeExsitDetect(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
             pCPCtrl->diodeDetectStep = CDDCP_DIODE_DETECT_STEP0;
             pCPCtrl->diodeDetectResult = GLOBAL_OPT_STATE_FAIL;
             CddCP_SetPwmDuty(port, 1000);
+            AswErrhandle_SetErrExsitCallback(port, eErr_DiodeStop);
         }
         else
         {
@@ -183,7 +185,7 @@ static void CddCP_DiodeExsitDetect(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
             {
                 pCPCtrl->diodeDetectStep = CDDCP_DIODE_DETECT_STEP0;
                 pCPCtrl->diodeDetectResult = GLOBAL_OPT_STATE_SUCCESS;
-                 CddCP_SetPwmDuty(port, 1000);
+                CddCP_SetPwmDuty(port, 1000);
             }
         }
 
@@ -426,7 +428,7 @@ uint8_t CddCP_GetDiodeExsitDetectResult(uint8_t port)
     return ret;
 }
 
-void CddCP_StartCP(uint8_t port)
+void CddCP_StartPWM(uint8_t port)
 {
     CddCPCtrl_Struct *pCpCtrl = &g_stCddCPCtrl[port];
 
@@ -436,7 +438,7 @@ void CddCP_StartCP(uint8_t port)
     }
 }
 
-void CddCP_StopCP(uint8_t port)
+void CddCP_StopPWM(uint8_t port)
 {
     CddCP_AdjustCurRateCurrent(port, 0);
 }

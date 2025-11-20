@@ -32,7 +32,6 @@ typedef enum
     eErrChargeCondition_Allow,      /* 允许充电 */
     eErrChargeCondition_Suspend,    /* 暂停充电 */
     eErrChargeCondition_Cancel,     /* 取消授权 */
-    eErrChargeCondition_Safety,     /* 安全态 */
 }AswErrChargeCondition_Enum;
 
 typedef enum

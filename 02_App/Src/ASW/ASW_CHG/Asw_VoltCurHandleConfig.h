@@ -45,11 +45,7 @@
 #define ASWVOLTCUR_CFG_OC_SET_FILTER_COUNT                  (5000u / ASWVOLTCUR_CFG_CALLCYCLE)
 #define ASWVOLTCUR_CFG_OC_CLR_FILTER_COUNT                  (5000u / ASWVOLTCUR_CFG_CALLCYCLE)
 
-#define CHECK_MAX_EQU(a, b)                                   ((a >= b)? TRUE: FALSE)
-#define CHECK_MAX(a, b)                                       ((a > b)? TRUE: FALSE)
-#define CHECK_MIN_EQU(a, b)                                   ((a <= b)? TRUE: FALSE)
-#define CHECK_MIN(a, b)                                       ((a < b)? TRUE: FALSE)
-#define CHECK_EQU(a, b)                                       ((a == b)? TRUE: FALSE)
+
 
 /******************************************************************************
 *    Enum Definition

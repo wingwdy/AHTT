@@ -32,6 +32,7 @@
         "porttask.h": "c",
         "asw_errorhandle.h": "c",
         "cdd_cpconfig.h": "c",
-        "cdd_cp.h": "c"
+        "cdd_cp.h": "c",
+        "asw_evseconfig.h": "c"
     }
 }

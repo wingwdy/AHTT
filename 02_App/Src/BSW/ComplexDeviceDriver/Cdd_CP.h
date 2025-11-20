@@ -53,8 +53,8 @@ typedef enum
 CddCPVolState_Enum CddCP_GetVolState(uint8_t port);
 int16_t CddCP_GetVoltage(uint8_t port);
 void CddCP_AdjustCurRateCurrent(uint8_t port, uint32_t current);
-void CddCP_StartCP(uint8_t port);
-void CddCP_StopCP(uint8_t port);
+void CddCP_StartPWM(uint8_t port);
+void CddCP_StopPWM(uint8_t port);
 void CddCP_SetErrNotice(uint8_t port);
 void CddCP_SetReqStartWakeup(uint8_t port);
 void CddCP_SetReqStopWakeUp(uint8_t port);

@@ -160,12 +160,9 @@ static void AswErrHandle_SelfRecoverDetect(uint8_t port)
 
 static void AswErrHandle_RefreshChargeCondition(AswErrorHandle_Struct *pErrorHandle)
 {
-    if (pErrorHandle->arErrLevelCnt[AswErrorLevel_5] > 0)
-    {
-        pErrorHandle->eChargeCondition = eErrChargeCondition_Safety;
-    }
-    else if (pErrorHandle->arErrLevelCnt[AswErrorLevel_1] > 0 ||
-        pErrorHandle->arErrLevelCnt[AswErrorLevel_4] > 0)
+    if (pErrorHandle->arErrLevelCnt[AswErrorLevel_1] > 0 ||
+        pErrorHandle->arErrLevelCnt[AswErrorLevel_4] > 0 ||
+        pErrorHandle->arErrLevelCnt[AswErrorLevel_5] > 0) 
     {
         pErrorHandle->eChargeCondition = eErrChargeCondition_Cancel;
     }
@@ -272,7 +269,6 @@ void AswErrHandle_ClearStopReason(uint8_t port)
         AswErrhandle_ResetErrExsitCallback(port, eSrc_StopbyTime);
         AswErrhandle_ResetErrExsitCallback(port, eSrc_StopbyEnergy);
         AswErrhandle_ResetErrExsitCallback(port, eErr_GunDisConn);
-        AswErrhandle_ResetErrExsitCallback(port, eErr_DiodeStop);
         AswErrhandle_ResetErrExsitCallback(port, eErr_ChgStartTimeout);
         AswErrhandle_ResetErrExsitCallback(port, eSrc_LittleCurr);
         AswErrhandle_ResetErrExsitCallback(port, eSrc_S2BreakOff);

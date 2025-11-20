@@ -29,10 +29,6 @@
 
 #define ASWERR_CFG_ErrStateChangeNotice(port, eErr, flag, pErrHandle)  do\
                                                              {\
-                                                                 if (pErrHandle->eChargeCondition == eErrChargeCondition_Safety)\
-                                                                 {\
-                                                                    CddCP_SetErrNotice(port);\
-                                                                 }\
                                                              }while(0)
 
 /******************************************************************************
