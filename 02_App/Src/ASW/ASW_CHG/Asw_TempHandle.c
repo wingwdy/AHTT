@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/11/12      V1.0.0      chenls    初版创建
+*2025/11/12      V1.0.0      shenjc    初版创建
 *
 *******************************************************************************/
 #include "Asw_TempHandleConfig.h"
@@ -80,7 +80,7 @@ typedef struct
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-static AswEnvTempHandle_Struct g_arAswEnvTempHandle[SYSCFG_CFG_GUN_NUM] = {0};
+static AswEnvTempHandle_Struct g_arAswEnvTempHandle = {0};
 static AswGunTempHandle_Struct g_arAswGunTempHandle[SYSCFG_CFG_GUN_NUM] = {0};
 
 
@@ -95,7 +95,7 @@ static AswGunTempHandle_Struct g_arAswGunTempHandle[SYSCFG_CFG_GUN_NUM] = {0};
 void AswTempHandle_InitMemory(void)
 {
     uint8_t i = 0;
-    memset(g_arAswEnvTempHandle, 0, sizeof(g_arAswEnvTempHandle));
+    memset(&g_arAswEnvTempHandle, 0, sizeof(g_arAswEnvTempHandle));
     memset(g_arAswGunTempHandle, 0, sizeof(g_arAswGunTempHandle));
     for(i = 0; i < SYSCFG_CFG_GUN_NUM; i++)
     {
@@ -103,10 +103,9 @@ void AswTempHandle_InitMemory(void)
         g_arAswGunTempHandle[i].arFilterThr[AswGunTempThr75] = ASWTEMP_CFG_GUN_OTEMP_75_THR;
         g_arAswGunTempHandle[i].arFilterThr[AswGunTempThr90] = ASWTEMP_CFG_GUN_OTEMP_90_THR;
         g_arAswGunTempHandle[i].arFilterThr[AswGunTempThr105] = ASWTEMP_CFG_GUN_OTEMP_105_THR;
-
-        g_arAswEnvTempHandle[i].arFilterThr[AswEnvTempThr65] = ASWTEMP_CFG_ENV_OTEMP_65_THR;
-        g_arAswEnvTempHandle[i].arFilterThr[AswEnvTempThr85] = ASWTEMP_CFG_ENV_OTEMP_85_THR;
     }
+    g_arAswEnvTempHandle.arFilterThr[AswEnvTempThr65] = ASWTEMP_CFG_ENV_OTEMP_65_THR;
+    g_arAswEnvTempHandle.arFilterThr[AswEnvTempThr85] = ASWTEMP_CFG_ENV_OTEMP_85_THR;
 }
 
 
@@ -208,12 +207,12 @@ void AswGunTemp_Manage(uint8_t port)
     }
 }
 
-void AswEnvTemp_Manage(uint8_t port)
+void AswEnvTemp_Manage(void)
 {
     uint8_t i = 0;
-    AswEnvTempHandle_Struct *pTempHandle = &g_arAswEnvTempHandle[port];
+    AswEnvTempHandle_Struct *pTempHandle = &g_arAswEnvTempHandle;
     
-    pTempHandle->temperatue = ASWTEMP_CFG_GetEnvTemp(port);
+    pTempHandle->temperatue = ASWTEMP_CFG_GetEnvTemp();
     for (i = 0; i < AswEnvTempThrMax; i++)
     {
         pTempHandle->arFilterState[i].status = pTempHandle->temperatue >= pTempHandle->arFilterThr[i]? TRUE:FALSE;
@@ -279,25 +278,21 @@ void AswEnvTemp_Manage(uint8_t port)
 }
 
 
-uint16_t AswTempHandle_SetCurrent(uint8_t port)
+uint16_t AswTempHandle_GetLimitCurrent(uint8_t port)
 {
-    uint16_t current = 32000;/*32A*/
+    uint16_t current = ASWTEMP_CFG_RATED_CURRENT;
 
     AswGunTempHandle_Struct *pGunTempHandle = &g_arAswGunTempHandle[port];
-    AswEnvTempHandle_Struct *pEnvTempHandle = &g_arAswEnvTempHandle[port];
+    AswEnvTempHandle_Struct *pEnvTempHandle = &g_arAswEnvTempHandle;
 
     if (pGunTempHandle->workState == ASWTEMP_WORK_STATE_2 
     || pEnvTempHandle->workState == ASWTEMP_WORK_STATE_2)
     {
-        current = 25000;
-    }
-    else if(pGunTempHandle->workState == ASWTEMP_WORK_STATE_3)
-    {
-        current = 0;
+        current = ASWTEMP_CFG_LIMIT_CURRENT;
     }
     else
     {
-        current = 32000;   
+        current = ASWTEMP_CFG_RATED_CURRENT;
     }
 
     return current;
@@ -311,8 +306,8 @@ void AswTempHandle_MainFunction(void)
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
         AswGunTemp_Manage(port);
-        AswEnvTemp_Manage(port);
     }
+    AswEnvTemp_Manage();
 }
 
 

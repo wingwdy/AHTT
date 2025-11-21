@@ -9,7 +9,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      chenls    初版创建
+*2025/10/10      V1.0.0      shenjc    初版创建
 *
 ******************************************************************************/
 #ifndef ASW_TEMPHANDLE_H_
@@ -46,9 +46,9 @@
 ******************************************************************************/
 extern void AswTempHandle_InitMemory(void);
 extern void AswTempHandle_MainFunction(void);
-extern uint16_t AswTempHandle_SetCurrent(uint8_t port);
+extern uint16_t AswTempHandle_GetLimitCurrent(uint8_t port);
 
-#endif /* ASW_ERRORHANDLE_H_ */
+#endif /* ASW_TEMPHANDLE_H_ */
 
 
 

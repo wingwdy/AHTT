@@ -1,3 +1,4 @@
+
 /******************************************************************************
 * File Name          : Cdd_SensorConfig.h
 * Description        : Code for xxxxxxxxxxx
@@ -8,7 +9,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      chenls    初版创建
+*2025/10/10      V1.0.0      shenjc    初版创建
 *
 ******************************************************************************/
 #ifndef CDD_SENSOR_CONFIG_H_
@@ -21,8 +22,7 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define CDDSENSOR_CFG_ENV_ADC_BUFF_NUM 	    	    (MCALADC_ADC0_SAMPLE_CNT)    /*Env ADC sample buffer number */
-#define CDDSENSOR_CFG_GUN_ADC_BUFF_NUM 	    	    (MCALADC_ADC0_SAMPLE_CNT)    /*Gun ADC sample buffer number */
+#define CDDSENSOR_CFG_ADC_BUFF_NUM 	    	        (MCALADC_ADC0_SAMPLE_CNT)    /*ADC sample buffer number */
 #define CDDSENSOR_CFG_ADC_MIN_SAMPLE_NUM 	    	(3u)    /*ADC min sample number */
 
 #define CDDSENSOR_CFG_ENV_NTC_ADC_MAP_NUM	        (166u)
@@ -38,7 +38,7 @@
 ******************************************************************************/
 typedef struct
 {
-    uint8_t  tempVal;      
+    uint8_t  tempVal;
     uint16_t adcVal;
 } CddSensorAdcMap_Struct;
 

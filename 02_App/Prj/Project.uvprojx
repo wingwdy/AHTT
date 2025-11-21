@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>GD32E503RE</Device>
           <Vendor>GigaDevice</Vendor>
-          <PackID>GigaDevice.GD32E50x_DFP.1.4.0</PackID>
+          <PackID>GigaDevice.GD32E50x_DFP.1.3.2</PackID>
           <PackURL>https://gd32mcu.com/data/documents/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x20000) IROM(0x08000000,0x080000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -339,7 +339,7 @@
               <MiscControls>-Wno-invalid-source-encoding</MiscControls>
               <Define>GD32E50X,GD32E50X_HD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\BSW\ComplexDeviceDriver;..\Src\ASW\ASW_CHG;..\Src\BSW\SystemService\SystemM</IncludePath>
+              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\BSW\ComplexDeviceDriver;..\Src\ASW\ASW_CHG;..\Src\BSW\SystemService\SystemM;..\Src\BSW\DebugService\LogM</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -456,6 +456,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_RelayConfig.c</FilePath>
             </File>
+            <File>
+              <FileName>Cdd_PE.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_PE.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -523,14 +528,26 @@
         </Group>
         <Group>
           <GroupName>BSW/DebugService</GroupName>
+          <Files>
+            <File>
+              <FileName>DS_LogM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\DebugService\LogM\DS_LogM.c</FilePath>
+            </File>
+            <File>
+              <FileName>DS_LogMConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\DebugService\LogM\DS_LogMConfig.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>BSW/SystemService</GroupName>
           <Files>
             <File>
-              <FileName>SystemM.c</FileName>
+              <FileName>SS_SystemM.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\BSW\SystemService\SystemM\SystemM.c</FilePath>
+              <FilePath>..\Src\BSW\SystemService\SystemM\SS_SystemM.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -1,3 +1,4 @@
+
 /******************************************************************************
 * File Name          : Cdd_RcdConfig.h
 * Description        : Code for xxxxxxxxxxx
@@ -8,7 +9,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      chenls    初版创建
+*2025/10/10      V1.0.0      shenjc    初版创建
 *
 ******************************************************************************/
 #ifndef CDD_RCD_CONFIG_H_
@@ -36,7 +37,6 @@
 #define CDDRCD_CFG_SELFCHECK_CHK_INT_TIME                   ((uint16_t)50u  / CDDRCD_CFG_TASK_PERIOD)/*50ms检测1次*/
 #define CDDRCD_CFG_SELFCHECK_CHK_MAX_TIME                   ((uint16_t)2000u  / CDDRCD_CFG_TASK_PERIOD)/*持续检测2000ms*/
 #define CDDRCD_CFG_SELFCHECK_EXIT_T6_TIME                   ((uint16_t)100u  / CDDRCD_CFG_TASK_PERIOD)/*T6>=100ms*/
-#define CDDRCD_
 
 
 #define RCD_DEBUG(fmt,...) 	//	LOG_DEBUG(LOG_MODULE_RCD,fmt,##__VA_ARGS__)

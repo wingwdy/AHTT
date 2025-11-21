@@ -22,6 +22,7 @@
 #include "Cdd_Relay.h"
 #include "Cdd_Rcd.h"
 #include "Cdd_Sensor.h"
+#include "Cdd_PE.h"
 
 #include "Mcal_If.h"
 
@@ -110,7 +111,7 @@ static void Task_10ms(void *arg)
         CddRelay_MainFunction();
         CddCP_MainFunction();
         CddRcd_MainFunction();
-
+        CddPE_MainFunction();
         AswEVSE_MainFunction();
         vTaskDelay(10);
     }
