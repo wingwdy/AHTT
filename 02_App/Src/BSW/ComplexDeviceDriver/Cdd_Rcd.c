@@ -26,8 +26,6 @@
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
-#define MCAL_BIT_SET                        SET
-#define MCAL_BIT_RESET                      RESET
 
 
 /*******************************************************************************
@@ -35,23 +33,23 @@
 *******************************************************************************/
 typedef enum
 {
-	eRcdState_Idle = 0u,
-    eRcdState_SelfCheck,
-	eRcdState_LeakCheck,
-} RcdStatus_Enum;
+	eCddRcdStatus_Idle = 0u,
+    eCddRcdStatus_SelfCheck,
+	eCddRcdStatus_LeakCheck,
+} CddRcdStatus_Enum;
 
 typedef enum
 {
-    eRCDTest_Idle = 0u,
-	eRCDCalib_Open,
-    eRCDCalib_Wait,
-	eRCDCalib_Close,
-    eRCDCalib_Exit,
-	eRCDTest_Open,
-    eRCDTest_Wait,
-    eRCDTest_Ready,
-    eRCDTest_Exit,
-} RcdSelfTestStep_Enum;
+    eCddRCDTest_Idle = 0u,
+	eCddRCDCalib_Open,
+    eCddRCDCalib_Wait,
+	eCddRCDCalib_Close,
+    eCddRCDCalib_Exit,
+	eCddRCDTest_Open,
+    eCddRCDTest_Wait,
+    eCddRCDTest_Ready,
+    eCddRCDTest_Exit,
+} CddRcdSelfTestStep_Enum;
 
 
 /*******************************************************************************
@@ -59,8 +57,8 @@ typedef enum
 *******************************************************************************/
 typedef struct
 {
-	RcdStatus_Enum eRcdStatus;
-	RcdSelfTestStep_Enum eSelfCheckStep;
+	CddRcdStatus_Enum eRcdStatus;
+	CddRcdSelfTestStep_Enum eSelfCheckStep;
 	uint8_t stepWaitCnt;
     uint16_t rcdSelfCheckWaitCnt;
     uint8_t rcdSelfCheckStatus;
@@ -80,6 +78,7 @@ static uint32_t g_TimerId;
 static void CddRcd_SelfCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl);
 static void CddRcd_LeakCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl);
 static void CddRcd_Timer1msCallback(void);
+
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
@@ -109,69 +108,69 @@ static void CddRcd_SelfCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl)
 
 	switch(pRcdCtrl->eSelfCheckStep)
 	{
-		case eRCDCalib_Open:
+		case eCddRCDCalib_Open:
 		{/* RCD CAL置低 */
             CDDRCD_CFG_ResetTestPin();
 			CDDRCD_CFG_SetCalPin();
 			pRcdCtrl->stepWaitCnt = 0;
-			pRcdCtrl->eSelfCheckStep = eRCDCalib_Wait;
+			pRcdCtrl->eSelfCheckStep = eCddRCDCalib_Wait;
 			break;
 		}
 		
-		case eRCDCalib_Wait:
+		case eCddRCDCalib_Wait:
 		{/* RCD CAL置低 50ms <= T2 <= 100ms */
 			pRcdCtrl->stepWaitCnt++;
 			if (pRcdCtrl->stepWaitCnt >= CDDRCD_CFG_SELFCHECK_CAL_T2_TIME)
 			{
 				pRcdCtrl->stepWaitCnt = 0u;
-				pRcdCtrl->eSelfCheckStep = eRCDCalib_Close;
+				pRcdCtrl->eSelfCheckStep = eCddRCDCalib_Close;
 			}
 
 			break;
 		}
 		
-        case eRCDCalib_Close:
+        case eCddRCDCalib_Close:
         {/* RCD CAL置高 */
             CDDRCD_CFG_ResetCalPin();
             pRcdCtrl->stepWaitCnt = 0;
-            pRcdCtrl->eSelfCheckStep = eRCDCalib_Exit;
+            pRcdCtrl->eSelfCheckStep = eCddRCDCalib_Exit;
 			break;
         }
         
-        case eRCDCalib_Exit:
+        case eCddRCDCalib_Exit:
         {/* RCD CAL置高 T3 >= 500ms */
 			pRcdCtrl->stepWaitCnt++;
 			if (pRcdCtrl->stepWaitCnt >= CDDRCD_CFG_SELFCHECK_CAL_T3_TIME)
 			{
 				pRcdCtrl->stepWaitCnt = 0u;
-				pRcdCtrl->eSelfCheckStep = eRCDTest_Open;
+				pRcdCtrl->eSelfCheckStep = eCddRCDTest_Open;
 			}
 
 			break;
         }
         
-        case eRCDTest_Open:
+        case eCddRCDTest_Open:
         {/* RCD TEST置高 */
             CDDRCD_CFG_SetTestPin();
             pRcdCtrl->stepWaitCnt = 0;
-            pRcdCtrl->eSelfCheckStep = eRCDTest_Wait;
+            pRcdCtrl->eSelfCheckStep = eCddRCDTest_Wait;
 			break;
         }
 		
-        case eRCDTest_Wait:
+        case eCddRCDTest_Wait:
         {/* RCD TEST置高 T5 >= 120ms */
 			pRcdCtrl->stepWaitCnt++;
 			if (pRcdCtrl->stepWaitCnt >= CDDRCD_CFG_SELFCHECK_TEST_T5_TIME)
 			{
 				pRcdCtrl->stepWaitCnt = 0u;
-				pRcdCtrl->eSelfCheckStep = eRCDTest_Ready;
+				pRcdCtrl->eSelfCheckStep = eCddRCDTest_Ready;
                 pRcdCtrl->rcdSelfCheckWaitCnt = 0;
 			}
 
 			break;
         }
         
-		case eRCDTest_Ready:
+		case eCddRCDTest_Ready:
 		{
 			pRcdCtrl->stepWaitCnt++;
 			pRcdCtrl->rcdSelfCheckWaitCnt++;
@@ -186,7 +185,7 @@ static void CddRcd_SelfCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl)
 					if (TrigSignalState)
 					{
 						pRcdCtrl->rcdSelfCheckStatus = GLOBAL_OPT_STATE_SUCCESS;
-                    	pRcdCtrl->eSelfCheckStep = eRCDTest_Exit;
+                    	pRcdCtrl->eSelfCheckStep = eCddRCDTest_Exit;
 						CDDRCD_CFG_ResetTestPin();
 					}
 				}
@@ -197,7 +196,7 @@ static void CddRcd_SelfCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl)
 			{
 				AswErrhandle_SetErrExsitCallback(port, eErr_RCDSelfcheckErr);
 				pRcdCtrl->rcdSelfCheckStatus = GLOBAL_OPT_STATE_FAIL;
-				pRcdCtrl->eSelfCheckStep = eRCDTest_Exit;
+				pRcdCtrl->eSelfCheckStep = eCddRCDTest_Exit;
 				pRcdCtrl->stepWaitCnt = 0;
 				CDDRCD_CFG_ResetTestPin();
 			}
@@ -205,21 +204,21 @@ static void CddRcd_SelfCheckHandle(uint8_t port, CddRcd_Struct *pRcdCtrl)
 			break;
 		}
 		
-        case eRCDTest_Exit:
+        case eCddRCDTest_Exit:
         {/* RCD TEST置低 T6 >= 100ms */
 			pRcdCtrl->stepWaitCnt++;
 			if(pRcdCtrl->stepWaitCnt >= CDDRCD_CFG_SELFCHECK_EXIT_T6_TIME)
             {
                 pRcdCtrl->stepWaitCnt = 0;
-				pRcdCtrl->eRcdStatus = eRcdState_LeakCheck;
-                pRcdCtrl->eSelfCheckStep = eRCDTest_Idle;
+				pRcdCtrl->eRcdStatus = eCddRcdStatus_LeakCheck;
+                pRcdCtrl->eSelfCheckStep = eCddRCDTest_Idle;
             }
 
 			break;
         }
 		default:
 		{
-			pRcdCtrl->eSelfCheckStep = eRCDTest_Idle;
+			pRcdCtrl->eSelfCheckStep = eCddRCDTest_Idle;
 			break;
 		}
 	}
@@ -229,7 +228,7 @@ static void CddRcd_Timer1msCallback(void)
 {
 	uint8_t TrigState = 0;
 
-	if (MCAL_BIT_SET == CDDRCD_CFG_GetTripPin())
+	if (CDDRCD_CFG_SET == CDDRCD_CFG_GetTripPin())
 	{
 		TrigState = 1;
 	}
@@ -265,28 +264,28 @@ void CddRcd_StateManage(uint8_t port, CddRcd_Struct *pRcdCtrl)
 {
 	switch(pRcdCtrl->eRcdStatus)
 	{
-	case eRcdState_Idle:
+	case eCddRcdStatus_Idle:
 	{
-		pRcdCtrl->eRcdStatus = eRcdState_SelfCheck;
+		pRcdCtrl->eRcdStatus = eCddRcdStatus_SelfCheck;
 		pRcdCtrl->rcdSelfCheckStatus = GLOBAL_OPT_STATE_PROCESS;
 		pRcdCtrl->rcdFaultStatus = GLOBAL_OPT_STATE_IDLE;
-		pRcdCtrl->eSelfCheckStep = eRCDCalib_Open;
+		pRcdCtrl->eSelfCheckStep = eCddRCDCalib_Open;
 		break;
 	}
-	case eRcdState_SelfCheck:
+	case eCddRcdStatus_SelfCheck:
 	{
 		CddRcd_SelfCheckHandle(port, pRcdCtrl);
 		break;
 	}
 
-	case eRcdState_LeakCheck:
+	case eCddRcdStatus_LeakCheck:
 	{
 		CddRcd_LeakCheckHandle(port, pRcdCtrl);
 		break;
 	}
 	default:
 	{
-		pRcdCtrl->eRcdStatus = eRcdState_Idle;
+		pRcdCtrl->eRcdStatus = eCddRcdStatus_Idle;
 		break;
 	}
 	}

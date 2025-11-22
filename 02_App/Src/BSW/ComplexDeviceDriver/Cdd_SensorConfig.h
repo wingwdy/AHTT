@@ -1,6 +1,6 @@
 /******************************************************************************
 * File Name          : Cdd_SensorConfig.h
-* Description        : Code for xxxxxxxxxxx
+* Description        : Code for Temperature sensor data sampling and conversion
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------

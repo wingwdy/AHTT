@@ -46,7 +46,6 @@
 *    Global Function Prototypes
 ******************************************************************************/
 extern void CddRcd_InitMemory(void);
-extern uint8_t CddRcd_ReqSelfCheck(uint8_t ucPort);
 extern void CddRcd_MainFunction(void);
 
 
