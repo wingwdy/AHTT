@@ -19,7 +19,7 @@
 #include "DS_LogMConfig.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
-
+#include "Mcal_Uart.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -88,11 +88,25 @@ void DSLogM_InitMemory(void)
     g_stLogMCtrl.mutex = xSemaphoreCreateMutex();
 }
 
-#include "Mcal_UartConfig.h"
+
 
 static void DSLogM_OutputFilter(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum eLevel, const char *fmt, va_list args)
 {
-    g_stLogMCtrl.logDataLen = vsprintf((char *)g_stLogMCtrl.cacheBuf, fmt, args);
+    uint16_t totalLen = g_stLogMCtrl.logDataLen;
+    uint16_t remainBufsize = (totalLen >= DSLOGM_CFG_ASYN_BUFF_SIZE) ? 0 : (DSLOGM_CFG_ASYN_BUFF_SIZE - totalLen);
+    uint16_t dataLen = 0;
+
+    dataLen = vsnprintf((char *)g_stLogMCtrl.cacheBuf + totalLen, remainBufsize, fmt, args);
+
+    if (dataLen >= remainBufsize)
+    {
+        g_stLogMCtrl.logDataLen = DSLOGM_CFG_ASYN_BUFF_SIZE;
+    }
+    else
+    {
+        g_stLogMCtrl.logDataLen += dataLen;
+    }
+
     McalUart_WriteData(eMcalUartChanel_Debug, g_stLogMCtrl.cacheBuf, g_stLogMCtrl.logDataLen);
 }
 

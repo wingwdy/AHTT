@@ -63,9 +63,8 @@ const char *g_logMModuleName[DSLogMModule_Count] =
     "Charge",
 
     "Cdd",
-    
-    "System",
 
+    "System",
 };
 
 
