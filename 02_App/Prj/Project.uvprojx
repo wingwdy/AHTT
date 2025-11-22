@@ -456,6 +456,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_RelayConfig.c</FilePath>
             </File>
+            <File>
+              <FileName>Cdd_PE.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_PE.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

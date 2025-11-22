@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      chenls    初版创建
+*2025/10/10      V1.0.0      shenjc    初版创建
 *
 ******************************************************************************/
 #ifndef ASW_TEMPHANDLE_CONFIG_H_
@@ -42,8 +42,13 @@
 #define ASWTEMP_CFG_ENV_BELOW_65_KEEP_TIME              (5*60*1000u)
 #define ASWTEMP_CFG_ENV_TEMP_FILTER_COUNT               (3000u / ASWTEMP_CFG_CALLCYCLE)
 
-#define ASWTEMP_CFG_GetGunTemp(port)                     CddSensor_GetGunTempValue(port)
-#define ASWTEMP_CFG_GetEnvTemp(port)                     CddSensor_GetEnvTempValue(port)
+
+#define ASWTEMP_CFG_RATED_CURRENT                       (32000u)
+#define ASWTEMP_CFG_LIMIT_CURRENT                       (25600u)
+
+
+#define ASWTEMP_CFG_GetGunTemp(port)                    CddSensor_GetGunTempTemperature(port)
+#define ASWTEMP_CFG_GetEnvTemp()                        CddSensor_GetEnvTemperature()
 
 
 /******************************************************************************

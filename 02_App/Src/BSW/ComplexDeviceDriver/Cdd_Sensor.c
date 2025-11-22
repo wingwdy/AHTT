@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      chenls    初版创建
+*2025/10/10      V1.0.0      shenjc    初版创建
 *
 *******************************************************************************/
 
@@ -17,7 +17,7 @@
 *    Header File Inclusion
 *******************************************************************************/
 #include "Cdd_Sensor.h"
-
+#include "SysCfg.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -33,79 +33,145 @@
 typedef struct
 {
     uint8_t  tempValue;									/*temperature value*/
-	uint16_t arrayAdcValue[CDDSENSOR_CFG_ENV_ADC_BUFF_NUM];	    /* ADC value array*/
-} CddSensorEnv_Struct;
-
-typedef struct
-{
-    uint8_t  tempValue;									/*temperature value*/
-	uint16_t arrayAdcValue[CDDSENSOR_CFG_GUN_ADC_BUFF_NUM];	    /* ADC value array*/
-} CddSensorGun_Struct;
+	uint16_t adcValue[CDDSENSOR_CFG_ADC_BUFF_NUM];	    /* ADC value array*/
+} CddSensor_Struct;
 
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-static CddSensorEnv_Struct 		g_stSensorEnv;
-static CddSensorGun_Struct 		g_stSensorGun;
+static CddSensor_Struct 		g_stSensorEnv;
+static CddSensor_Struct 		g_stSensorGun[SYSCFG_CFG_GUN_NUM];
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
 
-static uint8_t CddSensor_EnvAdcValueToTemperature(uint16_t adcValue);
-static uint8_t CddSensor_GunAdcValueToTemperature(uint16_t adcValue);
+static uint8_t CddSensor_SearchEnvTemperature(uint16_t adcValue);
+static uint8_t CddSensor_SearchGunTemperature(uint16_t adcValue);
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-static uint8_t CddSensor_EnvAdcValueToTemperature(uint16_t adcValue)
+static uint8_t CddSensor_SearchEnvTemperature(uint16_t adcValue)
 {
-    uint8_t temperature = 0;
-    uint8_t index = CDDSENSOR_CFG_ENV_NTC_ADC_MAP_NUM;
+    uint8_t index = 0;
+    uint8_t left = 0;
+    uint8_t right = CDDSENSOR_CFG_ENV_NTC_ADC_MAP_NUM - 1;
+    uint8_t mid = 0;
+    uint8_t find = 0;
+    uint16_t midAdc = 0;
 
-    temperature = c_stSensorAdcMapEnvNTC[index - 1].tempVal;/* 默认未查询到为最大温度 */
-
-    for (index = 1; index < CDDSENSOR_CFG_ENV_NTC_ADC_MAP_NUM; index++)
+    /* 处理边界情况 */
+    if (adcValue <= c_stSensorAdcMapEnvNTC[0].adcVal)
     {
-        if ((c_stSensorAdcMapEnvNTC[index].adcVal) >= adcValue)
+        index = 0;
+    }
+    else if (adcValue >= c_stSensorAdcMapEnvNTC[CDDSENSOR_CFG_ENV_NTC_ADC_MAP_NUM - 1].adcVal)
+    {
+        index = CDDSENSOR_CFG_ENV_NTC_ADC_MAP_NUM - 1;
+    }
+    else
+    {
+        /* 二分查找 从小到大排序 */
+        while (left <= right)
         {
-            if ( 2* adcValue > (c_stSensorAdcMapEnvNTC[index].adcVal + c_stSensorAdcMapEnvNTC[index-1].adcVal))
+            mid = left + (right - left) / 2;
+            midAdc = c_stSensorAdcMapEnvNTC[mid].adcVal;
+            if (midAdc == adcValue)
             {
-                temperature = c_stSensorAdcMapEnvNTC[index].tempVal;
+                find = 1;
+                break;
+            }
+            else if(midAdc < adcValue)
+            {/* 中间值小于目标值，目标值在右半部分 */
+                left = mid + 1;
+            }
+            else
+            {/* 中间值大于目标值，目标值在左半部分 */
+                right = mid - 1;
+            }
+        }
+
+        if (find)
+        {
+            index = mid;
+        }
+        else
+        {
+            int lower_adc = c_stSensorAdcMapEnvNTC[right].adcVal;
+            int upper_adc = c_stSensorAdcMapEnvNTC[left].adcVal;
+            if (abs(adcValue - lower_adc) <= abs(upper_adc - adcValue))
+            {
+                index = right;
             }
             else
             {
-                temperature = c_stSensorAdcMapEnvNTC[index-1].tempVal;
+                index = left;
             }
-            break;
         }
     }
-    
-    return temperature;
+
+    return c_stSensorAdcMapEnvNTC[index].tempVal;
 }
 
-static uint8_t CddSensor_GunAdcValueToTemperature(uint16_t adcValue)
+static uint8_t CddSensor_SearchGunTemperature(uint16_t adcValue)
 {
-    uint8_t temperature = 0;
     uint8_t index = 0;
+    uint8_t left = 0;
+    uint8_t right = CDDSENSOR_CFG_ENV_NTC_ADC_MAP_NUM - 1;
+    uint8_t mid = 0;
+    uint8_t find = 0;
+    uint16_t midAdc = 0;
 
-    temperature = c_stSensorAdcMapGunNTC[index].tempVal;
-
-    for (index = CDDSENSOR_CFG_ENV_NTC_ADC_MAP_NUM - 1; index > 0; index--)
+    /* 处理边界情况 */
+    if (adcValue <= c_stSensorAdcMapGunNTC[0].adcVal)
     {
-        if ((c_stSensorAdcMapGunNTC[index].adcVal) >= adcValue)
+        index = CDDSENSOR_CFG_GUN_NTC_ADC_MAP_NUM - 1;
+    }
+    else if (adcValue >= c_stSensorAdcMapGunNTC[CDDSENSOR_CFG_GUN_NTC_ADC_MAP_NUM - 1].adcVal)
+    {
+        index = 0;
+    }
+    else
+    {
+        /* 二分查找 从大到小排序 */
+        while (left <= right)
         {
-            if ( 2* adcValue > (c_stSensorAdcMapGunNTC[index].adcVal + c_stSensorAdcMapGunNTC[index-1].adcVal))
+            mid = left + (right - left) / 2;
+            midAdc = c_stSensorAdcMapGunNTC[mid].adcVal;
+            if (midAdc == adcValue)
             {
-                temperature = c_stSensorAdcMapGunNTC[index].tempVal;
+                find = 1;
+                break;
+            }
+            else if(midAdc > adcValue)
+            {/* 中间值大于目标值，目标值在右半部分 */
+                left = mid + 1;
+            }
+            else
+            {/* 中间值小于目标值，目标值在左半部分 */
+                right = mid - 1;
+            }
+        }
+
+        if (find)
+        {
+            index = mid;
+        }
+        else
+        {
+            int lower_adc = c_stSensorAdcMapGunNTC[left].adcVal;
+            int upper_adc = c_stSensorAdcMapGunNTC[right].adcVal;
+            if (abs(adcValue - lower_adc) <= abs(upper_adc - adcValue))
+            {
+                index = right;
             }
             else
             {
-                temperature = c_stSensorAdcMapGunNTC[index-1].tempVal;
+                index = left;
             }
-            break;
         }
     }
 
-    return temperature;
+    return c_stSensorAdcMapGunNTC[index].tempVal;
 }
 
 void CddSensor_InitMemory(void)
@@ -114,27 +180,38 @@ void CddSensor_InitMemory(void)
     memset((uint8_t *)&g_stSensorGun, 0, sizeof(g_stSensorGun));
 }
 
-uint8_t CddSensor_GetEnvTempValue(uint8_t ucPort)
+uint8_t CddSensor_GetEnvTemperature(void)
 {
 	return g_stSensorEnv.tempValue;
 }
 
-uint8_t CddSensor_GetGunTempValue(uint8_t ucPort)
-{
-	return g_stSensorGun.tempValue;
+uint8_t CddSensor_GetGunTempTemperature(uint8_t port)
+{   
+    uint8_t i = 0;
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        i = port;
+    }
+
+	return g_stSensorGun[i].tempValue;
 }
 
 void CddSensor_MainFunction(void)
 {
+    uint8_t i = 0;
     uint16_t temp = 0;
 
-    McalADC_GetChannelData(eMcalADCChanel_EnvNtc, g_stSensorEnv.arrayAdcValue, CDDSENSOR_CFG_ENV_ADC_BUFF_NUM);
-    temp = Common_MedianU16Filter(g_stSensorEnv.arrayAdcValue, CDDSENSOR_CFG_ENV_ADC_BUFF_NUM, CDDSENSOR_CFG_ENV_ADC_BUFF_NUM / 2);
-    g_stSensorEnv.tempValue = CddSensor_EnvAdcValueToTemperature(temp);
+    McalADC_GetChannelData(eMcalADCChanel_EnvNtc, g_stSensorEnv.adcValue, CDDSENSOR_CFG_ADC_BUFF_NUM);
+    temp = Common_MedianU16Filter(g_stSensorEnv.adcValue, CDDSENSOR_CFG_ADC_BUFF_NUM, CDDSENSOR_CFG_ADC_BUFF_NUM / 2);
+    g_stSensorEnv.tempValue = CddSensor_SearchEnvTemperature(temp);
 
-    McalADC_GetChannelData(eMcalADCChanel_GunNTC, g_stSensorGun.arrayAdcValue, CDDSENSOR_CFG_GUN_ADC_BUFF_NUM);
-    temp = Common_MedianU16Filter(g_stSensorGun.arrayAdcValue, CDDSENSOR_CFG_GUN_ADC_BUFF_NUM, CDDSENSOR_CFG_GUN_ADC_BUFF_NUM / 2);
-    g_stSensorGun.tempValue = CddSensor_GunAdcValueToTemperature(temp);
+    for(i = 0; i < SYSCFG_CFG_GUN_NUM; i++)
+    {
+        McalADC_GetChannelData(eMcalADCChanel_GunNTC, g_stSensorGun[i].adcValue, CDDSENSOR_CFG_ADC_BUFF_NUM);
+        temp = Common_MedianU16Filter(g_stSensorGun[i].adcValue, CDDSENSOR_CFG_ADC_BUFF_NUM, CDDSENSOR_CFG_ADC_BUFF_NUM / 2);
+        g_stSensorGun[i].tempValue = CddSensor_SearchGunTemperature(temp);
+    }
 }
 
 

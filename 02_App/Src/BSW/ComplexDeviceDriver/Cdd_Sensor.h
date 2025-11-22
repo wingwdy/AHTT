@@ -1,3 +1,4 @@
+
 /******************************************************************************
 * File Name          : Cdd_Sensor.h
 * Description        : Code for xxxxxxxxxxx
@@ -8,7 +9,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      chenls    初版创建
+*2025/10/10      V1.0.0      shenjc    初版创建
 *
 ******************************************************************************/
 #ifndef CDD_SENSOR_H_
@@ -41,8 +42,8 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-extern uint8_t CddSensor_GetEnvTempValue(uint8_t ucPort);
-extern uint8_t CddSensor_GetGunTempValue(uint8_t ucPort);
+extern uint8_t CddSensor_GetEnvTemperature(void);
+extern uint8_t CddSensor_GetGunTempTemperature(uint8_t ucPort);
 extern void CddSensor_InitMemory(void);
 extern void CddSensor_MainFunction(void);
 
