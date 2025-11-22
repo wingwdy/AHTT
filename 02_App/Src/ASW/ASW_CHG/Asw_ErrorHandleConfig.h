@@ -19,6 +19,7 @@
 #include "Asw_ErrorHandle.h"
 #include "stdint.h"
 #include "Cdd_CP.h"
+#include "DS_LogM.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -30,7 +31,8 @@
 #define ASWERR_CFG_ErrStateChangeNotice(port, eErr, flag, pErrHandle)  do\
                                                              {\
                                                              }while(0)
-
+                                                             
+#define ASWERR_CFG_LogPrint(fmt, ...)                 DSLOGM_Debug(DSLogMModule_ErrorHandle, fmt, ##__VA_ARGS__)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

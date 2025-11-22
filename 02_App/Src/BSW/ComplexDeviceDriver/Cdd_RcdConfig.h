@@ -1,4 +1,3 @@
-
 /******************************************************************************
 * File Name          : Cdd_RcdConfig.h
 * Description        : Code for xxxxxxxxxxx
@@ -18,6 +17,7 @@
 *    Header File Inclusion
 ******************************************************************************/
 #include "Mcal_Port.h"
+#include "DS_LogM.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -29,7 +29,6 @@
 #define CDDRCD_CFG_ResetTestPin()			                McalPort_ResetPin(eMcalPortPinChanel_PB11_RCDTest)
 #define CDDRCD_CFG_GetTripPin()					        	McalPort_GetPin(eMcalPortPinChanel_PB1_RCDTrip)
 
-
 #define CDDRCD_CFG_TASK_PERIOD                    		    (uint16_t)(10u)/*10ms*/
 #define CDDRCD_CFG_SELFCHECK_CAL_T2_TIME             	    ((uint16_t)80u / CDDRCD_CFG_TASK_PERIOD)/*50ms<=T2<=100ms*/
 #define CDDRCD_CFG_SELFCHECK_CAL_T3_TIME             	    ((uint16_t)500u  / CDDRCD_CFG_TASK_PERIOD)/*T3>=500ms*/
@@ -38,8 +37,8 @@
 #define CDDRCD_CFG_SELFCHECK_CHK_MAX_TIME                   ((uint16_t)2000u  / CDDRCD_CFG_TASK_PERIOD)/*持续检测2000ms*/
 #define CDDRCD_CFG_SELFCHECK_EXIT_T6_TIME                   ((uint16_t)100u  / CDDRCD_CFG_TASK_PERIOD)/*T6>=100ms*/
 
+#define CDDRCD_CFG_LogPrint(fmt, ...)                       DSLOGM_Debug(DSLogMModule_CP, fmt, ##__VA_ARGS__)
 
-#define RCD_DEBUG(fmt,...) 	//	LOG_DEBUG(LOG_MODULE_RCD,fmt,##__VA_ARGS__)
 
 /******************************************************************************
 *    Enum Definition

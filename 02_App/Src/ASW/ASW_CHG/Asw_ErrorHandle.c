@@ -95,7 +95,8 @@ static void AswErrHandle_SetErrHandle(uint8_t port, AswErrorHandle_Struct *pErro
         {
             pErrorHandle->arErrLevel[errType] = pConfig->tempErrLevel;
         }
-       
+
+        ASWERR_CFG_LogPrint("[枪：%d]故障：[%s] 产生\r\n", port, pConfig->errDesc);
         AswErrHandle_RefreshChargeCondition(pErrorHandle);
         ASWERR_CFG_ErrStateChangeNotice(port, errType, TRUE, pErrorHandle);
     }
@@ -123,6 +124,8 @@ static void AswErrHandle_ClearErrHandle(uint8_t port, AswErrorHandle_Struct *pEr
                 pErrorHandle->arErrLevelCnt[pConfig->tempErrLevel]--;
             }
         }
+
+        ASWERR_CFG_LogPrint("[枪：%d]故障：[%s] 撤销\r\n", port, pConfig->errDesc);
 
         pErrorHandle->arErrLevel[errType] = AswErrorLevel_0;
         AswErrHandle_RefreshChargeCondition(pErrorHandle);

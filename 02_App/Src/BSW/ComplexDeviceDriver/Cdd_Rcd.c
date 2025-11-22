@@ -1,4 +1,3 @@
-
 /******************************************************************************
 * File Name          : Cdd_Rcd.c
 * Description        : Code for xxxxxxxxxxx
@@ -246,14 +245,14 @@ void CddRcd_InitMemory(void)
 
 	if (eGlobalRet_OK != Filter_IO_CreatFIFO(eFilterIOChannel_RCD, 5, 0))
 	{
-		RCD_DEBUG("RCD FilterIO Create Fail\r\n");
+		CDDRCD_CFG_LogPrint("RCD FilterIO Create Fail\r\n");
 	}
 
 	g_RcdTimerHandle = xTimerCreate( "Timer1ms", 1, pdTRUE, &g_TimerId, (void *)CddRcd_Timer1msCallback);
 
 	if (g_RcdTimerHandle == NULL)
 	{
-		RCD_DEBUG("RCD Timer Create Fail\r\n");
+		CDDRCD_CFG_LogPrint("RCD Timer Create Fail\r\n");
 	}
 	else
 	{

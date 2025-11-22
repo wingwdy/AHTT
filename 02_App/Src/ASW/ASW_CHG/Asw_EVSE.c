@@ -62,16 +62,49 @@ typedef struct
 *******************************************************************************/
 static AswEVSECtrl_Struct g_stAswEVSECtrl[SYSCFG_CFG_GUN_NUM];
 
+const struct 
+{
+    char *cName;
+}c_EVSEStateName[] = 
+{
+    {"状态0"},
+    {"状态1"},
+    {"状态1'"},
+    {"状态2"},
+    {"状态2'"},
+    {"状态3"},
+    {"状态3'"},
+};
 
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-
-
+static void AswEVSE_SetEVSEState(uint8_t port, uint8_t state);
+static void AswEVSE_StateEnterState0(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl);
+static void AswEVSE_State0Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, CddCPVolState_Enum eCpState);
+static void AswEVSE_State1Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, CddCPVolState_Enum eCpState);
+static void AswEVSE_State1DotHanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, CddCPVolState_Enum eCpState);
+static void AswEVSE_State2Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, CddCPVolState_Enum eCpState);
+static void AswEVSE_State2DotHanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, CddCPVolState_Enum eCpState);
+static void AswEVSE_State3Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, CddCPVolState_Enum eCpState);
+static void AswEVSE_State3DotHanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, CddCPVolState_Enum eCpState);
+static void AswEVSE_StateManage(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl);
 
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
+static void AswEVSE_SetEVSEState(uint8_t port, uint8_t state)
+{
+    AswEVSECtrl_Struct *pEVSECtrl = &g_stAswEVSECtrl[port];
+
+    if (pEVSECtrl->evseState != state)
+    {
+        ASWEVSE_CFG_LogPrint("[枪：%d]EVSE状态变化: %s ---> %s\r\n", port, 
+            c_EVSEStateName[pEVSECtrl->evseState], c_EVSEStateName[state]);
+        pEVSECtrl->evseState = state;
+    }
+}
+
 static void AswEVSE_StateEnterState0(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl)
 {
     if (pEVSECtrl->evseState != ASWEVSE_STATE_0)
@@ -79,9 +112,10 @@ static void AswEVSE_StateEnterState0(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl
         if ((TRUE == AswErrHandle_IsExsistError(port)))
         {
             CddRelay_SetReqStopShortCutDetect(port);
+            CddCP_SetReqStopDiodeExsitDetect(port);
             CddCP_StopPWM(port);
             CddRelay_CtrlSwichOff(port);
-            pEVSECtrl->evseState = ASWEVSE_STATE_0;
+            AswEVSE_SetEVSEState(port, ASWEVSE_STATE_0);
         }
     }
 }
@@ -95,7 +129,7 @@ static void AswEVSE_State0Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
 
     if (Common_JudgeTimeoutMs(pEVSECtrl->quitState0DelayTimer, ASWEVSE_CFG_QUIT_STATE0_TIMEOUT))
     {
-        pEVSECtrl->evseState = ASWEVSE_STATE_1;
+        AswEVSE_SetEVSEState(port, ASWEVSE_STATE_1);
     }
 }
 
@@ -103,12 +137,12 @@ static void AswEVSE_State1Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
 {
     if (eCpState == eCddCPVolState_9V || eCpState == eCddCPVolState_6V)
     {
-        pEVSECtrl->evseState = ASWEVSE_STATE_2;
+        AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2);
         pEVSECtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;
         pEVSECtrl->enterState2DelayTimer = Common_GetSystick();
 
 #if (ASWEVSE_CFG_DIODE_DETECT_ENABLE == TRUE)
-        CddCP_SetReqDiodeExsitDetect(port);
+        CddCP_SetReqStartDiodeExsitDetect(port);
 #else
         pEVSECtrl->diodeDetectResult = GLOBAL_OPT_STATE_SUCCESS;
 #endif
@@ -120,11 +154,11 @@ static void AswEVSE_State1DotHanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl,
     if (eCpState == eCddCPVolState_9V || eCpState == eCddCPVolState_6V)
     {
         pEVSECtrl->relaySwitchOnDetectDelayTimer = 0;
-        pEVSECtrl->evseState = ASWEVSE_STATE_2_DOT;
+        AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2_DOT);
     }
     else
     {
-        pEVSECtrl->evseState = ASWEVSE_STATE_1;
+        AswEVSE_SetEVSEState(port, ASWEVSE_STATE_1);
         CddCP_StopPWM(port);
     }
 }
@@ -146,14 +180,16 @@ static void AswEVSE_State2Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
             if (pEVSECtrl->startCharge == TRUE)
             {
                 CddCP_StartPWM(port);
-                pEVSECtrl->evseState = ASWEVSE_STATE_2_DOT;
+                AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2_DOT);
                 pEVSECtrl->relaySwitchOnDetectDelayTimer = 0;
             }
         }
     }
     else if (eCpState == eCddCPVolState_12V)
     {
-        pEVSECtrl->evseState = ASWEVSE_STATE_1;
+        AswEVSE_SetEVSEState(port, ASWEVSE_STATE_1);
+        CddCP_SetReqStopDiodeExsitDetect(port);
+        CddRelay_SetReqStopShortCutDetect(port);
     }
     else
     {}
@@ -175,7 +211,7 @@ static void AswEVSE_State2DotHanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl,
             {
                 if (eCddRelayState_On == CddRelay_GetRelayState(port))
                 {
-                    pEVSECtrl->evseState = ASWEVSE_STATE_3_DOT;
+                    AswEVSE_SetEVSEState(port, ASWEVSE_STATE_3_DOT);
                 }
             }
         }
@@ -186,7 +222,7 @@ static void AswEVSE_State2DotHanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl,
         else if (eCpState == eCddCPVolState_12V)
         {
             CddRelay_CtrlSwichOff(port);
-            pEVSECtrl->evseState = ASWEVSE_STATE_1_DOT;
+            AswEVSE_SetEVSEState(port, ASWEVSE_STATE_1_DOT);
         }
         else
         {}
@@ -197,7 +233,7 @@ static void AswEVSE_State2DotHanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl,
         CddRelay_CtrlSwichOff(port);
         pEVSECtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;
         pEVSECtrl->enterState2DelayTimer = Common_GetSystick();
-        pEVSECtrl->evseState = ASWEVSE_STATE_2;
+        AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2);
     }
 }
 
@@ -206,19 +242,19 @@ static void AswEVSE_State3Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
     if (eCpState == eCddCPVolState_12V)
     {
         CddRelay_CtrlSwichOff(port);
-        pEVSECtrl->evseState = ASWEVSE_STATE_1;
+        AswEVSE_SetEVSEState(port, ASWEVSE_STATE_1);
     }
     else if (eCpState == eCddCPVolState_9V)
     {
         CddRelay_CtrlSwichOff(port);
-        pEVSECtrl->evseState = ASWEVSE_STATE_2;
+        AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2);
     }
     else
     {
         if (Common_JudgeTimeoutMs(pEVSECtrl->S2CloseTimer, ASWEVSE_CFG_S2_CLOSE_TIMEOUT))
         {
             CddRelay_CtrlSwichOff(port);
-            pEVSECtrl->evseState = ASWEVSE_STATE_2;
+            AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2);
         }
     }
 }
@@ -228,20 +264,20 @@ static void AswEVSE_State3DotHanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl,
     if (eCpState == eCddCPVolState_9V)
     {
         CddRelay_CtrlSwichOff(port);
-        pEVSECtrl->evseState = ASWEVSE_STATE_2_DOT;
+        AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2_DOT);
         pEVSECtrl->relaySwitchOnDetectDelayTimer = 0;
     }
     else if (eCpState == eCddCPVolState_12V)
     {
         CddRelay_CtrlSwichOff(port);
-        pEVSECtrl->evseState = ASWEVSE_STATE_1_DOT;
+        AswEVSE_SetEVSEState(port, ASWEVSE_STATE_1_DOT);
     }
     else
     {
         if (pEVSECtrl->startCharge == FALSE)
         {
             CddCP_StopPWM(port);
-            pEVSECtrl->evseState = ASWEVSE_STATE_3;
+            AswEVSE_SetEVSEState(port, ASWEVSE_STATE_3);
             pEVSECtrl->S2CloseTimer = Common_GetSystick();
         }
     }
@@ -250,6 +286,8 @@ static void AswEVSE_State3DotHanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl,
 static void AswEVSE_StateManage(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl)
 {
     CddCPVolState_Enum eCpState = CddCP_GetVolState(port);
+
+    AswEVSE_StateEnterState0(port, pEVSECtrl);
 
     switch (pEVSECtrl->evseState)
     {

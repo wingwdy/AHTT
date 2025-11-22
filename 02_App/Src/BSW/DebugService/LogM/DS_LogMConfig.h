@@ -16,21 +16,36 @@
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "DS_LogM.h"
 
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+#define DSLOGM_CFG_ASYN_BUFF_SIZE                 1024
 
 #define DSLOGM_CFG_OUTPUT_ASYN_ENABLE             TRUE           
 
-#define DSLOGM_CFG_ASYN_BUFF_SIZE                 1024
+#define DSLOGM_CFG_OUTPUT_WITH_MODULE_NAME        FALSE
 
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
+typedef enum
+{
+    /* ASW */
+    DSLogMModule_EVSE,
+    DSLogMModule_Charge,
+    DSLogMModule_ErrorHandle,
 
+    /*CDD */
+    DSLogMModule_CP,
+    DSLogMModule_RCD,
+
+    /*System Service */
+    DSLogMModule_System,
+
+    DSLogMModule_Count,
+}DSLogMModule_Enum;
 
 /******************************************************************************
 *    Typedef Definition

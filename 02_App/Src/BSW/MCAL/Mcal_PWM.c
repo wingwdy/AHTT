@@ -121,7 +121,7 @@ void McalPWM_Init(void)
 void McalPWM_SetOutputMode(McalPWMOCChannel_Enum ch,  uint8_t mode)
 {
     PARA_ASSERT(ch < eMcalPWMOCChannel_Count);
- //   PARA_ASSERT(mode == MCALPWM_MODE_FORCE_HIGH || mode == MCALPWM_MODE_FORCE_LOW || mode == MCALPWM_MODE_FORCE_PWM);
+    PARA_ASSERT((mode == MCALPWM_MODE_FORCE_HIGH || mode == MCALPWM_MODE_FORCE_LOW || mode == MCALPWM_MODE_FORCE_PWM));
 
     const McalPWMOC_Struct *pPwmOCCfg = &c_TimerOCParaTable[ch];
 

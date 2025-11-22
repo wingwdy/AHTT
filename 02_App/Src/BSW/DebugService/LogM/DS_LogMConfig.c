@@ -16,7 +16,7 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "DS_LogMConfig.h"
+#include "DS_LogM.h"
 
 
 
@@ -61,8 +61,10 @@ const char *g_logMModuleName[DSLogMModule_Count] =
 {
     "EVSE",
     "Charge",
+    "ErrorHandle"
 
-    "Cdd",
+    "CP",
+    "RCD",
 
     "System",
 };

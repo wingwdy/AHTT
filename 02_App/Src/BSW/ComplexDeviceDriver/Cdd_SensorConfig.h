@@ -1,4 +1,3 @@
-
 /******************************************************************************
 * File Name          : Cdd_SensorConfig.h
 * Description        : Code for xxxxxxxxxxx
@@ -45,14 +44,14 @@ typedef struct
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-
+extern const CddSensorAdcMap_Struct c_stSensorAdcMapEnvNTC[CDDSENSOR_CFG_ENV_NTC_ADC_MAP_NUM];
+extern const CddSensorAdcMap_Struct c_stSensorAdcMapGunNTC[CDDSENSOR_CFG_GUN_NTC_ADC_MAP_NUM];
 
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-extern const CddSensorAdcMap_Struct c_stSensorAdcMapEnvNTC[CDDSENSOR_CFG_ENV_NTC_ADC_MAP_NUM];
-extern const CddSensorAdcMap_Struct c_stSensorAdcMapGunNTC[CDDSENSOR_CFG_GUN_NTC_ADC_MAP_NUM];
+
 
 
 #endif /* CDD_SENSOR_CONFIG_H_ */

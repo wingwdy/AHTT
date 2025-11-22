@@ -16,7 +16,7 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "DS_LogMConfig.h"
+#include "DS_LogM.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "Mcal_Uart.h"
@@ -43,7 +43,6 @@ typedef enum
     eDSLogMOutputMode_Sync,
     eDSLogMOutputMode_Asyn,
 }DSLogMOutputMode_Enum;
-
 
 /*******************************************************************************
 *    Typedef Definition

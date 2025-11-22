@@ -1,4 +1,3 @@
-
 /******************************************************************************
 * File Name          : Cdd_SensorConfig.c
 * Description        : Code for xxxxxxxxxxx
