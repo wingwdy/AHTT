@@ -1,5 +1,5 @@
 /******************************************************************************
-* File Name          : SSS_SystemM.h
+* File Name          : SS_SystemM.h
 * Description        : Code for the Implementation of the System Management
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
@@ -11,8 +11,8 @@
 *2025/11/11      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef SYSS_SYSTEM_M_H_
-#define SYSS_SYSTEM_M_H_
+#ifndef SS_SYSTEM_M_H_
+#define SS_SYSTEM_M_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
@@ -43,7 +43,8 @@
 *    Global Function Prototypes
 ******************************************************************************/
 void SSSystemM_Init(void);
-#endif /* SYSS_SYSTEM_M_H_ */
+
+#endif /* SS_SYSTEM_M_H_ */
 
 
 

@@ -108,6 +108,7 @@ static void DSLogM_OutputFilter(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum
     }
 
     McalUart_WriteData(eMcalUartChanel_Debug, g_stLogMCtrl.cacheBuf, g_stLogMCtrl.logDataLen);
+    g_stLogMCtrl.logDataLen = 0;
 }
 
 const char* DSLogM_GetModuleName(DSLogMModule_Enum eModule)

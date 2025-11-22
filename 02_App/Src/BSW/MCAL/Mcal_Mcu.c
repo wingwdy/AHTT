@@ -48,7 +48,6 @@
 *******************************************************************************/
 static uint32_t g_systick;
 
-
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
@@ -111,7 +110,12 @@ void McalMcu_ClearResetFlags(void)
 
 void SysTick_Handler(void)
 {
-    xPortSysTickHandler();
+    extern PRIVILEGED_DATA volatile BaseType_t xSchedulerRunning;
+    if( xSchedulerRunning != pdFALSE )
+    {
+        xPortSysTickHandler();
+    }
+
     g_systick++;
 }
 
