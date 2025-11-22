@@ -51,7 +51,7 @@ typedef enum
 *    Global Function Prototypes
 ******************************************************************************/
 CddCPVolState_Enum CddCP_GetVolState(uint8_t port);
-int16_t CddCP_GetVoltage(uint8_t port);
+uint16_t CddCP_GetVoltage(uint8_t port);
 void CddCP_AdjustCurRateCurrent(uint8_t port, uint32_t current);
 void CddCP_StartPWM(uint8_t port);
 void CddCP_StopPWM(uint8_t port);

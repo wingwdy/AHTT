@@ -37,7 +37,7 @@
 #define CDDCP_CFG_GB_FILERCNT                 (50  / CDDCP_CFG_CALL_CYCLE)
 #define CDDCP_CFG_QB_FILERCNT                 (650 / CDDCP_CFG_CALL_CYCLE)
 
-#define CDDCP_CFG_DIODE_THREOLD               (-10000)
+#define CDDCP_CFG_DIODE_THREOLD               (10000)
 
 #define CDDCP_CFG_DIODE_FILTER_POINT          (200 / CDDCP_CFG_CALL_CYCLE)
 

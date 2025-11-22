@@ -120,6 +120,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
+          <Name>?</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -146,18 +147,34 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>102</LineNumber>
+          <LineNumber>207</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134220008</Address>
+          <Address>134222842</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Src\ASW\ASW_CHG\Asw_EVSE.c</Filename>
+          <Filename>..\Src\BSW\ComplexDeviceDriver\Cdd_CP.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_CHG/Asw_EVSE.c\102</Expression>
+          <Expression>\\D3_A32FB_GD32E503\../Src/BSW/ComplexDeviceDriver/Cdd_CP.c\207</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>217</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134222944</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Src\BSW\ComplexDeviceDriver\Cdd_CP.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\D3_A32FB_GD32E503\../Src/BSW/ComplexDeviceDriver/Cdd_CP.c\217</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>

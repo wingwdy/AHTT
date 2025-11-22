@@ -58,7 +58,7 @@ typedef struct
     FilterProfile1_Struct diodeFilter;        /* 二极管检测结果滤波 */
 
     uint16_t curSetCpDuty;                    /* 当前CP设置占空比 */ 
-    int16_t cpVol;                            /* CP电压，保留3位小数，可为负值 */ 
+    uint16_t cpVol;                           /* CP电压，保留3位小数 */ 
     CddCPVolState_Enum eValidCpVolState;      /* CP电压状态 */
     uint16_t curAjustCurrent;                 /* 当前调节电流值，放大1000倍 */
 }CddCPCtrl_Struct; 
@@ -208,13 +208,13 @@ static void CddCP_DiodeExsitDetect(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
             pCPCtrl->diodeDetectResult = GLOBAL_OPT_STATE_FAIL;
             CddCP_SetPwmDuty(port, 1000);
             ASWCP_CFG_LogPrint("[枪：%d]二极管存在性检测超时[%d]ms，该车不存在二极管！当前CP电压：%d.%d V\r\n",
-            port, CDDCP_CFG_DIODE_DETECT_TIMEOUT, pCPCtrl->cpVol / 1000, abs(pCPCtrl->cpVol) % 1000);
+            port, CDDCP_CFG_DIODE_DETECT_TIMEOUT, pCPCtrl->cpVol / 1000, pCPCtrl->cpVol % 1000);
             AswErrhandle_SetErrExsitCallback(port, eErr_DiodeStop);
 
         }
         else
         {
-            if (pCPCtrl->cpVol < CDDCP_CFG_DIODE_THREOLD)
+            if (pCPCtrl->cpVol > CDDCP_CFG_DIODE_THREOLD)
             {
                 pCPCtrl->diodeFilter.status = TRUE;
             }
@@ -251,7 +251,7 @@ static void CddCP_VolStateHandle(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
     uint8_t index = curState;
     uint8_t findFlag = FALSE;
 
-    pCPCtrl->cpVol = (int16_t)(CddCP_GetVol(port) * 1000);
+    pCPCtrl->cpVol = abs((int16_t)(CddCP_GetVol(port) * 1000));
 
     if (pCPCtrl->curSetCpDuty != 0)
     {
@@ -317,7 +317,7 @@ static void CddCP_VolStateHandle(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
                 {
                     ASWCP_CFG_LogPrint("[枪：%d]CP电压状态：%s ---> %s, 当前CP电压值：%d.%d V\r\n",
                     port, c_cpStateName[pCPCtrl->eValidCpVolState], c_cpStateName[pCPCtrl->eTempCpVolState]
-                    , pCPCtrl->cpVol/1000, abs(pCPCtrl->cpVol) % 1000);
+                    , pCPCtrl->cpVol/1000, pCPCtrl->cpVol % 1000);
                     pCPCtrl->eValidCpVolState = pCPCtrl->eTempCpVolState;
                     CddCP_CPVolErrDetect(port, pCPCtrl);
                 }
@@ -412,10 +412,10 @@ CddCPVolState_Enum CddCP_GetVolState(uint8_t port)
     return eRet;
 }
 
-int16_t CddCP_GetVoltage(uint8_t port)
+uint16_t CddCP_GetVoltage(uint8_t port)
 {
     CddCPCtrl_Struct *pCpCtrl = &g_stCddCPCtrl[port];
-    int16_t cpVol = 0;
+    uint16_t cpVol = 0;
 
     if (port < SYSCFG_CFG_GUN_NUM)
     {

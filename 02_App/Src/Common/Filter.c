@@ -196,9 +196,9 @@ uint8_t Filter_Profile1(FilterProfile1_Struct *pFilterStatus, uint16_t filterCnt
     uint8_t  retValue = FALSE;
     uint16_t filterMaxCnt = (uint16_t)0u;
 
-    if ((filterMaxCnt > (uint16_t)0u) && (filterMaxCnt < FILTER_PROFILE1_MAXVALUE_16))
+    if ((filterCnt > (uint16_t)0u) && (filterCnt < FILTER_PROFILE1_MAXVALUE_16))
     {
-        filterMaxCnt = filterMaxCnt;
+        filterMaxCnt = filterCnt;
     }
     else
     {
