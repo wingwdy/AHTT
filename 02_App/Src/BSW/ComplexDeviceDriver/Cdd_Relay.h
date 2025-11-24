@@ -53,7 +53,7 @@ void CddRelay_CtrlSwichOff(uint8_t port);
 CddRelayState_Enum CddRelay_GetRelayState(uint8_t port);
 void CddRelay_SetReqStartShortCutDetect(uint8_t port);
 void CddRelay_SetReqStopShortCutDetect(uint8_t port);
-uint8_t CddRelay_GetShortCutStatus(uint8_t port);
+uint8_t CddRelay_GetShortCutResult(uint8_t port);
 #endif /* CDD_RELAY_H_ */
 
 

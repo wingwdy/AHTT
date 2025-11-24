@@ -1,6 +1,7 @@
+
 /******************************************************************************
-* File Name          : DS_LogMConfig.h
-* Description        : Code for log manage
+* File Name          : Cdd_PEConfig.h
+* Description        : Code for PEConfig
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -8,83 +9,56 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      chenls    初版创建
+*2025/10/10      V1.0.0      shenjc    初版创建
 *
 ******************************************************************************/
-#ifndef DS_LOGM_CONFIG_H_
-#define DS_LOGM_CONFIG_H_
+#ifndef CDD_PE_CONFIG_H_
+#define CDD_PE_CONFIG_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-
+#include "Mcal_Adc.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define DSLOGM_CFG_ASYN_BUFF_SIZE                 1024
+#define CDDPE_CFG_ADC_BUFF_NUM 	    	                        (MCALADC_ADC0_SAMPLE_CNT)    /*ADC sample buffer number */
 
-#define DSLOGM_CFG_OUTPUT_ASYN_ENABLE             TRUE           
+#define CDDPE_CFG_PE_UNCONN_MIN_VOLT                            (700u)
+#define CDDPE_CFG_PE_UNCONN_MAX_VOLT                            (1200u)
+#define CDDPE_CFG_PE_CHECK_FILTER_TIME                          (5000u)
 
-#define DSLOGM_CFG_OUTPUT_WITH_MODULE_NAME        FALSE
+/* 火零反接的电压值 */
+#define CDDPE_CFG_LN_REVERSE_MIN_VOLT                           (1500u)
+#define CDDPE_CFG_LN_REVERSE_MAX_VOLT                           (2300u)
+
+#define CDDPE_CFG_LN_REVERSE_FILTER_TIME                        (2000u)
+#define CDDPE_CFG_LN_REVERSE_CHECK_MAXTIME                      (5000u)
+
+
+#define CDDPE_CFG_IsQBStandardMode()                            (FALSE)
+#define CDDPE_CFG_AswErrHandle_PileSetErrCallback(errType)      AswErrhandle_SetErrExsitCallback(0, errType)
+#define CDDPE_CFG_AswErrHandle_PileResetErrCallback(errType)    AswErrhandle_ResetErrExsitCallback(0, errType)
+
 
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    /* ASW */
-    DSLogMModule_EVSE,
-    DSLogMModule_Charge,
-    DSLogMModule_ErrorHandle,
-
-    /*CDD */
-    DSLogMModule_CP,
-    DSLogMModule_RCD,
-    DSLogMModule_RELAY,
-
-    /*System Service */
-    DSLogMModule_System,
-
-    DSLogMModule_Count,
-}DSLogMModule_Enum;
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
 
-
-
-
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-extern const char *g_logMModuleName[DSLogMModule_Count];
+
 
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
 
-#endif /* DS_LOGM_CONFIG_H_ */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif /* CDD_PE_CONFIG_H_ */
 

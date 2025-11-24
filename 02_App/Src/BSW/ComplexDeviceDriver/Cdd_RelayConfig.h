@@ -20,6 +20,7 @@
 #include "Mcal_Port.h"
 #include "Cdd_Relay.h"
 #include "Cdd_CP.h"
+#include "DS_LogM.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -28,8 +29,8 @@
 #define CDDRELAY_CFG_STATE_FILTER_COUNT                    (50u / CDDRELAY_CFG_CALL_CYCLE)
 #define CDDRELAY_CFG_ADHESION_FILTER_COUNT                 (500u / CDDRELAY_CFG_CALL_CYCLE)
 #define CDDRELAY_CFG_MALOPERATION_FILTER_COUNT             (500u / CDDRELAY_CFG_CALL_CYCLE)                                             
-#define CDDRELAY_ACT_HOLD_TIMEOUT                          (100)
-#define CDDRELAY_ACT_DELAY_TIMEOUT                         (300)
+#define CDDRELAY_CFG_ACT_HOLD_TIMEOUT                      (100)
+#define CDDRELAY_CFG_ACT_DELAY_TIMEOUT                     (300)
 
 #define CDDRELAY_CFG_ADC_BUFF_POINT                        (MCALADC_ADC0_SAMPLE_CNT)
 #define CDDRELAY_CFG_SHORTCUT_UPPER_LIMIT                  240
@@ -39,6 +40,8 @@
 #define CDDRELAY_CFG_SHORTCUT_FILTER_COUNT                 (500 /  CDDRELAY_CFG_CALL_CYCLE)
 
 #define CDDRELAY_CFG_CheckGunPlugout(port)                 (eCddCPVolState_12V == CddCP_GetVolState(port))
+
+#define CDDRELAY_CFG_LogPrint(fmt, ...)                    DSLOGM_Debug(DSLogMModule_RELAY, fmt, ##__VA_ARGS__)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

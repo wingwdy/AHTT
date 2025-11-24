@@ -33,6 +33,7 @@ typedef enum
     eCddCPVolState_9V,              /* 9V态 */
     eCddCPVolState_12V,             /* 12V态 */
     eCddCPVolState_Err,             /* 故障态 */
+    eCddCPVolState_Init,            /* 初始态 */
 }CddCPVolState_Enum;
 
 /******************************************************************************

@@ -65,6 +65,7 @@ const char *g_logMModuleName[DSLogMModule_Count] =
 
     "CP",
     "RCD",
+    "RELAY",
 
     "System",
 };

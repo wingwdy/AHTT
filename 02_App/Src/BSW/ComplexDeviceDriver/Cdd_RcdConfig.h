@@ -41,7 +41,7 @@
 #define CDDRCD_CFG_SELFCHECK_CHK_MAX_TIME                   ((uint16_t)2000u  / CDDRCD_CFG_TASK_PERIOD)/*持续检测2000ms*/
 #define CDDRCD_CFG_SELFCHECK_EXIT_T6_TIME                   ((uint16_t)100u  / CDDRCD_CFG_TASK_PERIOD)/*T6>=100ms*/
 
-#define CDDRCD_CFG_LogPrint(fmt, ...)                       DSLOGM_Debug(DSLogMModule_CP, fmt, ##__VA_ARGS__)
+#define CDDRCD_CFG_LogPrint(fmt, ...)                       DSLOGM_Debug(DSLogMModule_RCD, fmt, ##__VA_ARGS__)
 
 
 /******************************************************************************

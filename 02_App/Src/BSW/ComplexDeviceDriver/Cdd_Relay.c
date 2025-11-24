@@ -44,11 +44,6 @@ typedef enum
     eCddRelayCtrlState_SwitchOff,
 }CddRelayCtrlState_Enum;
 
-
-
-
-
-
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
@@ -114,7 +109,14 @@ static void CddRelay_IdleHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
     }
     else
     {
-        pRelayCtrl->stFilterAdhesionDetect.status = c_stCddRelayOpsConfigTable.pFuncGetRelayAdhesionStatus(port);
+        if (c_stCddRelayOpsConfigTable.pFuncGetRelayAdhesionStatus != NULL)
+        {
+            pRelayCtrl->stFilterAdhesionDetect.status = c_stCddRelayOpsConfigTable.pFuncGetRelayAdhesionStatus(port);
+        }
+        else
+        {
+            pRelayCtrl->stFilterAdhesionDetect.status = FALSE;
+        }
 
         if (Filter_Profile1(&pRelayCtrl->stFilterAdhesionDetect, CDDRELAY_CFG_ADHESION_FILTER_COUNT))
         {
@@ -137,36 +139,41 @@ static void CddRelay_SwitchOnHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
 {
     switch (pRelayCtrl->relayCtrlStep)
     {
-    case CDDRELAY_CTRL_STEP_1:
-    {
-        if (Common_JudgeTimeoutMs(pRelayCtrl->relayCtrlHoldTick, CDDRELAY_ACT_HOLD_TIMEOUT))
+        case CDDRELAY_CTRL_STEP_1:
         {
-            pRelayCtrl->relayCtrlStep = CDDRELAY_CTRL_STEP_2;
-            c_stCddRelayOpsConfigTable.pFuncHoldSwitchOn(port);
-            pRelayCtrl->relayCtrlHoldTick = Common_GetSystick();
-        }
+            if (Common_JudgeTimeoutMs(pRelayCtrl->relayCtrlHoldTick, CDDRELAY_CFG_ACT_HOLD_TIMEOUT))
+            {
+                pRelayCtrl->relayCtrlStep = CDDRELAY_CTRL_STEP_2;
 
-        break;
-    }
-    case CDDRELAY_CTRL_STEP_2:
-    {
-        if (Common_JudgeTimeoutMs(pRelayCtrl->relayCtrlHoldTick, CDDRELAY_ACT_DELAY_TIMEOUT))
+                if (c_stCddRelayOpsConfigTable.pFuncHoldSwitchOn != NULL)
+                {
+                    c_stCddRelayOpsConfigTable.pFuncHoldSwitchOn(port);
+                }
+
+                pRelayCtrl->relayCtrlHoldTick = Common_GetSystick();
+            }
+
+            break;
+        }
+        case CDDRELAY_CTRL_STEP_2:
         {
-            pRelayCtrl->relayCtrlStep = CDDRELAY_CTRL_STEP_3;
-        }
+            if (Common_JudgeTimeoutMs(pRelayCtrl->relayCtrlHoldTick, CDDRELAY_CFG_ACT_DELAY_TIMEOUT))
+            {
+                pRelayCtrl->relayCtrlStep = CDDRELAY_CTRL_STEP_3;
+            }
 
-        break;
-    }
-    case CDDRELAY_CTRL_STEP_3:
-    {
-        pRelayCtrl->eRelayCtrlState = eCddRelayCtrlState_Idle;
-        break;
-    }
-    default:
-    {
-        pRelayCtrl->eRelayCtrlState = eCddRelayCtrlState_Idle;
-        break;
-    }
+            break;
+        }
+        case CDDRELAY_CTRL_STEP_3:
+        {
+            pRelayCtrl->eRelayCtrlState = eCddRelayCtrlState_Idle;
+            break;
+        }
+        default:
+        {
+            pRelayCtrl->eRelayCtrlState = eCddRelayCtrlState_Idle;
+            break;
+        }
     }
 }
 
@@ -174,26 +181,30 @@ static void CddRelay_SwitchOffHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCt
 {
     switch (pRelayCtrl->relayCtrlStep)
     {
-    case CDDRELAY_CTRL_STEP_1:
-    {
-        if (Common_JudgeTimeoutMs(pRelayCtrl->relayCtrlHoldTick, CDDRELAY_ACT_DELAY_TIMEOUT))
+        case CDDRELAY_CTRL_STEP_1:
         {
-            pRelayCtrl->relayCtrlStep = CDDRELAY_CTRL_STEP_2;
-            c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOff(port);
-        }
+            if (Common_JudgeTimeoutMs(pRelayCtrl->relayCtrlHoldTick, CDDRELAY_CFG_ACT_DELAY_TIMEOUT))
+            {
+                pRelayCtrl->relayCtrlStep = CDDRELAY_CTRL_STEP_2;
 
-        break;
-    }
-    case CDDRELAY_CTRL_STEP_2:
-    {
-        pRelayCtrl->eRelayCtrlState = eCddRelayCtrlState_Idle;
-        break;
-    }
-    default:
-    {
-        pRelayCtrl->eRelayCtrlState = eCddRelayCtrlState_Idle;
-        break;
-    }
+                if (c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOff != NULL)
+                {
+                    c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOff(port);
+                }
+            }
+
+            break;
+        }
+        case CDDRELAY_CTRL_STEP_2:
+        {
+            pRelayCtrl->eRelayCtrlState = eCddRelayCtrlState_Idle;
+            break;
+        }
+        default:
+        {
+            pRelayCtrl->eRelayCtrlState = eCddRelayCtrlState_Idle;
+            break;
+        }
     }
 }
 
@@ -201,26 +212,26 @@ static void CddRelay_RelayStateManage(uint8_t port, CddRelayCtrl_Struct *pRelayC
 {
     switch (pRelayCtrl->eRelayCtrlState)
     {
-    case eCddRelayCtrlState_Idle:
-    {
-        CddRelay_IdleHandle(port, pRelayCtrl);
-        break;
-    }
-    case eCddRelayCtrlState_SwitchOn:
-    {
-        CddRelay_SwitchOnHandle(port, pRelayCtrl);
-        break;
-    }
-    case eCddRelayCtrlState_SwitchOff:
-    {
-        CddRelay_SwitchOffHandle(port, pRelayCtrl);
-        break;
-    }    
-    default:
-    {
-        CddRelay_SwitchOffHandle(port, pRelayCtrl);
-        break;       
-    }   
+        case eCddRelayCtrlState_Idle:
+        {
+            CddRelay_IdleHandle(port, pRelayCtrl);
+            break;
+        }
+        case eCddRelayCtrlState_SwitchOn:
+        {
+            CddRelay_SwitchOnHandle(port, pRelayCtrl);
+            break;
+        }
+        case eCddRelayCtrlState_SwitchOff:
+        {
+            CddRelay_SwitchOffHandle(port, pRelayCtrl);
+            break;
+        }    
+        default:
+        {
+            CddRelay_SwitchOffHandle(port, pRelayCtrl);
+            break;       
+        }   
     }
 }
 
@@ -228,57 +239,74 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
 {
     switch (pRelayCtrl->shortCutDetectStep)
     {
-    case CDDRELAY_SHORTCUT_STEP0:
-    {
-        break;
-    }
-
-    case CDDRELAY_SHORTCUT_STEP1:
-    {
-        if (eCddRelayState_On == CddRelay_GetRelayState(port))
+        case CDDRELAY_SHORTCUT_STEP0:
         {
-            pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_FAIL;
-            pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
-        }
-        else
-        {
-            c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOn(port);
-            pRelayCtrl->shortCutDetectTimer = Common_GetSystick();
-            pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP2;
-            pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_PROCESS;
+            break;
         }
 
-        break;
-    }
-
-    case CDDRELAY_SHORTCUT_STEP2:
-    {
-        pRelayCtrl->stFilterShortCutDetect.status = c_stCddRelayOpsConfigTable.pFuncGetShortCutStatus(port);
-
-        if (Common_JudgeTimeoutMs(pRelayCtrl->shortCutDetectTimer, CDDRELAY_CFG_SHORTCUT_TIMEOUT))
+        case CDDRELAY_SHORTCUT_STEP1:
         {
-            pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_FAIL;
-            pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
-            AswErrhandle_SetErrExsitCallback(port, eErr_ShortCircleErr);
-        }
-        else
-        {
-            if (Filter_Profile1(&pRelayCtrl->stFilterShortCutDetect, CDDRELAY_CFG_SHORTCUT_FILTER_COUNT))
+            if (eCddRelayState_On == CddRelay_GetRelayState(port))
             {
-                if (pRelayCtrl->stFilterShortCutDetect.validStatus == TRUE)
+                pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_FAIL;
+                pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
+                CDDRELAY_CFG_LogPrint("[枪：%d]输出短路检测时，继电器未断开!\r\n");
+                AswErrhandle_SetErrExsitCallback(port, eErr_ShortCircleErr);
+            }
+            else
+            {
+                if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOn != NULL)
                 {
-                    pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_SUCCESS;
-                    pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
+                    c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOn(port);
+                }
+
+                pRelayCtrl->shortCutDetectTimer = Common_GetSystick();
+                pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP2;
+                pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_PROCESS;
+            }
+
+            break;
+        }
+
+        case CDDRELAY_SHORTCUT_STEP2:
+        {
+            if (Common_JudgeTimeoutMs(pRelayCtrl->shortCutDetectTimer, CDDRELAY_CFG_SHORTCUT_TIMEOUT))
+            {
+                pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_FAIL;
+                pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
+                AswErrhandle_SetErrExsitCallback(port, eErr_ShortCircleErr);
+            }
+            else
+            {
+                if (c_stCddRelayOpsConfigTable.pFuncGetShortCutStatus != NULL)
+                {
+                    pRelayCtrl->stFilterShortCutDetect.status = c_stCddRelayOpsConfigTable.pFuncGetShortCutStatus(port);
+                }
+                else
+                {
+                    pRelayCtrl->stFilterShortCutDetect.status = FALSE;
+                }
+
+                if (Filter_Profile1(&pRelayCtrl->stFilterShortCutDetect, CDDRELAY_CFG_SHORTCUT_FILTER_COUNT))
+                {
+                    if (pRelayCtrl->stFilterShortCutDetect.validStatus == TRUE)
+                    {
+                        pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_SUCCESS;
+                        pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
+                    }
                 }
             }
-        }
 
-        break;
-    }
+            break;
+        }
+        default:
+        {
+            break;
+        }
     }
 }
 
-uint8_t CddRelay_GetShortCutStatus(uint8_t port)
+uint8_t CddRelay_GetShortCutResult(uint8_t port)
 {
     CddRelayCtrl_Struct *pRelayCtrl = NULL;
     uint8_t ret = GLOBAL_OPT_STATE_FAIL;
@@ -301,6 +329,7 @@ void CddRelay_SetReqStartShortCutDetect(uint8_t port)
         if (pRelayCtrl->shortCutDetectStep == CDDRELAY_SHORTCUT_STEP0)
         {
             pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP1;
+            pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_PROCESS;
             memset(&pRelayCtrl->stFilterShortCutDetect, 0x00, sizeof(pRelayCtrl->stFilterShortCutDetect));
         }
     }
@@ -314,7 +343,11 @@ void CddRelay_SetReqStopShortCutDetect(uint8_t port)
     {
         pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
         pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;
-        c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff(port);
+
+        if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff != NULL)
+        {
+            c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff(port);
+        }
     }
 }
 
@@ -348,7 +381,12 @@ void CddRelay_CtrlSwichOn(uint8_t port)
             pRelayCtrl->eRelayCtrlState = eCddRelayCtrlState_SwitchOn;
             pRelayCtrl->relayCtrlStep = CDDRELAY_CTRL_STEP_1;
             pRelayCtrl->relayCtrlHoldTick = Common_GetSystick();
-            c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOn(port);
+
+            if (c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOn != NULL)
+            {
+                c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOn(port);
+            }
+
             memset(&pRelayCtrl->stFilterMaloperationDetect, 0x00, sizeof(FilterProfile1_Struct));
         }
     }
@@ -366,7 +404,12 @@ void CddRelay_CtrlSwichOff(uint8_t port)
             pRelayCtrl->eRelayCtrlState = eCddRelayCtrlState_SwitchOff;
             pRelayCtrl->relayCtrlStep = CDDRELAY_CTRL_STEP_1;
             pRelayCtrl->relayCtrlHoldTick = Common_GetSystick();
-            c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOff(port);
+
+            if (c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOff != NULL)
+            {
+                c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOff(port);
+            }
+
             memset(&pRelayCtrl->stFilterMaloperationDetect, 0x00, sizeof(FilterProfile1_Struct));
         }
     }

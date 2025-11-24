@@ -22,12 +22,12 @@
 *    Macro Definition
 ******************************************************************************/
 #if (DSLOGM_CFG_OUTPUT_WITH_MODULE_NAME == TRUE)
-#define DSLOGM_Trace(module, fmt, ...)      DSLogM_Output(module, eDSLogOutputLevel_Trace,    "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
-#define DSLOGM_Debug(module, fmt, ...)      DSLogM_Output(module, eDSLogOutputLevel_Debug,    "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
-#define DSLOGM_Info(module, fmt, ...)       DSLogM_Output(module, eDSLogOutputLevel_Info,     "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
-#define DSLOGM_Warn(module, fmt, ...)       DSLogM_Output(module, eDSLogOutputLevel_Warn,     "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
-#define DSLOGM_Error(module, fmt, ...)      DSLogM_Output(module, eDSLogOutputLevel_Error,    "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
-#define DSLOGM_Critical(module, fmt, ...)   DSLogM_Output(module, eDSLogOutputLevel_Critical, "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
+#define DSLOGM_Trace(module, fmt, ...)      DSLogM_Output(module, eDSLogOutputLevel_Trace,    "[%d.%d][%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
+#define DSLOGM_Debug(module, fmt, ...)      DSLogM_Output(module, eDSLogOutputLevel_Debug,    "[%d.%d][%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
+#define DSLOGM_Info(module, fmt, ...)       DSLogM_Output(module, eDSLogOutputLevel_Info,     "[%d.%d][%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
+#define DSLOGM_Warn(module, fmt, ...)       DSLogM_Output(module, eDSLogOutputLevel_Warn,     "[%d.%d][%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
+#define DSLOGM_Error(module, fmt, ...)      DSLogM_Output(module, eDSLogOutputLevel_Error,    "[%d.%d][%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
+#define DSLOGM_Critical(module, fmt, ...)   DSLogM_Output(module, eDSLogOutputLevel_Critical, "[%d.%d][%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
 #else
 #define DSLOGM_Trace(module, fmt, ...)      DSLogM_Output(module, eDSLogOutputLevel_Trace,    fmt, ##__VA_ARGS__)
 #define DSLOGM_Debug(module, fmt, ...)      DSLogM_Output(module, eDSLogOutputLevel_Debug,    fmt, ##__VA_ARGS__)

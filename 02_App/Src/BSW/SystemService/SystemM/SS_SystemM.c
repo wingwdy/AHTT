@@ -21,12 +21,16 @@
 #include "Asw_Charge.h"
 
 #include "Cdd_Relay.h"
+#include "Cdd_CP.h"
+#include "Cdd_Rcd.h"
+#include "Cdd_PE.h"
+#include "Cdd_Sensor.h"
 
 #include "DS_LogM.h"
 
 #include "Mcal_If.h"
 #include "Mcal_Mcu.h"
-#include "Cdd_CP.h"
+
 #include "Common.h"
 #include "stdio.h"
 
@@ -84,6 +88,10 @@ static void SSSystemM_InitThree(void)
 {
     CddRelay_InitMemory();
     CddCP_InitMemory();
+    CddRcd_InitMemory();
+    CddPE_InitMemory();
+
+
     AswErrHandle_InitMemory();
 }
 

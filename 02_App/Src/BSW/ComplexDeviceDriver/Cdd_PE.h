@@ -1,6 +1,7 @@
+
 /******************************************************************************
-* File Name          : DS_LogMConfig.h
-* Description        : Code for log manage
+* File Name          : Cdd_PE.h
+* Description        : Code for PE
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -8,83 +9,54 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 ------------    --------     -------   ----------------------------------------
-*2025/10/10      V1.0.0      chenls    初版创建
+*2025/10/10      V1.0.0      shenjcs    初版创建
 *
 ******************************************************************************/
-#ifndef DS_LOGM_CONFIG_H_
-#define DS_LOGM_CONFIG_H_
+#ifndef CDD_PE_H_
+#define CDD_PE_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-
+#include "Cdd_PEConfig.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define DSLOGM_CFG_ASYN_BUFF_SIZE                 1024
 
-#define DSLOGM_CFG_OUTPUT_ASYN_ENABLE             TRUE           
-
-#define DSLOGM_CFG_OUTPUT_WITH_MODULE_NAME        FALSE
 
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
 typedef enum
 {
-    /* ASW */
-    DSLogMModule_EVSE,
-    DSLogMModule_Charge,
-    DSLogMModule_ErrorHandle,
+    eCddPEState_LNUnkown = 0,
+    eCddPEState_LNNormal,        /* 火零正常 */
+    eCddPEState_LNReverse,       /* 火零反接 */
+}CddLNState_Enum;
 
-    /*CDD */
-    DSLogMModule_CP,
-    DSLogMModule_RCD,
-    DSLogMModule_RELAY,
-
-    /*System Service */
-    DSLogMModule_System,
-
-    DSLogMModule_Count,
-}DSLogMModule_Enum;
+typedef enum
+{
+    eCddPEState_PEUnkown = 0,
+    eCddPEState_PEConnect,        /* 接地状态*/
+    eCddPEState_PEUnconn,         /* 未接地状态 */
+}CddPEState_Enum;
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
 
 
-
-
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-extern const char *g_logMModuleName[DSLogMModule_Count];
+
 
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
+extern void CddPE_InitMemory(void);
+extern void CddPE_MainFunction(void);
 
-#endif /* DS_LOGM_CONFIG_H_ */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif /* CDD_PE_H_ */
 

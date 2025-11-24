@@ -71,24 +71,6 @@ static void DSLogM_OutputFilter(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-void DSLogM_Output(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum eLevel, const char *fmt, ...)
-{
-    xSemaphoreTake(g_stLogMCtrl.mutex, portMAX_DELAY);
-    va_list args;
-    va_start(args, fmt);
-    DSLogM_OutputFilter(eModule, eLevel, fmt, args);
-    va_end(args);
-    xSemaphoreGive(g_stLogMCtrl.mutex);
-}
-
-void DSLogM_InitMemory(void)
-{
-    memset(&g_stLogMCtrl, 0x00, sizeof(g_stLogMCtrl));
-    g_stLogMCtrl.mutex = xSemaphoreCreateMutex();
-}
-
-
-
 static void DSLogM_OutputFilter(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum eLevel, const char *fmt, va_list args)
 {
     uint16_t totalLen = g_stLogMCtrl.logDataLen;
@@ -122,7 +104,21 @@ const char* DSLogM_GetModuleName(DSLogMModule_Enum eModule)
     return p;
 }
 
+void DSLogM_Output(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum eLevel, const char *fmt, ...)
+{
+    xSemaphoreTake(g_stLogMCtrl.mutex, portMAX_DELAY);
+    va_list args;
+    va_start(args, fmt);
+    DSLogM_OutputFilter(eModule, eLevel, fmt, args);
+    va_end(args);
+    xSemaphoreGive(g_stLogMCtrl.mutex);
+}
 
+void DSLogM_InitMemory(void)
+{
+    memset(&g_stLogMCtrl, 0x00, sizeof(g_stLogMCtrl));
+    g_stLogMCtrl.mutex = xSemaphoreCreateMutex();
+}
 
 
 

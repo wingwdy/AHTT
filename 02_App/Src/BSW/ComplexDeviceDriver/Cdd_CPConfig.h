@@ -46,7 +46,7 @@
 #define CDDCP_CFG_WAKEUP_LOW_HOLDTIME         1000
 #define CDDCP_CFG_WAKEUP_HIGH_HOLDTIME        1000
 
-#define ASWCP_CFG_LogPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_CP, fmt, ##__VA_ARGS__)
+#define CDDCP_CFG_LogPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_CP, fmt, ##__VA_ARGS__)
 
 /******************************************************************************
 *    Enum Definition

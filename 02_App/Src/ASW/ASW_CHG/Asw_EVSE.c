@@ -113,6 +113,7 @@ static void AswEVSE_StateEnterState0(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl
         {
             CddRelay_SetReqStopShortCutDetect(port);
             CddCP_SetReqStopDiodeExsitDetect(port);
+            pEVSECtrl->quitState0DelayTimer = Common_GetSystick();
             CddCP_StopPWM(port);
             CddRelay_CtrlSwichOff(port);
             AswEVSE_SetEVSEState(port, ASWEVSE_STATE_0);
@@ -137,9 +138,9 @@ static void AswEVSE_State1Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
 {
     if (eCpState == eCddCPVolState_9V || eCpState == eCddCPVolState_6V)
     {
-        AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2);
         pEVSECtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;
         pEVSECtrl->enterState2DelayTimer = Common_GetSystick();
+        AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2);
 
 #if (ASWEVSE_CFG_DIODE_DETECT_ENABLE == TRUE)
         CddCP_SetReqStartDiodeExsitDetect(port);
@@ -175,6 +176,11 @@ static void AswEVSE_State2Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
 
     if (eCpState == eCddCPVolState_9V || eCpState == eCddCPVolState_6V)
     {
+#if (ASWEVSE_CFG_DIODE_DETECT_ENABLE == TRUE)
+        pEVSECtrl->diodeDetectResult = CddCP_GetDiodeExsitDetectResult(port);
+#endif
+        pEVSECtrl->shortCutDetectResult = CddRelay_GetShortCutResult(port);
+
         if (pEVSECtrl->shortCutDetectResult == GLOBAL_OPT_STATE_SUCCESS && pEVSECtrl->diodeDetectResult == GLOBAL_OPT_STATE_SUCCESS)
         {
             if (pEVSECtrl->startCharge == TRUE)
@@ -247,6 +253,8 @@ static void AswEVSE_State3Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
     else if (eCpState == eCddCPVolState_9V)
     {
         CddRelay_CtrlSwichOff(port);
+        pEVSECtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;
+        pEVSECtrl->enterState2DelayTimer = Common_GetSystick();
         AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2);
     }
     else
@@ -254,6 +262,8 @@ static void AswEVSE_State3Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
         if (Common_JudgeTimeoutMs(pEVSECtrl->S2CloseTimer, ASWEVSE_CFG_S2_CLOSE_TIMEOUT))
         {
             CddRelay_CtrlSwichOff(port);
+            pEVSECtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;
+            pEVSECtrl->enterState2DelayTimer = Common_GetSystick();
             AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2);
         }
     }
@@ -356,7 +366,11 @@ void AswEVSE_StartCharge(uint8_t port)
 
     if (port < SYSCFG_CFG_GUN_NUM)
     {
-        pEVSECtrl->startCharge = TRUE;
+        if (pEVSECtrl->startCharge != TRUE)
+        {
+            pEVSECtrl->startCharge = TRUE;
+            ASWEVSE_CFG_LogPrint("[枪：%d]请求开始充电！\r\n");
+        }
     }
 }
 
@@ -366,8 +380,12 @@ void AswEVSE_StopCharge(uint8_t port)
 
     if (port < SYSCFG_CFG_GUN_NUM)
     {
-        pEVSECtrl->startCharge = FALSE;
-    }
+        if (pEVSECtrl->startCharge != FALSE)
+        {
+            pEVSECtrl->startCharge = FALSE;
+            ASWEVSE_CFG_LogPrint("[枪：%d]请求停止充电！\r\n");
+        }
+    }    
 }
 
 uint8_t AswEVSE_GetEVSEState(uint8_t port)
