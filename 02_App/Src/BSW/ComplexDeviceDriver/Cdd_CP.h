@@ -59,6 +59,7 @@ void CddCP_StopPWM(uint8_t port);
 void CddCP_SetErrNotice(uint8_t port);
 void CddCP_SetReqStartWakeup(uint8_t port);
 void CddCP_SetReqStopWakeUp(uint8_t port);
+uint8_t CddCP_GetWakeupStatus(uint8_t port);
 void CddCP_SetReqStartDiodeExsitDetect(uint8_t port);
 void CddCP_SetReqStopDiodeExsitDetect(uint8_t port);
 uint8_t CddCP_GetDiodeExsitDetectResult(uint8_t port);

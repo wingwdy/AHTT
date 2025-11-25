@@ -26,7 +26,7 @@
 ******************************************************************************/
 #define CDDCP_CFG_CALL_CYCLE                  (10U)
 
-#define CDDCP_CFG_RATE_CURRENT                (32000)
+#define CDDCP_CFG_RATE_CURRENT                SYSCFG_CFG_MAX_OUTPUT_CURRENT
 #define CDDCP_CFG_RATE_MIN_CURRENT            (6000)
 #define CDDCP_CFG_RATE_THRESOLD_CURRENT       (51000)
 

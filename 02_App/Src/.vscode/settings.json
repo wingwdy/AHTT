@@ -41,6 +41,7 @@
         "ss_systemm.h": "c",
         "ds_logm.h": "c",
         "ds_logmconfig.h": "c",
-        "semphr.h": "c"
+        "semphr.h": "c",
+        "asw_chargeconfig.h": "c"
     }
 }

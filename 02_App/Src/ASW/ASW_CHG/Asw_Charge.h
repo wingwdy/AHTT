@@ -16,17 +16,33 @@
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-
+#include "Global.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-
+#define ASWCHARGE_WORKSTATE_IDLE                     (0u)     /* 空闲状态 */
+#define ASWCHARGE_WORKSTATE_READY                    (1u)     /* 已准备状态 */
+#define ASWCHARGE_WORKSTATE_STARTING                 (2u)     /* 启动中状态 */
+#define ASWCHARGE_WORKSTATE_WAKEUP                   (3u)     /* 尝试唤醒状态 */
+#define ASWCHARGE_WORKSTATE_CHARGING                 (4u)     /* 充电中状态 */
+#define ASWCHARGE_WORKSTATE_PAUSEA                   (5u)     /* 车端暂停状态 */
+#define ASWCHARGE_WORKSTATE_PAUSEB                   (6u)     /* 桩端暂停状态 */
+#define ASWCHARGE_WORKSTATE_STOPPING                 (7u)     /* 停止中状态 */
+#define ASWCHARGE_WORKSTATE_FINISH                   (8u)     /* 停止完成状态 */
 
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-
+typedef enum
+{
+    /* 启动中超时15秒，车端暂停超时30秒，小电流小于1A，持续30分钟 */ 
+    eAswChargeCtrlProfile_GN,
+    /* 不作启动超时检测，不作车端暂停超时检测，
+       case1:当充电电流大于等于5A，且持续10min，S2闭合的情况下，那么当充电电流小于0.5A，持续30min，则停止充电，结算。
+       case2:当充电电流大于等于5A，且持续10min，S2断开的情况下，那么当充电电流小于0.5A，持续30min，则停止充电，结算。*/
+    eAswChargeCtrlProfile_XDT,
+}AswChargeCtrlProfile_Enum;
 
 /******************************************************************************
 *    Typedef Definition
@@ -43,7 +59,11 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-
+void AswCharge_SetProfile(AswChargeCtrlProfile_Enum eProfile);
+uint8_t AswCharge_GetWorkState(uint8_t port);
+void AswCharge_InitMemory(void);
+void AswCharge_MainFunction(void);
+uint8_t AswCharge_IsAuth(uint8_t port);
 #endif /* ASW_CHARGE_H_ */
 
 

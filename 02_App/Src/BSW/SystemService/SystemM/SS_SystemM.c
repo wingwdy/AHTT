@@ -26,10 +26,10 @@
 #include "Cdd_PE.h"
 #include "Cdd_Sensor.h"
 
-#include "DS_LogM.h"
-
 #include "Mcal_If.h"
 #include "Mcal_Mcu.h"
+
+#include "DS_LogM.h"
 
 #include "Common.h"
 #include "stdio.h"
@@ -91,7 +91,8 @@ static void SSSystemM_InitThree(void)
     CddRcd_InitMemory();
     CddPE_InitMemory();
 
-
+    AswEVSE_InitMemory();
+    AswCharge_InitMemory();
     AswErrHandle_InitMemory();
 }
 

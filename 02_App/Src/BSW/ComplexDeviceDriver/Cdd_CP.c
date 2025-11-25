@@ -51,6 +51,7 @@ typedef struct
 
     uint8_t wakeupStep;                       /* cp唤醒步骤 */
     uint32_t wakeupTick;                      /* cp唤醒计时 */
+    uint8_t wakeupStatus;                     /* cp唤醒状态 */
 
     uint8_t cpPWMOutputEnable;                /* cp PWM 输出使能 */
 
@@ -141,6 +142,19 @@ static void CddCP_SetPwmDuty(uint8_t port, uint16_t duty)
     }
 }
 
+static void CddCP_RecoverPWM(uint8_t port)
+{
+    CddCPCtrl_Struct *pCpCtrl = &g_stCddCPCtrl[port];
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        if (pCpCtrl->cpPWMOutputEnable == TRUE)
+        {
+            CddCP_AdjustCurRateCurrent(port, pCpCtrl->curAjustCurrent);
+        }
+    }
+}
+
 static float CddCP_GetVol(uint8_t port)
 {
     float ret = 0.0;
@@ -186,7 +200,8 @@ static void CddCP_WakeupHandle(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
     {
         if (Common_JudgeTimeoutMs(pCPCtrl->wakeupTick, CDDCP_CFG_WAKEUP_HIGH_HOLDTIME))
         {
-            CddCP_StartPWM(port);
+            CddCP_RecoverPWM(port);
+            pCPCtrl->wakeupStatus = GLOBAL_OPT_STATE_SUCCESS;
             pCPCtrl->wakeupStep = CDDCP_WAKEUP_STEP0;
         }
 
@@ -467,6 +482,7 @@ void CddCP_SetReqStartWakeup(uint8_t port)
     {
         if (pCpCtrl->wakeupStep == CDDCP_WAKEUP_STEP0)
         {
+            pCpCtrl->wakeupStatus = GLOBAL_OPT_STATE_PROCESS;
             pCpCtrl->wakeupStep = CDDCP_WAKEUP_STEP1;
             CDDCP_CFG_LogPrint("[枪：%d]请求尝试CP唤醒!\r\n");
         }
@@ -482,6 +498,7 @@ void CddCP_SetReqStopWakeUp(uint8_t port)
         if (pCpCtrl->wakeupStep != CDDCP_WAKEUP_STEP0)
         {
             pCpCtrl->wakeupStep = CDDCP_WAKEUP_STEP0;
+            pCpCtrl->wakeupStatus = GLOBAL_OPT_STATE_IDLE;
 
             if (pCpCtrl->curSetCpDuty != 0)
             {
@@ -491,6 +508,19 @@ void CddCP_SetReqStopWakeUp(uint8_t port)
             CDDCP_CFG_LogPrint("[枪：%d]请求中断CP唤醒!\r\n");
         }
     }
+}
+
+uint8_t CddCP_GetWakeupStatus(uint8_t port)
+{
+    CddCPCtrl_Struct *pCpCtrl = &g_stCddCPCtrl[port];
+    uint8_t ret = GLOBAL_OPT_STATE_IDLE;
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        ret = pCpCtrl->wakeupStatus;
+    }
+
+    return ret;
 }
 
 void CddCP_SetReqStartDiodeExsitDetect(uint8_t port)
@@ -546,10 +576,11 @@ void CddCP_StartPWM(uint8_t port)
         if (pCpCtrl->cpPWMOutputEnable != TRUE)
         {
             pCpCtrl->cpPWMOutputEnable = TRUE;
-            CddCP_AdjustCurRateCurrent(port, pCpCtrl->curAjustCurrent);
             CDDCP_CFG_LogPrint("[枪：%d]CP开始发送PWM! PWM对应电流值：%d.%d\r\n",port, pCpCtrl->curAjustCurrent / 1000,
             pCpCtrl->curAjustCurrent % 1000);
         }
+
+        CddCP_AdjustCurRateCurrent(port, pCpCtrl->curAjustCurrent);
     }
 }
 

@@ -16,7 +16,15 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-
+#include "Asw_Charge.h"
+#include "Common.h"
+#include "SysCfg.h"
+#include "Asw_ChargeConfig.h"
+#include "Cdd_CP.h"
+#include "Asw_EVSE.h"
+#include "Asw_ErrorHandle.h"
+#include "Filter.h"
+#include "Cdd_Relay.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -30,28 +38,529 @@
 
 
 
-
-
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
-
+typedef struct 
+{
+    uint8_t workState;           /* 工作状态 */
+    uint8_t tryWakeupFlag;       /* 尝试唤醒标记，TRUE-表示已唤醒过 */
+    uint8_t authFlag;            /* 授权标记，TRUE-表示已授权 */
+    uint32_t startTimer;         /* 启动超时计时器 */
+    FilterProfile1_Struct stFilterlittleCur; /* 小电流状态滤波 */
+    uint32_t vehiclePauseTimer;  /* 车端暂停超时计时器 */
+    uint32_t stopTimer;          /* 停止充电超时计时器 */
+    uint32_t quitStopFinishTimer; /* 退出停止完成状态延时计时器 */
+}AswChargeCtrl_Struct;
 
 
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
+static AswChargeCtrl_Struct g_stAswChargeCtrl[SYSCFG_CFG_GUN_NUM];
 
+const struct 
+{
+    char *cName;
+}c_ChargeStateName[] = 
+{
+    {"空闲状态"},
+    {"已准备状态"},
+    {"启动中状态"},
+    {"尝试唤醒状态"},
+    {"充电中状态"},
+    {"车端暂停状态"},
+    {"桩端暂停状态"},
+    {"停止中状态"},
+    {"停止完成状态"},
+};
 
 
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-
-
+static void AswCharge_SetWorkState(uint8_t port, uint8_t workState);
+static void AswCharge_IdleStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl);
+static void AswCharge_ReadyStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl);
+static void AswCharge_StartingStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl);
+static void AswCharge_WakeupStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl);
+static void AswCharge_ChargingStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl);
+static void AswCharge_PauseAStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl);
+static void AswCharge_PauseBStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl);
+static void AswCharge_StoppingStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl);
+static void AswCharge_FinishStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl);
+static void AswCharge_WorkStateManage(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl);
 
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
+static void AswCharge_SetWorkState(uint8_t port, uint8_t workState)
+{
+    AswChargeCtrl_Struct *pChargeCtrl = &g_stAswChargeCtrl[port];
 
-/* 在这个模块里处理，拔枪清除相关故障，授权清除相关故障 */
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        if (pChargeCtrl->workState != workState)
+        {
+            ASWCHARGE_CFG_LogPrint("[枪：%d]充电状态变化: %s ---> %s\r\n", port, 
+                c_ChargeStateName[pChargeCtrl->workState], c_ChargeStateName[workState]);
+            pChargeCtrl->workState = workState;
+        }
+    }
+}
+
+static void AswCharge_IdleStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl)
+{
+    uint8_t evseState = AswEVSE_GetEVSEState(port);
+
+    if (evseState == ASWEVSE_STATE_2)
+    {
+        AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_READY);
+    }
+}
+
+static void AswCharge_ReadyStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl)
+{
+    uint8_t evseState = AswEVSE_GetEVSEState(port);
+    AswErrChargeCondition_Enum eChargeCondition = AswErrHandle_GetChargeCondition(port);
+
+    if (pChargeCtrl->authFlag == TRUE)
+    {
+        if (eChargeCondition == eErrChargeCondition_Cancel)
+        {
+            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STOPPING);
+        }
+        else if (eChargeCondition == eErrChargeCondition_Suspend)
+        {
+            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_PAUSEB);
+        }
+        else
+        {
+            if (evseState == ASWEVSE_STATE_1 || evseState == ASWEVSE_STATE_1_DOT)
+            {
+                AswErrhandle_SetErrExsitCallback(port, eErr_GunDisConn);
+            }
+            else if (evseState == ASWEVSE_STATE_2)
+            {
+                AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STARTING);
+                AswEVSE_StartCharge(port);
+                pChargeCtrl->startTimer = Common_GetSystick();
+                pChargeCtrl->tryWakeupFlag = FALSE;
+            }
+            else
+            {}
+        }
+    }
+    else
+    {
+        if (evseState == ASWEVSE_STATE_1 || evseState == ASWEVSE_STATE_0)
+        {
+            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_IDLE);
+        }
+    }
+}
+
+static void AswCharge_StartingStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl)
+{
+    AswErrChargeCondition_Enum eChargeCondition = AswErrHandle_GetChargeCondition(port);
+    uint8_t evseState = AswEVSE_GetEVSEState(port);
+
+    if (pChargeCtrl->authFlag == TRUE)
+    {
+        if (eChargeCondition == eErrChargeCondition_Cancel)
+        {
+            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STOPPING);
+            AswEVSE_StopCharge(port);
+        }
+        else if (eChargeCondition == eErrChargeCondition_Suspend || ASWCHARGE_CFG_GetCurRateCurrent(port) == 0)
+        {
+            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_PAUSEB);
+        }
+        else
+        {
+            if (evseState == ASWEVSE_STATE_1 || evseState == ASWEVSE_STATE_1_DOT)
+            {
+                AswErrhandle_SetErrExsitCallback(port, eErr_GunDisConn);
+            }
+            else
+            {
+                if (evseState != ASWEVSE_STATE_3_DOT)
+                {
+                    if (Common_JudgeTimeoutMs(pChargeCtrl->startTimer, ASWCHARGE_CFG_START_TIMEOUT))
+                    {
+                        if (pChargeCtrl->tryWakeupFlag == FALSE)
+                        {
+                            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_WAKEUP);
+                            CddCP_SetReqStartWakeup(port);
+                            pChargeCtrl->tryWakeupFlag = TRUE;
+                        }
+                        else
+                        {
+                            AswErrhandle_SetErrExsitCallback(port, eErr_ChgStartTimeout);
+                        }
+                    }
+                }
+                else
+                {
+                    AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_CHARGING);
+                    memset(&pChargeCtrl->stFilterlittleCur, 0x00, sizeof(FilterProfile1_Struct));
+                }
+            }
+        }
+    }
+    else
+    {
+        AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STOPPING);
+        AswEVSE_StopCharge(port);
+    }
+}
+
+static void AswCharge_WakeupStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl)
+{
+    AswErrChargeCondition_Enum eChargeCondition = AswErrHandle_GetChargeCondition(port);
+    uint8_t evseState = AswEVSE_GetEVSEState(port);
+    uint8_t wakeupStatus = CddCP_GetWakeupStatus(port);
+
+    if (pChargeCtrl->authFlag == TRUE)
+    {
+        if (eChargeCondition == eErrChargeCondition_Cancel)
+        {
+            CddCP_SetReqStopWakeUp(port);
+            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STOPPING);
+            AswEVSE_StopCharge(port);
+        }
+        else if (eChargeCondition == eErrChargeCondition_Suspend || ASWCHARGE_CFG_GetCurRateCurrent(port) == 0)
+        {
+            CddCP_SetReqStopWakeUp(port);
+            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_PAUSEB);
+        }
+        else
+        {
+            if (evseState == ASWEVSE_STATE_1 || evseState == ASWEVSE_STATE_1_DOT)
+            {
+                CddCP_SetReqStopWakeUp(port);
+                AswErrhandle_SetErrExsitCallback(port, eErr_GunDisConn);
+            }
+            else
+            {
+                if (wakeupStatus != GLOBAL_OPT_STATE_PROCESS)
+                {
+                    AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STARTING);
+                    pChargeCtrl->startTimer = Common_GetSystick();
+                }
+            }
+        }    
+    }
+    else
+    {
+        CddCP_SetReqStopWakeUp(port);
+        AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STOPPING);
+        AswEVSE_StopCharge(port);
+    }
+}
+
+static void AswCharge_ChargingStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl)
+{
+    AswErrChargeCondition_Enum eChargeCondition = AswErrHandle_GetChargeCondition(port);
+    uint8_t evseState = AswEVSE_GetEVSEState(port);
+    uint32_t outputCurrent = 0;
+
+    if (pChargeCtrl->authFlag == TRUE)
+    {
+        if (eChargeCondition == eErrChargeCondition_Cancel)
+        {
+            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STOPPING);
+            AswEVSE_StopCharge(port);
+        }
+        else if (eChargeCondition == eErrChargeCondition_Suspend || ASWCHARGE_CFG_GetCurRateCurrent(port) == 0)
+        {
+            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_PAUSEB);
+        }
+        else 
+        {
+            if (evseState == ASWEVSE_STATE_1 || evseState == ASWEVSE_STATE_1_DOT)
+            {
+                AswErrhandle_SetErrExsitCallback(port, eErr_GunDisConn);
+            }
+            else if (evseState == ASWEVSE_STATE_2_DOT)
+            {
+                AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_PAUSEA);
+                pChargeCtrl->vehiclePauseTimer = Common_GetSystick();
+            }
+            else if (evseState == ASWEVSE_STATE_3_DOT)
+            {
+                outputCurrent = ASWCHARGE_CFG_GetOutputCurrent(port);
+
+                if (outputCurrent < ASWCHARGE_CFG_LITTLE_CURRENT_THRESHOLD)
+                {
+                    pChargeCtrl->stFilterlittleCur.status = TRUE;
+                }
+                else
+                {
+                    pChargeCtrl->stFilterlittleCur.status = FALSE;
+                }
+
+                if (Filter_Profile1(&pChargeCtrl->stFilterlittleCur, ASWCHARGE_CFG_LITTLE_CURRENT_FILTER_COUNT))
+                {
+                    AswErrhandle_SetErrExsitCallback(port, eSrc_LittleCurr);
+                }
+            }
+            else
+            {}
+        }
+    }
+    else
+    {
+        AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STOPPING);
+        AswEVSE_StopCharge(port);
+    }
+}
+
+static void AswCharge_PauseAStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl)
+{
+    AswErrChargeCondition_Enum eChargeCondition = AswErrHandle_GetChargeCondition(port);
+    uint8_t evseState = AswEVSE_GetEVSEState(port);
+
+    if (pChargeCtrl->authFlag == TRUE)
+    {
+        if (eChargeCondition == eErrChargeCondition_Cancel)
+        {
+            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STOPPING);
+            AswEVSE_StopCharge(port);
+        }
+        else if (eChargeCondition == eErrChargeCondition_Suspend || ASWCHARGE_CFG_GetCurRateCurrent(port) == 0)
+        {
+            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_PAUSEB);
+        }
+        else 
+        {
+            if (evseState == ASWEVSE_STATE_1 || evseState == ASWEVSE_STATE_1_DOT)
+            {
+                AswErrhandle_SetErrExsitCallback(port, eErr_GunDisConn);
+            }
+            else if (evseState == ASWEVSE_STATE_2_DOT)
+            {
+                if (Common_JudgeTimeoutMs(pChargeCtrl->vehiclePauseTimer, ASWCHARGE_CFG_PAUSE_TIMEOUT))
+                {
+                    AswErrhandle_SetErrExsitCallback(port, eSrc_S2BreakOff);
+                }
+            }
+            else if (evseState == ASWEVSE_STATE_3_DOT)
+            {
+                AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_CHARGING);
+                memset(&pChargeCtrl->stFilterlittleCur, 0x00, sizeof(FilterProfile1_Struct));
+            }
+            else
+            {}
+        }
+    }
+    else
+    {
+        AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STOPPING);
+        AswEVSE_StopCharge(port);
+    }
+}
+
+static void AswCharge_PauseBStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl)
+{
+    AswErrChargeCondition_Enum eChargeCondition = AswErrHandle_GetChargeCondition(port);
+    uint8_t evseState = AswEVSE_GetEVSEState(port);
+
+    if (pChargeCtrl->authFlag == TRUE)
+    {
+        if (evseState == ASWEVSE_STATE_1 || evseState == ASWEVSE_STATE_1_DOT)
+        {
+            AswErrhandle_SetErrExsitCallback(port, eErr_GunDisConn);
+        }
+        else 
+        {
+            if (eChargeCondition == eErrChargeCondition_Cancel)
+            {
+                AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STOPPING);
+                AswEVSE_StopCharge(port);
+            }
+            else if (eChargeCondition == eErrChargeCondition_Allow)
+            {
+                if (ASWCHARGE_CFG_GetCurRateCurrent(port) > 0)
+                {
+                    AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STARTING);
+                    pChargeCtrl->startTimer = Common_GetSystick();
+                    pChargeCtrl->tryWakeupFlag = FALSE;
+                }
+            }
+            else
+            {}
+        }
+    }
+    else
+    {
+        AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STOPPING);
+        AswEVSE_StopCharge(port);
+    }
+}
+
+static void AswCharge_StoppingStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl)
+{
+    CddRelayState_Enum eRelayState = CddRelay_GetRelayState(port);
+
+    pChargeCtrl->authFlag = FALSE;
+
+    if (pChargeCtrl->stopTimer == 0)
+    {
+        pChargeCtrl->stopTimer = Common_GetSystick();
+    }
+    else
+    {
+        if (eRelayState != eCddRelayState_Off)
+        {
+            if (Common_JudgeTimeoutMs(pChargeCtrl->stopTimer, ASWCHARGE_CFG_STOP_TIMEOUT))
+            {
+                AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_FINISH);
+                pChargeCtrl->stopTimer = 0;
+            }
+        }
+        else
+        {
+            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_FINISH);
+            pChargeCtrl->stopTimer = 0;
+        }
+    }
+}
+
+static void AswCharge_FinishStateHandle(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl)
+{
+    CddCPVolState_Enum eCPState = CddCP_GetVolState(port);
+
+    if (pChargeCtrl->quitStopFinishTimer == 0)
+    {
+        pChargeCtrl->quitStopFinishTimer = Common_GetSystick();
+    }
+    else
+    {
+        if (Common_JudgeTimeoutMs(pChargeCtrl->quitStopFinishTimer, ASWCHARGE_CFG_QUIT_FINISH_TIMEOUT))
+        {
+            if (pChargeCtrl->authFlag == TRUE)
+            {
+                AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_READY);
+                pChargeCtrl->quitStopFinishTimer = 0;
+                AswErrHandle_ClearStopReason(port);
+            }
+            else
+            {
+                if (eCPState == eCddCPVolState_12V)
+                {
+                    AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_IDLE);
+                    pChargeCtrl->quitStopFinishTimer = 0;
+                    AswErrHandle_ClearStopReason(port);
+                }
+            }
+        }
+    }
+}
+
+static void AswCharge_WorkStateManage(uint8_t port, AswChargeCtrl_Struct *pChargeCtrl)
+{
+    switch (pChargeCtrl->workState)
+    {
+        case ASWCHARGE_WORKSTATE_IDLE:
+        {
+            AswCharge_IdleStateHandle(port, pChargeCtrl);
+            break;
+        }
+        case ASWCHARGE_WORKSTATE_READY:
+        {
+            AswCharge_ReadyStateHandle(port, pChargeCtrl);
+            break;
+        }
+        case ASWCHARGE_WORKSTATE_STARTING:
+        {
+            AswCharge_StartingStateHandle(port, pChargeCtrl);
+            break;
+        }
+        case ASWCHARGE_WORKSTATE_WAKEUP:
+        {
+            AswCharge_StartingStateHandle(port, pChargeCtrl);
+            break;
+        }
+        case ASWCHARGE_WORKSTATE_CHARGING:
+        {
+            AswCharge_ChargingStateHandle(port, pChargeCtrl);
+            break;
+        }
+        case ASWCHARGE_WORKSTATE_PAUSEA:
+        {
+            AswCharge_PauseAStateHandle(port, pChargeCtrl);
+            break;
+        }
+        case ASWCHARGE_WORKSTATE_PAUSEB:
+        {
+            AswCharge_PauseBStateHandle(port, pChargeCtrl);
+            break;
+        }
+        case ASWCHARGE_WORKSTATE_STOPPING:
+        {
+            AswCharge_StoppingStateHandle(port, pChargeCtrl);
+            break;
+        }
+        case ASWCHARGE_WORKSTATE_FINISH:
+        {
+            AswCharge_FinishStateHandle(port, pChargeCtrl);
+            break;
+        }
+        default:
+        {
+            pChargeCtrl->workState = ASWCHARGE_WORKSTATE_IDLE;
+            break;
+        }
+    }
+}
+
+uint8_t AswCharge_GetWorkState(uint8_t port)
+{
+    AswChargeCtrl_Struct *pChargeCtrl = &g_stAswChargeCtrl[port];
+    uint8_t workState = ASWCHARGE_WORKSTATE_IDLE;
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        workState = pChargeCtrl->workState;
+    }
+
+    return workState;
+}
+
+uint8_t AswCharge_IsAuth(uint8_t port)
+{
+    AswChargeCtrl_Struct *pChargeCtrl = &g_stAswChargeCtrl[port];
+    uint8_t ret  = FALSE;
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        ret = pChargeCtrl->authFlag;
+    }
+
+    return ret;
+}
+
+void AswCharge_InitMemory(void)
+{
+    memset(g_stAswChargeCtrl, 0x00, sizeof(g_stAswChargeCtrl));
+}
+
+void AswCharge_MainFunction(void)
+{
+    AswChargeCtrl_Struct *pChargeCtrl = NULL;
+    uint8_t port = 0;
+
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+    {
+        pChargeCtrl = &g_stAswChargeCtrl[port];
+        AswCharge_WorkStateManage(port, pChargeCtrl);
+    }
+}
+
+void AswCharge_SetProfile(AswChargeCtrlProfile_Enum eProfile)
+{
+
+
+
+}

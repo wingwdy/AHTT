@@ -413,6 +413,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\ASW\ASW_CHG\Asw_EVSE.c</FilePath>
             </File>
+            <File>
+              <FileName>Asw_Charge.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_CHG\Asw_Charge.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

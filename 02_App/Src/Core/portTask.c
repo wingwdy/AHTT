@@ -17,6 +17,7 @@
 *    Header File Inclusion
 *******************************************************************************/
 #include "Asw_EVSE.h"
+#include "Asw_Charge.h"
 
 #include "Cdd_CP.h"
 #include "Cdd_Relay.h"
@@ -61,7 +62,8 @@ typedef struct
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-static void Task_10ms(void *arg);
+static void Task_10msA(void *arg);
+static void Task_10msB(void *arg);
 static void Task_100ms(void *arg);
 
 
@@ -72,8 +74,9 @@ static void Task_100ms(void *arg);
 *******************************************************************************/
 static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
 {
-    {"App10ms",        Task_10ms,          NULL,         512,   6 } ,
-    {"App100ms",       Task_100ms,         NULL,         512,   6 } ,
+    {"App10msA",        Task_10msA,          NULL,         512,   6 } ,
+    {"App10msB",        Task_10msB,          NULL,         512,   7 } ,
+    {"App100ms",        Task_100ms,          NULL,         512,   5 } ,
 };
 
 /*******************************************************************************
@@ -104,16 +107,24 @@ void portTask_CreatAllTask(void)
 }
 
 
-static void Task_10ms(void *arg)
+static void Task_10msA(void *arg)
 {
     while (1)
     {
         CddRelay_MainFunction();
         CddCP_MainFunction();
+        AswEVSE_MainFunction();
+        AswCharge_MainFunction();
+        vTaskDelay(10);
+    }
+}
+
+static void Task_10msB(void *arg)
+{
+    while (1)
+    {
         CddRcd_MainFunction();
         CddPE_MainFunction();
-
-        AswEVSE_MainFunction();
         vTaskDelay(10);
     }
 }

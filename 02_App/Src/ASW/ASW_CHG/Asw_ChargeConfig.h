@@ -16,14 +16,30 @@
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-
+#include "DS_LogM.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
 #define ASWCHARGE_CFG_CALL_CYCLE                       (10)
 
+#define ASWCHARGE_CFG_START_TIMEOUT                    15000
 
+#define ASWCHARGE_CFG_STOP_TIMEOUT                     10000
+
+#define ASWCHARGE_CFG_PAUSE_TIMEOUT                    30000
+
+#define ASWCHARGE_CFG_LITTLE_CURRENT_FILTER_COUNT      ((30 * 60 * 1000) / ASWCHARGE_CFG_CALL_CYCLE)
+
+#define ASWCHARGE_CFG_LITTLE_CURRENT_THRESHOLD         1000
+
+#define ASWCHARGE_CFG_GetCurRateCurrent(port)          0
+
+#define ASWCHARGE_CFG_LogPrint(fmt, ...)               DSLOGM_Debug(DSLogMModule_Charge, fmt, ##__VA_ARGS__)
+
+#define ASWCHARGE_CFG_GetOutputCurrent(port)           1000
+
+#define ASWCHARGE_CFG_QUIT_FINISH_TIMEOUT              200
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

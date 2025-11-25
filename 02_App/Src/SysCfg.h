@@ -21,13 +21,17 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define   SYSCFG_CFG_OS_HEAP_SIZE        (50 * 1024)
 
-#define   SYSCFG_VECT_TAB_OFFSET         0x0000
+#define   SYSCFG_CFG_MAX_OUTPUT_CURRENT         (32000U)
+#define   SYSCFG_CFG_MIN_OUTPUT_CURRENT         (6000U)
 
-#define   SYSTEM_CFG_WATCHDOG_ENABLE     FALSE
+#define   SYSCFG_CFG_OS_HEAP_SIZE               (50 * 1024U)
 
-#define   SYSCFG_CFG_GUN_NUM             1
+#define   SYSCFG_CFG_VECT_TAB_OFFSET            (0x0000U)
+
+#define   SYSTEM_CFG_WATCHDOG_ENABLE            (FALSE)
+
+#define   SYSCFG_CFG_GUN_NUM                    (1U)
 
 /******************************************************************************
 *    Enum Definition

@@ -107,9 +107,11 @@ static void AswEVSE_SetEVSEState(uint8_t port, uint8_t state)
 
 static void AswEVSE_StateEnterState0(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl)
 {
+    AswErrChargeCondition_Enum eChargeCondition = AswErrHandle_GetChargeCondition(port);
+
     if (pEVSECtrl->evseState != ASWEVSE_STATE_0)
     {
-        if ((TRUE == AswErrHandle_IsExsistError(port)))
+        if (eErrChargeCondition_Allow != eChargeCondition)
         {
             CddRelay_SetReqStopShortCutDetect(port);
             CddCP_SetReqStopDiodeExsitDetect(port);
