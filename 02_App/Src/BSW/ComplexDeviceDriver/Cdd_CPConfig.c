@@ -83,6 +83,7 @@ static float CddCPCfg_GetCPVol(uint8_t port)
     uint16_t adcData[CDDCP_CFG_ADC_BUFF_POINT] = {0};
     uint16_t averageAdcData = 0;
     float cpVol = 0.0;
+    
 
     if (port == 0)
     {
@@ -91,6 +92,7 @@ static float CddCPCfg_GetCPVol(uint8_t port)
 
     averageAdcData = Common_MedianU16Filter(adcData, CDDCP_CFG_ADC_BUFF_POINT, CDDCP_CFG_ADC_BUFF_POINT / 2);
     cpVol = (averageAdcData / 4096.0 * 3.3  - 1.595) / 0.119 - 0.1;
+
     return cpVol;
 }
 
@@ -110,7 +112,7 @@ static void CddCPCfg_SetPwmDuty(uint8_t port, uint16_t duty)
         else
         {
             McalPWM_SetSingleDuty(eMcalPWMOCChannel_CP, duty);
-            McalPWM_SetSingleDuty(eMcalPWMOCChannel_CPDetect, duty);
+            McalPWM_SetSingleDuty(eMcalPWMOCChannel_CPDetect, duty / 2);
             McalPWM_SetOutputMode(eMcalPWMOCChannel_CP, MCALPWM_MODE_FORCE_PWM);
         }
     }

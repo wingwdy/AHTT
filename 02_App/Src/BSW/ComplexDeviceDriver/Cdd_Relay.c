@@ -88,7 +88,7 @@ static void CddRelay_IdleHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
 
     Filter_Profile1(&pRelayCtrl->stRelayState, CDDRELAY_CFG_STATE_FILTER_COUNT);
 
-    if (pRelayCtrl->eRelayCtrlState == eCddRelayCtrlState_SwitchOn)
+    if (pRelayCtrl->eRelayCtrlOpt == eCddRelayCtrlState_SwitchOn)
     {
         if (pRelayCtrl->stRelayState.validStatus == (uint8_t)eCddRelayState_Off)
         {
@@ -250,7 +250,7 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
             {
                 pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_FAIL;
                 pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
-                CDDRELAY_CFG_LogPrint("[枪：%d]输出短路检测时，继电器未断开!\r\n");
+                CDDRELAY_CFG_LogPrint("[枪：%d]输出短路检测时，继电器未断开!\r\n", port);
                 AswErrhandle_SetErrExsitCallback(port, eErr_ShortCircleErr);
             }
             else
@@ -259,6 +259,8 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
                 {
                     c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOn(port);
                 }
+
+                CDDRELAY_CFG_LogPrint("[枪：%d]投入输出短路检测回路!\r\n", port);
 
                 pRelayCtrl->shortCutDetectTimer = Common_GetSystick();
                 pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP2;
@@ -274,7 +276,14 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
             {
                 pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_FAIL;
                 pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
+                CDDRELAY_CFG_LogPrint("[枪：%d]输出短路检测超时[%d]ms!\r\n", port, CDDRELAY_CFG_SHORTCUT_TIMEOUT);
                 AswErrhandle_SetErrExsitCallback(port, eErr_ShortCircleErr);
+                if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff != NULL)
+                {
+                    c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff(port);
+                }
+
+                CDDRELAY_CFG_LogPrint("[枪：%d]断开输出短路检测回路!\r\n", port);
             }
             else
             {
@@ -293,6 +302,14 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
                     {
                         pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_SUCCESS;
                         pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
+                        CDDRELAY_CFG_LogPrint("[枪：%d]输出短路检测成功!\r\n", port);
+
+                        if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff != NULL)
+                        {
+                            c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff(port);
+                        }
+
+                        CDDRELAY_CFG_LogPrint("[枪：%d]断开输出短路检测回路!\r\n", port);
                     }
                 }
             }
@@ -331,6 +348,7 @@ void CddRelay_SetReqStartShortCutDetect(uint8_t port)
             pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP1;
             pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_PROCESS;
             memset(&pRelayCtrl->stFilterShortCutDetect, 0x00, sizeof(pRelayCtrl->stFilterShortCutDetect));
+            CDDRELAY_CFG_LogPrint("[枪：%d]请求执行输出短路检测!\r\n", port);
         }
     }
 }
@@ -341,19 +359,35 @@ void CddRelay_SetReqStopShortCutDetect(uint8_t port)
 
     if (port < SYSCFG_CFG_GUN_NUM)
     {
-        pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
-        pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;
-
-        if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff != NULL)
+        if (pRelayCtrl->shortCutDetectStep != CDDRELAY_SHORTCUT_STEP0)
         {
-            c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff(port);
+            pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
+            pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;
+
+            CDDRELAY_CFG_LogPrint("[枪：%d]请求中止输出短路检测!\r\n", port);
+
+            if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff != NULL)
+            {
+                c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff(port);
+            }
+
+            CDDRELAY_CFG_LogPrint("[枪：%d]断开输出短路检测回路!\r\n", port);
         }
     }
 }
 
 void CddRelay_InitMemory(void)
 {
-    memset(g_stRelayCtrl, 0x00, sizeof(g_stRelayCtrl));
+    CddRelayCtrl_Struct *pRelayCtrl = NULL;
+    uint8_t port = 0;
+
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+    {
+        pRelayCtrl = &g_stRelayCtrl[port];
+
+        memset(pRelayCtrl, 0x00, sizeof(CddRelayCtrl_Struct));
+        pRelayCtrl->eRelayCtrlOpt = eCddRelayCtrlState_SwitchOff;
+    }
 }
 
 CddRelayState_Enum CddRelay_GetRelayState(uint8_t port)
@@ -386,7 +420,7 @@ void CddRelay_CtrlSwichOn(uint8_t port)
             {
                 c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOn(port);
             }
-
+            CDDRELAY_CFG_LogPrint("[枪：%d]请求闭合继电器!\r\n", port);
             memset(&pRelayCtrl->stFilterMaloperationDetect, 0x00, sizeof(FilterProfile1_Struct));
         }
     }
@@ -411,6 +445,7 @@ void CddRelay_CtrlSwichOff(uint8_t port)
             }
 
             memset(&pRelayCtrl->stFilterMaloperationDetect, 0x00, sizeof(FilterProfile1_Struct));
+            CDDRELAY_CFG_LogPrint("[枪：%d]请求断开继电器!\r\n", port);
         }
     }
 }
@@ -424,6 +459,7 @@ void CddRelay_MainFunction(void)
     {
         pRelayCtrl = &g_stRelayCtrl[port];
         CddRelay_RelayStateManage(port, pRelayCtrl);
+        CddRelay_ShortCutDetect(port, pRelayCtrl);
     }
 }
 

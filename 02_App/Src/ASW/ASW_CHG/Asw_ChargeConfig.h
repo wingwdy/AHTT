@@ -33,7 +33,7 @@
 
 #define ASWCHARGE_CFG_LITTLE_CURRENT_THRESHOLD         1000
 
-#define ASWCHARGE_CFG_GetCurRateCurrent(port)          0
+#define ASWCHARGE_CFG_GetCurRateCurrent(port)          32000
 
 #define ASWCHARGE_CFG_LogPrint(fmt, ...)               DSLOGM_Debug(DSLogMModule_Charge, fmt, ##__VA_ARGS__)
 

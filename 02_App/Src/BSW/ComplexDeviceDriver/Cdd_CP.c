@@ -238,7 +238,7 @@ static void CddCP_DiodeExsitDetect(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
             pCPCtrl->diodeDetectStep = CDDCP_DIODE_DETECT_STEP0;
             pCPCtrl->diodeDetectResult = GLOBAL_OPT_STATE_FAIL;
             CddCP_SetPwmDuty(port, 1000);
-            CDDCP_CFG_LogPrint("[枪：%d]二极管存在性检测超时[%d]ms，该车不存在二极管！当前CP电压：%d.%d V\r\n",
+            CDDCP_CFG_LogPrint("[枪：%d]二极管存在性检测超时[%d]ms，该车不存在二极管！当前CP电压：%d.%03d V\r\n",
             port, CDDCP_CFG_DIODE_DETECT_TIMEOUT, pCPCtrl->cpVol / 1000, pCPCtrl->cpVol % 1000);
             AswErrhandle_SetErrExsitCallback(port, eErr_DiodeStop);
 
@@ -346,7 +346,7 @@ static void CddCP_VolStateHandle(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
             {
                 if (pCPCtrl->eValidCpVolState != pCPCtrl->eTempCpVolState)
                 {
-                    CDDCP_CFG_LogPrint("[枪：%d]CP电压状态：%s ---> %s, 当前CP电压值：%d.%d V\r\n",
+                    CDDCP_CFG_LogPrint("[枪：%d]CP电压状态：%s ---> %s, 当前CP电压值：%d.%03d V\r\n",
                     port, c_cpStateName[pCPCtrl->eValidCpVolState], c_cpStateName[pCPCtrl->eTempCpVolState]
                     , pCPCtrl->cpVol/1000, pCPCtrl->cpVol % 1000);
                     pCPCtrl->eValidCpVolState = pCPCtrl->eTempCpVolState;
@@ -419,7 +419,7 @@ void CddCP_AdjustCurRateCurrent(uint8_t port, uint32_t current)
                 {
                     if (pCpCtrl->curAjustCurrent != current)
                     {
-                        CDDCP_CFG_LogPrint("[枪：%d]CP PWM使能：%d, CP额定电流值变化：[%d.%d A] ---> [%d.%d A] \r\n",
+                        CDDCP_CFG_LogPrint("[枪：%d]CP PWM使能：%d, CP额定电流值变化：[%d.%03d A] ---> [%d.%03d A] \r\n",
                             port, pCpCtrl->cpPWMOutputEnable, pCpCtrl->curAjustCurrent / 1000, 
                             pCpCtrl->curAjustCurrent % 1000, current / 1000, current % 1000);
 
@@ -576,7 +576,7 @@ void CddCP_StartPWM(uint8_t port)
         if (pCpCtrl->cpPWMOutputEnable != TRUE)
         {
             pCpCtrl->cpPWMOutputEnable = TRUE;
-            CDDCP_CFG_LogPrint("[枪：%d]CP开始发送PWM! PWM对应电流值：%d.%d\r\n",port, pCpCtrl->curAjustCurrent / 1000,
+            CDDCP_CFG_LogPrint("[枪：%d]CP开始发送PWM! PWM对应电流值：%d.%03d\r\n",port, pCpCtrl->curAjustCurrent / 1000,
             pCpCtrl->curAjustCurrent % 1000);
         }
 

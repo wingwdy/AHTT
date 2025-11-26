@@ -107,11 +107,9 @@ static void AswEVSE_SetEVSEState(uint8_t port, uint8_t state)
 
 static void AswEVSE_StateEnterState0(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl)
 {
-    AswErrChargeCondition_Enum eChargeCondition = AswErrHandle_GetChargeCondition(port);
-
     if (pEVSECtrl->evseState != ASWEVSE_STATE_0)
     {
-        if (eErrChargeCondition_Allow != eChargeCondition)
+        if (TRUE == AswErrHandle_IsExsistError(port))
         {
             CddRelay_SetReqStopShortCutDetect(port);
             CddCP_SetReqStopDiodeExsitDetect(port);
@@ -173,7 +171,9 @@ static void AswEVSE_State2Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
         if (pEVSECtrl->shortCutDetectResult == GLOBAL_OPT_STATE_IDLE)
         {
             CddRelay_SetReqStartShortCutDetect(port);
-        }
+        } 
+
+        pEVSECtrl->shortCutDetectResult = CddRelay_GetShortCutResult(port);
     }
 
     if (eCpState == eCddCPVolState_9V || eCpState == eCddCPVolState_6V)
@@ -181,8 +181,6 @@ static void AswEVSE_State2Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
 #if (ASWEVSE_CFG_DIODE_DETECT_ENABLE == TRUE)
         pEVSECtrl->diodeDetectResult = CddCP_GetDiodeExsitDetectResult(port);
 #endif
-        pEVSECtrl->shortCutDetectResult = CddRelay_GetShortCutResult(port);
-
         if (pEVSECtrl->shortCutDetectResult == GLOBAL_OPT_STATE_SUCCESS && pEVSECtrl->diodeDetectResult == GLOBAL_OPT_STATE_SUCCESS)
         {
             if (pEVSECtrl->startCharge == TRUE)
@@ -226,6 +224,7 @@ static void AswEVSE_State2DotHanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl,
         else if (eCpState == eCddCPVolState_9V)
         {
             CddRelay_CtrlSwichOff(port);
+            pEVSECtrl->relaySwitchOnDetectDelayTimer = 0;
         }
         else if (eCpState == eCddCPVolState_12V)
         {

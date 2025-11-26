@@ -266,6 +266,7 @@ void AswErrHandle_ClearStopReason(uint8_t port)
     if (port < SYSCFG_CFG_GUN_NUM)
     {
         pErrorHandle->eStopSrc = eErr_none;
+        AswErrhandle_ResetErrExsitCallback(port, eSrc_AppStop);
         AswErrhandle_ResetErrExsitCallback(port, eSrc_CardStop);
         AswErrhandle_ResetErrExsitCallback(port, eSrc_InsuffBalance);
         AswErrhandle_ResetErrExsitCallback(port, eSrc_StopbyMoney);

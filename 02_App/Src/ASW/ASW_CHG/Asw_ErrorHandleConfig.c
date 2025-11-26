@@ -78,7 +78,7 @@ const AswErrorHandleConfig_Struct c_AswErrorHandleConfigTable[eErr_Num] =
     {eErr_POverTempErr,       AswErrorOwner_Pile,  AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "插头过温"},
     {eErr_DatabaseErr,        AswErrorOwner_Pile,  AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "数据库存储错误"},
     {eErr_MeterCalcErr,       AswErrorOwner_Gun,   AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "电能表计量故障"},
-    {eErr_ChgStartTimeout,    AswErrorOwner_Gun,   AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "启动超时"},
+    {eErr_ChgStartTimeout,    AswErrorOwner_Gun,   AswErrorLevel_1, AswErrorLevel_1, AswErrorClear_External,   1,     0,   "启动超时"},
     {eErr_DiodeStop,          AswErrorOwner_Gun,   AswErrorLevel_1, AswErrorLevel_1, AswErrorClear_External,   1,     0,   "不存在二极管"},
     {eSrc_LittleCurr,         AswErrorOwner_Gun,   AswErrorLevel_1, AswErrorLevel_1, AswErrorClear_External,   1,     0,   "小电流停止"},
     {eSrc_S2BreakOff,         AswErrorOwner_Gun,   AswErrorLevel_1, AswErrorLevel_1, AswErrorClear_External,   1,     0,   "S2断开主动停止"},

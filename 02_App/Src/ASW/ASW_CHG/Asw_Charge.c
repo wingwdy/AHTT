@@ -115,6 +115,7 @@ static void AswCharge_IdleStateHandle(uint8_t port, AswChargeCtrl_Struct *pCharg
 
     if (evseState == ASWEVSE_STATE_2)
     {
+//        pChargeCtrl->authFlag = TRUE;
         AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_READY);
     }
 }
@@ -479,7 +480,7 @@ static void AswCharge_WorkStateManage(uint8_t port, AswChargeCtrl_Struct *pCharg
         }
         case ASWCHARGE_WORKSTATE_WAKEUP:
         {
-            AswCharge_StartingStateHandle(port, pChargeCtrl);
+            AswCharge_WakeupStateHandle(port, pChargeCtrl);
             break;
         }
         case ASWCHARGE_WORKSTATE_CHARGING:
