@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_PWMConfig.h
-* Description        : Code for the driver for General timer PWM output
+* File Name          : Mcal_SPIConfig.c
+* Description        : Code for SPI configuration module for hardware
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,87 +11,73 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef MCAL_PWM_CONFIG_H_
-#define MCAL_PWM_CONFIG_H_
+
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Mcal_PWM.h"
-
+#include "Mcal_SPIConfig.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
 
-/* led控制, DMABuf长度 当前3个灯 */
-#define MCALPWM_CFG_LED_COUNT             3
-#define MCALPWM_CFG_LED_POINT             24
-#define MCALPWM_CFG_LED_DMABUF_LEN       (MCALPWM_CFG_LED_COUNT * MCALPWM_CFG_LED_POINT)     
-
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
 
+
+
+
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
-typedef struct 
-{
-    IRQn_Type nvic_irq;
-    uint8_t timer_int_ch;
-    uint8_t nvic_irq_pre_priority;
-    uint8_t nvic_irq_sub_priority;
-}McalPWMTimerIntCfg_Struct;
 
-typedef struct 
-{
-    IRQn_Type nvic_irq;
-    uint32_t DMA_intSrc;
-    uint8_t nvic_irq_pre_priority;
-    uint8_t nvic_irq_sub_priority;
-}McalPWMDMAIntCfg_Struct;
+/******************************************************************************
+*    Global variables Declaration
+******************************************************************************/
+/*
+    SPI0   ---- APB2------180M
+    SPI1/2 ---- APB1------90M
+*/
 
-typedef struct 
+McalSPIConfig_Struct g_stSPIConfigTable[eMcalSPIChanel_Count] = 
 {
-    rcu_periph_enum rcu_DMA_periph;
-    uint32_t DMA_periph;
-    uint16_t DMA_ch;
-    uint32_t DMA_dataCV;
-    dma_parameter_struct DMA_parameter;
-    uint8_t circulationEn;
-    uint8_t DMA_intEn;
-    McalPWMDMAIntCfg_Struct DMA_int;
-}McalPWMTimerDMACfg_Struct;
+    [eMcalSPIChanel_Norflash] = 
+    {
+        .enable = TRUE,
+        .initFlag = FALSE,
+        .rcu_spi_periph = RCU_SPI2,
+        .spi_periph = SPI2,
+        .spi_initPara = 
+        {
+            .trans_mode = SPI_TRANSMODE_FULLDUPLEX,
+            .device_mode = SPI_MASTER,
+            .frame_size = SPI_FRAMESIZE_8BIT,
+            .clock_polarity_phase = SPI_CK_PL_LOW_PH_1EDGE,
+            .nss = SPI_NSS_SOFT,
+            .prescale = SPI_PSC_8,
+            .endian = SPI_ENDIAN_MSB,
+        },
+    },
+};
 
-typedef struct 
-{
-    rcu_periph_enum rcu_timer_periph;
-    uint32_t timer_periph;
-    uint16_t timer_ch;
-    timer_parameter_struct timer_initpara;
-    timer_oc_parameter_struct timer_ocintpara;
-    uint16_t initOutputMode;
-    uint16_t initOutputPulse;
-    uint16_t initCounterVal;
-    uint8_t timer_intEn;
-    McalPWMTimerIntCfg_Struct timer_int;
-    uint8_t DMAEn;
-    McalPWMTimerDMACfg_Struct DMA_Cfg;
-}McalPWMOC_Struct;
+
+
+
+
 
 /*******************************************************************************
-*    Global variables Declaration
+*    Static Local Functions Declaration
 *******************************************************************************/
-extern const McalPWMOC_Struct c_stTimerOCParaTable[eMcalPWMOCChannel_Count];
+
+
+
 
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
 
-
-
-#endif /* MCAL_PWM_CONFIG_H_ */
 
 
 

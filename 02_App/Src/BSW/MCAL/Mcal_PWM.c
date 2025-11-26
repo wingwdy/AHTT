@@ -114,7 +114,7 @@ void McalPWM_Init(void)
 
     for (index = 0; index < eMcalPWMOCChannel_Count; index++)
     {
-        McalPWM_CfgChannel((McalPWMOC_Struct *)&c_TimerOCParaTable[index]);
+        McalPWM_CfgChannel((McalPWMOC_Struct *)&c_stTimerOCParaTable[index]);
     }
 }
 
@@ -123,7 +123,7 @@ void McalPWM_SetOutputMode(McalPWMOCChannel_Enum ch,  uint8_t mode)
     PARA_ASSERT(ch < eMcalPWMOCChannel_Count);
     PARA_ASSERT((mode == MCALPWM_MODE_FORCE_HIGH || mode == MCALPWM_MODE_FORCE_LOW || mode == MCALPWM_MODE_FORCE_PWM));
 
-    const McalPWMOC_Struct *pPwmOCCfg = &c_TimerOCParaTable[ch];
+    const McalPWMOC_Struct *pPwmOCCfg = &c_stTimerOCParaTable[ch];
 
     timer_channel_output_mode_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, mode);
 }
@@ -131,7 +131,7 @@ void McalPWM_SetOutputMode(McalPWMOCChannel_Enum ch,  uint8_t mode)
 void McalPWM_SetSingleDuty(McalPWMOCChannel_Enum ch,  uint16_t duty)
 {
     PARA_ASSERT(ch < eMcalPWMOCChannel_Count);
-    const McalPWMOC_Struct *pPwmOCCfg = &c_TimerOCParaTable[ch];
+    const McalPWMOC_Struct *pPwmOCCfg = &c_stTimerOCParaTable[ch];
     uint16_t pulse = 0;
 
     pulse = duty * pPwmOCCfg->timer_initpara.period / 1000;
@@ -144,7 +144,7 @@ void McalPWM_SetMultiDuty(McalPWMOCChannel_Enum ch,  uint16_t* duty,  uint16_t d
     PARA_ASSERT(dutyCount > 0);
     PARA_ASSERT(duty != NULL);
 
-    const McalPWMOC_Struct *pPwmOCCfg = &c_TimerOCParaTable[ch];
+    const McalPWMOC_Struct *pPwmOCCfg = &c_stTimerOCParaTable[ch];
     uint8_t index = 0;
     uint16_t pulse = 0;
     uint32_t memoryWidth = 0;

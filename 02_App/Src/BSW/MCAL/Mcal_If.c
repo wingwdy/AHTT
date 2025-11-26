@@ -23,6 +23,7 @@
 #include "Mcal_Uart.h"
 #include "CycleBuf.h"
 #include "Mcal_IWDG.h"
+#include "Mcal_SPI.h"
 
 
 
@@ -71,6 +72,7 @@ void McalIf_Init(void)
     McalUart_Init();
     McalADC_Init();
     McalPWM_Init();
+    McalSPI_Init();
 }
 
 void McalIf_Test(void)

@@ -34,7 +34,7 @@
 ******************************************************************************/
 uint16_t g_adc0DMABuf[MCALADC_CFG_ADC0_SAMPLE_CNT][MCALADC_CFG_ADC0_CHANNEL_CNT] = {0};
 
-const McalADCChannelConfig_Struct c_adc0ChannelConfigTable[] = 
+const McalADCChannelConfig_Struct c_stADC0ChannelConfigTable[] = 
 {
     [eMcalADCChanel_CP] =           { 0,         ADC_CHANNEL_5  },
     [eMcalADCChanel_ShortCut] =     { 1,         ADC_CHANNEL_12 },
@@ -43,7 +43,7 @@ const McalADCChannelConfig_Struct c_adc0ChannelConfigTable[] =
     [eMcalADCChannel_PE] =          { 4,         ADC_CHANNEL_15 },
 };
 
-const McalADCConfig_Struct c_mcalADCConfigTable[MCALADC_CFG_INSTANCE_COUNT] = 
+const McalADCConfig_Struct c_stADCConfigTable[MCALADC_CFG_INSTANCE_COUNT] = 
 {
     [MCALADC_CFG_INSTANCE0_ADC0] = 
     {
@@ -53,7 +53,7 @@ const McalADCConfig_Struct c_mcalADCConfigTable[MCALADC_CFG_INSTANCE_COUNT] =
         .continusModeEn = DISABLE,
         .scanModeEn = ENABLE,
         .channelCount = eMcalADCChanel_Count,
-        .pChannelConfigArr = (McalADCChannelConfig_Struct *)c_adc0ChannelConfigTable,
+        .pChannelConfigArr = (McalADCChannelConfig_Struct *)c_stADC0ChannelConfigTable,
         .external_trigger_source = ADC0_1_2_EXTTRIG_REGULAR_NONE,
         .external_trigger_enable = ENABLE,
         .adc_intEn = FALSE,

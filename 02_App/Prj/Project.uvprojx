@@ -339,7 +339,7 @@
               <MiscControls>-Wno-invalid-source-encoding</MiscControls>
               <Define>GD32E50X,GD32E50X_HD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\BSW\ComplexDeviceDriver;..\Src\ASW\ASW_CHG;..\Src\BSW\SystemService\SystemM;..\Src\BSW\DebugService\LogM</IncludePath>
+              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\BSW\ComplexDeviceDriver;..\Src\ASW\ASW_CHG;..\Src\BSW\SystemService\SystemM;..\Src\BSW\DebugService\LogM;..\Src\BSW\MemoryService\Fls_External</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -470,6 +470,13 @@
         </Group>
         <Group>
           <GroupName>BSW/MemoryService</GroupName>
+          <Files>
+            <File>
+              <FileName>W25QXX.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MemoryService\Fls_External\W25QXX.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>BSW/MCAL</GroupName>
@@ -528,6 +535,16 @@
               <FileName>Mcal_IWDG.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\MCAL\Mcal_IWDG.c</FilePath>
+            </File>
+            <File>
+              <FileName>Mcal_SPI.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MCAL\Mcal_SPI.c</FilePath>
+            </File>
+            <File>
+              <FileName>Mcal_SPIConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MCAL\Mcal_SPIConfig.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -81,7 +81,6 @@ static void SSSystemM_InitOne(void)
 static void SSSystemM_InitTwo(void)
 {
 
-
 }
 
 static void SSSystemM_InitThree(void)

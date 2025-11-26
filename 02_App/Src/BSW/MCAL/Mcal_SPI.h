@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Global.h
-* Description        : Code for Global Definition
+* File Name          : Mcal_SPI.h
+* Description        : Code for SPI configuration module for hardware
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,72 +11,26 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-
-#ifndef Global_H_
-#define Global_H_
+#ifndef MCAL_SPI_H_
+#define MCAL_SPI_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "stdint.h"
+#include "Common.h" 
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define GLOBAL_OPT_STATE_IDLE                          (0U)
-#define GLOBAL_OPT_STATE_PROCESS                       (1U)
-#define GLOBAL_OPT_STATE_SUCCESS                       (2U)
-#define GLOBAL_OPT_STATE_FAIL                          (3U)
 
-#ifndef NULL
-#define NULL  0
-#endif
-
-#ifndef TRUE
-#define TRUE  1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#define ARRAY_SIZE(x)               sizeof(x) / sizeof(x[0])
-
-#define PARA_ASSERT(x)              do \
-                                    {}while((x) != TRUE)
-                                    
-#define PARA_ASSERT_RET(x, ret)     do \
-                                    {\
-                                        if ((x) != TRUE)\
-                                        {\
-                                            return ret;\
-                                        }\
-                                    }while(0)
-
-#define CHECK_MAX_EQU(a, b)         ((a >= b) ? TRUE : FALSE)
-#define CHECK_MAX(a, b)             ((a > b) ? TRUE : FALSE)
-#define CHECK_MIN_EQU(a, b)         ((a <= b) ? TRUE : FALSE)
-#define CHECK_MIN(a, b)             ((a < b) ? TRUE : FALSE)
-#define CHECK_EQU(a, b)             ((a == b) ? TRUE : FALSE)
-
-            
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
 typedef enum
 {
-    eGlobalRet_OK,
-    eGlobalRet_Error,
-    eGlobalRet_NotEnoughChannel,
-    eGlobalRet_FIFONotFull,
-    eGlobalRet_ParaInvalid,
-    eGlobalRet_NotInit,
-    eGlobalRet_NotEnoughBuf,
-    eGlobalRet_NotEnoughData,
-    eGlobalRet_UnexpectedError,
+    eMcalSPIChanel_Norflash,
+    eMcalSPIChanel_Count,
+}McalSPIChanel_Enum;
 
-    eGlobalRet_DeviceBusy,
-
-}GlobalRet_Enum;
 
 
 
@@ -90,18 +44,16 @@ typedef enum
 ******************************************************************************/
 
 
+
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-
-
-#endif /* Global_H_ */
-
-
-
-
-
-
+void McalSPI_Init(void);
+GlobalRet_Enum McalSPI_TransmitData(McalSPIChanel_Enum eCh, uint8_t *pTxData, uint16_t dataLen);
+GlobalRet_Enum McalSPI_ReceiveData(McalSPIChanel_Enum eCh, uint8_t *pRxData, uint16_t dataLen);
+GlobalRet_Enum McalSPI_TransmitSyncReceiveData(McalSPIChanel_Enum eCh, uint8_t *pTxData, 
+    uint16_t txLen, uint8_t *pRxData, uint16_t rxLen);
+#endif /* MCAL_SPI_H_ */
 
 
 

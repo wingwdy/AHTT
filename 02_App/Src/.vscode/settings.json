@@ -42,6 +42,10 @@
         "ds_logm.h": "c",
         "ds_logmconfig.h": "c",
         "semphr.h": "c",
-        "asw_chargeconfig.h": "c"
+        "asw_chargeconfig.h": "c",
+        "mcal_spiconfig.h": "c",
+        "mcal_spi.h": "c",
+        "gd32e50x_spi.h": "c",
+        "w25qxx.h": "c"
     }
 }

@@ -131,7 +131,7 @@ void McalADC_Init(void)
 
     for (index = 0; index < MCALADC_CFG_INSTANCE_COUNT; index++)
     {
-       McalADC_CfgChannel((McalADCConfig_Struct *)&c_mcalADCConfigTable[index]);
+       McalADC_CfgChannel((McalADCConfig_Struct *)&c_stADCConfigTable[index]);
     }
 }
 

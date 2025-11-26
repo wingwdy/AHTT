@@ -43,13 +43,13 @@
 *******************************************************************************/
 typedef struct 
 {
-    uint8_t workState;           /* 工作状态 */
-    uint8_t tryWakeupFlag;       /* 尝试唤醒标记，TRUE-表示已唤醒过 */
-    uint8_t authFlag;            /* 授权标记，TRUE-表示已授权 */
-    uint32_t startTimer;         /* 启动超时计时器 */
+    uint8_t workState;            /* 工作状态 */
+    uint8_t tryWakeupFlag;        /* 尝试唤醒标记，TRUE-表示已唤醒过 */
+    uint8_t authFlag;             /* 授权标记，TRUE-表示已授权 */
+    uint32_t startTimer;          /* 启动超时计时器 */
     FilterProfile1_Struct stFilterlittleCur; /* 小电流状态滤波 */
-    uint32_t vehiclePauseTimer;  /* 车端暂停超时计时器 */
-    uint32_t stopTimer;          /* 停止充电超时计时器 */
+    uint32_t vehiclePauseTimer;   /* 车端暂停超时计时器 */
+    uint32_t stopTimer;           /* 停止充电超时计时器 */
     uint32_t quitStopFinishTimer; /* 退出停止完成状态延时计时器 */
 }AswChargeCtrl_Struct;
 
