@@ -43,7 +43,7 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void W25Q_Init(void);
+GlobalRet_Enum W25Q_Init(void);
 GlobalRet_Enum W25Q_Read(uint32_t srcAddr, uint8_t* targetAddr, uint16_t len);
 GlobalRet_Enum W25Q_Write(uint32_t targetAddr, const uint8_t *srcAddr, uint16_t len);
 GlobalRet_Enum W25Q_Erase(uint32_t targetAddr, uint16_t len);

@@ -60,6 +60,7 @@ GlobalRet_Enum CycleBuf_ReadDataIsr(uint8_t channel, uint8_t * pOutData, uint16_
 GlobalRet_Enum CycleBuf_WriteData(uint8_t channel, uint8_t * pSrcData, uint16_t dataSize);
 GlobalRet_Enum CycleBuf_WriteDataIsr(uint8_t channel, uint8_t * pSrcData, uint16_t dataSize);
 GlobalRet_Enum CycleBuf_CreatChannel(uint8_t* pChannel, uint8_t* pDataBuf, uint32_t bufSize, uint8_t porfile);
+GlobalRet_Enum CycleBuf_RemoveData(uint8_t channel, uint16_t dataLen);
 
 #endif /* CYCLEBUF_H_ */
 

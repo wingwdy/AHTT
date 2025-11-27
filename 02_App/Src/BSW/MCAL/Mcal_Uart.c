@@ -157,12 +157,15 @@ GlobalRet_Enum McalUart_WriteData(McalUartChanel_Enum eCh, uint8_t *pBuf, uint16
             }
             else if (pUartCfg->uartCtrl.txMode == MCALUART_CFG_TXMODE_DMA)
             {
-                CycleBuf_CheckDataLen(pUartCfg->uartBufCtrl.txCycleBufID, &remainLen);
-                dma_channel_disable(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch);
-                dma_transfer_number_config(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch, remainLen);
-                dma_channel_enable(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch);
-                while (dma_flag_get(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch, DMA_FLAG_FTF)) {}
-                CycleBuf_ResetBuf(pUartCfg->uartBufCtrl.txCycleBufID);
+                while (eGlobalRet_OK == CycleBuf_CheckDataLen(pUartCfg->uartBufCtrl.txCycleBufID, &remainLen))
+                {
+                    dma_channel_disable(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch);
+                    dma_transfer_number_config(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch, remainLen);
+                    dma_channel_enable(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch);
+                    while (dma_flag_get(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch, DMA_FLAG_FTF)) {}
+                    CycleBuf_RemoveData(pUartCfg->uartBufCtrl.txCycleBufID, remainLen);
+                }
+            
                 pUartCfg->uartCtrl.txtate = MCALUART_TXSTATE_IDLE;
             }
             else
@@ -229,6 +232,20 @@ GlobalRet_Enum McalUart_CheckDataLen(McalUartChanel_Enum eCh, uint16_t* pRemainL
     PARA_ASSERT_RET(pUartCfg->initFlag == TRUE, eGlobalRet_NotInit);
 
     return CycleBuf_CheckDataLen(pUartCfg->uartBufCtrl.rxCycleBufID, pRemainLen);
+}
+
+GlobalRet_Enum McalUart_RemoveData(McalUartChanel_Enum eCh, uint16_t removeLen)
+{
+    McalUartConfig_Struct *pUartCfg = &g_UartConfigTable[eCh];
+    GlobalRet_Enum eRet = eGlobalRet_OK;
+    uint16_t remainLen = 0;
+    uint8_t byte = 0;
+
+    PARA_ASSERT_RET(eCh < eMcalUartChanel_Count, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(removeLen != 0, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(pUartCfg->initFlag == TRUE, eGlobalRet_NotInit);
+
+    return CycleBuf_RemoveData(pUartCfg->uartBufCtrl.rxCycleBufID, removeLen);
 }
 
 void McalUart_Test(void)

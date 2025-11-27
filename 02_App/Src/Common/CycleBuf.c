@@ -445,7 +445,7 @@ GlobalRet_Enum CycleBuf_CheckDataLen(uint8_t channel, uint16_t* pRemainLen)
 
         if (pCycBuf->profile == CYCLEBUF_PROFILE_CIRCLE)
         {
-			if(pCycBuf->writeIdx >= pCycBuf->readIdx)
+			if (pCycBuf->writeIdx >= pCycBuf->readIdx)
 			{
 				pRemainLen[0] = pCycBuf->writeIdx - pCycBuf->readIdx;
 			}
@@ -503,6 +503,72 @@ GlobalRet_Enum CycleBuf_CheckDataLenIsr(uint8_t channel, uint16_t* pRemainLen)
 
 	return eRet;
 }
+
+GlobalRet_Enum CycleBuf_RemoveData(uint8_t channel, uint16_t dataLen)
+{
+	GlobalRet_Enum eRet = eGlobalRet_OK;
+	CycleBuf_Struct *pCycBuf = &g_stCycleBufCtrl[channel];
+    uint16_t remainDataSize = 0u;
+
+	if ((0u == dataLen) || (channel >= CYCLEBUF_MAX_CHANNEL_COUNT))
+    {
+        eRet = eGlobalRet_ParaInvalid;
+    }
+    else if (CYCLEBUF_STATUS_FREE == pCycBuf->status)
+    {
+        eRet = eGlobalRet_NotInit;
+    }
+    else 
+    {
+        CYCLEBUF_ENTER_CRITICAL_AREA();
+
+        if (pCycBuf->profile == CYCLEBUF_PROFILE_CIRCLE)
+        {
+            if (((pCycBuf->readIdx + 1) % pCycBuf->buffSize) != pCycBuf->writeIdx)
+            {
+                if (pCycBuf->readIdx >= pCycBuf->writeIdx)
+                {
+                    remainDataSize = pCycBuf->buffSize - (pCycBuf->readIdx - pCycBuf->writeIdx);
+                }
+                else
+                {
+                    remainDataSize = pCycBuf->writeIdx - pCycBuf->readIdx;
+                }
+
+                if (dataLen <= remainDataSize)
+                {
+                    pCycBuf->readIdx += dataLen;
+                    eRet = eGlobalRet_OK;
+                }
+            }
+        }
+        else
+        {
+            remainDataSize = pCycBuf->writeIdx - pCycBuf->readIdx;
+
+            if (dataLen <= remainDataSize)
+            {
+                pCycBuf->readIdx += dataLen;
+
+                if (pCycBuf->readIdx == pCycBuf->writeIdx)
+                {
+                    pCycBuf->readIdx = 0;
+                    pCycBuf->writeIdx = 0;
+                }
+
+                eRet = eGlobalRet_OK;
+            }
+        }
+
+        CYCLEBUF_EXIT_CRITICAL_AREA(); 
+    }
+
+    return eRet;
+}
+
+
+
+
 
 GlobalRet_Enum CycleBuf_ResetBuf(uint8_t channel)
 {

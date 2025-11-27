@@ -24,33 +24,31 @@
 *    Macro Definition
 *******************************************************************************/
 /* 华邦Flash命令集 */
-#define W25Q_CMD_WRITE_ENABLE   0x06
-#define W25Q_CMD_WRITE_DISABLE  0x04
-#define W25Q_CMD_READ_STATUS1   0x05
-#define W25Q_CMD_READ_STATUS2   0x35
-#define W25Q_CMD_WRITE_STATUS   0x01
-#define W25Q_CMD_READ_DATA      0x03
-#define W25Q_CMD_FAST_READ      0x0B
-#define W25Q_CMD_PAGE_PROGRAM   0x02
-#define W25Q_CMD_SECTOR_ERASE   0x20
-#define W25Q_CMD_CHIP_ERASE     0xC7
-#define W25Q_CMD_POWER_DOWN     0xB9
-#define W25Q_CMD_RELEASE_POWER  0xAB
-#define W25Q_CMD_READ_ID        0x9F
+#define W25Q_CMD_WRITE_ENABLE                          0x06
+#define W25Q_CMD_WRITE_DISABLE                         0x04
+#define W25Q_CMD_READ_STATUS1                          0x05
+#define W25Q_CMD_READ_STATUS2                          0x35
+#define W25Q_CMD_WRITE_STATUS                          0x01
+#define W25Q_CMD_READ_DATA                             0x03
+#define W25Q_CMD_FAST_READ                             0x0B
+#define W25Q_CMD_PAGE_PROGRAM                          0x02
+#define W25Q_CMD_SECTOR_ERASE                          0x20
+#define W25Q_CMD_CHIP_ERASE                            0xC7
+#define W25Q_CMD_POWER_DOWN                            0xB9
+#define W25Q_CMD_RELEASE_POWER                         0xAB
+#define W25Q_CMD_READ_ID                               0x9F
 
 /* 状态寄存器位 */
-#define W25Q_STATUS_BUSY        0x01
-#define W25Q_STATUS_WEL         0x02
+#define W25Q_STATUS_BUSY                               0x01
+#define W25Q_STATUS_WEL                                0x02
 
-#define W25Q_OPT_BUSY           0x01
-#define W25Q_OPT_IDLE           0x00
+#define W25Q_OPT_BUSY                                  0x01
+#define W25Q_OPT_IDLE                                  0x00
 
 
 /*******************************************************************************
 *    Enum Definition
 *******************************************************************************/
-
-
 
 
 
@@ -157,16 +155,22 @@ static void W25Q_WriteDisable(void)
     W25Q_CFG_CS_HIGH();
 }
 
-void W25Q_Init(void) 
+GlobalRet_Enum W25Q_Init(void) 
 {   
+    GlobalRet_Enum eRet = eGlobalRet_OK;
     memset(&g_stW25qxx, 0x00, sizeof(g_stW25qxx));
 
-    if (TRUE == W25Q_CheckDeviceId())
+    if (TRUE != W25Q_CheckDeviceId())
+    {
+        eRet = eGlobalRet_Error;
+    }
+    else
     {
         g_stW25qxx.initFlag = TRUE;
     }
 
     g_stW25qxx.optState = W25Q_OPT_IDLE;
+    return eRet;
 }
 
 GlobalRet_Enum W25Q_Read(uint32_t srcAddr, uint8_t* targetAddr, uint16_t len)
@@ -266,7 +270,7 @@ GlobalRet_Enum W25Q_Write(uint32_t targetAddr, const uint8_t *srcAddr, uint16_t 
 
 GlobalRet_Enum W25Q_Erase(uint32_t targetAddr, uint16_t len)
 {
-   GlobalRet_Enum eRet = eGlobalRet_OK;
+    GlobalRet_Enum eRet = eGlobalRet_OK;
     uint32_t remaining = len;
     uint32_t currentAddr = targetAddr;
     uint8_t cmdFrame[4] = { 0 };
