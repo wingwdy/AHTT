@@ -47,11 +47,17 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
+uint16_t Common_CalcCRC16(uint8_t *pData, uint16_t dataLen);
 void Common_InsertSort(uint16_t *pData, uint16_t n);
 void Common_BubbleSort(uint16_t *pData, uint16_t size);
 uint8_t Common_JudgeTimeoutMs(uint32_t startTick, uint32_t threshold);
 uint16_t Common_MedianU16Filter(uint16_t *pData, uint16_t sample_num, uint16_t discard_num);
 uint32_t Common_GetSystick(void);
+void Common_Uint32ToFourUint8(uint8_t *pData, uint32_t curVal);
+void Common_Uint32ToTwoUint8(uint8_t *pData, uint32_t curVal);
+uint32_t Common_FourUint8ToUint32(uint8_t *pData);
+uint16_t Common_TwoUint8ToUint16(uint8_t *pData);
+void Common_Uint16ToTwoUint8(uint8_t *pData, uint16_t curVal);
 #endif /* COMMON_H_ */
 
 
