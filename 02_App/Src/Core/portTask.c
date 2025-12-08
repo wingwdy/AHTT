@@ -30,7 +30,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "Common.h"
-
+#include "shell.h"
+#include "shell_port.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -65,6 +66,7 @@ typedef struct
 static void Task_10msA(void *arg);
 static void Task_10msB(void *arg);
 static void Task_100ms(void *arg);
+static void Task_Debug20ms(void *arg);
 
 
 
@@ -77,6 +79,7 @@ static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
     {"App10msA",        Task_10msA,          NULL,         512,   6 } ,
     {"App10msB",        Task_10msB,          NULL,         512,   7 } ,
     {"App100ms",        Task_100ms,          NULL,         512,   5 } ,
+    {"DebugTask",       Task_Debug20ms,      NULL,         512,   4 } ,
 };
 
 /*******************************************************************************
@@ -138,7 +141,14 @@ static void Task_100ms(void *arg)
     }
 }
 
-
+static void Task_Debug20ms(void *arg)
+{
+    while (1)
+    {
+        shellTask(&shell);
+        vTaskDelay(20);
+    }
+}
 
 
 

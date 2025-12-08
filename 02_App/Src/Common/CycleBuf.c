@@ -161,7 +161,7 @@ static GlobalRet_Enum CycleBuf_CircleReadData(CycleBuf_Struct *pCycBuf, uint8_t 
 
     if (((pCycBuf->readIdx + 1) % pCycBuf->buffSize) != pCycBuf->writeIdx)
     {
-        if (pCycBuf->readIdx >= pCycBuf->writeIdx)
+        if (pCycBuf->readIdx > pCycBuf->writeIdx)
         {
             remainDataSize = pCycBuf->buffSize - (pCycBuf->readIdx - pCycBuf->writeIdx);
         }
@@ -526,7 +526,7 @@ GlobalRet_Enum CycleBuf_RemoveData(uint8_t channel, uint16_t dataLen)
         {
             if (((pCycBuf->readIdx + 1) % pCycBuf->buffSize) != pCycBuf->writeIdx)
             {
-                if (pCycBuf->readIdx >= pCycBuf->writeIdx)
+                if (pCycBuf->readIdx > pCycBuf->writeIdx)
                 {
                     remainDataSize = pCycBuf->buffSize - (pCycBuf->readIdx - pCycBuf->writeIdx);
                 }
@@ -565,10 +565,6 @@ GlobalRet_Enum CycleBuf_RemoveData(uint8_t channel, uint16_t dataLen)
 
     return eRet;
 }
-
-
-
-
 
 GlobalRet_Enum CycleBuf_ResetBuf(uint8_t channel)
 {

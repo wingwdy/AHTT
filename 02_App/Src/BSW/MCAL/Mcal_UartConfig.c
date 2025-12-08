@@ -61,7 +61,7 @@ McalUartConfig_Struct g_UartConfigTable[eMcalUartChanel_Count] =
         .uart_periph = USART5,
         .baudRate = 115200,
         .paritycfg = USART_PM_NONE,
-        .uartInt_En = FALSE,
+        .uartInt_En = TRUE,
         .uartIntCfg = 
         {
             .nvic_irq = USART5_IRQn,
@@ -82,7 +82,7 @@ McalUartConfig_Struct g_UartConfigTable[eMcalUartChanel_Count] =
         .uartCtrl = 
         {
             .txtate = MCALUART_TXSTATE_IDLE,
-            .txMode = MCALUART_CFG_TXMODE_POLL,
+            .txMode = MCALUART_CFG_TXMODE_INT,
         }
     },
 
@@ -300,7 +300,6 @@ void UART4_IRQHandler(void)
 {
     USART_IRQHandler(eMcalUartChanel_4G);
 }
-
 
 void USART1_IRQHandler(void)
 {

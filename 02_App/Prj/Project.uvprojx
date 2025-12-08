@@ -339,7 +339,7 @@
               <MiscControls>-Wno-invalid-source-encoding</MiscControls>
               <Define>GD32E50X,GD32E50X_HD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\BSW\ComplexDeviceDriver;..\Src\ASW\ASW_CHG;..\Src\BSW\SystemService\SystemM;..\Src\BSW\DebugService\LogM;..\Src\ThirdPartyLib\FlashDB\port\fal\inc;..\Src\ThirdPartyLib\FlashDB\inc;..\Src\BSW\MemoryService\FlashDB_Adapter;..\Src\BSW\MemoryService\MemIf;..\Src\BSW\MemoryService\NVM;..\Src\BSW\MemoryService\EA</IncludePath>
+              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\BSW\ComplexDeviceDriver;..\Src\ASW\ASW_CHG;..\Src\BSW\SystemService\SystemM;..\Src\BSW\DebugService\LogM;..\Src\ThirdPartyLib\FlashDB\port\fal\inc;..\Src\ThirdPartyLib\FlashDB\inc;..\Src\BSW\MemoryService\FlashDB_Adapter;..\Src\BSW\MemoryService\MemIf;..\Src\BSW\MemoryService\NVM;..\Src\BSW\MemoryService\EA;..\Src\BSW\DebugService\Shell;..\Src\ThirdPartyLib\LetterShell</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -605,6 +605,11 @@
               <FileName>DS_LogMConfig.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\DebugService\LogM\DS_LogMConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\DebugService\Shell\shell_port.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -946,6 +951,26 @@
               <FileName>freertos.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\Core\freertos.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>ThirdParty/LetterShell</GroupName>
+          <Files>
+            <File>
+              <FileName>shell.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ThirdPartyLib\LetterShell\shell.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_cmd_list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ThirdPartyLib\LetterShell\shell_cmd_list.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_ext.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ThirdPartyLib\LetterShell\shell_ext.c</FilePath>
             </File>
           </Files>
         </Group>
