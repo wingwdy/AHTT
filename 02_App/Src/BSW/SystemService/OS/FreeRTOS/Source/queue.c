@@ -1583,13 +1583,17 @@ BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue,
                  * semaphore, and if so, unblock the highest priority such task. */
                 if( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToSend ) ) == pdFALSE )
                 {
-                    if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToSend ) ) != pdFALSE )
+                    extern PRIVILEGED_DATA volatile BaseType_t xSchedulerRunning;
+                    if( xSchedulerRunning != pdFALSE )
                     {
-                        queueYIELD_IF_USING_PREEMPTION();
-                    }
-                    else
-                    {
-                        mtCOVERAGE_TEST_MARKER();
+                        if( xTaskRemoveFromEventList( &( pxQueue->xTasksWaitingToSend ) ) != pdFALSE )
+                        {
+                            queueYIELD_IF_USING_PREEMPTION();
+                        }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
                     }
                 }
                 else
