@@ -1,6 +1,6 @@
 /******************************************************************************
 * File Name          : Cdd_Rcd.h
-* Description        : Code for xxxxxxxxxxx
+* Description        : Code for Leakage detection driver implementation
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
