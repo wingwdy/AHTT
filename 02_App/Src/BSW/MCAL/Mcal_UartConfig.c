@@ -51,7 +51,6 @@ static uint8_t g_Uart1SendBuf[MCALUART_CFG_UART1_SENDBUF_SIZE] = { 0 };
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-
 McalUartConfig_Struct g_UartConfigTable[eMcalUartChanel_Count] = 
 {
     [eMcalUartChanel_Debug] = 
@@ -75,7 +74,7 @@ McalUartConfig_Struct g_UartConfigTable[eMcalUartChanel_Count] =
             .pTxBuf = g_Uart5SendBuf,
             .txBufSize = MCALUART_CFG_UART5_SENDBUF_SIZE,
             .txCycleBufID = CYCLEBUF_INVALID_ID,
-            .txProfile = CYCLEBUF_PROFILE_SINGLE,
+            .txProfile = CYCLEBUF_PROFILE_CIRCLE,
             .pRxBuf = g_Uart5RecvBuf,
             .rxBufSize = MCALUART_CFG_UART5_RECVBUF_SIZE,
             .rxCycleBufID = CYCLEBUF_INVALID_ID,
