@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Global.h
-* Description        : Code for Global Definition
+* File Name          : FlashDB_TSDB_Adapt.h
+* Description        : Code for The adapter layer of TSDB
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,80 +11,27 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-
-#ifndef Global_H_
-#define Global_H_
+#ifndef FLASHDB_TSDB_ADAPT_H_
+#define FLASHDB_TSDB_ADAPT_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "stdint.h"
+#include "MS_NvmAppTypes.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define GLOBAL_OPT_STATE_IDLE                          (0U)
-#define GLOBAL_OPT_STATE_PROCESS                       (1U)
-#define GLOBAL_OPT_STATE_SUCCESS                       (2U)
-#define GLOBAL_OPT_STATE_FAIL                          (3U)
 
-#ifndef NULL
-#define NULL  0
-#endif
 
-#ifndef TRUE
-#define TRUE  1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#define ARRAY_SIZE(x)               sizeof(x) / sizeof(x[0])
-
-#define PARA_ASSERT(x)              do \
-                                    {}while((x) != TRUE)
-                                    
-#define PARA_ASSERT_RET(x, ret)     do \
-                                    {\
-                                        if ((x) != TRUE)\
-                                        {\
-                                            return ret;\
-                                        }\
-                                    }while(0)
-
-#define CHECK_MAX_EQU(a, b)         ((a >= b) ? TRUE : FALSE)
-#define CHECK_MAX(a, b)             ((a > b) ? TRUE : FALSE)
-#define CHECK_MIN_EQU(a, b)         ((a <= b) ? TRUE : FALSE)
-#define CHECK_MIN(a, b)             ((a < b) ? TRUE : FALSE)
-#define CHECK_EQU(a, b)             ((a == b) ? TRUE : FALSE)
-
-            
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
 typedef enum
 {
-    eGlobalRet_OK,
-
-    eGlobalRet_Error,
-    eGlobalRet_ParaInvalid,
-
-
-    eGlobalRet_NotSupported,
-    eGlobalRet_InitFail,
-    eGlobalRet_NotInit,
-    
-    eGlobalRet_NotEnoughChannel,
-
-    eGlobalRet_FIFONotFull,
-
-    eGlobalRet_NotEnoughBuf,
-    eGlobalRet_NotEnoughData,
-
-    eGlobalRet_DeviceBusy,
-
-    eGlobalRet_UnexpectedError,
-}GlobalRet_Enum;
+	eTSDBAdaptChannel_ChargeRecord,
+	eTSDBAdaptChannel_ErrorRecord,
+	eTSDBAdaptChannel_Count,
+}TSDBAdaptChannel_Enum;
 
 
 
@@ -93,19 +40,27 @@ typedef enum
 ******************************************************************************/
 
 
+
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
 
 
+
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-
-
-#endif /* Global_H_ */
-
-
+uint8_t TSDBAdapt_Init(void);
+GlobalRet_Enum TSDBAdapt_CleanRecordDB(uint16_t ch);
+uint32_t TSDBAdapt_QueryTotalRecordCount(uint16_t ch);
+uint32_t TSDBAdapt_QueryUnreportedRecordCount(uint16_t ch);
+GlobalRet_Enum TSDBAdapt_InsertRecord(uint16_t ch, uint8_t *pInBuf, uint16_t dataLen);
+GlobalRet_Enum TSDBAdapt_SetRecordReportSuccess(uint16_t ch, uint32_t time);
+GlobalRet_Enum TSDBAdapt_QueryLatestUnreportedRecord(uint16_t ch, uint8_t *pOutBuf, uint16_t dataLen, uint32_t *pTime);
+GlobalRet_Enum TSDBAdapt_QueryRecordByTime(uint16_t ch, uint8_t *pOutBuf, uint16_t dataLen, uint32_t time);
+GlobalRet_Enum TSDBAdapt_QueryRecordByExternal(uint16_t ch, uint8_t *para, uint16_t paraSize,
+    pNvmCmpFunc pCmpFunc, uint8_t *pInBuf, uint16_t dataLen);
+#endif
 
 
 

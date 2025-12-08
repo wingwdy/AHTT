@@ -26,7 +26,9 @@
 #include "Cdd_PE.h"
 #include "Cdd_Sensor.h"
 
-#include "Mcal_If.h"
+#include "MS_Nvm.h"
+
+#include "Mcal_If.h" 
 #include "Mcal_Mcu.h"
 
 #include "DS_LogM.h"
@@ -80,7 +82,8 @@ static void SSSystemM_InitOne(void)
 
 static void SSSystemM_InitTwo(void)
 {
-
+    MSNvm_InitMemory();
+    MSNvm_ReadAll();
 }
 
 static void SSSystemM_InitThree(void)

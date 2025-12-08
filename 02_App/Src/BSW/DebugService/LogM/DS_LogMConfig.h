@@ -21,7 +21,7 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define DSLOGM_CFG_ASYN_BUFF_SIZE                 1024
+#define DSLOGM_CFG_ASYN_BUFF_SIZE                 3072
 
 #define DSLOGM_CFG_OUTPUT_ASYN_ENABLE             TRUE           
 
@@ -44,6 +44,9 @@ typedef enum
 
     /*System Service */
     DSLogMModule_System,
+
+    /*Memory Service */
+    DSLogMModule_Flash,
 
     DSLogMModule_Count,
 }DSLogMModule_Enum;

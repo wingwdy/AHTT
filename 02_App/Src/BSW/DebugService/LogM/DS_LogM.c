@@ -73,23 +73,10 @@ static void DSLogM_OutputFilter(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum
 *******************************************************************************/
 static void DSLogM_OutputFilter(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum eLevel, const char *fmt, va_list args)
 {
-    uint16_t totalLen = g_stLogMCtrl.logDataLen;
-    uint16_t remainBufsize = (totalLen >= DSLOGM_CFG_ASYN_BUFF_SIZE) ? 0 : (DSLOGM_CFG_ASYN_BUFF_SIZE - totalLen);
     uint16_t dataLen = 0;
 
-    dataLen = vsnprintf((char *)g_stLogMCtrl.cacheBuf + totalLen, remainBufsize, fmt, args);
-
-    if (dataLen >= remainBufsize)
-    {
-        g_stLogMCtrl.logDataLen = DSLOGM_CFG_ASYN_BUFF_SIZE;
-    }
-    else
-    {
-        g_stLogMCtrl.logDataLen += dataLen;
-    }
-
-    McalUart_WriteData(eMcalUartChanel_Debug, g_stLogMCtrl.cacheBuf, g_stLogMCtrl.logDataLen);
-    g_stLogMCtrl.logDataLen = 0;
+    dataLen = vsnprintf((char *)g_stLogMCtrl.cacheBuf, DSLOGM_CFG_ASYN_BUFF_SIZE, fmt, args);
+    McalUart_WriteData(eMcalUartChanel_Debug, g_stLogMCtrl.cacheBuf, dataLen);
 }
 
 const char* DSLogM_GetModuleName(DSLogMModule_Enum eModule)
@@ -119,9 +106,28 @@ void DSLogM_InitMemory(void)
     memset(&g_stLogMCtrl, 0x00, sizeof(g_stLogMCtrl));
     g_stLogMCtrl.mutex = xSemaphoreCreateMutex();
 }
+void DSLogM_HexOutput(uint8_t *pHexData, uint16_t dataLen)
+{
+    uint16_t index = 0;
+    uint16_t dataIdx = 0;
 
+    xSemaphoreTake(g_stLogMCtrl.mutex, portMAX_DELAY);
 
+    if (dataLen < ((DSLOGM_CFG_ASYN_BUFF_SIZE / 3) - 2))
+    {
+        for (dataIdx = 0; dataIdx < dataLen; dataIdx++)
+        {
+            sprintf((char *)&g_stLogMCtrl.cacheBuf[index], "%02X ", pHexData[dataIdx]);
+            index += 3;
+        }
 
+        g_stLogMCtrl.cacheBuf[index++] = '\r';
+        g_stLogMCtrl.cacheBuf[index++] = '\n';
+        McalUart_WriteData(eMcalUartChanel_Debug, g_stLogMCtrl.cacheBuf, index);
+    }
+
+    xSemaphoreGive(g_stLogMCtrl.mutex);
+}
 
 
 

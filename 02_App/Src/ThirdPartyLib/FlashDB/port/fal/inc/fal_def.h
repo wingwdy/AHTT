@@ -16,7 +16,7 @@
 #ifdef FDB_USING_NATIVE_ASSERT
 #include <assert.h>
 #endif
-
+#include "DS_LogM.h"
 #define FAL_SW_VERSION                 "0.5.99"
 
 #ifdef __RTTHREAD__ /* for RT-Thread platform */
@@ -45,7 +45,7 @@
 #endif
 
 #ifndef FAL_PRINTF
-#define FAL_PRINTF                     printf
+#define FAL_PRINTF(fmt, ...)           DSLOGM_Debug(DSLogMModule_Flash, fmt, ##__VA_ARGS__)
 #endif
 
 #ifndef FAL_DEBUG

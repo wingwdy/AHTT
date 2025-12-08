@@ -173,7 +173,7 @@ GlobalRet_Enum W25Q_Init(void)
     return eRet;
 }
 
-GlobalRet_Enum W25Q_Read(uint32_t srcAddr, uint8_t* targetAddr, uint16_t len)
+GlobalRet_Enum W25Q_Read(uint32_t srcAddr, uint8_t* targetAddr, uint32_t len)
 {
     GlobalRet_Enum eRet = eGlobalRet_OK;
 
@@ -190,6 +190,8 @@ GlobalRet_Enum W25Q_Read(uint32_t srcAddr, uint8_t* targetAddr, uint16_t len)
     cmd[1] = (srcAddr >> 16) & 0xFF;  // 地址高位
     cmd[2] = (srcAddr >> 8) & 0xFF;   // 地址中位
     cmd[3] = srcAddr & 0xFF;          // 地址低位
+
+    W25Q_CFG_SpiTransmit(&dummy, 1);
 
     W25Q_CFG_CS_LOW();
     W25Q_CFG_SpiTransmit(cmd, 4);
@@ -209,8 +211,7 @@ GlobalRet_Enum W25Q_Read(uint32_t srcAddr, uint8_t* targetAddr, uint16_t len)
 
     return eRet;
 }
-
-GlobalRet_Enum W25Q_Write(uint32_t targetAddr, const uint8_t *srcAddr, uint16_t len)
+GlobalRet_Enum W25Q_Write(uint32_t targetAddr, const uint8_t *srcAddr, uint32_t len)
 {
     GlobalRet_Enum eRet = eGlobalRet_OK;
     uint32_t remaining = len;
@@ -219,6 +220,7 @@ GlobalRet_Enum W25Q_Write(uint32_t targetAddr, const uint8_t *srcAddr, uint16_t 
     uint8_t cmdFrame[4] = { 0 };
     uint32_t pageOffset = 0;
     uint32_t bytesToWrite = 0;
+    uint8_t dummy = 0xFF;
 
     PARA_ASSERT_RET(len != 0 && srcAddr != NULL, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET((targetAddr + len) <= W25Q_CFG_TOTAL_SIZE, eGlobalRet_ParaInvalid);
@@ -226,8 +228,6 @@ GlobalRet_Enum W25Q_Write(uint32_t targetAddr, const uint8_t *srcAddr, uint16_t 
     PARA_ASSERT_RET(g_stW25qxx.optState == W25Q_OPT_IDLE, eGlobalRet_DeviceBusy);
 
     g_stW25qxx.optState = W25Q_OPT_BUSY;
-
-    W25Q_WriteEnable();
 
     while (remaining > 0)
     {
@@ -241,7 +241,10 @@ GlobalRet_Enum W25Q_Write(uint32_t targetAddr, const uint8_t *srcAddr, uint16_t 
         {
             bytesToWrite = W25Q_CFG_PAGE_SIZE - pageOffset;
         }
+        W25Q_WriteEnable();
 
+        W25Q_CFG_SpiTransmit(&dummy, 1);
+ 
         cmdFrame[0] = W25Q_CMD_PAGE_PROGRAM;
         cmdFrame[1] = (currentAddr >> 16) & 0xFF;
         cmdFrame[2] = (currentAddr >> 8) & 0xFF;
@@ -251,24 +254,23 @@ GlobalRet_Enum W25Q_Write(uint32_t targetAddr, const uint8_t *srcAddr, uint16_t 
         W25Q_CFG_SpiTransmit(cmdFrame, 4);
         W25Q_CFG_SpiTransmit((uint8_t *)dataPtr, bytesToWrite);
         W25Q_CFG_CS_HIGH();
-
         if (TRUE != W25Q_WaitForIdle())
         {
             eRet = eGlobalRet_Error;
             break;
         }
 
+        W25Q_WriteDisable();
         currentAddr += bytesToWrite;
         dataPtr += bytesToWrite;
         remaining -= bytesToWrite;
     }
     
-    W25Q_WriteDisable();
     g_stW25qxx.optState = W25Q_OPT_IDLE;
     return eRet;
 }
 
-GlobalRet_Enum W25Q_Erase(uint32_t targetAddr, uint16_t len)
+GlobalRet_Enum W25Q_Erase(uint32_t targetAddr, uint32_t len)
 {
     GlobalRet_Enum eRet = eGlobalRet_OK;
     uint32_t remaining = len;
@@ -276,9 +278,10 @@ GlobalRet_Enum W25Q_Erase(uint32_t targetAddr, uint16_t len)
     uint8_t cmdFrame[4] = { 0 };
     uint32_t pageOffset = 0;
     uint32_t bytesToWrite = 0;
+    uint8_t dummy = 0xFF;
 
     PARA_ASSERT_RET(len != 0, eGlobalRet_ParaInvalid);
-    PARA_ASSERT_RET((targetAddr + len) <= W25Q_CFG_SECTOR_SIZE, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET((targetAddr + len) <= W25Q_CFG_TOTAL_SIZE, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(targetAddr % W25Q_CFG_SECTOR_SIZE == 0, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(len % W25Q_CFG_SECTOR_SIZE == 0, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(g_stW25qxx.initFlag == TRUE, eGlobalRet_NotInit);
@@ -286,16 +289,17 @@ GlobalRet_Enum W25Q_Erase(uint32_t targetAddr, uint16_t len)
 
     g_stW25qxx.optState = W25Q_OPT_BUSY;
 
-    W25Q_WriteEnable();
-
     while (remaining > 0)
     {
+        W25Q_WriteEnable();
         g_stW25qxx.optState = W25Q_OPT_BUSY;
 
         cmdFrame[0] = W25Q_CMD_SECTOR_ERASE;
         cmdFrame[1] = (currentAddr >> 16) & 0xFF;
         cmdFrame[2] = (currentAddr >> 8) & 0xFF;
         cmdFrame[3] = currentAddr & 0xFF;
+
+        W25Q_CFG_SpiTransmit(&dummy, 1);
 
         W25Q_CFG_CS_LOW();
         W25Q_CFG_SpiTransmit(cmdFrame, 4);
@@ -309,16 +313,13 @@ GlobalRet_Enum W25Q_Erase(uint32_t targetAddr, uint16_t len)
 
         currentAddr += W25Q_CFG_SECTOR_SIZE;
         remaining -= W25Q_CFG_SECTOR_SIZE;
+        W25Q_WriteDisable();
     }
 
-    W25Q_WriteDisable();
+    g_stW25qxx.optState = W25Q_OPT_IDLE;
+
     return eRet;
 }
-
-
-
-
-
 
 
 

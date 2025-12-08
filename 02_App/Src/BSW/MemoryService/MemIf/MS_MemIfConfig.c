@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : DS_LogMConfig.c
-* Description        : Code for log manage
+* File Name          : template.c
+* Description        : Code for xxxxxxxxxxx
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -16,9 +16,9 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "DS_LogM.h"
-
-
+#include "MS_MemIf.h"
+#include "MS_MemIfConfig.h"
+#include "FlashDB_KVDB_Adapt.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -41,11 +41,35 @@
 
 
 
-
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
+const MSMemifConfig_Struct c_stMSMemifConfigTable[MSMEMIF_DEVICE_EA_COUNT] =
+{
+    [MSMEMIF_DEVICE_EA_KVDB] = 
+    {
+        .pFuncInit = KVDBAdapt_Init,
+        .pFuncRead = KVDBAdapt_Read,
+        .pFuncWrite = KVDBAdapt_Write,
 
+    },
+
+    [MSMEMIF_DEVICE_EA_TSDB] = 
+    {
+        .pFuncInit = TSDBAdapt_Init,
+        .pFuncRead = NULL,
+        .pFuncWrite = NULL,
+
+        .pFuncClearDB = TSDBAdapt_CleanRecordDB,
+        .pFuncQueryUnreportedRecordCount = TSDBAdapt_QueryUnreportedRecordCount,
+        .pFuncQueryTotalRecordCount = TSDBAdapt_QueryTotalRecordCount,
+        .pFuncInsertRecord = TSDBAdapt_InsertRecord,
+        .pFuncSetReportSuccess = TSDBAdapt_SetRecordReportSuccess,
+        .pFuncQueryLatestUnreportedRecord = TSDBAdapt_QueryLatestUnreportedRecord,
+        .pFuncQueryRecordByTime = TSDBAdapt_QueryRecordByTime,
+        .pFuncQueryRecordByExternal = TSDBAdapt_QueryRecordByExternal,
+    },
+};
 
 
 /*******************************************************************************
@@ -57,20 +81,7 @@
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-const char *g_logMModuleName[DSLogMModule_Count] = 
-{
-    "EVSE",
-    "Charge",
-    "ErrorHandle"
 
-    "CP",
-    "RCD",
-    "RELAY",
-
-    "Flash",
-
-    "System",
-};
 
 
 

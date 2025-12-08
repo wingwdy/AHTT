@@ -1,6 +1,7 @@
 /******************************************************************************
-* File Name          : Global.h
-* Description        : Code for Global Definition
+* File Name          : MS_NvmAppTypes.h
+* Description        : Code for The core service layer for managing non-volatile data 
+                       storage of the ECU
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,91 +12,51 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-
-#ifndef Global_H_
-#define Global_H_
+#ifndef MS_NVM_APP_TYPES_H_
+#define MS_NVM_APP_TYPES_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "stdint.h"
+#include "SysCfg.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define GLOBAL_OPT_STATE_IDLE                          (0U)
-#define GLOBAL_OPT_STATE_PROCESS                       (1U)
-#define GLOBAL_OPT_STATE_SUCCESS                       (2U)
-#define GLOBAL_OPT_STATE_FAIL                          (3U)
-
-#ifndef NULL
-#define NULL  0
-#endif
-
-#ifndef TRUE
-#define TRUE  1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#define ARRAY_SIZE(x)               sizeof(x) / sizeof(x[0])
-
-#define PARA_ASSERT(x)              do \
-                                    {}while((x) != TRUE)
-                                    
-#define PARA_ASSERT_RET(x, ret)     do \
-                                    {\
-                                        if ((x) != TRUE)\
-                                        {\
-                                            return ret;\
-                                        }\
-                                    }while(0)
-
-#define CHECK_MAX_EQU(a, b)         ((a >= b) ? TRUE : FALSE)
-#define CHECK_MAX(a, b)             ((a > b) ? TRUE : FALSE)
-#define CHECK_MIN_EQU(a, b)         ((a <= b) ? TRUE : FALSE)
-#define CHECK_MIN(a, b)             ((a < b) ? TRUE : FALSE)
-#define CHECK_EQU(a, b)             ((a == b) ? TRUE : FALSE)
-
-            
+#define MSNVM_APP_QRCODE_LEN                  256
+#define MSNVM_APP_ORDER_PRIVATE_LEN           512
+#define MSNVM_APP_ERROR_PRIVATE_LEN           32
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    eGlobalRet_OK,
-
-    eGlobalRet_Error,
-    eGlobalRet_ParaInvalid,
-
-
-    eGlobalRet_NotSupported,
-    eGlobalRet_InitFail,
-    eGlobalRet_NotInit,
-    
-    eGlobalRet_NotEnoughChannel,
-
-    eGlobalRet_FIFONotFull,
-
-    eGlobalRet_NotEnoughBuf,
-    eGlobalRet_NotEnoughData,
-
-    eGlobalRet_DeviceBusy,
-
-    eGlobalRet_UnexpectedError,
-}GlobalRet_Enum;
-
 
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+typedef uint8_t (*pNvmCmpFunc)(uint8_t *record, uint8_t *pCompara, uint16_t paraSize);
 
+/* 二维码 */
+typedef struct
+{
+    char qrcode[MSNVM_APP_QRCODE_LEN];
+}MSNvmDrcode_Struct;
+
+/* 订单记录 */
+typedef struct 
+{
+    uint8_t userData[MSNVM_APP_ORDER_PRIVATE_LEN];
+}MSNvmOrderInfo_Struct;
+
+/* 故障记录 */
+typedef struct 
+{
+    uint8_t userData[MSNVM_APP_ERROR_PRIVATE_LEN];
+}MSNvmErrorInfo_Struct;
 
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
+
 
 
 /******************************************************************************
@@ -103,12 +64,7 @@ typedef enum
 ******************************************************************************/
 
 
-#endif /* Global_H_ */
-
-
-
-
-
+#endif
 
 
 

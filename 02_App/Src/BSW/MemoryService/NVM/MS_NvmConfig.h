@@ -1,6 +1,7 @@
 /******************************************************************************
-* File Name          : Global.h
-* Description        : Code for Global Definition
+* File Name          : MS_NvmConfig.h
+* Description        : Code for The core service layer for managing non-volatile data 
+                       storage of the ECU
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,86 +12,39 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
+#ifndef MS_NVM_CONFIG_H_
+#define MS_NVM_CONFIG_H_
 
-#ifndef Global_H_
-#define Global_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "stdint.h"
-
+#include "MS_MemIf.h"
+#include "Common.h"
+#include "MS_Nvm.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define GLOBAL_OPT_STATE_IDLE                          (0U)
-#define GLOBAL_OPT_STATE_PROCESS                       (1U)
-#define GLOBAL_OPT_STATE_SUCCESS                       (2U)
-#define GLOBAL_OPT_STATE_FAIL                          (3U)
+#define MSNVM_CFG_ADDTION_CRC16_LEN              2U
 
-#ifndef NULL
-#define NULL  0
-#endif
 
-#ifndef TRUE
-#define TRUE  1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#define ARRAY_SIZE(x)               sizeof(x) / sizeof(x[0])
-
-#define PARA_ASSERT(x)              do \
-                                    {}while((x) != TRUE)
-                                    
-#define PARA_ASSERT_RET(x, ret)     do \
-                                    {\
-                                        if ((x) != TRUE)\
-                                        {\
-                                            return ret;\
-                                        }\
-                                    }while(0)
-
-#define CHECK_MAX_EQU(a, b)         ((a >= b) ? TRUE : FALSE)
-#define CHECK_MAX(a, b)             ((a > b) ? TRUE : FALSE)
-#define CHECK_MIN_EQU(a, b)         ((a <= b) ? TRUE : FALSE)
-#define CHECK_MIN(a, b)             ((a < b) ? TRUE : FALSE)
-#define CHECK_EQU(a, b)             ((a == b) ? TRUE : FALSE)
-
-            
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    eGlobalRet_OK,
 
-    eGlobalRet_Error,
-    eGlobalRet_ParaInvalid,
-
-
-    eGlobalRet_NotSupported,
-    eGlobalRet_InitFail,
-    eGlobalRet_NotInit,
-    
-    eGlobalRet_NotEnoughChannel,
-
-    eGlobalRet_FIFONotFull,
-
-    eGlobalRet_NotEnoughBuf,
-    eGlobalRet_NotEnoughData,
-
-    eGlobalRet_DeviceBusy,
-
-    eGlobalRet_UnexpectedError,
-}GlobalRet_Enum;
 
 
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+typedef struct 
+{
+    uint16_t  blockSize;
+    uint8_t   *ramBlockDataAddr;
+    uint8_t   deviceID;
+    uint16_t  memIfID;
+    void (*pFuncDefault)(uint8_t *pIndata, uint16_t dataLen);
+}MSNvmBlockDescriptor_Struct;
 
 
 /******************************************************************************
@@ -98,15 +52,13 @@ typedef enum
 ******************************************************************************/
 
 
+
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
+extern const MSNvmBlockDescriptor_Struct c_stMSNvmBlockDescriptorTable[eMSNvmBlockID_Count];
 
-
-#endif /* Global_H_ */
-
-
-
+#endif
 
 
 

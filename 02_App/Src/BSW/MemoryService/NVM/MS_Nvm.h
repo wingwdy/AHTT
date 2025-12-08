@@ -1,6 +1,7 @@
 /******************************************************************************
-* File Name          : Global.h
-* Description        : Code for Global Definition
+* File Name          : MS_Nvm.h
+* Description        : Code for The core service layer for managing non-volatile data 
+                       storage of the ECU
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,86 +12,37 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-
-#ifndef Global_H_
-#define Global_H_
+#ifndef MS_NVM_H_
+#define MS_NVM_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "stdint.h"
-
+#include "Common.h"
+#include "MS_NvmAppTypes.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define GLOBAL_OPT_STATE_IDLE                          (0U)
-#define GLOBAL_OPT_STATE_PROCESS                       (1U)
-#define GLOBAL_OPT_STATE_SUCCESS                       (2U)
-#define GLOBAL_OPT_STATE_FAIL                          (3U)
 
-#ifndef NULL
-#define NULL  0
-#endif
-
-#ifndef TRUE
-#define TRUE  1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#define ARRAY_SIZE(x)               sizeof(x) / sizeof(x[0])
-
-#define PARA_ASSERT(x)              do \
-                                    {}while((x) != TRUE)
-                                    
-#define PARA_ASSERT_RET(x, ret)     do \
-                                    {\
-                                        if ((x) != TRUE)\
-                                        {\
-                                            return ret;\
-                                        }\
-                                    }while(0)
-
-#define CHECK_MAX_EQU(a, b)         ((a >= b) ? TRUE : FALSE)
-#define CHECK_MAX(a, b)             ((a > b) ? TRUE : FALSE)
-#define CHECK_MIN_EQU(a, b)         ((a <= b) ? TRUE : FALSE)
-#define CHECK_MIN(a, b)             ((a < b) ? TRUE : FALSE)
-#define CHECK_EQU(a, b)             ((a == b) ? TRUE : FALSE)
-
-            
+ 
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
 typedef enum
 {
-    eGlobalRet_OK,
+    /* 参数信息 */
+    eMSNvmBlockID_Gun0Qrcode,
 
-    eGlobalRet_Error,
-    eGlobalRet_ParaInvalid,
+    /* 记录信息 */
+    eMSNvmBlockID_OrderRecord,
+    eMSNvmBlockID_ErrorRecord,
 
-
-    eGlobalRet_NotSupported,
-    eGlobalRet_InitFail,
-    eGlobalRet_NotInit,
-    
-    eGlobalRet_NotEnoughChannel,
-
-    eGlobalRet_FIFONotFull,
-
-    eGlobalRet_NotEnoughBuf,
-    eGlobalRet_NotEnoughData,
-
-    eGlobalRet_DeviceBusy,
-
-    eGlobalRet_UnexpectedError,
-}GlobalRet_Enum;
-
-
+    eMSNvmBlockID_Count,
+}MSNvmBlockID_Enum;
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+
 
 
 /******************************************************************************
@@ -98,17 +50,28 @@ typedef enum
 ******************************************************************************/
 
 
+
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
+void MSNvm_InitMemory(void);
+void MSNvm_ReadAll(void);
 
+/* 参数块读写接口 */
+GlobalRet_Enum MSNvm_ReadParaBlock(MSNvmBlockID_Enum eBlockID, uint8_t *pOutBuf, uint16_t dataLen);
+GlobalRet_Enum MSNvm_WriteParaBlock(MSNvmBlockID_Enum eBlockID, uint8_t *pInBuf, uint16_t dataLen);
 
-#endif /* Global_H_ */
-
-
-
-
-
+/* 记录块读写接口 */
+GlobalRet_Enum MSNvm_ClearRecord(MSNvmBlockID_Enum eBlockID);
+uint32_t MSNvm_QueryUnreportedRecordCount(MSNvmBlockID_Enum eBlockID);
+uint32_t MSNvm_QueryTotalRecordCount(MSNvmBlockID_Enum eBlockID);
+GlobalRet_Enum MSNvm_InsertNewRecord(MSNvmBlockID_Enum eBlockID, uint8_t *pInRecord, uint16_t recordSize);
+GlobalRet_Enum MSNvm_SetRecordReportSuccess(MSNvmBlockID_Enum eBlockID, uint32_t time);
+GlobalRet_Enum MSNvm_QueryLatestUnreportedRecord(MSNvmBlockID_Enum eBlockID, uint8_t *pOutRecord, uint16_t recordSize, uint32_t *pTime);
+GlobalRet_Enum MSNvm_QueryRecordByTime(MSNvmBlockID_Enum eBlockID, uint8_t *pOutRecord, uint16_t recordSize, uint32_t time);
+GlobalRet_Enum MSNvm_QueryRecordByExternal(MSNvmBlockID_Enum eBlockID, uint8_t *para, uint16_t paraSize,
+pNvmCmpFunc pCmpFunc, uint8_t *pInRecord, uint16_t recordSize);
+#endif
 
 
 

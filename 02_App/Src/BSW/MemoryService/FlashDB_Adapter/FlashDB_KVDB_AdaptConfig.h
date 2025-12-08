@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Global.h
-* Description        : Code for Global Definition
+* File Name          : FlashDB_KVDB_AdaptConfig.h
+* Description        : Code for The adapter layer of KVDB
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,91 +11,50 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-
-#ifndef Global_H_
-#define Global_H_
+#ifndef FLASHDB_KVDB_ADAPT_CONFIG_H_
+#define FLASHDB_KVDB_ADAPT_CONFIG_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "stdint.h"
-
+#include <flashdb.h>
+#include "Common.h"
+#include <FreeRTOS.h>
+#include <semphr.h>
+#include "fal_cfg.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define GLOBAL_OPT_STATE_IDLE                          (0U)
-#define GLOBAL_OPT_STATE_PROCESS                       (1U)
-#define GLOBAL_OPT_STATE_SUCCESS                       (2U)
-#define GLOBAL_OPT_STATE_FAIL                          (3U)
 
-#ifndef NULL
-#define NULL  0
-#endif
 
-#ifndef TRUE
-#define TRUE  1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#define ARRAY_SIZE(x)               sizeof(x) / sizeof(x[0])
-
-#define PARA_ASSERT(x)              do \
-                                    {}while((x) != TRUE)
-                                    
-#define PARA_ASSERT_RET(x, ret)     do \
-                                    {\
-                                        if ((x) != TRUE)\
-                                        {\
-                                            return ret;\
-                                        }\
-                                    }while(0)
-
-#define CHECK_MAX_EQU(a, b)         ((a >= b) ? TRUE : FALSE)
-#define CHECK_MAX(a, b)             ((a > b) ? TRUE : FALSE)
-#define CHECK_MIN_EQU(a, b)         ((a <= b) ? TRUE : FALSE)
-#define CHECK_MIN(a, b)             ((a < b) ? TRUE : FALSE)
-#define CHECK_EQU(a, b)             ((a == b) ? TRUE : FALSE)
-
-            
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    eGlobalRet_OK,
-
-    eGlobalRet_Error,
-    eGlobalRet_ParaInvalid,
-
-
-    eGlobalRet_NotSupported,
-    eGlobalRet_InitFail,
-    eGlobalRet_NotInit,
-    
-    eGlobalRet_NotEnoughChannel,
-
-    eGlobalRet_FIFONotFull,
-
-    eGlobalRet_NotEnoughBuf,
-    eGlobalRet_NotEnoughData,
-
-    eGlobalRet_DeviceBusy,
-
-    eGlobalRet_UnexpectedError,
-}GlobalRet_Enum;
-
 
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+typedef struct 
+{
+    struct fdb_kvdb kvdb;
+    SemaphoreHandle_t mutex;
+    uint8_t initFlag;   
+    uint8_t (*pFuncCreatLock)(void);
+    void (*pFuncSetLock)(void); 
+    void (*pFuncSetUnlock)(void); 
+    const char *dbName;
+    const char *flashPartName;
+    struct fdb_default_kv_node *default_kvs;
+    uint8_t default_kvs_num;
+    void *userData;
+}KVDBAdaptConfig_Struct;
+
 
 
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
+extern KVDBAdaptConfig_Struct g_stKVDBAdaptConfig;
 
 
 /******************************************************************************
@@ -103,10 +62,7 @@ typedef enum
 ******************************************************************************/
 
 
-#endif /* Global_H_ */
-
-
-
+#endif
 
 
 

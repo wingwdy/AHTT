@@ -339,7 +339,7 @@
               <MiscControls>-Wno-invalid-source-encoding</MiscControls>
               <Define>GD32E50X,GD32E50X_HD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\BSW\ComplexDeviceDriver;..\Src\ASW\ASW_CHG;..\Src\BSW\SystemService\SystemM;..\Src\BSW\DebugService\LogM;..\Src\BSW\MemoryService\Fls_External;..\Src\ThirdPartyLib\FlashDB\port\fal\inc;..\Src\ThirdPartyLib\FlashDB\port\fal\samples\porting;..\Src\ThirdPartyLib\FlashDB\inc</IncludePath>
+              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\BSW\ComplexDeviceDriver;..\Src\ASW\ASW_CHG;..\Src\BSW\SystemService\SystemM;..\Src\BSW\DebugService\LogM;..\Src\ThirdPartyLib\FlashDB\port\fal\inc;..\Src\ThirdPartyLib\FlashDB\inc;..\Src\BSW\MemoryService\FlashDB_Adapter;..\Src\BSW\MemoryService\MemIf;..\Src\BSW\MemoryService\NVM;..\Src\BSW\MemoryService\EA</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -472,9 +472,54 @@
           <GroupName>BSW/MemoryService</GroupName>
           <Files>
             <File>
+              <FileName>fal_flash_w25qxx_port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MemoryService\FlashDB_Adapter\fal_flash_w25qxx_port.c</FilePath>
+            </File>
+            <File>
               <FileName>W25QXX.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\BSW\MemoryService\Fls_External\W25QXX.c</FilePath>
+              <FilePath>..\Src\BSW\MemoryService\EA\W25QXX.c</FilePath>
+            </File>
+            <File>
+              <FileName>MS_Nvm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MemoryService\NVM\MS_Nvm.c</FilePath>
+            </File>
+            <File>
+              <FileName>MS_NvmConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MemoryService\NVM\MS_NvmConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>FlashDB_KVDB_Adapt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MemoryService\FlashDB_Adapter\FlashDB_KVDB_Adapt.c</FilePath>
+            </File>
+            <File>
+              <FileName>FlashDB_TSDB_Adapt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MemoryService\FlashDB_Adapter\FlashDB_TSDB_Adapt.c</FilePath>
+            </File>
+            <File>
+              <FileName>FlashDB_KVDB_AdaptConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MemoryService\FlashDB_Adapter\FlashDB_KVDB_AdaptConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>FlashDB_TSDB_AdaptConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MemoryService\FlashDB_Adapter\FlashDB_TSDB_AdaptConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>MS_MemIf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MemoryService\MemIf\MS_MemIf.c</FilePath>
+            </File>
+            <File>
+              <FileName>MS_MemIfConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\MemoryService\MemIf\MS_MemIfConfig.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -631,11 +676,6 @@
               <FileName>fal_rtt.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\ThirdPartyLib\FlashDB\port\fal\src\fal_rtt.c</FilePath>
-            </File>
-            <File>
-              <FileName>fal_flash_norflash_port.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\ThirdPartyLib\FlashDB\port\fal\samples\porting\fal_flash_norflash_port.c</FilePath>
             </File>
           </Files>
         </Group>

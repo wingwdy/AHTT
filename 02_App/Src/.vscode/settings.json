@@ -47,6 +47,18 @@
         "mcal_spi.h": "c",
         "gd32e50x_spi.h": "c",
         "w25qxx.h": "c",
-        "fdb_cfg.h": "c"
+        "fdb_cfg.h": "c",
+        "ms nvmconfig.h": "c",
+        "ms_nvmconfig.h": "c",
+        "ms_memif.h": "c",
+        "ms_nvm.h": "c",
+        "ms_nvmapptypes.h": "c",
+        "flashdb_kvdb_adapt.h": "c",
+        "flashdb_tsdb_adapt.h": "c",
+        "ms_memifconfig.h": "c",
+        "flashdb_kvdb_adaptconfig.h": "c",
+        "fal.h": "c",
+        "fal_cfg.h": "c",
+        "flashdb_tsdb_adaptconfig.h": "c"
     }
 }

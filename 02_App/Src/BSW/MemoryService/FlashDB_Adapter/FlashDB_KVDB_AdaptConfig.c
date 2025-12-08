@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : fal_flash_norflash_port.c
-* Description        : Code for The function of adapting to NOR flash
+* File Name          : FlashDB_KVDB_AdaptConfig.c
+* Description        : Code for The adapter layer of KVDB
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -16,9 +16,9 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include <fal.h>
-#include "Global.h"
-#include "W25QXX.h"
+#include "FlashDB_KVDB_AdaptConfig.h"
+
+
 
 /*******************************************************************************
 *    Macro Definition
@@ -33,104 +33,73 @@
 
 
 
-
-
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
 
 
+
+
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-static int init(void);
-static int read(long offset, uint8_t *buf, size_t size);
-static int write(long offset, const uint8_t *buf, size_t size);
-static int erase(long offset, size_t size);
+static uint8_t KVDBAdaptConfig_CreatLock(void);
+static void KVDBAdaptConfig_SetLock(void);
+static void KVDBAdaptConfig_SetUnlock(void);
 
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-const struct fal_flash_dev nor_flash0 =
+KVDBAdaptConfig_Struct g_stKVDBAdaptConfig = 
 {
-    .name       = NOR_FLASH_DEV_NAME,
-    .addr       = 0,
-    .len        = 4 * 1024 * 1024,
-    .blk_size   = 4 * 1024,
-    .ops        = {
-    		.init = init,
-    		.read = read,
-    		.write = write,
-    		.erase = erase
-    },
-    .write_gran = 1
+    .kvdb = {0},
+    .initFlag = FALSE,
+    .pFuncCreatLock = KVDBAdaptConfig_CreatLock,
+    .pFuncSetLock = KVDBAdaptConfig_SetLock,
+    .pFuncSetUnlock = KVDBAdaptConfig_SetUnlock,
+    .dbName = "D3_A32FB",
+    .flashPartName = FAL_KVDB_NAME_PARA,
+    .default_kvs = NULL,
+    .default_kvs_num = 0,
+    .userData = NULL,
 };
+
 
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-GlobalRet_Enum W25Q_Init(void);
-GlobalRet_Enum W25Q_Read(uint32_t srcAddr, uint8_t* targetAddr, uint16_t len);
-GlobalRet_Enum W25Q_Write(uint32_t targetAddr, const uint8_t *srcAddr, uint16_t len);
-GlobalRet_Enum W25Q_Erase(uint32_t targetAddr, uint16_t len);
-
-
-
-
-
-
-
-
-
-static int init(void)
+static uint8_t KVDBAdaptConfig_CreatLock(void)
 {
-    int ret = -1;
+    uint8_t ret = FALSE;
+    g_stKVDBAdaptConfig.mutex = xSemaphoreCreateMutex();
 
-    if (eGlobalRet_OK == W25Q_Init())
+    if (g_stKVDBAdaptConfig.mutex != NULL)
     {
-        ret = 1;
-    }
-    return ret;
-}
-
-static int read(long offset, uint8_t *buf, size_t size)
-{
-    uint32_t addr = nor_flash0.addr + offset;
-    int ret = -1;
-
-    if (eGlobalRet_OK == W25Q_Read(addr, buf, size))
-    {
-        ret = 1;
+        ret = TRUE;
     }
 
     return ret;
 }
 
-static int write(long offset, const uint8_t *buf, size_t size)
+static void KVDBAdaptConfig_SetLock(void)
 {
-    uint32_t addr = nor_flash0.addr + offset;
-    int ret = -1;
-
-    if (eGlobalRet_OK == W25Q_Write(addr, buf, size))
-    {
-        ret = 1;
-    }
-
-    return ret;
+	xSemaphoreTake(g_stKVDBAdaptConfig.mutex, portMAX_DELAY);
 }
 
-static int erase(long offset, size_t size)
+static void KVDBAdaptConfig_SetUnlock(void)
 {
-    uint32_t addr = nor_flash0.addr + offset;
-    int ret = -1;
-
-    if (eGlobalRet_OK == W25Q_Erase(addr, size))
-    {
-        ret = 1;
-    }
-
-    return ret;
+	xSemaphoreGive(g_stKVDBAdaptConfig.mutex);
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
