@@ -126,9 +126,9 @@ uint8_t McalPort_GetPin(McalPortPinChanel_Enum ePinChannel)
 void McalPort_Init(void)
 {
     uint8_t index = 0;
-    gpio_pin_remap_config(GPIO_SWJ_SWDPENABLE_REMAP, ENABLE);
     rcu_periph_clock_enable(RCU_AF);
-
+    gpio_pin_remap_config(GPIO_SWJ_SWDPENABLE_REMAP, ENABLE);
+    
     for (index = 0; index < eMcalPortPinChanel_Count; index++)
     {
         McalPort_ConfigPin(&c_stPorPinConfigTable[index]);
