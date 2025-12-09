@@ -91,10 +91,10 @@ static void McalUart_ConfigChannel(McalUartConfig_Struct *pUartConfig)
             usart_interrupt_enable(pUartConfig->uart_periph, USART_INT_IDLE);
         }
 
-        eRet1 = CycleBuf_CreatChannel(&pUartConfig->uartBufCtrl.txCycleBufID, pUartConfig->uartBufCtrl.pTxBuf,
+        eRet1 = CycleBuf_CreateChannel(&pUartConfig->uartBufCtrl.txCycleBufID, pUartConfig->uartBufCtrl.pTxBuf,
         pUartConfig->uartBufCtrl.txBufSize, pUartConfig->uartBufCtrl.txProfile);
 
-        eRet2 = CycleBuf_CreatChannel(&pUartConfig->uartBufCtrl.rxCycleBufID, pUartConfig->uartBufCtrl.pRxBuf,
+        eRet2 = CycleBuf_CreateChannel(&pUartConfig->uartBufCtrl.rxCycleBufID, pUartConfig->uartBufCtrl.pRxBuf,
         pUartConfig->uartBufCtrl.rxBufSize, CYCLEBUF_PROFILE_CIRCLE);
 
         if (pUartConfig->DMATx_En == TRUE)

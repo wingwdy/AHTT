@@ -238,7 +238,6 @@ static void AswEVSE_State2DotHanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl,
     {
         CddCP_StopPWM(port);
         CddRelay_CtrlSwichOff(port);
-        pEVSECtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;
         pEVSECtrl->enterState2DelayTimer = Common_GetSystick();
         AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2);
     }
@@ -254,7 +253,6 @@ static void AswEVSE_State3Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
     else if (eCpState == eCddCPVolState_9V)
     {
         CddRelay_CtrlSwichOff(port);
-        pEVSECtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;
         pEVSECtrl->enterState2DelayTimer = Common_GetSystick();
         AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2);
     }
@@ -263,7 +261,6 @@ static void AswEVSE_State3Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
         if (Common_JudgeTimeoutMs(pEVSECtrl->S2CloseTimer, ASWEVSE_CFG_S2_CLOSE_TIMEOUT))
         {
             CddRelay_CtrlSwichOff(port);
-            pEVSECtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;
             pEVSECtrl->enterState2DelayTimer = Common_GetSystick();
             AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2);
         }

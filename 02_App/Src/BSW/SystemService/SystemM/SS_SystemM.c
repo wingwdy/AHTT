@@ -32,7 +32,7 @@
 #include "Mcal_Mcu.h"
 
 #include "DS_LogM.h"
-#include "shell_port.h"
+#include "DS_Console.h"
 
 #include "Common.h"
 #include "stdio.h"
@@ -76,8 +76,8 @@ static void SSSystemM_InitThree(void);
 static void SSSystemM_InitOne(void)
 {
     McalIf_Init();
-    userShellInit();
     DSLogM_InitMemory();
+    DSConsole_Init();
     SSSystemM_ShowInfo();
     McalMcu_ClearResetFlags();
 }

@@ -34,7 +34,7 @@ void userShellWrite(char data)
  * @param data 数据
  * @return char 状态
  */
-signed char userShellRead(char *data)
+int8_t userShellRead(char *data)
 {
     if (McalUart_ReadData(eMcalUartChanel_Debug, (uint8_t *)data, 1) == eGlobalRet_OK)
     {
@@ -46,7 +46,6 @@ signed char userShellRead(char *data)
     }
 }
 
-
 /**
  * @brief 用户shell初始化
  * 
@@ -57,4 +56,3 @@ void userShellInit(void)
     shell.read = userShellRead;
     shellInit(&shell, shellBuffer, 512);
 }
-

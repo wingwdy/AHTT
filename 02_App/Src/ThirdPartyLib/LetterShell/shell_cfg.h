@@ -12,13 +12,13 @@
 #ifndef __SHELL_CFG_H__
 #define __SHELL_CFG_H__
 
-
+#include "Common.h"
 /**
  * @brief 是否使用默认shell任务while循环，使能宏`SHELL_USING_TASK`后此宏有意义
  *        使能此宏，则`shellTask()`函数会一直循环读取输入，一般使用操作系统建立shell
  *        任务时使能此宏，关闭此宏的情况下，一般适用于无操作系统，在主循环中调用`shellTask()`
  */
-#define     SHELL_TASK_WHILE            1
+#define     SHELL_TASK_WHILE            0
 
 /**
  * @brief 是否使用命令导出方式
@@ -51,19 +51,19 @@
  * @brief 使用LF作为命令行回车触发
  *        可以和SHELL_ENTER_CR同时开启
  */
-#define     SHELL_ENTER_LF              1
+#define     SHELL_ENTER_LF              0
 
 /**
  * @brief 使用CR作为命令行回车触发
  *        可以和SHELL_ENTER_LF同时开启
  */
-#define     SHELL_ENTER_CR              1
+#define     SHELL_ENTER_CR              0
 
 /**
  * @brief 使用CRLF作为命令行回车触发
  *        不可以和SHELL_ENTER_LF或SHELL_ENTER_CR同时开启
  */
-#define     SHELL_ENTER_CRLF            0
+#define     SHELL_ENTER_CRLF            1
 
 /**
  * @brief shell命令参数最大数量
@@ -98,7 +98,7 @@
  *        定义此宏为获取系统Tick，如`HAL_GetTick()`
  * @note 此宏不定义时无法使用双击tab补全命令help，无法使用shell超时锁定
  */
-#define     SHELL_GET_TICK()            0
+#define     SHELL_GET_TICK()            Common_GetSystick()
 
 /**
  * @brief shell默认用户

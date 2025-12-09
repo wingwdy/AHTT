@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_if.c
-* Description        : Code for the interface for the layer of MCAL
+* File Name          : DS_ConsoleConfig.c
+* Description        : Code for Serial console debugging
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -16,18 +16,11 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
+#include "DS_ConsoleConfig.h"
+
+#include "Asw_Charge.h"
 #include "Mcal_Mcu.h"
-#include "Mcal_Port.h"
-#include "Mcal_PWM.h"
-#include "Mcal_ADC.h"
-#include "Mcal_Uart.h"
-#include "CycleBuf.h"
-#include "Mcal_IWDG.h"
-#include "Mcal_SPI.h"
-
-
-
-/*******************************************************************************
+/************************s*******************************************************
 *    Macro Definition
 *******************************************************************************/
 
@@ -63,65 +56,35 @@
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-void McalIf_Init(void)
+static int32_t DSConsoleCfg_Reboot(void)
 {
-    McalMCU_SystickInit();
-    McalIWDG_Init();
-    CycleBuf_Init();
-    McalPort_Init();
-    McalUart_Init();
-    McalADC_Init();
-    McalPWM_Init();
-    McalSPI_Init();
-}
+    McalMcu_SystemReset();
+    return 0;
+} 
 
-void McalIf_Test(void)
+static int32_t DSConsoleCfg_ChargeCtrl(char *cmd, uint8_t port)
 {
-    McalPWM_Test();
-    // McalADC_Test();
+    int32_t ret = 0;
 
-    // MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
+    if (0 == strcmp(cmd, "start"))
+    {
+        AswCharge_StartAuth(port);
+    }
+    else if (0 == strcmp(cmd, "stop"))
+    {
+        AswCharge_StopAuth(port);
+    }
+    else
+    {
+        ret = -1;
+    }
 
-    // static uint32_t StateCnt = 0;
-    // if (StateCnt < 8)
-    // {
-    //     StateCnt++;
-    // }
-
-    // if (StateCnt == 1)
-    // {
-    //     McalPort_SetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    // }
-    // else if (StateCnt == 3)
-    // {
-    //     McalPort_ResetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    // }
-    // else if (StateCnt == 5)
-    // {
-    //     McalPort_SetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn);
-    // }
-    // else if (StateCnt == 7)
-    // {
-    //     McalPort_ResetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn); 
-    // } 
-    // else 
-    // {}
-
-    //  McalUart_Test();
+    return 0;
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
+DSCONSOLE_CFG_ADD_CMD(reboot, DSConsoleCfg_Reboot, "reboot" reboot system);
+DSCONSOLE_CFG_ADD_CMD(charge, DSConsoleCfg_ChargeCtrl, "charge start/stop 0/1" start/stop charge);
 
 
 

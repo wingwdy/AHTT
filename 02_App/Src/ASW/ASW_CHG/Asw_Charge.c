@@ -115,7 +115,7 @@ static void AswCharge_IdleStateHandle(uint8_t port, AswChargeCtrl_Struct *pCharg
 
     if (evseState == ASWEVSE_STATE_2)
     {
-//        pChargeCtrl->authFlag = TRUE;
+//      pChargeCtrl->authFlag = TRUE;
         AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_READY);
     }
 }
@@ -556,6 +556,42 @@ void AswCharge_MainFunction(void)
     {
         pChargeCtrl = &g_stAswChargeCtrl[port];
         AswCharge_WorkStateManage(port, pChargeCtrl);
+    }
+}
+
+void AswCharge_StartAuth(uint8_t port)
+{
+    AswChargeCtrl_Struct *pChargeCtrl = NULL;
+    AswErrChargeCondition_Enum eChargeCondition = AswErrHandle_GetChargeCondition(port);
+    uint8_t evseState = AswEVSE_GetEVSEState(port);
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        pChargeCtrl = &g_stAswChargeCtrl[port];
+
+        if (evseState == ASWEVSE_STATE_2 && eChargeCondition == eErrChargeCondition_Allow)
+        {
+            if (pChargeCtrl->authFlag != TRUE)
+            {
+                pChargeCtrl->authFlag = TRUE;
+                 ASWCHARGE_CFG_LogPrint("[枪：%d]充电授权成功\r\n", port);
+            }
+        }
+    }
+}
+
+void AswCharge_StopAuth(uint8_t port)
+{
+    AswChargeCtrl_Struct *pChargeCtrl = NULL;
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        if (pChargeCtrl->authFlag == TRUE)
+        {
+            pChargeCtrl = &g_stAswChargeCtrl[port];
+            pChargeCtrl->authFlag = FALSE;
+            ASWCHARGE_CFG_LogPrint("[枪：%d]取消充电授权成功\r\n", port);
+        }
     }
 }
 

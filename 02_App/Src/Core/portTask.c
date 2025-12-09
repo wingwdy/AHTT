@@ -19,6 +19,8 @@
 #include "Asw_EVSE.h"
 #include "Asw_Charge.h"
 
+#include "DS_Console.h"
+
 #include "Cdd_CP.h"
 #include "Cdd_Relay.h"
 #include "Cdd_Rcd.h"
@@ -30,8 +32,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "Common.h"
-#include "shell.h"
-#include "shell_port.h"
+
+
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -136,6 +138,7 @@ static void Task_100ms(void *arg)
 {
     while (1)
     {
+ //       McalIf_Test();
         CddSensor_MainFunction();
         vTaskDelay(1000);
     }
@@ -145,8 +148,8 @@ static void Task_Debug20ms(void *arg)
 {
     while (1)
     {
-        shellTask(&shell);
-        vTaskDelay(20);
+        DSConsole_MainFunction();
+        vTaskDelay(10);
     }
 }
 

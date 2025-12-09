@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_if.c
-* Description        : Code for the interface for the layer of MCAL
+* File Name          : DS_Console.c
+* Description        : Code for Serial console debugging
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -16,14 +16,7 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "Mcal_Mcu.h"
-#include "Mcal_Port.h"
-#include "Mcal_PWM.h"
-#include "Mcal_ADC.h"
-#include "Mcal_Uart.h"
-#include "CycleBuf.h"
-#include "Mcal_IWDG.h"
-#include "Mcal_SPI.h"
+#include "DS_ConsoleConfig.h"
 
 
 
@@ -63,58 +56,15 @@
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-void McalIf_Init(void)
+void DSConsole_Init(void)
 {
-    McalMCU_SystickInit();
-    McalIWDG_Init();
-    CycleBuf_Init();
-    McalPort_Init();
-    McalUart_Init();
-    McalADC_Init();
-    McalPWM_Init();
-    McalSPI_Init();
+    userShellInit();
 }
 
-void McalIf_Test(void)
+void DSConsole_MainFunction(void)
 {
-    McalPWM_Test();
-    // McalADC_Test();
-
-    // MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
-
-    // static uint32_t StateCnt = 0;
-    // if (StateCnt < 8)
-    // {
-    //     StateCnt++;
-    // }
-
-    // if (StateCnt == 1)
-    // {
-    //     McalPort_SetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    // }
-    // else if (StateCnt == 3)
-    // {
-    //     McalPort_ResetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    // }
-    // else if (StateCnt == 5)
-    // {
-    //     McalPort_SetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn);
-    // }
-    // else if (StateCnt == 7)
-    // {
-    //     McalPort_ResetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn); 
-    // } 
-    // else 
-    // {}
-
-    //  McalUart_Test();
+    shellTask(&shell);
 }
-
-
-
-
-
-
 
 
 

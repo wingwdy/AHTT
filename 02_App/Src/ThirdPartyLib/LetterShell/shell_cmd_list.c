@@ -13,7 +13,7 @@
 
 #if SHELL_USING_CMD_EXPORT != 1
 
-extern int shellSetVar(char *name, int value);
+extern int32_t shellSetVar(char *name, int32_t value);
 extern void shellUp(Shell *shell);
 extern void shellDown(Shell *shell);
 extern void shellRight(Shell *shell);
@@ -22,7 +22,7 @@ extern void shellTab(Shell *shell);
 extern void shellBackspace(Shell *shell);
 extern void shellDelete(Shell *shell);
 extern void shellEnter(Shell *shell);
-extern void shellHelp(int argc, char *argv[]);
+extern void shellHelp(int32_t argc, char *argv[]);
 extern void shellUsers(void);
 extern void shellCmds(void);
 extern void shellVars(void);
@@ -92,7 +92,7 @@ const ShellCommand shellCommandList[] =
  * @brief shell命令表大小
  * 
  */
-const unsigned short shellCommandCount 
+const uint16_t shellCommandCount 
     = sizeof(shellCommandList) / sizeof(ShellCommand);
 
 #endif

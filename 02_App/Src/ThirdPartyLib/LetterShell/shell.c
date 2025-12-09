@@ -33,7 +33,7 @@ const ShellCommand shellUserDefault SECTION("shellCommand") =
 
 #if SHELL_USING_CMD_EXPORT != 1
     extern const ShellCommand shellCommandList[];
-    extern const unsigned short shellCommandCount;
+    extern const uint16_t shellCommandCount;
 #endif
 
 
@@ -127,20 +127,20 @@ static Shell *shellList[SHELL_MAX_NUMBER] = {NULL};
 
 static void shellAdd(Shell *shell);
 static void shellWriteCommandLine(Shell *shell);
-static void shellWirteReturnValue(Shell *shell, int value);
+static void shellWirteReturnValue(Shell *shell, int32_t value);
 static void shellShowVar(Shell *shell, ShellCommand *command);
 static void shellSetUser(Shell *shell, const ShellCommand *user);
 ShellCommand* shellSeekCommand(Shell *shell,
                                const char *cmd,
                                ShellCommand *base,
-                               unsigned short compareLength);
+                               uint16_t compareLength);
 
 /**
  * @brief shell 初始化
  * 
  * @param shell shell对象
  */
-void shellInit(Shell *shell, char *buffer, unsigned short size)
+void shellInit(Shell *shell, char *buffer, uint16_t size)
 {
     shell->parser.length = 0;
     shell->parser.cursor = 0;
@@ -159,26 +159,26 @@ void shellInit(Shell *shell, char *buffer, unsigned short size)
 
 #if SHELL_USING_CMD_EXPORT == 1
     #if defined(__CC_ARM) || (defined(__ARMCC_VERSION) && __ARMCC_VERSION >= 6000000)
-        extern const unsigned int shellCommand$$Base;
-        extern const unsigned int shellCommand$$Limit;
+        extern const uint32_t shellCommand$$Base;
+        extern const uint32_t shellCommand$$Limit;
 
         shell->commandList.base = (ShellCommand *)(&shellCommand$$Base);
-        shell->commandList.count = ((unsigned int)(&shellCommand$$Limit)
-                                - (unsigned int)(&shellCommand$$Base))
+        shell->commandList.count = ((uint32_t)(&shellCommand$$Limit)
+                                - (uint32_t)(&shellCommand$$Base))
                                 / sizeof(ShellCommand);
 
     #elif defined(__ICCARM__)
         shell->commandList.base = (ShellCommand *)(__section_begin("shellCommand"));
-        shell->commandList.count = ((unsigned int)(__section_end("shellCommand"))
-                                - (unsigned int)(__section_begin("shellCommand")))
+        shell->commandList.count = ((uint32_t)(__section_end("shellCommand"))
+                                - (uint32_t)(__section_begin("shellCommand")))
                                 / sizeof(ShellCommand);
     #elif defined(__GNUC__)
-        extern const unsigned int _shell_command_start;
-        extern const unsigned int _shell_command_end;
+        extern const uint32_t _shell_command_start;
+        extern const uint32_t _shell_command_end;
         
         shell->commandList.base = (ShellCommand *)(&_shell_command_start);
-        shell->commandList.count = ((unsigned int)(&_shell_command_end)
-                                - (unsigned int)(&_shell_command_start))
+        shell->commandList.count = ((uint32_t)(&_shell_command_end)
+                                - (uint32_t)(&_shell_command_start))
                                 / sizeof(ShellCommand);
     #else
         #error not supported compiler, please use command table mode
@@ -252,11 +252,11 @@ static void shellWriteByte(Shell *shell, const char data)
  * @param shell shell对象
  * @param string 字符串数据
  * 
- * @return unsigned short 写入字符的数量
+ * @return uint16_t 写入字符的数量
  */
-unsigned short shellWriteString(Shell *shell, const char *string)
+uint16_t shellWriteString(Shell *shell, const char *string)
 {
-    unsigned short count = 0;
+    uint16_t count = 0;
     SHELL_ASSERT(shell->write, return 0);
     while(*string)
     {
@@ -273,11 +273,11 @@ unsigned short shellWriteString(Shell *shell, const char *string)
  * @param shell shell对象
  * @param string 字符串数据
  * 
- * @return unsigned short 写入字符的数量
+ * @return uint16_t 写入字符的数量
  */
-static unsigned short shellWriteCommandDesc(Shell *shell, const char *string)
+static uint16_t shellWriteCommandDesc(Shell *shell, const char *string)
 {
-    unsigned short count = 0;
+    uint16_t count = 0;
     SHELL_ASSERT(shell->write, return 0);
     while(*string
         && *string != '\r'
@@ -348,10 +348,10 @@ void shellPrint(Shell *shell, char *fmt, ...)
  * @param shell shell对象
  * @param command ShellCommand
  * 
- * @return signed char 0 当前用户具有该命令权限
+ * @return int8_t 0 当前用户具有该命令权限
  * @return signec char -1 当前用户不具有该命令权限
  */
-signed char shellCheckPermission(Shell *shell, ShellCommand *command)
+int8_t shellCheckPermission(Shell *shell, ShellCommand *command)
 {
     return ((!command->attr.attrs.permission
                 || command->attr.attrs.type == SHELL_TYPE_USER
@@ -369,9 +369,9 @@ signed char shellCheckPermission(Shell *shell, ShellCommand *command)
  * @param value 数值
  * @param buffer 缓冲
  * 
- * @return signed char 转换后有效数据长度
+ * @return int8_t 转换后有效数据长度
  */
-signed char shellToHex(unsigned int value, char *buffer)
+int8_t shellToHex(uint32_t value, char *buffer)
 {
     char byte;
     unsigned char i = 8;
@@ -392,12 +392,12 @@ signed char shellToHex(unsigned int value, char *buffer)
  * @param value 数值
  * @param buffer 缓冲
  * 
- * @return signed char 转换后有效数据长度
+ * @return int8_t 转换后有效数据长度
  */
-signed char shellToDec(int value, char *buffer)
+int8_t shellToDec(int32_t value, char *buffer)
 {
     unsigned char i = 11;
-    int v = value;
+    int32_t v = value;
     if (value < 0)
     {
         v = -value;
@@ -424,11 +424,11 @@ signed char shellToDec(int value, char *buffer)
  * 
  * @param dest 目标字符串
  * @param src 源字符串
- * @return unsigned short 字符串长度
+ * @return uint16_t 字符串长度
  */
-static unsigned short shellStringCopy(char *dest, char* src)
+static uint16_t shellStringCopy(char *dest, char* src)
 {
-    unsigned short count = 0;
+    uint16_t count = 0;
     while (*(src + count))
     {
         *(dest + count) = *(src + count);
@@ -444,12 +444,12 @@ static unsigned short shellStringCopy(char *dest, char* src)
  * 
  * @param dest 目标字符串
  * @param src 源字符串
- * @return unsigned short 匹配长度
+ * @return uint16_t 匹配长度
  */
-static unsigned short shellStringCompare(char* dest, char *src)
+static uint16_t shellStringCompare(char* dest, char *src)
 {
-    unsigned short match = 0;
-    unsigned short i = 0;
+    uint16_t match = 0;
+    uint16_t i = 0;
 
     while (*(dest +i) && *(src + i))
     {
@@ -560,7 +560,7 @@ void shellListItem(Shell *shell, ShellCommand *item)
     }
 #if SHELL_HELP_SHOW_PERMISSION == 1
     shellWriteString(shell, "  ");
-    for (signed char i = 7; i >= 0; i--)
+    for (int8_t i = 7; i >= 0; i--)
     {
         shellWriteByte(shell, item->attr.attrs.permission & (1 << i) ? 'x' : '-');
     }
@@ -756,7 +756,7 @@ void shellInsertByte(Shell *shell, char data)
  * @param shell shell对象
  * @param direction 删除方向 {@code 1}删除光标前字符 {@code -1}删除光标处字符
  */
-void shellDeleteByte(Shell *shell, signed char direction)
+void shellDeleteByte(Shell *shell, int8_t direction)
 {
     char offset = (direction == -1) ? 1 : 0;
 
@@ -810,7 +810,7 @@ static void shellParserParam(Shell *shell)
     unsigned char record = 1;
 
     shell->parser.paramCount = 0;
-    for (unsigned short i = 0; i < shell->parser.length; i++)
+    for (uint16_t i = 0; i < shell->parser.length; i++)
     {
         if (quotes != 0
             || (shell->parser.buffer[i] != ' '
@@ -844,8 +844,8 @@ static void shellParserParam(Shell *shell)
  */
 static void shellRemoveParamQuotes(Shell *shell)
 {
-    unsigned short paramLength;
-    for (unsigned short i = 0; i < shell->parser.paramCount; i++)
+    uint16_t paramLength;
+    for (uint16_t i = 0; i < shell->parser.paramCount; i++)
     {
         if (shell->parser.param[i][0] == '\"')
         {
@@ -873,12 +873,12 @@ static void shellRemoveParamQuotes(Shell *shell)
 ShellCommand* shellSeekCommand(Shell *shell,
                                const char *cmd,
                                ShellCommand *base,
-                               unsigned short compareLength)
+                               uint16_t compareLength)
 {
     const char *name;
-    unsigned short count = shell->commandList.count -
-        ((int)base - (int)shell->commandList.base) / sizeof(ShellCommand);
-    for (unsigned short i = 0; i < count; i++)
+    uint16_t count = shell->commandList.count -
+        ((int32_t)base - (int32_t)shell->commandList.base) / sizeof(ShellCommand);
+    for (uint16_t i = 0; i < count; i++)
     {
         if (base[i].attr.attrs.type == SHELL_TYPE_KEY
             || shellCheckPermission(shell, &base[i]) != 0)
@@ -910,15 +910,15 @@ ShellCommand* shellSeekCommand(Shell *shell,
  * 
  * @param shell shell对象
  * @param command 命令
- * @return int 变量值
+ * @return int32_t 变量值
  */
-int shellGetVarValue(Shell *shell, ShellCommand *command)
+int32_t shellGetVarValue(Shell *shell, ShellCommand *command)
 {
-    int value = 0;
+    int32_t value = 0;
     switch (command->attr.attrs.type)
     {
     case SHELL_TYPE_VAR_INT:
-        value = *((int *)(command->data.var.value));
+        value = *((int32_t *)(command->data.var.value));
         break;
     case SHELL_TYPE_VAR_SHORT:
         value = *((short *)(command->data.var.value));
@@ -928,7 +928,7 @@ int shellGetVarValue(Shell *shell, ShellCommand *command)
         break;
     case SHELL_TYPE_VAR_POINT:
     case SHELL_TYPE_VAL:
-        value = (int)(command->data.var.value);
+        value = (int32_t)(command->data.var.value);
         break;
     default:
         break;
@@ -944,12 +944,12 @@ int shellGetVarValue(Shell *shell, ShellCommand *command)
  * @param command 命令
  * @param value 值
  */
-void shellSetVarValue(Shell *shell, ShellCommand *command, int value)
+void shellSetVarValue(Shell *shell, ShellCommand *command, int32_t value)
 {
     switch (command->attr.attrs.type)
     {
     case SHELL_TYPE_VAR_INT:
-        *((int *)(command->data.var.value)) = value;
+        *((int32_t *)(command->data.var.value)) = value;
         break;
     case SHELL_TYPE_VAR_SHORT:
         *((short *)(command->data.var.value)) = value;
@@ -979,7 +979,7 @@ void shellSetVarValue(Shell *shell, ShellCommand *command, int value)
 static void shellShowVar(Shell *shell, ShellCommand *command)
 {
     char buffer[12] = "00000000000";
-    int value = shellGetVarValue(shell, command);
+    int32_t value = shellGetVarValue(shell, command);
     shellWriteString(shell, command->data.var.name);
     shellWriteString(shell, " = ");
     shellWriteString(shell, &buffer[11 - shellToDec(value, buffer)]);
@@ -999,9 +999,9 @@ static void shellShowVar(Shell *shell, ShellCommand *command)
  * 
  * @param name 变量名
  * @param value 变量值
- * @return int 返回变量值
+ * @return int32_t 返回变量值
  */
-int shellSetVar(char *name, int value)
+int32_t shellSetVar(char *name, int32_t value)
 {
     Shell *shell = shellGetCurrent();
     if (shell == NULL)
@@ -1040,7 +1040,7 @@ setVar, shellSetVar, set var);
  */
 static void shellRunCommand(Shell *shell, ShellCommand *command)
 {
-    int returnValue;
+    int32_t returnValue;
     shell->status.isActive = 1;
     if (command->attr.attrs.type == SHELL_TYPE_CMD_MAIN)
     {
@@ -1126,7 +1126,7 @@ static void shellSetUser(Shell *shell, const ShellCommand *user)
  * @param shell shell对象
  * @param value 返回值
  */
-static void shellWirteReturnValue(Shell *shell, int value)
+static void shellWirteReturnValue(Shell *shell, int32_t value)
 {
     char buffer[12] = "00000000000";
     shellWriteString(shell, "Return: ");
@@ -1179,7 +1179,7 @@ static void shellHistoryAdd(Shell *shell)
  * @param shell shell对象
  * @param dir 方向 {@code <0}往上查找 {@code >0}往下查找
  */
-static void shellHistory(Shell *shell, signed char dir)
+static void shellHistory(Shell *shell, int8_t dir)
 {
     if (dir > 0)
     {
@@ -1300,10 +1300,10 @@ SHELL_EXPORT_KEY(SHELL_CMD_PERMISSION(0)|SHELL_CMD_ENABLE_UNCHECKED,
  */
 void shellTab(Shell *shell)
 {
-    unsigned short maxMatch = shell->parser.bufferSize;
-    unsigned short lastMatchIndex = 0;
-    unsigned short matchNum = 0;
-    unsigned short length;
+    uint16_t maxMatch = shell->parser.bufferSize;
+    uint16_t lastMatchIndex = 0;
+    uint16_t matchNum = 0;
+    uint16_t length;
 
     if (shell->parser.length == 0)
     {
@@ -1481,7 +1481,7 @@ SHELL_EXPORT_KEY(SHELL_CMD_PERMISSION(0)|SHELL_CMD_ENABLE_UNCHECKED,
  * @param argc 参数个数
  * @param argv 参数
  */
-void shellHelp(int argc, char *argv[])
+void shellHelp(int32_t argc, char *argv[])
 {
     Shell *shell = shellGetCurrent();
     SHELL_ASSERT(shell, return);
@@ -1512,6 +1512,10 @@ help, shellHelp, show command info\r\nhelp [cmd]);
  * @param shell shell对象
  * @param data 输入数据
  */
+
+
+
+ #include "DS_LogM.h"
 void shellHandler(Shell *shell, char data)
 {
     SHELL_ASSERT(data, return);
@@ -1530,7 +1534,7 @@ void shellHandler(Shell *shell, char data)
 
     /* 根据记录的按键键值计算当前字节在按键键值中的偏移 */
     char keyByteOffset = 24;
-    int keyFilter = 0x00000000;
+    int32_t keyFilter = 0x00000000;
     if ((shell->parser.keyValue & 0x0000FF00) != 0x00000000)
     {
         keyByteOffset = 0;
@@ -1603,9 +1607,19 @@ void shellTask(void *param)
     while(1)
     {
 #endif
-        if (shell->read && shell->read(&data) == 0)
+        if (shell->read)
         {
-            shellHandler(shell, data);
+            while (1)
+            {
+                if (shell->read(&data) == 0)
+                {
+                    shellHandler(shell, data);
+                }
+                else 
+                {
+                    break;
+                }
+            }
         }
 #if SHELL_TASK_WHILE == 1
     }

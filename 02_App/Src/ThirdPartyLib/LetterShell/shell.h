@@ -79,7 +79,7 @@
             { \
                 .attr.value = _attr, \
                 .data.cmd.name = shellCmd##_name, \
-                .data.cmd.function = (int (*)())_func, \
+                .data.cmd.function = (int32_t (*)())_func, \
                 .data.cmd.desc = shellDesc##_name \
             }
 
@@ -155,7 +155,7 @@
             { \
                 .attr.value = _attr, \
                 .data.cmd.name = #_name, \
-                .data.cmd.function = (int (*)())_func, \
+                .data.cmd.function = (int32_t (*)())_func, \
                 .data.cmd.desc = #_desc \
             }
 
@@ -238,37 +238,37 @@ typedef struct
     struct
     {
         const struct shell_command *user;                       /**< 当前用户 */
-        int activeTime;                                         /**< shell激活时间 */
+        int32_t activeTime;                                     /**< shell激活时间 */
     } info;
     struct
     {
-        unsigned short length;                                  /**< 输入数据长度 */
-        unsigned short cursor;                                  /**< 当前光标位置 */
+        uint16_t length;                                        /**< 输入数据长度 */
+        uint16_t cursor;                                        /**< 当前光标位置 */
         char *buffer;                                           /**< 输入缓冲 */
-        unsigned short bufferSize;                              /**< 输入缓冲大小 */
+        uint16_t bufferSize;                                    /**< 输入缓冲大小 */
         char *param[SHELL_PARAMETER_MAX_NUMBER];                /**< 参数 */
-        unsigned short paramCount;                              /**< 参数数量 */
-        int keyValue;                                           /**< 输入按键键值 */
+        uint16_t paramCount;                                    /**< 参数数量 */
+        int32_t keyValue;                                       /**< 输入按键键值 */
     } parser;
     struct
     {
         char *item[SHELL_HISTORY_MAX_NUMBER];                   /**< 历史记录 */
-        unsigned short number;                                  /**< 历史记录数 */
-        unsigned short record;                                  /**< 当前记录位置 */
+        uint16_t number;                                        /**< 历史记录数 */
+        uint16_t record;                                        /**< 当前记录位置 */
         signed short offset;                                    /**< 当前历史记录偏移 */
     } history;
     struct
     {
         void *base;                                             /**< 命令表基址 */
-        unsigned short count;                                   /**< 命令数量 */
+        uint16_t count;                                         /**< 命令数量 */
     } commandList;
     struct
     {
-        unsigned char isChecked : 1;                            /**< 密码校验通过 */
-        unsigned char isActive : 1;                             /**< 当前活动Shell */
-        unsigned char tabFlag : 1;                              /**< tab标志 */
+        uint8_t isChecked : 1;                                  /**< 密码校验通过 */
+        uint8_t isActive : 1;                                   /**< 当前活动Shell */
+        uint8_t tabFlag : 1;                                    /**< tab标志 */
     } status;
-    signed char (*read)(char *);                                /**< shell读函数 */
+    int8_t (*read)(char *);                                     /**< shell读函数 */
     void (*write)(const char);                                  /**< shell写函数 */
 } Shell;
 
@@ -282,19 +282,19 @@ typedef struct shell_command
     {
         struct
         {
-            unsigned char permission : 8;                       /**< command权限 */
+            uint8_t permission : 8;                             /**< command权限 */
             ShellCommandType type : 4;                          /**< command类型 */
-            unsigned char enableUnchecked : 1;                  /**< 在未校验密码的情况下可用 */
-            unsigned char disableReturn : 1;                    /**< 禁用返回值输出 */
+            uint8_t enableUnchecked : 1;                        /**< 在未校验密码的情况下可用 */
+            uint8_t disableReturn : 1;                          /**< 禁用返回值输出 */
         } attrs;
-        int value;
+        int32_t value;
     } attr;                                                     /**< 属性 */
     union
     {
         struct
         {
             const char *name;                                   /**< 命令名 */
-            int (*function)();                                  /**< 命令执行函数 */
+            int32_t (*function)();                              /**< 命令执行函数 */
             const char *desc;                                   /**< 命令描述 */
         } cmd;                                                  /**< 命令定义 */
         struct
@@ -311,7 +311,7 @@ typedef struct shell_command
         } user;                                                 /**< 用户定义 */
         struct
         {
-            int value;                                          /**< 按键键值 */
+            int32_t value;                                      /**< 按键键值 */
             void (*function)(Shell *);                          /**< 按键执行函数 */
             const char *desc;                                   /**< 按键描述 */
         } key;                                                  /**< 按键定义 */
@@ -319,8 +319,8 @@ typedef struct shell_command
 } ShellCommand;
 
 
-void shellInit(Shell *shell, char *buffer, unsigned short size);
-unsigned short shellWriteString(Shell *shell, const char *string);
+void shellInit(Shell *shell, char *buffer, uint16_t size);
+uint16_t shellWriteString(Shell *shell, const char *string);
 void shellPrint(Shell *shell, char *fmt, ...);
 Shell* shellGetCurrent(void);
 void shellHandler(Shell *shell, char data);

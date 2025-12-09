@@ -127,11 +127,11 @@ static GlobalRet_Enum CycleBuf_CircleWriteData(CycleBuf_Struct *pCycBuf, uint8_t
     {
         if (pCycBuf->writeIdx >= pCycBuf->readIdx)
         {
-            freeBuffSize = pCycBuf->buffSize - (pCycBuf->writeIdx - pCycBuf->readIdx);
+            freeBuffSize = pCycBuf->buffSize - (pCycBuf->writeIdx - pCycBuf->readIdx) - 1;
         }
         else 
         {
-            freeBuffSize = pCycBuf->readIdx - pCycBuf->writeIdx;
+            freeBuffSize = pCycBuf->readIdx - pCycBuf->writeIdx - 1;
         }
 
         if (dataSize <= freeBuffSize)
@@ -139,7 +139,12 @@ static GlobalRet_Enum CycleBuf_CircleWriteData(CycleBuf_Struct *pCycBuf, uint8_t
             for (dataIdx = 0; dataIdx < dataSize; dataIdx++)
             {
                 pCycBuf->data[pCycBuf->writeIdx] = pSrcData[dataIdx];
-                pCycBuf->writeIdx = (pCycBuf->writeIdx + 1) % pCycBuf->buffSize;
+                pCycBuf->writeIdx++;
+
+                if (pCycBuf->writeIdx >= pCycBuf->buffSize)
+                {
+                    pCycBuf->writeIdx = 0;
+                }
             }
         
             eRet = eGlobalRet_OK;
@@ -159,7 +164,7 @@ static GlobalRet_Enum CycleBuf_CircleReadData(CycleBuf_Struct *pCycBuf, uint8_t 
     uint16_t dataIdx = 0u;
 	uint16_t remainDataSize = 0u;
 
-    if (((pCycBuf->readIdx + 1) % pCycBuf->buffSize) != pCycBuf->writeIdx)
+    if (pCycBuf->readIdx != pCycBuf->writeIdx)
     {
         if (pCycBuf->readIdx > pCycBuf->writeIdx)
         {
@@ -175,7 +180,12 @@ static GlobalRet_Enum CycleBuf_CircleReadData(CycleBuf_Struct *pCycBuf, uint8_t 
             for (dataIdx = 0; dataIdx < readSize; dataIdx++)
             {
                 pOutData[dataIdx] = pCycBuf->data[pCycBuf->readIdx];
-                pCycBuf->readIdx = (pCycBuf->readIdx + 1) % pCycBuf->buffSize;
+
+                pCycBuf->readIdx++;
+                if (pCycBuf->readIdx >= pCycBuf->buffSize)
+                {
+                    pCycBuf->readIdx = 0;
+                }
             }
             
             eRet = eGlobalRet_OK;
@@ -198,13 +208,7 @@ static GlobalRet_Enum CycleBuf_SingleReadData(CycleBuf_Struct *pCycBuf, uint8_t 
         for (dataIdx = 0; dataIdx < readSize; dataIdx++)
         {
             pOutData[dataIdx] = pCycBuf->data[pCycBuf->readIdx];
-            pCycBuf->readIdx = (pCycBuf->readIdx + 1) % pCycBuf->buffSize;
-        }
-
-        if (pCycBuf->readIdx == pCycBuf->writeIdx)
-        {
-            pCycBuf->readIdx = 0;
-            pCycBuf->writeIdx = 0;
+            pCycBuf->readIdx++;
         }
 
         eRet = eGlobalRet_OK;
@@ -228,7 +232,7 @@ void CycleBuf_Init(void)
 	}
 }
 
-GlobalRet_Enum CycleBuf_CreatChannel(uint8_t* pChannel, uint8_t* pDataBuf, uint32_t bufSize, uint8_t porfile)
+GlobalRet_Enum CycleBuf_CreateChannel(uint8_t* pChannel, uint8_t* pDataBuf, uint32_t bufSize, uint8_t porfile)
 {
 	GlobalRet_Enum eRet = eGlobalRet_OK;
     CycleBuf_Struct *pCycBuf = NULL;
@@ -445,14 +449,17 @@ GlobalRet_Enum CycleBuf_CheckDataLen(uint8_t channel, uint16_t* pRemainLen)
 
         if (pCycBuf->profile == CYCLEBUF_PROFILE_CIRCLE)
         {
-			if (pCycBuf->writeIdx >= pCycBuf->readIdx)
-			{
-				pRemainLen[0] = pCycBuf->writeIdx - pCycBuf->readIdx;
-			}
-			else
-			{
-				pRemainLen[0] = pCycBuf->buffSize + pCycBuf->writeIdx - pCycBuf->readIdx;
-			}
+            if (pCycBuf->readIdx != pCycBuf->writeIdx)
+            {
+                if (pCycBuf->writeIdx > pCycBuf->readIdx)
+                {
+                    pRemainLen[0] = pCycBuf->writeIdx - pCycBuf->readIdx;
+                }
+                else
+                {
+                    pRemainLen[0] = pCycBuf->buffSize + pCycBuf->writeIdx - pCycBuf->readIdx;
+                }
+            }
         }
         else
         {
@@ -484,14 +491,17 @@ GlobalRet_Enum CycleBuf_CheckDataLenIsr(uint8_t channel, uint16_t* pRemainLen)
     {
         if (pCycBuf->profile == CYCLEBUF_PROFILE_CIRCLE)
         {
-			if(pCycBuf->writeIdx >= pCycBuf->readIdx)
-			{
-				pRemainLen[0] = pCycBuf->writeIdx - pCycBuf->readIdx;
-			}
-			else
-			{
-				pRemainLen[0] = pCycBuf->buffSize + pCycBuf->writeIdx - pCycBuf->readIdx;
-			}
+            if (pCycBuf->readIdx != pCycBuf->writeIdx)
+            {
+                if (pCycBuf->writeIdx > pCycBuf->readIdx)
+                {
+                    pRemainLen[0] = pCycBuf->writeIdx - pCycBuf->readIdx;
+                }
+                else
+                {
+                    pRemainLen[0] = pCycBuf->buffSize + pCycBuf->writeIdx - pCycBuf->readIdx;
+                }
+            }
         }
         else
         {
