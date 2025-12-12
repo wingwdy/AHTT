@@ -26,6 +26,7 @@
 #include "Cdd_Rcd.h"
 #include "Cdd_Sensor.h"
 #include "Cdd_PE.h"
+#include "Cdd_MeterM.h"
 
 #include "Mcal_If.h"
 
@@ -81,7 +82,7 @@ static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
     {"App10msA",        Task_10msA,          NULL,         512,   6 } ,
     {"App10msB",        Task_10msB,          NULL,         512,   7 } ,
     {"App100ms",        Task_100ms,          NULL,         512,   5 } ,
-    {"DebugTask",       Task_Debug20ms,      NULL,         512,   4 } ,
+    {"DebugTask",       Task_Debug20ms,      NULL,         256,   4 } ,
 };
 
 /*******************************************************************************
@@ -106,7 +107,6 @@ void portTask_CreatAllTask(void)
 
 	    if(xResult != pdTRUE)
         {
-//          log_debug("[%s] task create error\n", pTaskCtr->cTaskName);
         }
 	}
 }
@@ -138,9 +138,9 @@ static void Task_100ms(void *arg)
 {
     while (1)
     {
- //       McalIf_Test();
+        CddMeterM_MainFunction();
         CddSensor_MainFunction();
-        vTaskDelay(1000);
+        vTaskDelay(100);
     }
 }
 
@@ -149,7 +149,7 @@ static void Task_Debug20ms(void *arg)
     while (1)
     {
         DSConsole_MainFunction();
-        vTaskDelay(10);
+        vTaskDelay(20);
     }
 }
 

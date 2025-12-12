@@ -61,14 +61,14 @@ const char *g_logMModuleName[DSLogMModule_Count] =
 {
     "EVSE",
     "Charge",
-    "ErrorHandle"
+    "ErrorHandle",
 
     "CP",
+    "Meter",
     "RCD",
-    "RELAY",
+    "Relay",
 
     "Flash",
-
     "System",
 };
 

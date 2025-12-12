@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : DS_LogMConfig.h
-* Description        : Code for log manage
+* File Name          : Cdd_MeterMConfig.h
+* Description        : Code for Configuration of metering interface
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,66 +11,51 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef DS_LOGM_CONFIG_H_
-#define DS_LOGM_CONFIG_H_
+#ifndef CDD_METERM_CONFIG_H_
+#define CDD_METERM_CONFIG_H_
+
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-
+#include "Common.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define DSLOGM_CFG_ASYN_BUFF_SIZE                 3072
-
-#define DSLOGM_CFG_OUTPUT_ASYN_ENABLE             TRUE           
-
-#define DSLOGM_CFG_OUTPUT_WITH_MODULE_NAME        FALSE
-
+#define CDD_METERM_CFG_DEVICE_BL0942      0U
+#define CDD_METERM_CFG_DEVICE_COUNT       1U
+#define CDD_METERM_CFG_DEVICE_TYPE        CDD_METERM_CFG_DEVICE_BL0942
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    /* ASW */
-    DSLogMModule_EVSE,
-    DSLogMModule_Charge,
-    DSLogMModule_ErrorHandle,
-
-    /*CDD */
-    DSLogMModule_CP,
-    DSLogMModule_Meter,
-    DSLogMModule_RCD,
-    DSLogMModule_RELAY,
-
-    /*System Service */
-    DSLogMModule_System,
-
-    /*Memory Service */
-    DSLogMModule_Flash,
-
-    DSLogMModule_Count,
-}DSLogMModule_Enum;
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
-
-
+typedef struct 
+{ 
+    void (*pFuncInitMemory)(void);
+    void (*pFuncMainFunction)(void);
+    uint8_t (*pFuncGetReadyFlag)(uint8_t port);
+    uint32_t (*pFuncGetPeriodEnergy)(uint8_t port);
+    uint32_t (*pFuncGetPower)(uint8_t port);
+    uint32_t (*pFuncGetRmsVoltage)(uint8_t port);
+    uint32_t (*pFuncGetRmsCurrent)(uint8_t port);
+} CddMeterMConfig_Struct;
 
 
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-extern const char *g_logMModuleName[DSLogMModule_Count];
+extern const CddMeterMConfig_Struct c_CddMeterMConfigTable[CDD_METERM_CFG_DEVICE_COUNT];
 
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
 
-#endif /* DS_LOGM_CONFIG_H_ */
 
+#endif /* CDD_METERM_CONFIG_H_ */
 
 
 

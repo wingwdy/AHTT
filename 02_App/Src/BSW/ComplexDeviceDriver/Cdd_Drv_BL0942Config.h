@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : DS_ConsoleConfig.h
-* Description        : Code for Serial console debugging
+* File Name          : template.h
+* Description        : Code for xxxxxxxxxxx
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,17 +11,37 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef DS_CONSOLE_CONFIG_H_
-#define DS_CONSOLE_CONFIG_H_
+#ifndef CDD_DRV_BL0942CONFIG_H_
+#define CDD_DRV_BL0942CONFIG_H_
+
 
 /******************************************************************************
 *    Include Files
 ******************************************************************************/
-#include "Common.h"
-#include "Shell.h"
-#include "Shell_Port.h"
-#include "Shell_Cfg.h"
+#include "Mcal_Uart.h"
+#include "Global.h"
+/******************************************************************************
+*    Macro Definition
+******************************************************************************/
+#define CDDDRV_BL0942_CFG_HEAD_WRITE              0xA8  
+#define CDDDRV_BL0942_CFG_HEAD_READ               0x58
 
+
+
+#define CDDDRV_BL0942_CFG_WriteData(pData, length)      McalUart_WriteData(eMcalUartChanel_MeterChip, pData, length)
+
+#define CDDDRV_BL0942_CFG_ReadData(pData, length, ret)  do \
+                                                        {\
+                                                            uint16_t mcalRecvLen = 0;\
+                                                            ret = McalUart_CheckDataLen(eMcalUartChanel_MeterChip, &mcalRecvLen);\
+                                                            if (ret == eGlobalRet_OK)\
+                                                            {\
+                                                                ret = McalUart_ReadData(eMcalUartChanel_MeterChip, pData, length);\
+                                                            }\
+                                                        }while(0)
+
+/******************************************************************************
+*    Typedef Definition
 
 /******************************************************************************
 *    Header File Inclusion
@@ -31,7 +51,7 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define DSCONSOLE_CFG_ADD_CMD(cmd, func, desc)   SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_DISABLE_RETURN, cmd, func, desc)
+
 
 /******************************************************************************
 *    Enum Definition
@@ -53,8 +73,8 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-#endif /* DS_CONSOLE_CONFIG_H_ */
 
+#endif
 
 
 

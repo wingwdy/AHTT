@@ -460,14 +460,24 @@ GlobalRet_Enum CycleBuf_CheckDataLen(uint8_t channel, uint16_t* pRemainLen)
                     pRemainLen[0] = pCycBuf->buffSize + pCycBuf->writeIdx - pCycBuf->readIdx;
                 }
             }
+            else
+            {
+                eRet = eGlobalRet_NotEnoughData;
+            }
         }
         else
         {
-            pRemainLen[0] = pCycBuf->writeIdx - pCycBuf->readIdx;
+            if (pCycBuf->readIdx != pCycBuf->writeIdx)
+            {
+                pRemainLen[0] = pCycBuf->writeIdx - pCycBuf->readIdx;
+            }
+            else
+            {
+                eRet = eGlobalRet_NotEnoughData;
+            }
         }
 
-        CYCLEBUF_EXIT_CRITICAL_AREA();
-        eRet = eGlobalRet_OK;
+        CYCLEBUF_EXIT_CRITICAL_AREA(); 
     }
 
 	return eRet;
@@ -502,13 +512,22 @@ GlobalRet_Enum CycleBuf_CheckDataLenIsr(uint8_t channel, uint16_t* pRemainLen)
                     pRemainLen[0] = pCycBuf->buffSize + pCycBuf->writeIdx - pCycBuf->readIdx;
                 }
             }
+            else
+            {
+                eRet = eGlobalRet_NotEnoughData;
+            }
         }
         else
         {
-            pRemainLen[0] = pCycBuf->writeIdx - pCycBuf->readIdx;
+            if (pCycBuf->readIdx != pCycBuf->writeIdx)
+            {
+                pRemainLen[0] = pCycBuf->writeIdx - pCycBuf->readIdx;
+            }
+            else
+            {
+                eRet = eGlobalRet_NotEnoughData;
+            }
         }
-        
-        eRet = eGlobalRet_OK;
     }
 
 	return eRet;

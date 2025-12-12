@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : DS_ConsoleConfig.c
-* Description        : Code for Serial console debugging
+* File Name          : Cdd_MeterMConfig.c
+* Description        : Code for Configuration of metering interface
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -16,11 +16,10 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "DS_ConsoleConfig.h"
+#include "Cdd_Drv_BL0942.h"
+#include "Cdd_MeterMConfig.h"
 
-#include "Asw_Charge.h"
-#include "Mcal_Mcu.h"
-/************************s*******************************************************
+/*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
 
@@ -44,7 +43,19 @@
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-
+const CddMeterMConfig_Struct c_CddMeterMConfigTable[CDD_METERM_CFG_DEVICE_COUNT] = 
+{
+    [CDD_METERM_CFG_DEVICE_BL0942] = 
+    {
+        .pFuncInitMemory = CddDrvBL0942_InitMemory,
+        .pFuncMainFunction = CddDrvBL0942_MainFunction,
+        .pFuncGetReadyFlag = CddDrvBL0942_GetReadyFlag,
+        .pFuncGetPower = CddDrvBL0942_GetPower,
+        .pFuncGetPeriodEnergy = CddDrvBL0942_GetPeriodEnergy,
+        .pFuncGetRmsCurrent = CddDrvBL0942_GetRmsCurrent,
+        .pFuncGetRmsVoltage = CddDrvBL0942_GetRmsVoltage,
+    },
+};
 
 
 /*******************************************************************************
@@ -56,43 +67,14 @@
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-static int32_t DSConsoleCfg_Reboot(int32_t argc, char *argv[])
-{
-    McalMcu_SystemReset();
-    return 0;
-} 
-
-static int32_t DSConsoleCfg_ChargeCtrl(int32_t argc, char *argv[])
-{
-    int32_t ret = 0;
-    uint8_t port = atoi(argv[2]);
-
-    if (argc == 3)
-    {
-        if (0 == strcmp(argv[1], "start"))
-        {
-            AswCharge_StartAuth(port);
-        }
-        else if (0 == strcmp(argv[1], "stop"))
-        {
-            AswCharge_StopAuth(port);
-        }
-        else
-        {
-            ret = -1;
-        }
-    }
-    else
-    {
-        ret = -1;
-    }
-
-    return ret;
-}
 
 
-DSCONSOLE_CFG_ADD_CMD(reboot, DSConsoleCfg_Reboot, "reboot" reboot system);
-DSCONSOLE_CFG_ADD_CMD(charge, DSConsoleCfg_ChargeCtrl, "charge start/stop 0/1" start/stop charge);
+
+
+
+
+
+
 
 
 

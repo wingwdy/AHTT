@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : DS_LogMConfig.h
-* Description        : Code for log manage
+* File Name          : Cdd_MeterM.h
+* Description        : Code for Meter Manage
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,8 +11,15 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef DS_LOGM_CONFIG_H_
-#define DS_LOGM_CONFIG_H_
+#ifndef CDD_METERM_H_
+#define CDD_METERM_H_
+
+
+/******************************************************************************
+*    Include Files
+******************************************************************************/
+#include "Common.h"
+
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
@@ -21,36 +28,12 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define DSLOGM_CFG_ASYN_BUFF_SIZE                 3072
 
-#define DSLOGM_CFG_OUTPUT_ASYN_ENABLE             TRUE           
-
-#define DSLOGM_CFG_OUTPUT_WITH_MODULE_NAME        FALSE
 
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    /* ASW */
-    DSLogMModule_EVSE,
-    DSLogMModule_Charge,
-    DSLogMModule_ErrorHandle,
 
-    /*CDD */
-    DSLogMModule_CP,
-    DSLogMModule_Meter,
-    DSLogMModule_RCD,
-    DSLogMModule_RELAY,
-
-    /*System Service */
-    DSLogMModule_System,
-
-    /*Memory Service */
-    DSLogMModule_Flash,
-
-    DSLogMModule_Count,
-}DSLogMModule_Enum;
 
 /******************************************************************************
 *    Typedef Definition
@@ -58,20 +41,23 @@ typedef enum
 
 
 
-
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-extern const char *g_logMModuleName[DSLogMModule_Count];
+
 
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-
-#endif /* DS_LOGM_CONFIG_H_ */
-
-
+void CddMeterM_InitMemory(void);
+void CddMeterM_MainFunction(void);
+uint8_t CddMeterM_GetReadyFlag(uint8_t port);
+uint32_t CddMeterM_GetPower(uint8_t port);
+uint32_t CddMeterM_GetRmsVoltage(uint8_t port);
+uint32_t CddMeterM_GetRmsCurrent(uint8_t port);
+uint32_t CddMeterM_GetEnergyVal(uint8_t port);
+#endif
 
 
 

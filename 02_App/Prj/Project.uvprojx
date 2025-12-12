@@ -339,7 +339,7 @@
               <MiscControls>-Wno-invalid-source-encoding</MiscControls>
               <Define>GD32E50X,GD32E50X_HD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\BSW\ComplexDeviceDriver;..\Src\ASW\ASW_CHG;..\Src\BSW\SystemService\SystemM;..\Src\BSW\DebugService\LogM;..\Src\ThirdPartyLib\FlashDB\port\fal\inc;..\Src\ThirdPartyLib\FlashDB\inc;..\Src\BSW\MemoryService\FlashDB_Adapter;..\Src\BSW\MemoryService\MemIf;..\Src\BSW\MemoryService\NVM;..\Src\BSW\MemoryService\EA;..\Src\BSW\DebugService\Shell;..\Src\ThirdPartyLib\LetterShell</IncludePath>
+              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\ASW\ASW_CHG;..\Src\BSW\SystemService\SystemM;..\Src\BSW\DebugService\LogM;..\Src\ThirdPartyLib\FlashDB\port\fal\inc;..\Src\ThirdPartyLib\FlashDB\inc;..\Src\BSW\MemoryService\FlashDB_Adapter;..\Src\BSW\MemoryService\MemIf;..\Src\BSW\MemoryService\NVM;..\Src\BSW\MemoryService\EA;..\Src\ThirdPartyLib\LetterShell;..\Src\BSW\DebugService\Console;..\Src\BSW\ComplexDeviceDriver\CP;..\Src\BSW\ComplexDeviceDriver\Meter;..\Src\BSW\ComplexDeviceDriver\PE;..\Src\BSW\ComplexDeviceDriver\RCD;..\Src\BSW\ComplexDeviceDriver\Relay;..\Src\BSW\ComplexDeviceDriver\Sensor</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -373,7 +373,7 @@
             <ScatterFile>.\GD32E503\build\pile-tcu-ctrl.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
-            <Misc></Misc>
+            <Misc>--keep shellCommand*</Misc>
             <LinkerInputFile></LinkerInputFile>
             <DisabledWarnings></DisabledWarnings>
           </LDads>
@@ -427,44 +427,64 @@
           <GroupName>BSW/ComplexDeviceDriver</GroupName>
           <Files>
             <File>
-              <FileName>Cdd_Relay.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_Relay.c</FilePath>
-            </File>
-            <File>
               <FileName>Cdd_CP.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_CP.c</FilePath>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\CP\Cdd_CP.c</FilePath>
             </File>
             <File>
               <FileName>Cdd_CPConfig.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_CPConfig.c</FilePath>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\CP\Cdd_CPConfig.c</FilePath>
             </File>
             <File>
-              <FileName>Cdd_Rcd.c</FileName>
+              <FileName>Cdd_Drv_BL0942.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_Rcd.c</FilePath>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_Drv_BL0942.c</FilePath>
             </File>
             <File>
-              <FileName>Cdd_Sensor.c</FileName>
+              <FileName>Cdd_MeterM.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_Sensor.c</FilePath>
-            </File>
-            <File>
-              <FileName>Cdd_SensorConfig.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_SensorConfig.c</FilePath>
-            </File>
-            <File>
-              <FileName>Cdd_RelayConfig.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_RelayConfig.c</FilePath>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_MeterM.c</FilePath>
             </File>
             <File>
               <FileName>Cdd_PE.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Cdd_PE.c</FilePath>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\PE\Cdd_PE.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_Rcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\RCD\Cdd_Rcd.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_Relay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Relay\Cdd_Relay.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_RelayConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Relay\Cdd_RelayConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_Sensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Sensor\Cdd_Sensor.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_SensorConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Sensor\Cdd_SensorConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_MeterMConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_MeterMConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_Drv_BL0942Config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_Drv_BL0942Config.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -607,9 +627,14 @@
               <FilePath>..\Src\BSW\DebugService\LogM\DS_LogMConfig.c</FilePath>
             </File>
             <File>
-              <FileName>shell_port.c</FileName>
+              <FileName>DS_Console.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\BSW\DebugService\Shell\shell_port.c</FilePath>
+              <FilePath>..\Src\BSW\DebugService\Console\DS_Console.c</FilePath>
+            </File>
+            <File>
+              <FileName>DS_ConsoleConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\DebugService\Console\DS_ConsoleConfig.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -681,6 +706,31 @@
               <FileName>fal_rtt.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\ThirdPartyLib\FlashDB\port\fal\src\fal_rtt.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>ThirdParty/LetterShell</GroupName>
+          <Files>
+            <File>
+              <FileName>shell.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ThirdPartyLib\LetterShell\shell.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_cmd_list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ThirdPartyLib\LetterShell\shell_cmd_list.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_ext.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ThirdPartyLib\LetterShell\shell_ext.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ThirdPartyLib\LetterShell\shell_port.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -951,26 +1001,6 @@
               <FileName>freertos.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\Core\freertos.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>ThirdParty/LetterShell</GroupName>
-          <Files>
-            <File>
-              <FileName>shell.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\ThirdPartyLib\LetterShell\shell.c</FilePath>
-            </File>
-            <File>
-              <FileName>shell_cmd_list.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\ThirdPartyLib\LetterShell\shell_cmd_list.c</FilePath>
-            </File>
-            <File>
-              <FileName>shell_ext.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\ThirdPartyLib\LetterShell\shell_ext.c</FilePath>
             </File>
           </Files>
         </Group>

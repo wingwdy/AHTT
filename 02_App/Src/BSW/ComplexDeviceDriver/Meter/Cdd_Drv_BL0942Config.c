@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : DS_ConsoleConfig.c
-* Description        : Code for Serial console debugging
+* File Name          : Cdd_Drv_BL0942Config.c
+* Description        : Code for Configuration of BL0942 interface
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -16,22 +16,20 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "DS_ConsoleConfig.h"
+#include "Mcal_Uart.h"
+#include "Global.h"
+#include "Cdd_Drv_BL0942Config.h"
+#include "Cdd_Drv_BL0942.h" 
 
-#include "Asw_Charge.h"
-#include "Mcal_Mcu.h"
-/************************s*******************************************************
+
+/*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
-
-
 
 
 /*******************************************************************************
 *    Enum Definition
 *******************************************************************************/
-
-
 
 
 
@@ -50,51 +48,54 @@
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
+static uint8_t g_caliRegVal[eCddDrvBL0942CaliReg_Cnt][3] = 
+{
+    {0xC7, 0x00, 0x00},
+    {0x9E, 0x0E, 0x00},
+    {0x00, 0x00, 0x00},
+    {0x00, 0x00, 0x00},
+    {0x3D, 0x00, 0x00},
+}; 
 
-
+const CddDrvBL0942WriteRegister_Struct c_stCddDrvBL0942WriteRegisterTable[eCddDrvBL0942CaliReg_Cnt] =
+{
+    {CDDDRV_BL0942_REG_MODE,     0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_V_MODE]    },
+    {CDDDRV_BL0942_REG_V_CHGN,   0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_V_CHGN]    },
+    {CDDDRV_BL0942_REG_PHCAL,    0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_PHCAL]     },
+    {CDDDRV_BL0942_REG_WATTOS,   0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_WATTOS]    },
+    {CDDDRV_BL0942_REG_WA_CREEP, 0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_WA_CREEP]  },
+};   
 
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-static int32_t DSConsoleCfg_Reboot(int32_t argc, char *argv[])
+void CddDrvBL0942Cfg_WriteData(uint8_t port, uint8_t *pData, uint16_t length)
 {
-    McalMcu_SystemReset();
-    return 0;
-} 
-
-static int32_t DSConsoleCfg_ChargeCtrl(int32_t argc, char *argv[])
-{
-    int32_t ret = 0;
-    uint8_t port = atoi(argv[2]);
-
-    if (argc == 3)
+    if (port == 0)
     {
-        if (0 == strcmp(argv[1], "start"))
-        {
-            AswCharge_StartAuth(port);
-        }
-        else if (0 == strcmp(argv[1], "stop"))
-        {
-            AswCharge_StopAuth(port);
-        }
-        else
-        {
-            ret = -1;
-        }
+        McalUart_WriteData(eMcalUartChanel_MeterChip, pData, length);
     }
     else
+    {}
+}
+
+GlobalRet_Enum CddDrvBL0942Cfg_ReadData(uint8_t port, uint8_t *pData, uint16_t length)
+{
+    uint16_t mcalRecvLen = 0;
+    GlobalRet_Enum ret = eGlobalRet_Error;
+
+    if (port == 0)
     {
-        ret = -1;
+        ret = McalUart_CheckDataLen(eMcalUartChanel_MeterChip, &mcalRecvLen);
+        
+        if (ret == eGlobalRet_OK)
+        {
+            ret = McalUart_ReadData(eMcalUartChanel_MeterChip, pData, length);
+        }
     }
 
     return ret;
 }
-
-
-DSCONSOLE_CFG_ADD_CMD(reboot, DSConsoleCfg_Reboot, "reboot" reboot system);
-DSCONSOLE_CFG_ADD_CMD(charge, DSConsoleCfg_ChargeCtrl, "charge start/stop 0/1" start/stop charge);
-
-
 
 
 

@@ -83,7 +83,6 @@ static float CddCPCfg_GetCPVol(uint8_t port)
     uint16_t adcData[CDDCP_CFG_ADC_BUFF_POINT] = {0};
     uint16_t averageAdcData = 0;
     float cpVol = 0.0;
-    
 
     if (port == 0)
     {

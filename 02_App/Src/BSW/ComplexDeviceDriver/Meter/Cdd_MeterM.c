@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : DS_ConsoleConfig.c
-* Description        : Code for Serial console debugging
+* File Name          : Cdd_MeterM.c
+* Description        : Code for Meter Manage
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -16,11 +16,11 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "DS_ConsoleConfig.h"
+#include "Cdd_MeterM.h"
+#include "Cdd_MeterMConfig.h"
 
-#include "Asw_Charge.h"
-#include "Mcal_Mcu.h"
-/************************s*******************************************************
+
+/*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
 
@@ -56,43 +56,39 @@
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-static int32_t DSConsoleCfg_Reboot(int32_t argc, char *argv[])
+void CddMeterM_InitMemory(void)
 {
-    McalMcu_SystemReset();
-    return 0;
+    c_CddMeterMConfigTable[CDD_METERM_CFG_DEVICE_TYPE].pFuncInitMemory();
+}
+
+void CddMeterM_MainFunction(void)
+{
+    c_CddMeterMConfigTable[CDD_METERM_CFG_DEVICE_TYPE].pFuncMainFunction();
+}
+
+uint8_t CddMeterM_GetReadyFlag(uint8_t port)
+{
+    return c_CddMeterMConfigTable[CDD_METERM_CFG_DEVICE_TYPE].pFuncGetReadyFlag(port);
 } 
 
-static int32_t DSConsoleCfg_ChargeCtrl(int32_t argc, char *argv[])
+uint32_t CddMeterM_GetPower(uint8_t port)
 {
-    int32_t ret = 0;
-    uint8_t port = atoi(argv[2]);
-
-    if (argc == 3)
-    {
-        if (0 == strcmp(argv[1], "start"))
-        {
-            AswCharge_StartAuth(port);
-        }
-        else if (0 == strcmp(argv[1], "stop"))
-        {
-            AswCharge_StopAuth(port);
-        }
-        else
-        {
-            ret = -1;
-        }
-    }
-    else
-    {
-        ret = -1;
-    }
-
-    return ret;
+    return c_CddMeterMConfigTable[CDD_METERM_CFG_DEVICE_TYPE].pFuncGetPower(port);
+}
+uint32_t CddMeterM_GetRmsVoltage(uint8_t port)
+{
+    return c_CddMeterMConfigTable[CDD_METERM_CFG_DEVICE_TYPE].pFuncGetRmsVoltage(port);
+}
+uint32_t CddMeterM_GetRmsCurrent(uint8_t port)
+{
+    return c_CddMeterMConfigTable[CDD_METERM_CFG_DEVICE_TYPE].pFuncGetRmsCurrent(port);
+}
+uint32_t CddMeterM_GetEnergyVal(uint8_t port)
+{
+    return 0;
 }
 
 
-DSCONSOLE_CFG_ADD_CMD(reboot, DSConsoleCfg_Reboot, "reboot" reboot system);
-DSCONSOLE_CFG_ADD_CMD(charge, DSConsoleCfg_ChargeCtrl, "charge start/stop 0/1" start/stop charge);
 
 
 
