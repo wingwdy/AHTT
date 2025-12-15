@@ -258,7 +258,7 @@ GlobalRet_Enum McalUart_ResetRecvBuf(McalUartChanel_Enum eCh)
     PARA_ASSERT_RET(eCh < eMcalUartChanel_Count, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pUartCfg->initFlag == TRUE, eGlobalRet_NotInit);
 
-    return CycleBuf_ResetBuf(eCh);
+    return CycleBuf_ResetBuf(pUartCfg->uartBufCtrl.rxCycleBufID);
 }
 
 void McalUart_Test(void)

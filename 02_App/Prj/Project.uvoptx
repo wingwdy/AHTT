@@ -120,7 +120,6 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name>?</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -143,7 +142,40 @@
           <Name>UL2V8M(-S0 -C0 -P0 )  -FN1 -FC1000 -FD20000000 -FF0GD32E50x_512 -FL080000 -FS08000000 -FP0($$Device:GD32E503RE$Flash\GD32E50x_512.FLM)</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint/>
+      <Breakpoint>
+        <Bp>
+          <Number>0</Number>
+          <Type>0</Type>
+          <LineNumber>172</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134229600</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_Drv_BL0942.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\D3_A32FB_GD32E503\../Src/BSW/ComplexDeviceDriver/Meter/Cdd_Drv_BL0942.c\172</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>421</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134230744</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_Drv_BL0942.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\D3_A32FB_GD32E503\../Src/BSW/ComplexDeviceDriver/Meter/Cdd_Drv_BL0942.c\421</Expression>
+        </Bp>
+      </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
@@ -154,6 +186,21 @@
           <count>1</count>
           <WinNumber>1</WinNumber>
           <ItemText>eCh</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pBL0942-&gt;optResult</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>ret</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>g_stCycleBufCtrl</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
