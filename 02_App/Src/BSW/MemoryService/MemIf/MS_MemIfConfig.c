@@ -51,7 +51,6 @@ const MSMemifConfig_Struct c_stMSMemifConfigTable[MSMEMIF_DEVICE_EA_COUNT] =
         .pFuncInit = KVDBAdapt_Init,
         .pFuncRead = KVDBAdapt_Read,
         .pFuncWrite = KVDBAdapt_Write,
-
     },
 
     [MSMEMIF_DEVICE_EA_TSDB] = 

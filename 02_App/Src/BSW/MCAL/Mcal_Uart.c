@@ -248,16 +248,29 @@ GlobalRet_Enum McalUart_RemoveData(McalUartChanel_Enum eCh, uint16_t removeLen)
     return CycleBuf_RemoveData(pUartCfg->uartBufCtrl.rxCycleBufID, removeLen);
 }
 
+GlobalRet_Enum McalUart_ResetRecvBuf(McalUartChanel_Enum eCh)
+{
+    McalUartConfig_Struct *pUartCfg = &g_UartConfigTable[eCh];
+    GlobalRet_Enum eRet = eGlobalRet_OK;
+    uint16_t remainLen = 0;
+    uint8_t byte = 0;
+
+    PARA_ASSERT_RET(eCh < eMcalUartChanel_Count, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(pUartCfg->initFlag == TRUE, eGlobalRet_NotInit);
+
+    return CycleBuf_ResetBuf(eCh);
+}
+
 void McalUart_Test(void)
 {
-    char buf[] = "Hello world!!!\r\n";
-    McalUart_WriteData(eMcalUartChanel_Debug, (uint8_t *)buf, strlen(buf));
+    // char buf[] = "Hello world!!!\r\n";
+    // McalUart_WriteData(eMcalUartChanel_Debug, (uint8_t *)buf, strlen(buf));
 
     char txStr[] = "ATI\r\n";
     McalUart_WriteData(eMcalUartChanel_4G, (uint8_t *)txStr, strlen(txStr));
 
-    uint8_t txbuf[] = {0x58, 0x18};
-    McalUart_WriteData(eMcalUartChanel_MeterChip, (uint8_t *)txbuf, 2);
+    // uint8_t txbuf[] = {0x58, 0x18};
+    // McalUart_WriteData(eMcalUartChanel_MeterChip, (uint8_t *)txbuf, 2);
 }
 
 

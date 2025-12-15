@@ -187,8 +187,6 @@ static void CddDrvBL0942_SoftReset(uint8_t port, CddDrvBL0942_Struct *pBL0942)
     if (pBL0942->optResult != GLOBAL_OPT_STATE_PROCESS)
     {
         CddDrvBL0942_SendData(port, pBL0942, CDDDRV_BL0942_CFG_HEAD_WRITE, CDDDRV_BL0942_REG_SOFT_RESET, data, sizeof(data));
-        pBL0942->optResult = GLOBAL_OPT_STATE_PROCESS;
-        pBL0942->tickStart = Common_GetSystick();
     }
 }
 
@@ -417,9 +415,10 @@ static void CddDrvBL0942_WorkStateManage(uint8_t port, CddDrvBL0942_Struct *pBL0
         {
             pBL0942->failTryCount = 0;
             AswErrhandle_SetErrExsitCallback(port, eErr_MeterCommErr);
-            CddDrvBL0942_SoftReset(port, pBL0942);
         }
 
+        CddDrvBL0942Cfg_ResetRecvBuf(port);
+        CddDrvBL0942_SoftReset(port, pBL0942);
         pBL0942->eWorkState = eCddDrvBL0942WorkState_Init;
         break;
     }
@@ -465,7 +464,7 @@ uint32_t CddDrvBL0942_GetRmsCurrent(uint8_t port)
 {
     uint32_t rms_current = 0;
 
-    if (port > SYSCFG_CFG_GUN_NUM)
+    if (port < SYSCFG_CFG_GUN_NUM)
     {
         rms_current = g_stCddDrvBL0942[port].rms_current;
     }
@@ -477,7 +476,7 @@ uint32_t CddDrvBL0942_GetRmsVoltage(uint8_t port)
 {
     uint32_t rms_voltage = 0;
 
-    if (port > SYSCFG_CFG_GUN_NUM)
+    if (port < SYSCFG_CFG_GUN_NUM)
     {
         rms_voltage = g_stCddDrvBL0942[port].rms_voltage;
     }
@@ -489,7 +488,7 @@ uint32_t CddDrvBL0942_GetPower(uint8_t port)
 {
     uint32_t power = 0;
 
-    if (port > SYSCFG_CFG_GUN_NUM)
+    if (port < SYSCFG_CFG_GUN_NUM)
     {
         power = g_stCddDrvBL0942[port].watt;
     }
@@ -501,7 +500,7 @@ uint32_t CddDrvBL0942_GetPeriodEnergy(uint8_t port)
 {
     uint32_t energy = 0;
 
-    if (port > SYSCFG_CFG_GUN_NUM)
+    if (port < SYSCFG_CFG_GUN_NUM)
     {
         energy = g_stCddDrvBL0942[port].energy;
     }
@@ -513,7 +512,7 @@ uint8_t CddDrvBL0942_GetReadyFlag(uint8_t port)
 {
     uint8_t readyFlag = FALSE;
 
-    if (port > SYSCFG_CFG_GUN_NUM)
+    if (port < SYSCFG_CFG_GUN_NUM)
     {
         if (g_stCddDrvBL0942[port].eWorkState == eCddDrvBL0942WorkState_Normal)
         {

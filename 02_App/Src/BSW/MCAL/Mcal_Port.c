@@ -84,7 +84,7 @@ void McalPort_WritePin(McalPortPinChanel_Enum ePinChannel, uint8_t pinVal)
     const McalPortPinConfig_Struct *pPortPinConfig = NULL;
 
     PARA_ASSERT(ePinChannel < eMcalPortPinChanel_Count);
-
+ 
     pPortPinConfig = &c_stPorPinConfigTable[ePinChannel];
     gpio_bit_write(pPortPinConfig->gpio_periph, pPortPinConfig->pin, val);
 }
@@ -133,8 +133,6 @@ void McalPort_Init(void)
     {
         McalPort_ConfigPin(&c_stPorPinConfigTable[index]);
     }
-
-    
 }
 
 

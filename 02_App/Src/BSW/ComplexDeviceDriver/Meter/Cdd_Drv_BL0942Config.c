@@ -79,6 +79,16 @@ void CddDrvBL0942Cfg_WriteData(uint8_t port, uint8_t *pData, uint16_t length)
     {}
 }
 
+void CddDrvBL0942Cfg_ResetRecvBuf(uint8_t port)
+{
+    if (port == 0)
+    {
+        McalUart_ResetRecvBuf(eMcalUartChanel_MeterChip);
+    }
+    else
+    {}
+}
+
 GlobalRet_Enum CddDrvBL0942Cfg_ReadData(uint8_t port, uint8_t *pData, uint16_t length)
 {
     uint16_t mcalRecvLen = 0;

@@ -42,8 +42,8 @@
 static uint8_t g_Uart5RecvBuf[MCALUART_CFG_UART5_RECVBUF_SIZE] = { 0 };
 static uint8_t g_Uart5SendBuf[MCALUART_CFG_UART5_SENDBUF_SIZE] = { 0 };
 
-static uint8_t g_Uart4RecvBuf[MCALUART_CFG_UART4_RECVBUF_SIZE] = { 0 };
-static uint8_t g_Uart4SendBuf[MCALUART_CFG_UART4_SENDBUF_SIZE] = { 0 };
+static uint8_t g_Uart0RecvBuf[MCALUART_CFG_UART0_RECVBUF_SIZE] = { 0 };
+static uint8_t g_Uart0SendBuf[MCALUART_CFG_UART0_SENDBUF_SIZE] = { 0 };
 
 static uint8_t g_Uart1RecvBuf[MCALUART_CFG_UART1_RECVBUF_SIZE] = { 0 };
 static uint8_t g_Uart1SendBuf[MCALUART_CFG_UART1_SENDBUF_SIZE] = { 0 };
@@ -90,26 +90,26 @@ McalUartConfig_Struct g_UartConfigTable[eMcalUartChanel_Count] =
     {
         .uartEnable = TRUE,
         .initFlag = FALSE,
-        .rcu_periph = RCU_UART4,
-        .uart_periph = UART4,
+        .rcu_periph = RCU_USART0,
+        .uart_periph = USART0,
         .baudRate = 115200,
         .paritycfg = USART_PM_NONE,
         .uartInt_En = TRUE,
         .uartIntCfg = 
         {
-            .nvic_irq = UART4_IRQn,
+            .nvic_irq = USART0_IRQn,
             .nvic_irq_pre_priority = 0,
             .nvic_irq_sub_priority = 1,
         },
         .DMATx_En = FALSE,
         .uartBufCtrl = 
         {
-            .pTxBuf = g_Uart4SendBuf,
-            .txBufSize = MCALUART_CFG_UART4_SENDBUF_SIZE,
+            .pTxBuf = g_Uart0SendBuf,
+            .txBufSize = MCALUART_CFG_UART0_SENDBUF_SIZE,
             .txCycleBufID = CYCLEBUF_INVALID_ID,
             .txProfile = CYCLEBUF_PROFILE_CIRCLE,
-            .pRxBuf = g_Uart4RecvBuf,
-            .rxBufSize = MCALUART_CFG_UART4_RECVBUF_SIZE,
+            .pRxBuf = g_Uart0RecvBuf,
+            .rxBufSize = MCALUART_CFG_UART0_RECVBUF_SIZE,
             .rxCycleBufID = CYCLEBUF_INVALID_ID,
         },
         .uartCtrl = 
@@ -296,14 +296,14 @@ void USART5_IRQHandler(void)
     }
 }
 
-void UART4_IRQHandler(void)
+void USART0_IRQHandler(void)
 {
     USART_IRQHandler(eMcalUartChanel_4G);
 }
 
 void USART1_IRQHandler(void)
 {
-    USART_IRQHandler(eMcalUartChanel_MeterChip);
+   USART_IRQHandler(eMcalUartChanel_MeterChip);
 }
 
 

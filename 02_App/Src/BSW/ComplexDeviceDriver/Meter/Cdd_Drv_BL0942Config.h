@@ -94,6 +94,7 @@ extern const CddDrvBL0942WriteRegister_Struct c_stCddDrvBL0942WriteRegisterTable
 ******************************************************************************/
 void CddDrvBL0942Cfg_WriteData(uint8_t port, uint8_t *pData, uint16_t length);
 GlobalRet_Enum CddDrvBL0942Cfg_ReadData(uint8_t port, uint8_t *pData, uint16_t length);
+void CddDrvBL0942Cfg_ResetRecvBuf(uint8_t port);
 #endif
 
 

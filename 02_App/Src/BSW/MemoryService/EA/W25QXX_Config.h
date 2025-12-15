@@ -28,8 +28,8 @@
 
 #define W25Q_CFG_SpiTransmit(data, len)     McalSPI_TransmitData(eMcalSPIChanel_Norflash, data, len)
 #define W25Q_CFG_SpiReceive(data, len)      McalSPI_ReceiveData(eMcalSPIChanel_Norflash, data, len)
-#define W25Q_CFG_CS_LOW()                   McalPort_ResetPin(eMcalPortPinChanel_PB8_NorFlashSpiCS)
-#define W25Q_CFG_CS_HIGH()                  McalPort_SetPin(eMcalPortPinChanel_PB8_NorFlashSpiCS)
+#define W25Q_CFG_CS_LOW()                   McalPort_ResetPin(eMcalPortPinChanel_PB6_NorFlashSpiCS)
+#define W25Q_CFG_CS_HIGH()                  McalPort_SetPin(eMcalPortPinChanel_PB6_NorFlashSpiCS)
 
 
 #define W25Q_CHIP_ID                        (0xEF4016U)

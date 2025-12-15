@@ -41,6 +41,12 @@ typedef struct
     char qrcode[MSNVM_APP_QRCODE_LEN];
 }MSNvmDrcode_Struct;
 
+/* 电能示值 */
+typedef struct
+{
+    uint64_t meterEnergy;
+}MSNvmMeterEnergy_Struct;
+
 /* 订单记录 */
 typedef struct 
 {

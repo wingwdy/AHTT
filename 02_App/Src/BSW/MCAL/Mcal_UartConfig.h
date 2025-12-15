@@ -27,8 +27,8 @@
 #define   MCALUART_CFG_UART5_SENDBUF_SIZE               (1024)
 
 /* Uart for 4G */
-#define   MCALUART_CFG_UART4_RECVBUF_SIZE               (3096U)
-#define   MCALUART_CFG_UART4_SENDBUF_SIZE               (3096U)
+#define   MCALUART_CFG_UART0_RECVBUF_SIZE               (3096U)
+#define   MCALUART_CFG_UART0_SENDBUF_SIZE               (3096U)
 
 /* Uart for MeterChip */
 #define   MCALUART_CFG_UART1_RECVBUF_SIZE               (128U)

@@ -31,6 +31,8 @@ typedef enum
 {
     /* 参数信息 */
     eMSNvmBlockID_Gun0Qrcode,
+    eMSNvmBlockID_Gun0OrderInfo,
+    eMSNvmBlockID_Gun0MeterEnergy,
 
     /* 记录信息 */
     eMSNvmBlockID_OrderRecord,
