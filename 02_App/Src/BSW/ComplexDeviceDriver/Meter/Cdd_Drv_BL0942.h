@@ -33,6 +33,7 @@
 #define CDDDRV_BL0942_REG_USR_WRPROT               (0x1DU)  /* 用户写保护设置寄存器 */
 #define CDDDRV_BL0942_REG_ALL                      (0xAAU)  /* 全电参数 */
 
+#define CDDDRV_BL0942_REG_I_CHGN                   (0x22U)  /* 电流通道增益调整寄存器，补码 */
 #define CDDDRV_BL0942_REG_V_CHGN                   (0x23U)  /* 电压通道增益调整寄存器，补码 */
 #define CDDDRV_BL0942_REG_PHCAL                    (0x21U)  /* 通道相位调整寄存器 */
 #define CDDDRV_BL0942_REG_WATTOS                   (0x24U)  /* 功率小信号校正寄存器，补码 */

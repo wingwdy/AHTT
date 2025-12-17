@@ -19,7 +19,7 @@
 #include "Cdd_MeterM.h"
 #include "Cdd_MeterMConfig.h"
 #include "SysCfg.h"
-
+#include "Asw_ErrorHandle.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -43,9 +43,11 @@ typedef struct
 {
     uint64_t lastCalcEnergy;
     uint64_t lastSaveEnergy;
+    uint8_t  errCount;
     uint64_t totalEnergy;
     uint32_t periodCalcTick;
     uint32_t periodSaveTick;
+    uint32_t cyclePrintTick;
 }CddMeterM_Struct;
 
 
@@ -65,11 +67,33 @@ static void CddMeterM_PeriodCalcEnergy(uint8_t port, CddMeterM_Struct *pstMeterM
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
+static void CddMeterM_CyclePrintData(uint8_t port, CddMeterM_Struct *pstMeterM)
+{
+    uint32_t current, voltage, power, temp1, temp2;
+    uint32_t readyFlag = CddMeterM_GetReadyFlag(port);
+
+    if (readyFlag == TRUE)
+    {
+        if (Common_JudgeTimeoutMs(pstMeterM->cyclePrintTick, CDD_METERM_CFG_PRINT_CYCLE))
+        {
+            temp1 = pstMeterM->totalEnergy / 10000;
+            temp2 = pstMeterM->totalEnergy % 10000;
+            power = CddMeterM_GetPower(port);
+            voltage = CddMeterM_GetRmsVoltage(port);
+            current = CddMeterM_GetRmsCurrent(port);
+
+            pstMeterM->cyclePrintTick = Common_GetSystick();
+            CDD_METERM_CFG_LogPrint("[枪：%d]电压：%d.%02d V, 电流：%d.%03d A, 有功功率：%d W, 累计已充电能：%ld.%04ld kwh \r\n", port,
+                voltage / 100, voltage % 100, current / 1000, current % 1000, power, temp1, temp2);
+        }
+    }
+}
 static void CddMeterM_PeriodCalcEnergy(uint8_t port, CddMeterM_Struct *pstMeterM)
 { 
     uint64_t tempEnergy = 0;
     uint64_t incEnergy = 0;
     uint8_t saveFlag = FALSE;
+    uint32_t deltaEnergy = 0;
 
     if (CddMeterM_GetReadyFlag(port) == TRUE)
     {
@@ -88,21 +112,36 @@ static void CddMeterM_PeriodCalcEnergy(uint8_t port, CddMeterM_Struct *pstMeterM
 
             if (pstMeterM->totalEnergy > pstMeterM->lastSaveEnergy)
             {
-                if ((pstMeterM->totalEnergy - pstMeterM->lastSaveEnergy) > CDD_METERM_CFG_ENERGY_IMMEDIATE_SAVE_VALUE)
+                deltaEnergy = pstMeterM->totalEnergy - pstMeterM->lastSaveEnergy;
+
+                if (deltaEnergy > CDD_METERM_CFG_ENERGY_ABNORMAL_VALUE)
                 {
-                    saveFlag = TRUE;
+                    pstMeterM->errCount++;
+                }
+                else 
+                {
+                    if (deltaEnergy > CDD_METERM_CFG_ENERGY_IMMEDIATE_SAVE_VALUE)
+                    {
+                        saveFlag = TRUE;
+                    }
+                    
+                    if (Common_JudgeTimeoutMs(pstMeterM->periodSaveTick, CDD_METERM_CFG_ENERGY_SAVE_PERIOD))
+                    {
+                        saveFlag = TRUE;
+                    }
+
+                    if (saveFlag == TRUE)
+                    {
+                        pstMeterM->periodSaveTick = Common_GetSystick();
+                        CDD_METERM_CFG_WriteBlockEnergy(port, (uint8_t *)&pstMeterM->totalEnergy, sizeof(pstMeterM->totalEnergy));
+                        pstMeterM->lastSaveEnergy = pstMeterM->totalEnergy;
+                    }
                 }
 
-                if (Common_JudgeTimeoutMs(pstMeterM->periodSaveTick, CDD_METERM_CFG_ENERGY_SAVE_PERIOD))
+                if (pstMeterM->errCount > CDD_METERM_CFG_ERROR_TRY_CNT)
                 {
-                    saveFlag = TRUE;
-                }
-
-                if (saveFlag == TRUE)
-                {
-                    pstMeterM->periodSaveTick = Common_GetSystick();
-                    CDD_METERM_CFG_WriteBlockEnergy(port, (uint8_t *)&pstMeterM->totalEnergy, sizeof(pstMeterM->totalEnergy));
-                    pstMeterM->lastSaveEnergy = pstMeterM->totalEnergy;
+                    pstMeterM->errCount = 0;
+                    AswErrhandle_SetErrExsitCallback(port, eErr_MeterCalcErr);
                 }
             }
         }
@@ -114,7 +153,8 @@ static void CddMeterM_LoadPara(void)
     CddMeterM_Struct *pstMeterM = NULL;
     uint8_t port = 0;
     GlobalRet_Enum eRet;
-    
+    uint32_t temp1, temp2;
+
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
         pstMeterM = &g_stCddMeterM[port];
@@ -124,6 +164,9 @@ static void CddMeterM_LoadPara(void)
         if (eRet == eGlobalRet_OK)
         {
             pstMeterM->lastSaveEnergy = pstMeterM->totalEnergy;
+            temp1 = pstMeterM->totalEnergy / 10000;
+            temp2 = pstMeterM->totalEnergy % 10000;
+            CDD_METERM_CFG_LogPrint("[枪：%d]上电加载电表示值成功，累计已充电能：%ld.%04ld kwh \r\n", port, temp1, temp2);
         }
         else
         {
@@ -148,6 +191,7 @@ void CddMeterM_MainFunction(void)
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
         CddMeterM_PeriodCalcEnergy(port, &g_stCddMeterM[port]);
+        CddMeterM_CyclePrintData(port, &g_stCddMeterM[port]);
     }
 }
 
@@ -168,9 +212,16 @@ uint32_t CddMeterM_GetRmsCurrent(uint8_t port)
 {
     return c_CddMeterMConfigTable[CDD_METERM_CFG_DEVICE_TYPE].pFuncGetRmsCurrent(port);
 }
-uint32_t CddMeterM_GetEnergyVal(uint8_t port)
+uint64_t CddMeterM_GetEnergyVal(uint8_t port)
 {
-    return 0;
+    uint64_t totalEnergy = 0;
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        totalEnergy = g_stCddMeterM[port].totalEnergy;
+    }
+
+    return totalEnergy;
 }
 
 

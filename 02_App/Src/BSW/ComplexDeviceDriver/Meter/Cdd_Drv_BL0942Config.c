@@ -51,18 +51,20 @@
 static uint8_t g_caliRegVal[eCddDrvBL0942CaliReg_Cnt][3] = 
 {
     {0xC7, 0x00, 0x00},
-    {0x9E, 0x0E, 0x00},
-    {0x00, 0x00, 0x00},
-    {0x00, 0x00, 0x00},
-    {0x3D, 0x00, 0x00},
+//  {0x55, 0x0D, 0x00},
+//  {0xD8, 0x0D, 0x00},
+//  {0x06, 0x00, 0x00},
+//  {0x00, 0x00, 0x00},
+    {0x16, 0x00, 0x00},    // 0B 对应的是0.6W
 }; 
 
 const CddDrvBL0942WriteRegister_Struct c_stCddDrvBL0942WriteRegisterTable[eCddDrvBL0942CaliReg_Cnt] =
 {
     {CDDDRV_BL0942_REG_MODE,     0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_V_MODE]    },
-    {CDDDRV_BL0942_REG_V_CHGN,   0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_V_CHGN]    },
-    {CDDDRV_BL0942_REG_PHCAL,    0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_PHCAL]     },
-    {CDDDRV_BL0942_REG_WATTOS,   0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_WATTOS]    },
+//  {CDDDRV_BL0942_REG_I_CHGN,   0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_I_CHGN]    },
+//  {CDDDRV_BL0942_REG_V_CHGN,   0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_V_CHGN]    },
+//  {CDDDRV_BL0942_REG_PHCAL,    0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_PHCAL]     },
+//  {CDDDRV_BL0942_REG_WATTOS,   0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_WATTOS]    },
     {CDDDRV_BL0942_REG_WA_CREEP, 0x03,    g_caliRegVal[eCddDrvBL0942CaliReg_WA_CREEP]  },
 };   
 

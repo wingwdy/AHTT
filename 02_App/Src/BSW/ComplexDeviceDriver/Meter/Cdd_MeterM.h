@@ -56,7 +56,7 @@ uint8_t CddMeterM_GetReadyFlag(uint8_t port);
 uint32_t CddMeterM_GetPower(uint8_t port);
 uint32_t CddMeterM_GetRmsVoltage(uint8_t port);
 uint32_t CddMeterM_GetRmsCurrent(uint8_t port);
-uint32_t CddMeterM_GetEnergyVal(uint8_t port);
+uint64_t CddMeterM_GetEnergyVal(uint8_t port);
 #endif
 
 

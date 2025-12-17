@@ -32,15 +32,15 @@
 #define CDDDRV_BL0942_CFG_HEAD_WRITE                (0xA8u)  
 #define CDDDRV_BL0942_CFG_HEAD_READ                 (0x58u)
 
-#define CDDDRV_BL0942_CFG_VOLTAGE_K                 (7636U)
-#define CDDDRV_BL0942_CFG_CURRENT_K                 (1930U)
-#define CDDDRV_BL0942_CFG_POWER_K                   (2237U)
+#define CDDDRV_BL0942_CFG_VOLTAGE_K                 (7638U)     
+#define CDDDRV_BL0942_CFG_CURRENT_K                 (188410U)     
+#define CDDDRV_BL0942_CFG_POWER_K                   (224.8723)    
 
-#define CDDDRV_BL0942_CFG_PULSE_CONSTANT            (1600U)
+#define CDDDRV_BL0942_CFG_PULSE_CONSTANT            (1930U)
 
 #define CDDDRV_BL0942_CFG_MAX_TIMES                 (20U)
 
-#define CDDDRV_BL0942_CFG_LogPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_Meter, fmt, ##__VA_ARGS__)
+#define CDDDRV_BL0942_CFG_LogPrint(fmt, ...)        DSLOGM_Debug(DSLogMModule_Meter, fmt, ##__VA_ARGS__)
 
 /******************************************************************************
 *    Typedef Definition
@@ -65,9 +65,10 @@
 typedef enum
 {
     eCddDrvBL0942CaliReg_V_MODE,
-    eCddDrvBL0942CaliReg_V_CHGN,
-    eCddDrvBL0942CaliReg_PHCAL,
-    eCddDrvBL0942CaliReg_WATTOS,
+//  eCddDrvBL0942CaliReg_I_CHGN,
+//  eCddDrvBL0942CaliReg_V_CHGN,
+//  eCddDrvBL0942CaliReg_PHCAL,
+//  eCddDrvBL0942CaliReg_WATTOS,
     eCddDrvBL0942CaliReg_WA_CREEP,
     eCddDrvBL0942CaliReg_Cnt,
 }eCddDrvBL0942CaliReg_Enum;

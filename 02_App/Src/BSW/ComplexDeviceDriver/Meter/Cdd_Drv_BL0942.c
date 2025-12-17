@@ -144,7 +144,7 @@ static uint8_t CddDrvBL0942_ReadData(uint8_t port, CddDrvBL0942_Struct *pBL0942,
 
         calcCheckSum = (~calcCheckSum);
 
-        eResult = CddDrvBL0942Cfg_ReadData(port, &checkSum, 1);
+         eResult = CddDrvBL0942Cfg_ReadData(port, &checkSum, 1);
 
         if (eResult == eGlobalRet_OK && calcCheckSum == checkSum)
         {
@@ -264,7 +264,7 @@ static uint8_t CddDrvBL0942_CaliBration(uint8_t port, CddDrvBL0942_Struct *pBL09
     const CddDrvBL0942WriteRegister_Struct *pReg = &c_stCddDrvBL0942WriteRegisterTable[pBL0942->cfgMeterOject];
     uint8_t ret = GLOBAL_OPT_STATE_PROCESS;
 
-    CddDrvBL0942_CfgRegiser(port, pBL0942, pReg);
+   CddDrvBL0942_CfgRegiser(port, pBL0942, pReg);
 
     if (pBL0942->optResult == GLOBAL_OPT_STATE_FAIL)
     {
@@ -299,24 +299,26 @@ static void CddDrvVL0942_RefreshData(uint8_t port, CddDrvBL0942_Struct *pBL0942)
     /* 拷贝 V_RMS --- 电压有效值 */
     memcpy(data, pBL0942->cacheBuf + index, 3);
     pBL0942->rms_voltage = Common_FourUint8ToUint32(data) * 100 / CDDDRV_BL0942_CFG_VOLTAGE_K;
-    index += 3;
+    index += 3; 
 
     /* I_FAST_RMS */
     index += 3;
 
     /* 拷贝 WATT --- 有功功率  bit23为符号位，当该位为1表示该*/
     memcpy(data, pBL0942->cacheBuf + index, 3);
+
     if (data[2] > 0x7F)
-    {
+    {  
         data[0] = ~data[0] + 1;
         data[1] = ~data[1];
         data[2] = ~data[2]; 
     }
-    pBL0942->watt = Common_FourUint8ToUint32(data) * 1000 / CDDDRV_BL0942_CFG_POWER_K;
+
+    pBL0942->watt = Common_FourUint8ToUint32(data) / CDDDRV_BL0942_CFG_POWER_K;
     index += 3;
 
     /* 拷贝 CF_CNT */
-    memcpy(data, pBL0942->cacheBuf + index, 3);
+    memcpy(data, pBL0942->cacheBuf + index, 3); 
     pBL0942->tempCount = Common_FourUint8ToUint32(data);
     pBL0942->totalCount += pBL0942->tempCount;
 }
@@ -522,6 +524,9 @@ uint8_t CddDrvBL0942_GetReadyFlag(uint8_t port)
 
     return readyFlag;
 }
+
+
+// 1930
 
 
 

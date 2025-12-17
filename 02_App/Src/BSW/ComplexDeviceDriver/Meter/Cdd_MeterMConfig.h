@@ -20,6 +20,8 @@
 #include "Common.h"
 #include "MS_Nvm.h"
 #include "Global.h"
+#include "DS_LogM.h"
+
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -27,9 +29,15 @@
 #define CDD_METERM_CFG_DEVICE_COUNT                 1U
 #define CDD_METERM_CFG_DEVICE_TYPE                  CDD_METERM_CFG_DEVICE_BL0942
 
+#define CDD_METERM_CFG_ERROR_TRY_CNT                (20)
+
+#define CDD_METERM_CFG_PRINT_CYCLE                  (5 * 1000)
+
 #define CDD_METERM_CFG_ENERGY_SAVE_PERIOD           (30 * 1000)
 
-#define CDD_METERM_CFG_ENERGY_IMMEDIATE_SAVE_VALUE  (500)      /* 0.05度，立即存储 */ 
+#define CDD_METERM_CFG_ENERGY_IMMEDIATE_SAVE_VALUE  (400)      /* 0.04度，立即存储 */
+
+#define CDD_METERM_CFG_ENERGY_ABNORMAL_VALUE        (1500)      /* 0.15度，按照7kW充电功率30秒计算 */
 
 #define CDD_METERM_CFG_ENERGY_PERIOD                (1000U)
 
@@ -53,7 +61,7 @@
                                                                 }\
                                                             }while(0)
 
-
+#define CDD_METERM_CFG_LogPrint(fmt, ...)                   DSLOGM_Debug(DSLogMModule_Meter, fmt, ##__VA_ARGS__)
 
 
 /******************************************************************************
