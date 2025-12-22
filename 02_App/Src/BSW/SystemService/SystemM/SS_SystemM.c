@@ -26,6 +26,7 @@
 #include "Cdd_PE.h"
 #include "Cdd_Sensor.h"
 #include "Cdd_MeterM.h"
+#include "Cdd_LedM.h"
 
 #include "MS_Nvm.h"
 
@@ -91,6 +92,7 @@ static void SSSystemM_InitTwo(void)
 
 static void SSSystemM_InitThree(void)
 {
+    CddLedM_InitMemory();
     CddMeterM_InitMemory();
     CddRelay_InitMemory();
     CddCP_InitMemory();

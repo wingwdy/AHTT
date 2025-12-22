@@ -18,6 +18,7 @@
 *******************************************************************************/
 #include "Asw_EVSE.h"
 #include "Asw_Charge.h"
+#include "Asw_LedEvent.h"
 
 #include "DS_Console.h"
 
@@ -27,6 +28,8 @@
 #include "Cdd_Sensor.h"
 #include "Cdd_PE.h"
 #include "Cdd_MeterM.h"
+#include "Cdd_LedM.h"
+
 
 #include "Mcal_If.h"
 
@@ -69,8 +72,7 @@ typedef struct
 static void Task_10msA(void *arg);
 static void Task_10msB(void *arg);
 static void Task_100ms(void *arg);
-static void Task_Debug20ms(void *arg);
-
+static void Task_20msA(void *arg);
 
 
 
@@ -82,7 +84,7 @@ static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
     {"App10msA",        Task_10msA,          NULL,         512,   6 } ,
     {"App10msB",        Task_10msB,          NULL,         512,   7 } ,
     {"App100ms",        Task_100ms,          NULL,         512,   5 } ,
-    {"DebugTask",       Task_Debug20ms,      NULL,         256,   4 } ,
+    {"App20msA",        Task_20msA,          NULL,         256,   4 } ,
 };
 
 /*******************************************************************************
@@ -116,10 +118,10 @@ static void Task_10msA(void *arg)
 {
     while (1)
     {
-        CddRelay_MainFunction();
         CddCP_MainFunction();
         AswEVSE_MainFunction();
         AswCharge_MainFunction();
+        CddRelay_MainFunction();
         vTaskDelay(10);
     }
 }
@@ -144,10 +146,12 @@ static void Task_100ms(void *arg)
     }
 }
 
-static void Task_Debug20ms(void *arg)
+static void Task_20msA(void *arg)
 {
     while (1)
     {
+        AswLedEvent_MainFunction();
+        CddLedM_MainFunction();
         DSConsole_MainFunction();
         vTaskDelay(20);
     }

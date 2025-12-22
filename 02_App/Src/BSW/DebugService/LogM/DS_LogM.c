@@ -42,7 +42,7 @@ typedef enum
 {
     eDSLogMOutputMode_Sync,
     eDSLogMOutputMode_Asyn,
-}DSLogMOutputMode_Enum;
+}DSLogMOutputMode_Enum;  
 
 /*******************************************************************************
 *    Typedef Definition

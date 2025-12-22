@@ -84,7 +84,7 @@ static void CddRelayCfg_HoldSwitchOn(uint8_t port)
 {
     if (port == 0)
     {
-        McalPWM_SetSingleDuty(eMcalPWMOCChannel_Relay, 800);
+        McalPWM_SetSingleDuty(eMcalPWMOCChannel_Relay, 500);
         McalPWM_SetOutputMode(eMcalPWMOCChannel_Relay, MCALPWM_MODE_FORCE_PWM);
     }
 }

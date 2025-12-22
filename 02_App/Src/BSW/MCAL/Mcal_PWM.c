@@ -138,11 +138,11 @@ void McalPWM_SetSingleDuty(McalPWMOCChannel_Enum ch,  uint16_t duty)
     timer_channel_output_pulse_value_config(pPwmOCCfg->timer_periph, pPwmOCCfg->timer_ch, pulse);
 }
 
-void McalPWM_SetMultiDuty(McalPWMOCChannel_Enum ch,  uint16_t* duty,  uint16_t dutyCount)
+void McalPWM_SetMultiDuty(McalPWMOCChannel_Enum ch,   uint8_t setType, uint16_t* setVal,  uint16_t dutyCount)
 {
     PARA_ASSERT(ch < eMcalPWMOCChannel_Count);
     PARA_ASSERT(dutyCount > 0);
-    PARA_ASSERT(duty != NULL);
+    PARA_ASSERT(setVal != NULL);
 
     const McalPWMOC_Struct *pPwmOCCfg = &c_stTimerOCParaTable[ch];
     uint8_t index = 0;
@@ -155,10 +155,21 @@ void McalPWM_SetMultiDuty(McalPWMOCChannel_Enum ch,  uint16_t* duty,  uint16_t d
         memoryWidth = pPwmOCCfg->DMA_Cfg.DMA_parameter.memory_width;
         copysize = (memoryWidth == DMA_MEMORY_WIDTH_8BIT) ? 1 : (memoryWidth == DMA_MEMORY_WIDTH_16BIT) ? 2 : 4;
 
-        for (index = 0; index < dutyCount; index++)
+        if (setType == MCALPWM_CFG_SET_DUTY)
         {
-            pulse = duty[index] * pPwmOCCfg->timer_initpara.period / 1000;
-            memcpy((uint8_t *)pPwmOCCfg->DMA_Cfg.DMA_parameter.memory_addr + (index * copysize), &pulse, copysize);
+            for (index = 0; index < dutyCount; index++)
+            {
+                pulse = setVal[index] * pPwmOCCfg->timer_initpara.period / 1000;
+                memcpy((uint8_t *)pPwmOCCfg->DMA_Cfg.DMA_parameter.memory_addr + (index * copysize), &pulse, copysize);
+            }
+        }
+        else
+        {
+            for (index = 0; index < dutyCount; index++)
+            {
+                pulse = setVal[index];
+                memcpy((uint8_t *)pPwmOCCfg->DMA_Cfg.DMA_parameter.memory_addr + (index * copysize), &pulse, copysize);
+            }
         }
 
         dma_channel_enable(pPwmOCCfg->DMA_Cfg.DMA_periph, pPwmOCCfg->DMA_Cfg.DMA_ch);
@@ -167,23 +178,35 @@ void McalPWM_SetMultiDuty(McalPWMOCChannel_Enum ch,  uint16_t* duty,  uint16_t d
 }
 
 
+
+
+
+
+
+
+
+
+#if 0
 void McalPWM_Test(void)
 {
     static uint8_t flag = 0;
 
     uint16_t timerLedDMAMemoryBuf[MCALPWM_CFG_LED_COUNT][MCALPWM_CFG_LED_POINT] = 
     {
-        {502, 502, 502, 502, 502, 502, 502, 502,
-        280, 280, 280, 280, 280, 280, 280, 280,
-        280, 280, 280, 280, 280, 280, 280, 280},
+        {
+        280, 280, 280, 280, 280, 280, 280, 280,    
+        502, 502, 502, 502, 502, 502, 502, 502,
+        502, 502, 502, 502, 502, 502, 502, 502,},
 
-        {502, 502, 502, 502, 502, 502, 502, 502,
-        280, 280, 280, 280, 280, 280, 280, 280,
-        280, 280, 280, 280, 280, 280, 280, 280},
+        {
+        280, 280, 280, 280, 280, 280, 280, 280,    
+        502, 502, 502, 502, 502, 502, 502, 502,
+        502, 502, 502, 502, 502, 502, 502, 502,},
 
-        {502, 502, 502, 502, 502, 502, 502, 502,
-        280, 280, 280, 280, 280, 280, 280, 280,
-        280, 280, 280, 280, 280, 280, 280, 280},
+        {
+        280, 280, 280, 280, 280, 280, 280, 280,    
+        502, 502, 502, 502, 502, 502, 502, 502,
+        502, 502, 502, 502, 502, 502, 502, 502,},
     };
 
     uint16_t timerLedDMAMemoryBuf1[MCALPWM_CFG_LED_COUNT][MCALPWM_CFG_LED_POINT] = 
@@ -213,5 +236,6 @@ void McalPWM_Test(void)
     }
  
     flag = !flag;
-    McalPWM_SetMultiDuty(eMcalPWMOCChannel_Led, pArray, MCALPWM_CFG_LED_DMABUF_LEN);
+    McalPWM_SetMultiDuty(eMcalPWMOCChannel_Led, MCALPWM_CFG_SET_DUTY, pArray, MCALPWM_CFG_LED_DMABUF_LEN);
 }
+#endif

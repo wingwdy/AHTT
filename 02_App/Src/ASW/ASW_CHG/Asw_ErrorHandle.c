@@ -242,7 +242,7 @@ uint8_t AswErrHandle_CheckErrExit(uint8_t port, AswErrorType_Enum errType)
         ret = pErrorHandle->arErrFlag[errType];
     }
 
-    return TRUE;
+    return ret;
 }
 
 AswErrChargeCondition_Enum AswErrHandle_GetChargeCondition(uint8_t port)

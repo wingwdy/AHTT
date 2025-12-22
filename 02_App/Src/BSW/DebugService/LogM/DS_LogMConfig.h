@@ -36,6 +36,7 @@ typedef enum
     DSLogMModule_EVSE,
     DSLogMModule_Charge,
     DSLogMModule_ErrorHandle,
+    DSLogMModule_Led,
 
     /*CDD */
     DSLogMModule_CP,

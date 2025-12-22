@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_if.c
-* Description        : Code for the interface for the layer of MCAL
+* File Name          : template.c
+* Description        : Code for xxxxxxxxxxx
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -16,16 +16,9 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "Mcal_Mcu.h"
-#include "Mcal_Port.h"
-#include "Mcal_PWM.h"
-#include "Mcal_ADC.h"
-#include "Mcal_Uart.h"
-#include "CycleBuf.h"
-#include "Mcal_IWDG.h"
-#include "Mcal_SPI.h"
 
-
+#include "Cdd_Drv_WS2812B.h"
+#include "Cdd_LedMConfig.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -49,81 +42,34 @@
 
 
 /*******************************************************************************
-*    Global variables Declaration
+*    Static Local Functions Declaration
 *******************************************************************************/
+static void CddLedMCfg_UpdateLedDispType(uint8_t port, uint8_t ledDispType);
 
 
 
 /*******************************************************************************
-*    Static Local Functions Declaration
+*    Global variables Declaration
 *******************************************************************************/
-
-
+const CddLedMConfig_Struct c_stCddLedMConfigTable[CDD_LEDM_DEVICE_COUNT] = {
+    [CDD_LEDM_DEVICE_0_WS2812B] = 
+    {
+        .pFuncInit = NULL,
+        .pFuncMainFunction = CddDrvWS2812B_MainFunction,
+        .pFuncUpdateLedDispType = CddLedMCfg_UpdateLedDispType,
+    },
+};
 
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-void McalIf_Init(void)
+static void CddLedMCfg_UpdateLedDispType(uint8_t port, uint8_t ledDispType)
 {
-    McalMCU_SystickInit();
-    McalIWDG_Init();
-    CycleBuf_Init();
-    McalPort_Init();
-    McalUart_Init();
-    McalADC_Init();
-    McalPWM_Init();
-    McalSPI_Init();
-}
-
-
-#if 0
-void McalIf_Test(void)
-{
-    static uint8_t count = 0;
-
-    count++;
-
-    if (count % 10 == 0)
+    if (port == 0)
     {
-        McalPWM_Test();
-    }
-
-    McalADC_Test();
-
-    MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
-
-    static uint32_t StateCnt = 0;
-    if (StateCnt < 8)
-    {
-        StateCnt++;
-    }
-
-    if (StateCnt == 1)
-    {
-        McalPort_SetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    }
-    else if (StateCnt == 3)
-    {
-        McalPort_ResetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    }
-    else if (StateCnt == 5)
-    {
-        McalPort_SetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn);
-    }
-    else if (StateCnt == 7)
-    {
-        McalPort_ResetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn); 
-    } 
-    else if (StateCnt == 8)
-    {
-        McalUart_Test();
+        CddDrvWS2812B_UpdateLedDispType(eCddDrvWS2812BChannel_0, ledDispType);
     }
 }
-#endif
-
-
-
-
 
 
 

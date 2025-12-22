@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_if.c
-* Description        : Code for the interface for the layer of MCAL
+* File Name          : template.c
+* Description        : Code for xxxxxxxxxxx
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -16,14 +16,7 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "Mcal_Mcu.h"
-#include "Mcal_Port.h"
-#include "Mcal_PWM.h"
-#include "Mcal_ADC.h"
-#include "Mcal_Uart.h"
-#include "CycleBuf.h"
-#include "Mcal_IWDG.h"
-#include "Mcal_SPI.h"
+#include "Cdd_LedMConfig.h"
 
 
 
@@ -63,70 +56,42 @@
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-void McalIf_Init(void)
+void CddLedM_InitMemory(void)
 {
-    McalMCU_SystickInit();
-    McalIWDG_Init();
-    CycleBuf_Init();
-    McalPort_Init();
-    McalUart_Init();
-    McalADC_Init();
-    McalPWM_Init();
-    McalSPI_Init();
+    uint8_t dev = 0;
+
+    for (dev = 0; dev < CDD_LEDM_DEVICE_COUNT; dev++)
+    {
+        if (c_stCddLedMConfigTable[dev].pFuncInit != NULL)
+        {
+            c_stCddLedMConfigTable[dev].pFuncInit();
+        }
+    }
 }
 
-
-#if 0
-void McalIf_Test(void)
+void CddLedM_MainFunction(void)
 {
-    static uint8_t count = 0;
+    uint8_t dev = 0;
 
-    count++;
-
-    if (count % 10 == 0)
+    for (dev = 0; dev < CDD_LEDM_DEVICE_COUNT; dev++)
     {
-        McalPWM_Test();
-    }
-
-    McalADC_Test();
-
-    MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
-
-    static uint32_t StateCnt = 0;
-    if (StateCnt < 8)
-    {
-        StateCnt++;
-    }
-
-    if (StateCnt == 1)
-    {
-        McalPort_SetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    }
-    else if (StateCnt == 3)
-    {
-        McalPort_ResetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    }
-    else if (StateCnt == 5)
-    {
-        McalPort_SetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn);
-    }
-    else if (StateCnt == 7)
-    {
-        McalPort_ResetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn); 
-    } 
-    else if (StateCnt == 8)
-    {
-        McalUart_Test();
+        if (c_stCddLedMConfigTable[dev].pFuncMainFunction != NULL)
+        {
+            c_stCddLedMConfigTable[dev].pFuncMainFunction();
+        }
     }
 }
-#endif
 
-
-
-
-
-
-
+void CddLedM_UpdateState(uint8_t device, uint8_t port, uint8_t ledDispType)
+{
+    if (device < CDD_LEDM_DEVICE_COUNT)
+    {
+        if (c_stCddLedMConfigTable[device].pFuncUpdateLedDispType != NULL)
+        {
+            c_stCddLedMConfigTable[device].pFuncUpdateLedDispType(port, ledDispType);
+        }
+    }
+}
 
 
 

@@ -151,6 +151,7 @@ void McalADC_GetChannelData(McalADCChanel_Enum ch, uint16_t *pOutBuf, uint8_t co
     }
 }
 
+#if 0
 void McalADC_Test(void)
 {
     uint16_t TestData[MCALADC_CFG_ADC0_CHANNEL_CNT][MCALADC_CFG_ADC0_SAMPLE_CNT] = { 0 };
@@ -161,7 +162,7 @@ void McalADC_Test(void)
     McalADC_GetChannelData(eMcalADCChanel_EnvNtc, TestData[eMcalADCChanel_EnvNtc], 8);
     McalADC_GetChannelData(eMcalADCChannel_PE, TestData[eMcalADCChannel_PE], 5);
 }
-
+#endif
 
 
 

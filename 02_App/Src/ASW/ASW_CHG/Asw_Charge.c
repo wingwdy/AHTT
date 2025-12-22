@@ -154,7 +154,7 @@ static void AswCharge_ReadyStateHandle(uint8_t port, AswChargeCtrl_Struct *pChar
     }
     else
     {
-        if (evseState == ASWEVSE_STATE_1 || evseState == ASWEVSE_STATE_0)
+        if (evseState == ASWEVSE_STATE_1)
         {
             AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_IDLE);
         }

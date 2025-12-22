@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Mcal_if.c
-* Description        : Code for the interface for the layer of MCAL
+* File Name          : template.c
+* Description        : Code for xxxxxxxxxxx
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,26 +11,32 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 *******************************************************************************/
+#ifndef CDD_DRV_WS2812B_H_
+#define CDD_DRV_WS2812B_H_
 
+/*******************************************************************************
+* Include
+*******************************************************************************/
+#include "Common.h"
 
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "Mcal_Mcu.h"
-#include "Mcal_Port.h"
-#include "Mcal_PWM.h"
-#include "Mcal_ADC.h"
-#include "Mcal_Uart.h"
-#include "CycleBuf.h"
-#include "Mcal_IWDG.h"
-#include "Mcal_SPI.h"
+
 
 
 
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
-
+#define CDDDRV_WS2812B_NONE            0x000000
+#define CDDDRV_WS2812B_GREEN           0xFF0000
+#define CDDDRV_WS2812B_RED             0x00FF00
+#define CDDDRV_WS2812B_BLUE            0x0000FF
+#define CDDDRV_WS2812B_WHITE           0xFFFFFF
+#define CDDDRV_WS2812B_YELLOW          0xFFFF00
+#define CDDDRV_WS2812B_CYAN            0xFF00FF
+#define CDDDRV_WS2812B_PURPLE          0x00FFFF
 
 
 
@@ -45,7 +51,11 @@
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
-
+typedef enum
+{
+    eCddDrvWS2812BChannel_0,
+    eCddDrvWS2812BChannel_Count,
+}CddDrvWS2812BChannel_Enum;
 
 
 /*******************************************************************************
@@ -63,68 +73,9 @@
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-void McalIf_Init(void)
-{
-    McalMCU_SystickInit();
-    McalIWDG_Init();
-    CycleBuf_Init();
-    McalPort_Init();
-    McalUart_Init();
-    McalADC_Init();
-    McalPWM_Init();
-    McalSPI_Init();
-}
-
-
-#if 0
-void McalIf_Test(void)
-{
-    static uint8_t count = 0;
-
-    count++;
-
-    if (count % 10 == 0)
-    {
-        McalPWM_Test();
-    }
-
-    McalADC_Test();
-
-    MalPort_TogglePin(eMcalPortPinChanel_PA1_RunLed);
-
-    static uint32_t StateCnt = 0;
-    if (StateCnt < 8)
-    {
-        StateCnt++;
-    }
-
-    if (StateCnt == 1)
-    {
-        McalPort_SetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    }
-    else if (StateCnt == 3)
-    {
-        McalPort_ResetPin(eMcalPortPinChanel_PC15_4GPwrEn);
-    }
-    else if (StateCnt == 5)
-    {
-        McalPort_SetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn);
-    }
-    else if (StateCnt == 7)
-    {
-        McalPort_ResetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn); 
-    } 
-    else if (StateCnt == 8)
-    {
-        McalUart_Test();
-    }
-}
-#endif
-
-
-
-
-
+void CddDrvWS2812B_UpdateLedDispType(uint8_t ch, uint8_t ledDispType);
+void CddDrvWS2812B_MainFunction(void);
+#endif /* CDD_DRV_WS2812B_H_ */
 
 
 
