@@ -35,15 +35,14 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include "portable.h"
 #include "Common.h"
 
 
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
-
-
-
+#define PORTTASK_CFG_LogPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_System, fmt, ##__VA_ARGS__)
 
 /*******************************************************************************
 *    Enum Definition
@@ -90,6 +89,29 @@ static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
+void portTask_ShowStackInfo(void)
+{
+	uint8_t index = 0;
+	portTask_CtrBlk *pTaskCtr = NULL;
+    BaseType_t xResult = pdFALSE;
+    uint32_t uxHighWaterMark = 0;
+
+    PORTTASK_CFG_LogPrint("---------------------------------堆栈信息------------------------------------\r\n");
+
+    PORTTASK_CFG_LogPrint("freeRTOS 总堆栈空间: %d K 字节, 剩余空间: %d K 字节\r\n", SYSCFG_CFG_OS_HEAP_SIZE / 1024, xPortGetFreeHeapSize() / 1024);
+  
+	for (index = 0; index < ARRAY_SIZE(g_stTaskCtrBlkTable); index++)
+	{
+		pTaskCtr = &g_stTaskCtrBlkTable[index];
+
+        uxHighWaterMark = uxTaskGetStackHighWaterMark(pTaskCtr->taskHandle);
+        PORTTASK_CFG_LogPrint("线程名: %s, \t总分配: %4d 字节, \t剩余: %4d 字节, \t空置率: %d%% \r\n", 
+            pTaskCtr->cTaskName, pTaskCtr->usStackDepth * 4, uxHighWaterMark * 4, uxHighWaterMark * 100 / pTaskCtr->usStackDepth);
+    }
+
+    PORTTASK_CFG_LogPrint("------------------------------------------------------------------------------\r\n");
+}
+
 void portTask_CreatAllTask(void)
 {
 	uint8_t index = 0;
@@ -109,6 +131,7 @@ void portTask_CreatAllTask(void)
 
 	    if(xResult != pdTRUE)
         {
+            PORTTASK_CFG_LogPrint("%s: Task create failed!!\r\n", pTaskCtr->cTaskName);
         }
 	}
 }
@@ -156,6 +179,8 @@ static void Task_20msA(void *arg)
         vTaskDelay(20);
     }
 }
+
+
 
 
 

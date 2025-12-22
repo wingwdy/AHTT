@@ -44,6 +44,7 @@
 *    Global Function Prototypes
 ******************************************************************************/
 void portTask_CreatAllTask(void);
+void portTask_ShowStackInfo(void);
 #endif
 
 

@@ -120,7 +120,6 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name>?</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -147,18 +146,18 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>364</LineNumber>
+          <LineNumber>104</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134225750</Address>
+          <Address>134243388</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Src\ASW\ASW_CHG\Asw_LedEventConfig.c</Filename>
+          <Filename>..\Src\BSW\MCAL\Mcal_ADCConfig.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_CHG/Asw_LedEventConfig.c\364</Expression>
+          <Expression>\\D3_A32FB_GD32E503\../Src/BSW/MCAL/Mcal_ADCConfig.c\104</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -263,8 +262,8 @@
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
-          <SubType>0</SubType>
-          <ItemText>pLedConfig-&gt;lastHighestLedDesc[0]</ItemText>
+          <SubType>8</SubType>
+          <ItemText>shell</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
@@ -1155,7 +1154,7 @@
 
   <Group>
     <GroupName>ThirdParty/LetterShell</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

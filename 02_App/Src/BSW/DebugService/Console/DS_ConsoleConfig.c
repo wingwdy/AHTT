@@ -20,6 +20,7 @@
 
 #include "Asw_Charge.h"
 #include "Mcal_Mcu.h"
+#include "PortTask.h"
 /************************s*******************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -50,8 +51,9 @@
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-
-
+static int32_t DSConsoleCfg_Reboot(int32_t argc, char *argv[]);
+static int32_t DSConsoleCfg_ChargeCtrl(int32_t argc, char *argv[]);
+static int32_t DSConsoleCfg_ShowStack(int32_t argc, char *argv[]);
 
 /*******************************************************************************
 *    Function Source Code
@@ -90,10 +92,16 @@ static int32_t DSConsoleCfg_ChargeCtrl(int32_t argc, char *argv[])
     return ret;
 }
 
+static int32_t DSConsoleCfg_ShowStack(int32_t argc, char *argv[])
+{
+    portTask_ShowStackInfo();
+    return 0;
+}
 
-DSCONSOLE_CFG_ADD_CMD(reboot, DSConsoleCfg_Reboot, "reboot" reboot system);
-DSCONSOLE_CFG_ADD_CMD(charge, DSConsoleCfg_ChargeCtrl, "charge start/stop 0/1" start/stop charge);
 
+DSCONSOLE_CFG_ADD_CMD(reboot,    DSConsoleCfg_Reboot, "reboot" reboot system);
+DSCONSOLE_CFG_ADD_CMD(charge,    DSConsoleCfg_ChargeCtrl, "charge start/stop 0/1" start/stop charge);
+DSCONSOLE_CFG_ADD_CMD(showStack, DSConsoleCfg_ShowStack, "showStack" show stack info);
 
 
 

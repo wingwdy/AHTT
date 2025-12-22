@@ -107,7 +107,7 @@ static const char *shellText[] =
     [SHELL_TEXT_CLEAR_CONSOLE] = 
         "\033[2J\033[1H",
     [SHELL_TEXT_TYPE_CMD] = 
-        "CMD ",
+        "CMD",
     [SHELL_TEXT_TYPE_VAR] = 
         "VAR ",
     [SHELL_TEXT_TYPE_USER] = 
@@ -532,12 +532,17 @@ static const char* shellGetCommandDesc(ShellCommand *command)
 void shellListItem(Shell *shell, ShellCommand *item)
 {
     short spaceLength;
+    uint8_t tabCount = 0;
 
     spaceLength = 22 - shellWriteString(shell, shellGetCommandName(item));
-    spaceLength = (spaceLength > 0) ? spaceLength : 4;
+
+    tabCount = (spaceLength / 4) + 1;
+
+ //   spaceLength = (spaceLength > 0) ? spaceLength : 4;
     do {
-        shellWriteByte(shell, ' ');
-    } while (--spaceLength);
+        shellWriteByte(shell, '\t');
+    } while (--tabCount);
+
     if (item->attr.attrs.type <= SHELL_TYPE_CMD_FUNC)
     {
         shellWriteString(shell, shellText[SHELL_TEXT_TYPE_CMD]);
@@ -1672,7 +1677,7 @@ void shellVars(void)
 }
 SHELL_EXPORT_CMD(
 SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_FUNC)|SHELL_CMD_DISABLE_RETURN,
-vars, shellVars, list all var);
+varss, shellVars, list all var);
 
 
 /**

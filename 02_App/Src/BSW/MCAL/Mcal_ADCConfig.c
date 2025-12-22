@@ -76,7 +76,7 @@ const McalADCConfig_Struct c_stADCConfigTable[MCALADC_CFG_INSTANCE_COUNT] =
                 .priority = DMA_PRIORITY_MEDIUM,   
             },
             .circulationEn = TRUE,
-            .DMA_intEn = TRUE,
+            .DMA_intEn = FALSE,
             .DMA_intCfg = 
             {
                 .nvic_irq = DMA0_Channel0_IRQn,
@@ -105,7 +105,6 @@ void DMA0_Channel0_IRQHandler(void)
     {
         dma_interrupt_flag_clear(DMA0, DMA_CH0, DMA_INT_FLAG_FTF);
     }
-
 }
 
 

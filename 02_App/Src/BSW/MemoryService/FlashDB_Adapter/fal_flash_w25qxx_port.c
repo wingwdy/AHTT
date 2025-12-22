@@ -19,7 +19,7 @@
 #include <fal.h>
 #include "Global.h"
 #include "W25QXX.h"
-
+#include "Mcal_IWDG.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -110,6 +110,8 @@ static int erase(long offset, size_t size)
 {
     uint32_t addr = nor_flash0.addr + offset;
     int ret = -1;
+
+    McalIWDG_FeedWatchDog();
 
     if (eGlobalRet_OK == W25Q_Erase(addr, size))
     {

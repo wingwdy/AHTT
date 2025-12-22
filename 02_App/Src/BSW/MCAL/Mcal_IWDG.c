@@ -74,7 +74,7 @@ void McalIWDG_Init(void)
 
 void McalIWDG_FeedWatchDog(void)
 {
-#if defined(MCALIWDG_CFG_ENABLE)
+#if (MCALIWDG_CFG_ENABLE == TRUE)
     fwdgt_counter_reload();
 #endif
 }
