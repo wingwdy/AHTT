@@ -562,14 +562,13 @@ void AswCharge_MainFunction(void)
 void AswCharge_StartAuth(uint8_t port)
 {
     AswChargeCtrl_Struct *pChargeCtrl = NULL;
-    AswErrChargeCondition_Enum eChargeCondition = AswErrHandle_GetChargeCondition(port);
     uint8_t evseState = AswEVSE_GetEVSEState(port);
 
     if (port < SYSCFG_CFG_GUN_NUM)
     {
         pChargeCtrl = &g_stAswChargeCtrl[port];
 
-        if (evseState == ASWEVSE_STATE_2 && eChargeCondition == eErrChargeCondition_Allow)
+        if (evseState == ASWEVSE_STATE_2)
         {
             if (pChargeCtrl->authFlag != TRUE)
             {
