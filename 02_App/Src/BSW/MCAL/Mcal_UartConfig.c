@@ -101,13 +101,31 @@ McalUartConfig_Struct g_UartConfigTable[eMcalUartChanel_Count] =
             .nvic_irq_pre_priority = 0,
             .nvic_irq_sub_priority = 1,
         },
-        .DMATx_En = FALSE,
+        .DMATx_En = TRUE,
+        .DMATx_Cfg = 
+        {
+            .rcu_DMA_periph = RCU_DMA0,
+            .DMA_periph = DMA0,
+            .DMA_ch = DMA_CH3,
+            .DMA_parameter = 
+            {
+                .direction = DMA_MEMORY_TO_PERIPHERAL,
+                .periph_addr = (uint32_t)&USART_DATA(USART0),
+                .periph_inc = DMA_PERIPH_INCREASE_DISABLE,
+                .periph_width = DMA_PERIPHERAL_WIDTH_8BIT,
+                .memory_addr = (uint32_t)g_Uart0SendBuf,
+                .memory_inc = DMA_MEMORY_INCREASE_ENABLE,   
+                .memory_width = DMA_MEMORY_WIDTH_8BIT,
+                .number = sizeof(g_Uart0SendBuf),        
+                .priority = DMA_PRIORITY_MEDIUM,   
+            }
+        },
         .uartBufCtrl = 
         {
             .pTxBuf = g_Uart0SendBuf,
             .txBufSize = MCALUART_CFG_UART0_SENDBUF_SIZE,
             .txCycleBufID = CYCLEBUF_INVALID_ID,
-            .txProfile = CYCLEBUF_PROFILE_CIRCLE,
+            .txProfile = CYCLEBUF_PROFILE_SINGLE,
             .pRxBuf = g_Uart0RecvBuf,
             .rxBufSize = MCALUART_CFG_UART0_RECVBUF_SIZE,
             .rxCycleBufID = CYCLEBUF_INVALID_ID,
@@ -115,7 +133,7 @@ McalUartConfig_Struct g_UartConfigTable[eMcalUartChanel_Count] =
         .uartCtrl = 
         {
             .txtate = MCALUART_TXSTATE_IDLE,
-            .txMode = MCALUART_CFG_TXMODE_INT,
+            .txMode = MCALUART_CFG_TXMODE_DMA,
         }
     },
 

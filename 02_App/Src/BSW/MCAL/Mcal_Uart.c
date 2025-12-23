@@ -160,9 +160,11 @@ GlobalRet_Enum McalUart_WriteData(McalUartChanel_Enum eCh, uint8_t *pBuf, uint16
                 while (eGlobalRet_OK == CycleBuf_CheckDataLen(pUartCfg->uartBufCtrl.txCycleBufID, &remainLen))
                 {
                     dma_channel_disable(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch);
+                    dma_memory_address_config(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch,pUartCfg->DMATx_Cfg.DMA_parameter.memory_addr);
                     dma_transfer_number_config(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch, remainLen);
                     dma_channel_enable(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch);
-                    while (dma_flag_get(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch, DMA_FLAG_FTF)) {}
+                    usart_dma_transmit_config(pUartCfg->uart_periph, USART_TRANSMIT_DMA_ENABLE);
+                    while (RESET == dma_flag_get(pUartCfg->DMATx_Cfg.DMA_periph, pUartCfg->DMATx_Cfg.DMA_ch, DMA_FLAG_FTF)) {}
                     CycleBuf_RemoveData(pUartCfg->uartBufCtrl.txCycleBufID, remainLen);
                 }
             
