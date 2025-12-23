@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : template.c
-* Description        : Code for xxxxxxxxxxx
+* File Name          : Asw_LedEvent.c
+* Description        : Code for Led event manage
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------

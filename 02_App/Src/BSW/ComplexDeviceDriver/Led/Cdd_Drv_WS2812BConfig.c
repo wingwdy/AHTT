@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : template.c
-* Description        : Code for xxxxxxxxxxx
+* File Name          : Cdd_Drv_WS2812BConfig.c
+* Description        : Code for WS2812B Driver
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------

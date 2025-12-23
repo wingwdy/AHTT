@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : template_Config.h
-* Description        : Code for xxxxxxxxxxx
+* File Name          : Cdd_LedMConfig.h
+* Description        : Code for Led Driver router
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------

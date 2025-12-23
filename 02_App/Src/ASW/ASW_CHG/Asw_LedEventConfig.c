@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : template.c
-* Description        : Code for xxxxxxxxxxx
+* File Name          : Asw_LedEventConfig.c
+* Description        : Code for Led event manage
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -19,6 +19,7 @@
 #include "Asw_LedEventConfig.h"
 #include "Asw_Charge.h"
 #include "Asw_ErrorHandle.h"
+#include "Cdd_Relay.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -310,9 +311,16 @@ static uint8_t AswLedEventCfg_GetChargingExsit(uint8_t port)
     uint8_t ret = FALSE;
     uint8_t workState = AswCharge_GetWorkState(port);
 
-    if (workState == ASWCHARGE_WORKSTATE_CHARGING || workState == ASWCHARGE_WORKSTATE_STOPPING)
+    if (workState == ASWCHARGE_WORKSTATE_CHARGING)
     {
         ret = TRUE;
+    }
+    else if (workState == ASWCHARGE_WORKSTATE_STOPPING)
+    {
+        if (CddRelay_GetRelayState(port) == eCddRelayState_On)
+        {
+            ret = TRUE;
+        }
     }
 
     return ret;
@@ -339,6 +347,13 @@ static uint8_t AswLedEventCfg_GetStopFinishExsit(uint8_t port)
     if (workState == ASWCHARGE_WORKSTATE_FINISH)
     {
         ret = TRUE;
+    }
+    else if (workState == ASWCHARGE_WORKSTATE_STOPPING)
+    {
+        if (CddRelay_GetRelayState(port) == eCddRelayState_Off)
+        {
+            ret = TRUE;
+        }
     }
 
     return ret;

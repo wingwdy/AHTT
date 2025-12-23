@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : template.h
-* Description        : Code for xxxxxxxxxxx
+* File Name          : Asw_LedEventConfig.h
+* Description        : Code for Led event manage
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -38,8 +38,8 @@
 ******************************************************************************/
 typedef enum
 {
-    eAswLedEventType_State,
-    eAswLedEventype_Event,
+    eAswLedEventType_State,  /* 状态型 */
+    eAswLedEventype_Event,   /* 事件型 */
     eAswLedEventType_Count,
 }AswLedEventType_Enum;
 
