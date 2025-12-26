@@ -120,6 +120,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
+          <Name>?</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -146,50 +147,18 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>104</LineNumber>
+          <LineNumber>196</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134243292</Address>
+          <Address>134257380</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Src\BSW\MCAL\Mcal_ADCConfig.c</Filename>
+          <Filename>..\Src\Core\portTask.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/BSW/MCAL/Mcal_ADCConfig.c\104</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>153</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134226360</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Src\ASW\ASW_CHG\Asw_LedEvent.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_CHG/Asw_LedEvent.c\153</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>74</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134226480</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Src\ASW\ASW_CHG\Asw_LedEvent.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_CHG/Asw_LedEvent.c\74</Expression>
+          <Expression>\\D3_A32FB_GD32E503\../Src/Core/portTask.c\196</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -197,6 +166,21 @@
           <count>0</count>
           <WinNumber>1</WinNumber>
           <ItemText>g_Uart0RecvBuf</ItemText>
+        </Ww>
+        <Ww>
+          <count>1</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pBufLen[0]</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>stHead</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>readData</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -229,16 +213,16 @@
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
-          <SubType>0</SubType>
-          <ItemText>0x20000BC0</ItemText>
+          <SubType>8</SubType>
+          <ItemText>pDstData</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
       <MemoryWindow2>
         <Mm>
           <WinNumber>2</WinNumber>
-          <SubType>0</SubType>
-          <ItemText>pDescriptor-&gt;ramBlockDataAddr</ItemText>
+          <SubType>8</SubType>
+          <ItemText>pTopic</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow2>

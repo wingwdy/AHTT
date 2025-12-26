@@ -63,16 +63,16 @@ typedef struct
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-static FrameQueueCtrlDCB_Struct g_stFrameQueueCtrlDCB[FRAME_QUEUE_CHANNEL_COUNT] = {0};
 static GlobalRet_Enum FrameQueue_PopTCP(FrameQueueCtrlDCB_Struct *pDCB, uint8_t *pDstData, uint16_t *pDataSize, uint8_t direction);
 static GlobalRet_Enum FrameQueue_PopMQTT(FrameQueueCtrlDCB_Struct *pDCB, char *pTopic, uint16_t *pTopicLen, uint8_t *pDstData, uint16_t *pDataSize, uint8_t direction);
 static GlobalRet_Enum FrameQueue_PushMQTT(FrameQueueCtrlDCB_Struct *pDCB, char *pTopic, uint16_t topicLen, uint8_t *pSrcData, uint16_t dataLen, uint8_t direction);
 static GlobalRet_Enum FrameQueue_PushTCP(FrameQueueCtrlDCB_Struct *pDCB, char *pTopic, uint16_t topicLen, uint8_t *pSrcData, uint16_t dataLen, uint8_t direction);
 static GlobalRet_Enum FrameQueue_GetLastFrameDataLen(uint8_t channelID, uint16_t *pDataLen, char *pTopic, uint16_t *pTopicLen, uint8_t direction);
+
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-
+static FrameQueueCtrlDCB_Struct g_stFrameQueueCtrlDCB[FRAME_QUEUE_CHANNEL_COUNT] = {0};
 
 
 /*******************************************************************************
@@ -207,7 +207,7 @@ static GlobalRet_Enum FrameQueue_PushMQTT(FrameQueueCtrlDCB_Struct *pDCB, char *
     uint16_t bufSize = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->txBufSize : pDCB->rxBufSize;
     uint16_t *pBufLen = (direction == FRAME_QUEUE_DIRECTION_TX) ? &pDCB->txLen : &pDCB->rxLen;
 
-    if (pBufLen[0] + topicLen + dataLen + sizeof(FrameQueueHead_Struct) > bufSize)
+    if (pBufLen[0] + topicLen + dataLen + sizeof(FrameQueueHead_Struct) < bufSize)
     {
         Common_Uint16ToTwoUint8(stHead.ctrlWord, ctrlWord);
         Common_Uint16ToTwoUint8(stHead.topicLen, topicLen);
@@ -234,7 +234,7 @@ static GlobalRet_Enum FrameQueue_PushTCP(FrameQueueCtrlDCB_Struct *pDCB, char *p
     uint16_t bufSize = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->txBufSize : pDCB->rxBufSize;
     uint16_t *pBufLen = (direction == FRAME_QUEUE_DIRECTION_TX) ? &pDCB->txLen : &pDCB->rxLen;
 
-    if (pBufLen[0] + dataLen + sizeof(FrameQueueHead_Struct) > bufSize)
+    if (pBufLen[0] + dataLen + sizeof(FrameQueueHead_Struct) < bufSize)
     {
         Common_Uint16ToTwoUint8(stHead.ctrlWord, ctrlWord);
         Common_Uint16ToTwoUint8(stHead.dataLen, dataLen);
@@ -462,6 +462,7 @@ GlobalRet_Enum FrameQueue_PopTx(uint8_t channelID, char *pTopic, uint16_t *pTopi
     PARA_ASSERT_RET(channelID < FRAME_QUEUE_CHANNEL_COUNT, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pDstData != NULL && pDataSize != NULL, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pDCB->initFlag == TRUE, eGlobalRet_NotInit);
+        PARA_ASSERT_RET(pDCB->initFlag == TRUE, eGlobalRet_NotInit);
 
     if (pDCB->frameType == eFrameQueueType_MQTT)
     {
@@ -649,7 +650,7 @@ GlobalRet_Enum FrameQueue_TransmitTxData(uint8_t channelID, typeFuncTransmit pTr
             {
                 pFrameData = pDCB->pTXBuf + sizeof(FrameQueueHead_Struct) + topicLen;
                 pTransmitFunc(pFrameData, dataLen);
-                
+
                 memmove(pDCB->pTXBuf, 
                         pDCB->pTXBuf + sizeof(FrameQueueHead_Struct) + dataLen + topicLen, 
                         pDCB->txLen - sizeof(FrameQueueHead_Struct) - dataLen - topicLen);
