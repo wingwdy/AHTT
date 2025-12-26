@@ -29,6 +29,7 @@
 #include "Cdd_PE.h"
 #include "Cdd_MeterM.h"
 #include "Cdd_LedM.h"
+#include "Cdd_4GM.h"
 
 
 #include "Mcal_If.h"
@@ -70,9 +71,9 @@ typedef struct
 *******************************************************************************/
 static void Task_10msA(void *arg);
 static void Task_10msB(void *arg);
-static void Task_100ms(void *arg);
+static void Task_100msA(void *arg);
 static void Task_20msA(void *arg);
-
+static void Task_20msB(void *arg);
 
 
 /*******************************************************************************
@@ -80,10 +81,11 @@ static void Task_20msA(void *arg);
 *******************************************************************************/
 static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
 {
-    {"App10msA",        Task_10msA,          NULL,         512,   6 } ,
-    {"App10msB",        Task_10msB,          NULL,         512,   7 } ,
-    {"App100ms",        Task_100ms,          NULL,         512,   5 } ,
+    {"App10msA",        Task_10msA,          NULL,         256,   6 } ,
+    {"App10msB",        Task_10msB,          NULL,         256,   7 } ,
     {"App20msA",        Task_20msA,          NULL,         256,   4 } ,
+    {"App20msB",        Task_20msB,          NULL,         1024,  5 } ,
+    {"App100msA",       Task_100msA,         NULL,         512,   5 } ,
 };
 
 /*******************************************************************************
@@ -159,24 +161,33 @@ static void Task_10msB(void *arg)
     }
 }
 
-static void Task_100ms(void *arg)
-{
-    while (1)
-    {
-        CddMeterM_MainFunction();
-        CddSensor_MainFunction();
-        vTaskDelay(100);
-    }
-}
-
 static void Task_20msA(void *arg)
 {
     while (1)
     {
         AswLedEvent_MainFunction();
         CddLedM_MainFunction();
+        vTaskDelay(20);
+    }
+}
+
+static void Task_20msB(void *arg)
+{
+    while (1)
+    {
+        Cdd4GM_MainFunction();
         DSConsole_MainFunction();
         vTaskDelay(20);
+    }
+}
+
+static void Task_100msA(void *arg)
+{
+    while (1)
+    {
+        CddMeterM_MainFunction();
+        CddSensor_MainFunction();
+        vTaskDelay(100);
     }
 }
 
