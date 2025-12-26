@@ -186,9 +186,9 @@ void McalPWM_SetMultiDuty(McalPWMOCChannel_Enum ch,   uint8_t setType, uint16_t*
 
 
 
-#if 0
 void McalPWM_Test(void)
 {
+#if 0
     static uint8_t flag = 0;
 
     uint16_t timerLedDMAMemoryBuf[MCALPWM_CFG_LED_COUNT][MCALPWM_CFG_LED_POINT] = 
@@ -237,5 +237,5 @@ void McalPWM_Test(void)
  
     flag = !flag;
     McalPWM_SetMultiDuty(eMcalPWMOCChannel_Led, MCALPWM_CFG_SET_DUTY, pArray, MCALPWM_CFG_LED_DMABUF_LEN);
-}
 #endif
+}

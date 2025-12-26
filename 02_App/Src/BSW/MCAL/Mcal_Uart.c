@@ -263,16 +263,19 @@ GlobalRet_Enum McalUart_ResetRecvBuf(McalUartChanel_Enum eCh)
     return CycleBuf_ResetBuf(pUartCfg->uartBufCtrl.rxCycleBufID);
 }
 
+
 void McalUart_Test(void)
 {
-    // char buf[] = "Hello world!!!\r\n";
-    // McalUart_WriteData(eMcalUartChanel_Debug, (uint8_t *)buf, strlen(buf));
+#if 0
+    char buf[] = "Hello world!!!\r\n";
+    McalUart_WriteData(eMcalUartChanel_Debug, (uint8_t *)buf, strlen(buf));
 
     char txStr[] = "ATI\r\n";
     McalUart_WriteData(eMcalUartChanel_4G, (uint8_t *)txStr, strlen(txStr));
 
-    // uint8_t txbuf[] = {0x58, 0x18};
-    // McalUart_WriteData(eMcalUartChanel_MeterChip, (uint8_t *)txbuf, 2);
+    uint8_t txbuf[] = {0x58, 0x18};
+    McalUart_WriteData(eMcalUartChanel_MeterChip, (uint8_t *)txbuf, 2);
+#endif
 }
 
 
