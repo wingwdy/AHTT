@@ -34,7 +34,7 @@
 
 #define CDDRELAY_CFG_ADC_BUFF_POINT                        (MCALADC_ADC0_SAMPLE_CNT)
 #define CDDRELAY_CFG_SHORTCUT_UPPER_LIMIT                  240
-#define CDDRELAY_CFG_SHORTCUT_LOWER_LIMIT                  75
+#define CDDRELAY_CFG_SHORTCUT_LOWER_LIMIT                  200
 
 #define CDDRELAY_CFG_SHORTCUT_TIMEOUT                      (5000)
 #define CDDRELAY_CFG_SHORTCUT_FILTER_COUNT                 (500 /  CDDRELAY_CFG_CALL_CYCLE)
