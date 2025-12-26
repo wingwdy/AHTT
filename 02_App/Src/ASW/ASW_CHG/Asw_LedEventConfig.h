@@ -32,7 +32,9 @@
 
 #define ASWLED_CFG_LogPrint(fmt, ...)                   DSLOGM_Debug(DSLogMModule_EVSE, fmt, ##__VA_ARGS__)
 
-#define ASWLED_CFG_IsQBStandardMode()                   (FALSE)                 
+#define ASWLED_CFG_IsQBStandardMode()                   (FALSE)       
+#define ASWLED_CFG_IsFactoryMode()                      (FALSE)
+#define ASWLED_CFG_IsOTAing()                           (FALSE)          
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -42,7 +44,7 @@ typedef enum
     eAswLedEventype_Event,   /* 事件型 */
     eAswLedEventType_Count,
 }AswLedEventType_Enum;
-
+  
 typedef enum
 {
     eAswLedDevice0_DispType_None,               /* 初始状态, 具体显示由底层驱动决定 */
@@ -57,6 +59,8 @@ typedef enum
     eAswLedDevice0_DispType_InvalidCard,        /* 无效卡 */
     eAswLedDevice0_DispType_Error,              /* 设备故障 */
     eAswLedDevice0_DispType_Offline,            /* 设备离线 */
+    eAswLedDevice0_DispType_FactoryMode,        /* 厂内模式 */
+    eAswLedDevice0_DispType_OTA,                /* OTA状态 */
     eAswLedDevice0_DispType_Count,
 }AswLedDevice0DispType_Enum;
 
