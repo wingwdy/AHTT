@@ -43,7 +43,9 @@
 #define CDD_LEDM_DEVICE0_DISP_TYPE_9           9
 #define CDD_LEDM_DEVICE0_DISP_TYPE_10          10
 #define CDD_LEDM_DEVICE0_DISP_TYPE_11          11
-#define CDD_LEDM_DEVICE0_DISP_TYPE_COUNT       12
+#define CDD_LEDM_DEVICE0_DISP_TYPE_12          12
+#define CDD_LEDM_DEVICE0_DISP_TYPE_13          13
+#define CDD_LEDM_DEVICE0_DISP_TYPE_COUNT       14
 
 /******************************************************************************
 *    Enum Definition

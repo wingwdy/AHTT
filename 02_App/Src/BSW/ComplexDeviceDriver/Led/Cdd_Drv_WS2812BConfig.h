@@ -54,7 +54,7 @@
 #define CDDDRV_WS2812B_CFG_LOW_BIT_DUTY              (62u) 
 
 /* 呼吸单次控制步长 */
-#define CDDDRV_WS2812B_CFG_BREATH_FOOTSTEP            (3)
+#define CDDDRV_WS2812B_CFG_BREATH_FOOTSTEP            (2)
 /*******************************************************************************
 *    Enum Definition
 *******************************************************************************/

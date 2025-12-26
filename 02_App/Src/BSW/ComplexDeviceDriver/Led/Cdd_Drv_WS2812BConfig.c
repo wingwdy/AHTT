@@ -67,14 +67,14 @@ const CddDrvWS2812BConfig_Struct c_stCddDrvWS2812BConfigTable[CDD_LEDM_DEVICE0_D
     {
         .RGBArray = { CDDDRV_WS2812B_BLUE,    CDDDRV_WS2812B_BLUE,     CDDDRV_WS2812B_BLUE   },
         .maxDispTimes = 0xFF,
-        .eDispMode = eCddDrvWS2812BDispMode_SlowBlink,
+        .eDispMode = eCddDrvWS2812BDispMode_Breath,
     },
 
     [CDD_LEDM_DEVICE0_DISP_TYPE_2] =
     {
         .RGBArray = { CDDDRV_WS2812B_GREEN,   CDDDRV_WS2812B_GREEN,    CDDDRV_WS2812B_GREEN   },
         .maxDispTimes = 0xFF,
-        .eDispMode = eCddDrvWS2812BDispMode_SlowBlink,
+        .eDispMode = eCddDrvWS2812BDispMode_Breath,
     },
 
     [CDD_LEDM_DEVICE0_DISP_TYPE_3] =
@@ -138,6 +138,20 @@ const CddDrvWS2812BConfig_Struct c_stCddDrvWS2812BConfigTable[CDD_LEDM_DEVICE0_D
         .RGBArray = { CDDDRV_WS2812B_WHITE,   CDDDRV_WS2812B_WHITE,    CDDDRV_WS2812B_WHITE   },
         .maxDispTimes = 0xFF,
         .eDispMode = eCddDrvWS2812BDispMode_On,
+    },
+
+    [CDD_LEDM_DEVICE0_DISP_TYPE_12] =
+    {
+        .RGBArray = { CDDDRV_WS2812B_YELLOW,  CDDDRV_WS2812B_YELLOW,   CDDDRV_WS2812B_YELLOW   },
+        .maxDispTimes = 0xFF,
+        .eDispMode = eCddDrvWS2812BDispMode_Breath,
+    },
+
+    [CDD_LEDM_DEVICE0_DISP_TYPE_13] =
+    {
+        .RGBArray = { CDDDRV_WS2812B_PURPLE,   CDDDRV_WS2812B_PURPLE,    CDDDRV_WS2812B_PURPLE   },
+        .maxDispTimes = 0xFF,
+        .eDispMode = eCddDrvWS2812BDispMode_Breath,
     },
 };
 
