@@ -594,6 +594,20 @@ void AswCharge_StopAuth(uint8_t port)
     }
 }
 
+uint8_t AswCharge_GetAuthFlag(uint8_t port)
+{
+    AswChargeCtrl_Struct *pChargeCtrl = NULL;
+    uint8_t ret = FALSE;
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        pChargeCtrl = &g_stAswChargeCtrl[port];
+        ret = pChargeCtrl->authFlag;
+    }
+
+    return ret;
+}
+
 void AswCharge_SetProfile(AswChargeCtrlProfile_Enum eProfile)
 {
 

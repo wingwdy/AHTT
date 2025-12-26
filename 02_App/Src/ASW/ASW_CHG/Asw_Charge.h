@@ -66,6 +66,7 @@ void AswCharge_MainFunction(void);
 uint8_t AswCharge_IsAuth(uint8_t port);
 void AswCharge_StartAuth(uint8_t port);
 void AswCharge_StopAuth(uint8_t port);
+uint8_t AswCharge_GetAuthFlag(uint8_t port);
 #endif /* ASW_CHARGE_H_ */
 
 
