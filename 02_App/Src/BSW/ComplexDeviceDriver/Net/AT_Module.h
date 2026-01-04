@@ -37,7 +37,7 @@ typedef enum
     eATModuleCmd_QueryIccid,                        /* sim卡iccid查询 */
     eATModuleCmd_QueryCsq,                          /* 信号强度查询 */
     eATModuleCmd_QueryNtpClk,                       /* 查询NTP时间 */
-    eATModuleCmd_QueryCREG,                         /* PS服务网络连接状态查询 */
+    eATModuleCmd_QueryCGREG,                         /* PS服务网络连接状态查询 */
     eATModuleCmd_QueryCOPS,                         /* 查询运营商 */
     eATModuleCmd_QueryNetWorkInfo,                  /* 查询网络信息 */
     eATModuleCmd_SetCFUN0,                          /* 设置最小功能模式 */

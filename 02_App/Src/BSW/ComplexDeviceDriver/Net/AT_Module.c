@@ -45,7 +45,7 @@
 *    Static Local Functions Declaration
 *******************************************************************************/
 static uint8_t ATModule_RecvSimStatus(uint8_t socketID, uint8_t *pData, uint16_t dataLen);
-
+static uint8_t ATModule_RecvCGREG(uint8_t socketID, uint8_t *pData, uint16_t dataLen);
 
 /*******************************************************************************
 *    Global variables Declaration
@@ -78,9 +78,9 @@ const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
     { "AT+QNTP=1,\"ntp1.aliyun.com\"\r\n",    "+QNTP:",           3,          5000,       "查询NTP时间",
     NULL,                                      NULL,                NULL},
 
-    [eATModuleCmd_QueryCREG] =  
+    [eATModuleCmd_QueryCGREG] =  
     { "AT+CGREG?\r\n",                        "+CGREG:",          3,          10000,      "PS服务网络连接状态查询",
-    NULL,                                      NULL,                NULL},
+    NULL,                                      ATModule_RecvCGREG,        NULL},
 
     [eATModuleCmd_QueryCOPS] =  
     { "AT+COPS?\r\n",                         "+COPS:",           10,         3000,       "查询运营商",
@@ -120,6 +120,26 @@ static uint8_t ATModule_RecvSimStatus(uint8_t socketID, uint8_t *pData, uint16_t
     if (status == 1)
     {
         ret = TRUE;
+    }
+
+    return ret;
+}
+
+#include "Asw_ErrorHandle.h"
+
+static uint8_t ATModule_RecvCGREG(uint8_t socketID, uint8_t *pData, uint16_t dataLen)
+{
+    int32_t en = 0;
+    int32_t status = 0;
+    uint8_t ret = FALSE;
+
+    sscanf((char*)pData, "+CGREG:%d,%d", &en, &status);
+
+    /* 1: 已注册，归属地网络； 5: 已注册，漫游状态 */
+    if (status == 1 || status == 5)
+    {
+        ret = TRUE;
+        AswErrhandle_ResetErrExsitCallback(0, eErr_PlatformOffline);
     }
 
     return ret;
