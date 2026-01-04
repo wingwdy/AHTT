@@ -20,13 +20,28 @@
 ******************************************************************************/
 
 
-
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+#define CCDD_NETM_CFG_LINK_COUNT                 3
 
+#define CDD_NETM_CFG_LINKPARA_LEN                256
 
+#define CDD_NETM_CFG_IP_LEN						 72
 
+/* config for FTP */
+#define CDD_NETM_CFG_FTP_FILENAME_LEN            64
+#define CDD_NETM_CFG_FTP_PATH_LEN                48
+#define CDD_NETM_CFG_FTP_USERNAME_LEN            24
+#define CDD_NETM_CFG_FTP_PASSWD_LEN              24
+
+/* config for FTP */
+#define CDD_NETM_CFG_MQTT_TOPIC_COUNT            5
+#define CDD_NETM_CFG_MQTT_TOPIC_LEN              16
+#define CDD_NETM_CFG_MQTT_DEVICE_NAME_LEN        32
+#define CDD_NETM_CFG_MQTT_PRODUCT_SECRET_LEN     32
+#define CDD_NETM_CFG_MQTT_PRODUCT_KEY_LEN        32
+#define CDD_NETM_CFG_MQTT_PID_LEN                20
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

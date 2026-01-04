@@ -75,6 +75,7 @@ typedef enum
     eAswLedPriority_4,
     eAswLedPriority_5,
     eAswLedPriority_6,
+    eAswLedPriority_7,
 }AswLedPriority_Enum;
 
 

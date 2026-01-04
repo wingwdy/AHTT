@@ -182,6 +182,7 @@ static void AswErrHandle_RefreshChargeCondition(AswErrorHandle_Struct *pErrorHan
 void AswErrHandle_InitMemory(void)
 {
     memset(g_stAswErrorHandle, 0x00, sizeof(g_stAswErrorHandle));
+    AswErrhandle_SetErrExsitCallback(0, eErr_PlatformOffline);
 }
 
 void AswErrhandle_SetErrExsitCallback(uint8_t port, AswErrorType_Enum errType)
@@ -189,7 +190,7 @@ void AswErrhandle_SetErrExsitCallback(uint8_t port, AswErrorType_Enum errType)
     AswErrorHandle_Struct *pErrorHandle = &g_stAswErrorHandle[port];
     const AswErrorHandleConfig_Struct *pConfig = &c_AswErrorHandleConfigTable[errType];
     uint8_t gunIndex = port;
-
+  
     if ((port < SYSCFG_CFG_GUN_NUM) && (errType < eErr_Num))
     {
         if (pConfig->eErrOwner == AswErrorOwner_Pile)

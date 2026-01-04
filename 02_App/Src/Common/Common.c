@@ -243,3 +243,20 @@ void Common_Uint16ToTwoUint8(uint8_t *pData, uint16_t curVal)
     *pData++ = (curVal & 0x00ff);
     *pData++ = ((curVal >> 8) & 0x00ff);
 }
+
+uint8_t* Common_SearchData(uint8_t *pData, uint16_t dataLen, void *pString, uint16_t stringLen)
+{
+    uint8_t *pTr = NULL;
+
+	while(dataLen >= stringLen)
+	{
+		if (0 == memcmp(pData, pString, stringLen))
+		{
+			pTr = pData;
+		}
+		pData++;
+		dataLen--;
+	}
+
+	return pTr;
+}

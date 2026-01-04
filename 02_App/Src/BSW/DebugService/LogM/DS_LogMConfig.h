@@ -39,6 +39,7 @@ typedef enum
     DSLogMModule_Led,
 
     /*CDD */
+    DSLogMModule_4G,
     DSLogMModule_CP,
     DSLogMModule_Meter,
     DSLogMModule_RCD,

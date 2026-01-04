@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : DS_LogMConfig.c
-* Description        : Code for log manage
+* File Name          : template.c
+* Description        : Code for xxxxxxxxxxx
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "DS_LogM.h"
+#include "Cdd_NetM.h"
 
 
 
@@ -43,36 +43,32 @@
 
 
 /*******************************************************************************
-*    Global variables Declaration
-*******************************************************************************/
-
-
-
-/*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
 
 
 
 /*******************************************************************************
+*    Global variables Declaration
+*******************************************************************************/
+
+const CddNetMModuleOps_Struct c_NetMModuleOpsTable[CDD_NETM_DEV_COUNT] = {
+    [CDD_NETM_DEV_4G] = 
+    {
+        .getModuleState = NULL,
+        .getSocketState = NULL,
+        .setSocketDisconnect = NULL,
+        .creatSocket = NULL,
+        .delAllSocket = NULL,
+        .delSingleSocket = NULL,
+    },
+};
+
+
+/*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-const char *g_logMModuleName[DSLogMModule_Count] = 
-{
-    "EVSE",
-    "Charge",
-    "ErrorHandle",
-    "Led",
 
-    "4G",
-    "CP",
-    "Meter",
-    "RCD",
-    "Relay",
-
-    "Flash",
-    "System",
-};
 
 
 

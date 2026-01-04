@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Common.h
-* Description        : Code for Common function
+* File Name          : template_Config.h
+* Description        : Code for xxxxxxxxxxx
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,27 +11,42 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef COMMON_H_
-#define COMMON_H_
+#ifndef AT_MODULE_H_
+#define AT_MODULE_H_
+
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "stdint.h"
-#include "stdio.h"
-#include "stdarg.h"
-#include "stdlib.h"
-#include "math.h"
-#include "string.h"
-#include "gd32e50x.h"
-#include "Global.h"
+#include "AT_Describtor.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
 
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
+typedef enum
+{
+    eATModuleCmd_Null,
+    eATModuleCmd_QueryModule,                       /* 识别模块 */
+    eATModuleCmd_SetSimStatusReportEnable,          /* 设置sim卡状态上报使能 */
+    eATModuleCmd_QuerySimStatus,                    /* sim卡状态查询 */
+    eATModuleCmd_QuerySimRecognizeStatus,           /* sim识别状态查询 */
+    eATModuleCmd_QueryIccid,                        /* sim卡iccid查询 */
+    eATModuleCmd_QueryCsq,                          /* 信号强度查询 */
+    eATModuleCmd_QueryNtpClk,                       /* 查询NTP时间 */
+    eATModuleCmd_QueryCREG,                         /* PS服务网络连接状态查询 */
+    eATModuleCmd_QueryCOPS,                         /* 查询运营商 */
+    eATModuleCmd_QueryNetWorkInfo,                  /* 查询网络信息 */
+    eATModuleCmd_SetCFUN0,                          /* 设置最小功能模式 */
+    eATModuleCmd_SetCFUN1,                          /* 设置全功能模式 */
+    eATModuleCmd_QueryCount,
+}ATModuleCmd_Enum;
+
+
+
 
 
 /******************************************************************************
@@ -39,33 +54,18 @@
 ******************************************************************************/
 
 
+
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-
-
+extern const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[eATModuleCmd_QueryCount];
+extern const ATUrcDescribtor_Struct c_stATCmdDescribtor[1];
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-uint16_t Common_CalcCRC16(uint8_t *pData, uint16_t dataLen);
-void Common_InsertSort(uint16_t *pData, uint16_t n);
-void Common_BubbleSort(uint16_t *pData, uint16_t size);
-uint8_t Common_JudgeTimeoutMs(uint32_t startTick, uint32_t threshold);
-uint16_t Common_MedianU16Filter(uint16_t *pData, uint16_t sample_num, uint16_t discard_num);
-uint32_t Common_GetSystick(void);
-void Common_Uint32ToFourUint8(uint8_t *pData, uint32_t curVal);
-void Common_Uint32ToTwoUint8(uint8_t *pData, uint32_t curVal);
-uint32_t Common_FourUint8ToUint32(uint8_t *pData);
-uint16_t Common_TwoUint8ToUint16(uint8_t *pData);
-void Common_Uint16ToTwoUint8(uint8_t *pData, uint16_t curVal);
-
-uint8_t* Common_SearchData(uint8_t *pData, uint16_t dataLen, void *pString, uint16_t stringLen);
-#endif /* COMMON_H_ */
 
 
-
-
-
+#endif
 
 
 

@@ -61,8 +61,9 @@
                                                                 }\
                                                             }while(0)
 
-#define CDD_METERM_CFG_LogPrint(fmt, ...)                   DSLOGM_Debug(DSLogMModule_Meter, fmt, ##__VA_ARGS__)
+#define CDD_METERM_CFG_LogPrint(fmt, ...)                   // DSLOGM_Debug(DSLogMModule_Meter, fmt, ##__VA_ARGS__)
 
+        
 
 /******************************************************************************
 *    Enum Definition

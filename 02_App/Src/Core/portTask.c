@@ -29,7 +29,7 @@
 #include "Cdd_PE.h"
 #include "Cdd_MeterM.h"
 #include "Cdd_LedM.h"
-#include "Cdd_4GM.h"
+#include "Cdd_Drv_EG800AK.h"
 
 
 #include "Mcal_If.h"
@@ -175,7 +175,7 @@ static void Task_20msB(void *arg)
 {
     while (1)
     {
-        Cdd4GM_MainFunction();
+        CddDrvEG800AK_MainFunction();
         DSConsole_MainFunction();
         vTaskDelay(20);
     }

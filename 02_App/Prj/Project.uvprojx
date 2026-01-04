@@ -517,14 +517,44 @@
               <FilePath>..\Src\BSW\ComplexDeviceDriver\Led\Cdd_LedMConfig.c</FilePath>
             </File>
             <File>
-              <FileName>Cdd_4GM.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_4GM.c</FilePath>
-            </File>
-            <File>
               <FileName>Cdd_NetM.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_NetM.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_Drv_EG800AK.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_Drv_EG800AK.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_NetMConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_NetMConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>AT_MQTT.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\AT_MQTT.c</FilePath>
+            </File>
+            <File>
+              <FileName>AT_Module.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\AT_Module.c</FilePath>
+            </File>
+            <File>
+              <FileName>AT_FTP.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\AT_FTP.c</FilePath>
+            </File>
+            <File>
+              <FileName>AT_TCP.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\AT_TCP.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_Drv_EG800AKConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_Drv_EG800AKConfig.c</FilePath>
             </File>
           </Files>
         </Group>

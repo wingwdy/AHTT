@@ -28,15 +28,15 @@
 #define GLOBAL_OPT_STATE_FAIL                          (3U)
 
 #ifndef NULL
-#define NULL  0
+#define NULL ((void *)0)
 #endif
 
 #ifndef TRUE
-#define TRUE  1
+#define TRUE  1U
 #endif
 
 #ifndef FALSE
-#define FALSE 0
+#define FALSE 0U
 #endif
 
 #define ARRAY_SIZE(x)               sizeof(x) / sizeof(x[0])

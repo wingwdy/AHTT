@@ -53,6 +53,7 @@ static uint8_t AswLedEventCfg_GetPausingExsit(uint8_t port);
 static uint8_t AswLedEventCfg_GetStopFinishExsit(uint8_t port);
 static uint8_t AswLedEventCfg_GetConnectedUnAuthExsit(uint8_t port);
 static uint8_t AswLedEventCfg_GetErrorStateExsit(uint8_t port);
+static uint8_t AswLedEventCfg_GetOfflineExsit(uint8_t port);
 static uint8_t AswLedEventCfg_GetFactoryModeExsit(uint8_t port);
 static uint8_t AswLedEventCfg_GetOTAStatusExsit(uint8_t port);
 /*******************************************************************************
@@ -136,7 +137,7 @@ const AswLedEventConfig_Struct  c_stAswLed_Device0_EventConfigTable[eAswLedDevic
     {
         .pFuncGetStateExsist = NULL,
         .eLedEventType = eAswLedEventype_Event,
-        .eLedPriority = eAswLedPriority_6,
+        .eLedPriority = eAswLedPriority_7,
         .ledDispType = CDD_LEDM_DEVICE0_DISP_TYPE_8,  /* 绿绿绿 快闪 */
         .desc = "读卡成功",
     },
@@ -145,7 +146,7 @@ const AswLedEventConfig_Struct  c_stAswLed_Device0_EventConfigTable[eAswLedDevic
     {
         .pFuncGetStateExsist = NULL,
         .eLedEventType = eAswLedEventype_Event,
-        .eLedPriority = eAswLedPriority_6,
+        .eLedPriority = eAswLedPriority_7,
         .ledDispType = CDD_LEDM_DEVICE0_DISP_TYPE_9, /* 红红红 快闪 */
         .desc = "无效卡",
     },
@@ -154,16 +155,16 @@ const AswLedEventConfig_Struct  c_stAswLed_Device0_EventConfigTable[eAswLedDevic
     {
         .pFuncGetStateExsist = AswLedEventCfg_GetErrorStateExsit,
         .eLedEventType = eAswLedEventType_State,
-        .eLedPriority = eAswLedPriority_3,
+        .eLedPriority = eAswLedPriority_4,
         .ledDispType = CDD_LEDM_DEVICE0_DISP_TYPE_10, /* 红红红 常亮 */
         .desc = "设备故障",
     },
 
     [eAswLedDevice0_DispType_Offline] = 
     {
-        .pFuncGetStateExsist = NULL,
+        .pFuncGetStateExsist = AswLedEventCfg_GetOfflineExsit,
         .eLedEventType = eAswLedEventType_State,
-        .eLedPriority = eAswLedPriority_5,
+        .eLedPriority = eAswLedPriority_6,
         .ledDispType = CDD_LEDM_DEVICE0_DISP_TYPE_11, /* 白色 常亮 */
         .desc = "设备离线",
     },
@@ -181,7 +182,7 @@ const AswLedEventConfig_Struct  c_stAswLed_Device0_EventConfigTable[eAswLedDevic
     {
         .pFuncGetStateExsist = AswLedEventCfg_GetOTAStatusExsit,
         .eLedEventType = eAswLedEventType_State,
-        .eLedPriority = eAswLedPriority_4,
+        .eLedPriority = eAswLedPriority_5,
         .ledDispType = CDD_LEDM_DEVICE0_DISP_TYPE_13, /* 紫色 呼吸 */
         .desc = "远程升级",
     },
@@ -422,14 +423,13 @@ static uint8_t AswLedEventCfg_GetOfflineExsit(uint8_t port)
 {
     uint8_t ret = FALSE;
 
-    if ((TRUE == AswErrHandle_CheckErrExit(port, eErr_NetNoSIMErr)) || (TRUE == AswErrHandle_CheckErrExit(port, eErr_PlatformOffline)))
+    if ((TRUE == AswErrHandle_CheckErrExit(port, eErr_PlatformOffline)))
     {
         ret = TRUE;
     }
 
     return ret;
 }
-
 static uint8_t AswLedEventCfg_GetFactoryModeExsit(uint8_t port)
 {
     uint8_t ret = FALSE;

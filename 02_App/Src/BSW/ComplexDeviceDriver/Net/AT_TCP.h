@@ -11,19 +11,18 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef CDD_4G_ATM_CONFIG_H_
-#define CDD_4G_ATM_CONFIG_H_
+#define AT_TCP_H_
+#define AT_TCP_H_
 
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Common.h"
+#include "AT_Describtor.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define CDD4G_ATM_CFG_TX_AT_MAXLEN                    80
-#define CDD4G_ATM_CFG_EXPECT_AT_ANSWER_LEN            36
+
 
 /******************************************************************************
 *    Enum Definition
@@ -32,18 +31,7 @@
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
-typedef struct 
-{
-	char cAT[CDD4G_ATM_CFG_TX_AT_MAXLEN];
-    uint16_t (*pFuncPackAT)(uint8_t socketID, uint8_t *pData, uint16_t dataLen);
-	char cATAnswer[CDD4G_ATM_CFG_EXPECT_AT_ANSWER_LEN];
-	uint8_t (*pFuncRecvHandle)(uint8_t socketID, uint8_t *pData, uint16_t dataLen);						
-	uint8_t (*pFuncFailHandle)(uint8_t socketID, uint8_t atTaskID); 
-	uint8_t maxTryCnt;
-	uint32_t waitTimeout;
-	uint8_t atTaskID;												
-	char *cMeanings;						
-}Cdd4GATMTaskConfig_Struct;
+
 
 
 /******************************************************************************

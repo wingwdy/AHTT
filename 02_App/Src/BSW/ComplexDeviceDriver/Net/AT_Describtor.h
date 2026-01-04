@@ -11,32 +11,17 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef CDD_4GM_CONFIG_H_
-#define CDD_4GM_CONFIG_H_
-
+#ifndef CDD_4G_ATM_CONFIG_H_
+#define CDD_4G_ATM_CONFIG_H_
 
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Mcal_Port.h"
-#include "Mcal_Uart.h"
-
+#include "Common.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-
-#define CDD_4GM_CFG_PwrOff()                     McalPort_SetPin(eMcalPortPinChanel_PC15_4GPwrEn)
-#define CDD_4GM_CFG_PwrOn()                      McalPort_ResetPin(eMcalPortPinChanel_PC15_4GPwrEn)
-#define CDD_4GM_CFG_PwrKeyOff()                  McalPort_SetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn)
-#define CDD_4GM_CFG_PwrKeyOn()                   McalPort_ResetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn)
-
-#define CDD_4GM_CFG_WriteData(data, len)         McalUart_WriteData(eMcalUartChanel_4G, data, len)
-
-#define CDD_4GM_CFG_POWEROFF_HOLD_TIME           500           
-#define CDD_4GM_CFG_POWERON_HOLD_TIME            1000
-#define CDD_4GM_CFG_POWERKEY_OFF_HOLD_TIME       1500
-#define CDD_4GM_CFG_POWERKEY_ON_HOLD_TIME        3000
 
 
 /******************************************************************************
@@ -46,6 +31,24 @@
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+typedef struct 
+{
+	char *cAT;
+	char *cATAnswer;
+	uint8_t maxTryCnt;
+	uint32_t waitTimeout;										
+	char *cMeanings;
+	uint16_t (*pFuncPackAT)(uint8_t socketID, uint8_t *pData);
+	uint8_t (*pFuncRecvHandle)(uint8_t socketID, uint8_t *pData, uint16_t dataLen);						
+	uint8_t (*pFuncFailHandle)(uint8_t socketID, uint8_t atTaskID); 
+}ATCmdDescribtor_Struct;
+
+typedef struct
+{
+	char *cUrc;
+	uint8_t (*pFuncRecvHandle)(uint8_t *pData, uint16_t dataLen);
+	char *cMeanings;
+}ATUrcDescribtor_Struct;
 
 
 /******************************************************************************
@@ -57,9 +60,9 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-#endif /* CDD_DRV_4GM_CONFIG_H_ */
 
 
+#endif
 
 
 
