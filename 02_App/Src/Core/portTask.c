@@ -19,6 +19,8 @@
 #include "Asw_EVSE.h"
 #include "Asw_Charge.h"
 #include "Asw_LedEvent.h"
+#include "Asw_TempHandle.h"
+#include "Asw_VoltCurHandle.h"
 
 #include "DS_Console.h"
 
@@ -187,6 +189,8 @@ static void Task_100msA(void *arg)
     {
         CddMeterM_MainFunction();
         CddSensor_MainFunction();
+        AswVoltCurHandle_MainFunction();
+        AswTempHandle_MainFunction();
         vTaskDelay(100);
     }
 }

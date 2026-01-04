@@ -63,6 +63,8 @@ const char *g_logMModuleName[DSLogMModule_Count] =
     "Charge",
     "ErrorHandle",
     "Led",
+    "Temp",
+    "VoltCur",
 
     "4G",
     "CP",
