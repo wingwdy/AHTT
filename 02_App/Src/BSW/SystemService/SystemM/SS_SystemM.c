@@ -19,7 +19,8 @@
 #include "Asw_ErrorHandle.h"
 #include "Asw_EVSE.h"
 #include "Asw_Charge.h"
-
+#include "Asw_TempHandle.h"
+#include "Asw_VoltCurHandle.h"
 #include "Cdd_Relay.h"
 #include "Cdd_CP.h"
 #include "Cdd_Rcd.h"
@@ -27,7 +28,6 @@
 #include "Cdd_Sensor.h"
 #include "Cdd_MeterM.h"
 #include "Cdd_LedM.h"
-
 #include "MS_Nvm.h"
 
 #include "Mcal_If.h" 
@@ -102,6 +102,8 @@ static void SSSystemM_InitThree(void)
     AswEVSE_InitMemory();
     AswCharge_InitMemory();
     AswErrHandle_InitMemory();
+    AswTempHandle_InitMemory();
+    AswVoltCurHandle_InitMemory();
 }
 
 static void SSSystemM_ShowInfo(void)
