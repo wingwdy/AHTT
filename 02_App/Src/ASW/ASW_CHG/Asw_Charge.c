@@ -115,7 +115,8 @@ static void AswCharge_IdleStateHandle(uint8_t port, AswChargeCtrl_Struct *pCharg
 
     if (evseState == ASWEVSE_STATE_2)
     {
-//      pChargeCtrl->authFlag = TRUE;
+        /* 测试用，到时候删掉 */
+        pChargeCtrl->authFlag = TRUE;
         AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_READY);
     }
 }
