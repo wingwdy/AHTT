@@ -42,6 +42,13 @@
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+typedef struct 
+{
+    uint8_t  atTryCount;
+    uint32_t atWaitTickStart;
+    uint8_t atTaskArray[CDDDRV_EG800AK_CFG_AT_TASK_COUNT];
+}CddDrvEG800AKATCtrl_Struct;
+
 typedef struct
 {
     uint8_t useFlag;
@@ -53,22 +60,17 @@ typedef struct
 
     uint32_t disconectTickStart;
     uint8_t reconectTimes;
-    uint8_t socketATTaskArray[CDDDRV_EG800AK_CFG_AT_TASK_COUNT];
+    CddDrvEG800AKATCtrl_Struct stSocketAtCtrl;
 
  	void (*stateHandle)(void *socketCtrl);
     void (*socketDisconnectCallback)(void *socketCtrl);
     void (*socketCloseHandle)(void *socketCtrl);
 } CddDrvEG800AKSocketCtrl_Struct;
 
-
 typedef struct
 {
     char iccid[CDDDRV_EG800AK_CFG_ICCID_LEN + 1];
 
-
-
-
-   
 }CddDrvEG800AKInfo_Struct;
 
 typedef struct
@@ -89,10 +91,7 @@ typedef struct
     uint8_t currentTaskCmd;
     const ATCmdDescribtor_Struct *currentTaskATDescribtor;
 
-    uint8_t atTryCount;
-    uint32_t atWaitTickStart;
-
-    uint8_t moduleATTaskArray[CDDDRV_EG800AK_CFG_AT_TASK_COUNT];
+    CddDrvEG800AKATCtrl_Struct stModuleAtCtrl;
     CddDrvEG800AKSocketCtrl_Struct stSocketCtrl[CDDDRV_EG800AK_CFG_SOCKET_COUNT];
 }CddDrvEG800AKCtrl_Struct;
 

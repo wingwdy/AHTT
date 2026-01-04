@@ -392,7 +392,7 @@ static void CddDrvEG800AK_StartModuleCfg(void)
 uint8_t CddDrvEG800AK_AddCmd(uint8_t socketIndex, uint8_t cmd)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex];
-    uint8_t *pTaskArray = NULL;
+    CddDrvEG800AKATCtrl_Struct *pAtCtrl = NULL;
     const CddDrvEG800AKATConfig_Struct *pATTablePtr = NULL;
     CddNetMSocketType_Enum eSocketType = eCddNetMSocketType_Null;
     uint8_t addResult = FALSE;
@@ -400,7 +400,7 @@ uint8_t CddDrvEG800AK_AddCmd(uint8_t socketIndex, uint8_t cmd)
     
     if (socketIndex == CDDDRV_EG800AK_MODULE_SOCKET)
     {
-        pTaskArray = g_stCddDrvEG800AKCtrl.moduleATTaskArray;
+        pAtCtrl = &g_stCddDrvEG800AKCtrl.stModuleAtCtrl;
         eSocketType = eCddNetMSocketType_Null;
     }
     else
