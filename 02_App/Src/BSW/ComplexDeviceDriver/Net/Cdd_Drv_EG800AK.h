@@ -92,6 +92,7 @@ typedef struct
     const ATCmdDescribtor_Struct *currentTaskATDescribtor;
 
     CddDrvEG800AKATCtrl_Struct stModuleAtCtrl;
+    
     CddDrvEG800AKSocketCtrl_Struct stSocketCtrl[CDDDRV_EG800AK_CFG_SOCKET_COUNT];
 }CddDrvEG800AKCtrl_Struct;
 
