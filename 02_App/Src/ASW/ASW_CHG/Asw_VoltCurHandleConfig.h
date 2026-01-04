@@ -26,30 +26,36 @@
 
 #define ASWVOLTCUR_CFG_CALLCYCLE                            (100u)
 
-#define ASWVOLTCUR_CFG_OV_SET_THR                           (26400u)/*产生过压阈值*/
-#define ASWVOLTCUR_CFG_OV_CLR_THR                           (25900u)/*解除过压阈值*/
+#define ASWVOLTCUR_CFG_SET_OV_THR                           (26400u)/*产生过压故障阈值*/
+#define ASWVOLTCUR_CFG_CLR_OV_THR                           (25400u)/*解除过压故障阈值*/
 
-#define ASWVOLTCUR_CFG_UV_SET_THR                           (17600u)/*产生欠压阈值*/
-#define ASWVOLTCUR_CFG_UV_CLR_THR                           (18100u)/*解除欠压阈值*/
+#define ASWVOLTCUR_CFG_SET_UV_THR                           (17600u)/*产生欠压故障阈值*/
+#define ASWVOLTCUR_CFG_CLR_UV_THR                           (18500u)/*解除欠压故障阈值*/
 
-#define ASWVOLTCUR_CFG_OC_SET_THR                           (3520u)/*产生过流阈值*/
-#define ASWVOLTCUR_CFG_OC_CLR_THR                           (3519u)/*解除过流阈值*/
+#define ASWVOLTCUR_CFG_SET_OC_THR                           (35200u)/*产生过流故障阈值*/
+#define ASWVOLTCUR_CFG_CLR_OC_THR                           (35190u)/*解除过流故障阈值*/
 
 
 #define ASWVOLTCUR_CFG_OV_SET_FILTER_COUNT                  (3000u / ASWVOLTCUR_CFG_CALLCYCLE)
 #define ASWVOLTCUR_CFG_OV_CLR_FILTER_COUNT                  (3000u / ASWVOLTCUR_CFG_CALLCYCLE)
 
-#define ASWVOLTCUR_CFG_UV_SET_FILTER_COUNT                  (3000u / ASWVOLTCUR_CFG_CALLCYCLE)
-#define ASWVOLTCUR_CFG_UV_CLR_FILTER_COUNT                  (3000u / ASWVOLTCUR_CFG_CALLCYCLE)
+#define ASWVOLTCUR_CFG_UV_SET_FILTER_COUNT                  (3000u / ASWVOLTCUR_CFG_CALLCYCLE) /* 产生过流故障阈值 */
+#define ASWVOLTCUR_CFG_UV_CLR_FILTER_COUNT                  (3000u / ASWVOLTCUR_CFG_CALLCYCLE) /* 产生过流故障阈值 */
 
-#define ASWVOLTCUR_CFG_OC_SET_FILTER_COUNT                  (5000u / ASWVOLTCUR_CFG_CALLCYCLE)
-#define ASWVOLTCUR_CFG_OC_CLR_FILTER_COUNT                  (5000u / ASWVOLTCUR_CFG_CALLCYCLE)
+#define ASWVOLTCUR_CFG_OC_SET_FILTER_COUNT                  (5000u / ASWVOLTCUR_CFG_CALLCYCLE) /* 产生过流故障阈值 */
+#define ASWVOLTCUR_CFG_OC_CLR_FILTER_COUNT                  (5000u / ASWVOLTCUR_CFG_CALLCYCLE) /* 解除过流故障阈值 */
 
-
+#define ASWVOLTCUR_CFG_LogPrint(fmt, ...)                   DSLOGM_Debug(DSLogMModule_VoltCur, fmt, ##__VA_ARGS__)
 
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
+typedef enum
+{
+    AswVoltType = 0,
+    AswCurrType,   
+} AswVoltCurType_Enum;
+
 typedef enum
 {
     AswVoltCur_OV_Set = 0,
@@ -63,12 +69,12 @@ typedef enum
 
 typedef enum
 {
-    AswVoltCur_MaxEqu = 0, /*大于等于*/
-    AswVoltCur_Max,        /*大于*/
-    AswVoltCur_MinEqu,     /*小于等于*/
-    AswVoltCur_Min,        /*小于*/
-    AswVoltCur_Equ,        /*等于*/
-} AswVoltCur_Enum;
+    AswVoltCurCmp_MaxEqu = 0, /*大于等于*/
+    AswVoltCurCmp_Max,        /*大于*/
+    AswVoltCurCmp_MinEqu,     /*小于等于*/
+    AswVoltCurCmp_Min,        /*小于*/
+    AswVoltCurCmp_Equ,        /*等于*/
+} AswVoltCurCMP_Enum;
 
 /******************************************************************************
 *    Typedef Definition
@@ -76,11 +82,12 @@ typedef enum
 typedef struct
 {
     AswVoltCurEvent_Enum event;
+    AswVoltCurType_Enum type;
     uint8_t  compareType;
     uint16_t threshold;
     uint16_t filterCount;
-    uint8_t  setErrorFlag;
-    AswErrorType_Enum errorType;
+    uint8_t  setErrFlag;
+    AswErrorType_Enum errType;
 } AswVoltCurHandleConfig_Struct;
 
 /******************************************************************************

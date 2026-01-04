@@ -27,7 +27,11 @@
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-
+typedef enum
+{
+    AswLimitCurrLevelZero = 0,
+    AswLimitCurrLevelOne,
+} LimitCurrentLevel_Enum;
 
 /******************************************************************************
 *    Typedef Definition
@@ -46,7 +50,7 @@
 ******************************************************************************/
 extern void AswTempHandle_InitMemory(void);
 extern void AswTempHandle_MainFunction(void);
-extern uint16_t AswTempHandle_GetLimitCurrent(uint8_t port);
+extern LimitCurrentLevel_Enum AswTempHandle_GetLimitCurrentLevel(uint8_t port);
 
 #endif /* ASW_TEMPHANDLE_H_ */
 

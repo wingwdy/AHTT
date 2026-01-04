@@ -48,12 +48,12 @@
   
 const AswVoltCurHandleConfig_Struct c_AswVoltCurHandleConfigTable[AswVoltCur_EvtCnt] = 
 {
-    {AswVoltCur_OV_Set, AswVoltCur_MaxEqu, ASWVOLTCUR_CFG_OV_SET_THR, ASWVOLTCUR_CFG_OV_SET_FILTER_COUNT, TRUE,  eErr_AphaseInputOverVol},
-    {AswVoltCur_OV_Clr, AswVoltCur_MinEqu, ASWVOLTCUR_CFG_OV_CLR_THR, ASWVOLTCUR_CFG_OV_CLR_FILTER_COUNT, FALSE, eErr_AphaseInputOverVol},
-    {AswVoltCur_UV_Set, AswVoltCur_MinEqu, ASWVOLTCUR_CFG_UV_SET_THR, ASWVOLTCUR_CFG_UV_SET_FILTER_COUNT, TRUE,  eErr_AphaseInputLessVol},
-    {AswVoltCur_UV_Clr, AswVoltCur_MaxEqu, ASWVOLTCUR_CFG_UV_CLR_THR, ASWVOLTCUR_CFG_UV_CLR_FILTER_COUNT, FALSE, eErr_AphaseInputLessVol},
-    {AswVoltCur_OC_Set, AswVoltCur_MaxEqu, ASWVOLTCUR_CFG_OC_SET_THR, ASWVOLTCUR_CFG_OC_SET_FILTER_COUNT, TRUE,  eErr_OutputOverCurr},
-    {AswVoltCur_OC_Clr, AswVoltCur_Min,    ASWVOLTCUR_CFG_OC_CLR_THR, ASWVOLTCUR_CFG_OC_CLR_FILTER_COUNT, FALSE, eErr_OutputOverCurr},
+    {AswVoltCur_OV_Set, AswVoltType, AswVoltCurCmp_MaxEqu, ASWVOLTCUR_CFG_SET_OV_THR, ASWVOLTCUR_CFG_OV_SET_FILTER_COUNT, TRUE,  eErr_AphaseInputOverVol},
+    {AswVoltCur_OV_Clr, AswVoltType, AswVoltCurCmp_MinEqu, ASWVOLTCUR_CFG_CLR_OV_THR, ASWVOLTCUR_CFG_OV_CLR_FILTER_COUNT, FALSE, eErr_AphaseInputOverVol},
+    {AswVoltCur_UV_Set, AswVoltType, AswVoltCurCmp_MinEqu, ASWVOLTCUR_CFG_SET_UV_THR, ASWVOLTCUR_CFG_UV_SET_FILTER_COUNT, TRUE,  eErr_AphaseInputLessVol},
+    {AswVoltCur_UV_Clr, AswVoltType, AswVoltCurCmp_MaxEqu, ASWVOLTCUR_CFG_CLR_UV_THR, ASWVOLTCUR_CFG_UV_CLR_FILTER_COUNT, FALSE, eErr_AphaseInputLessVol},
+    {AswVoltCur_OC_Set, AswCurrType, AswVoltCurCmp_MaxEqu, ASWVOLTCUR_CFG_SET_OC_THR, ASWVOLTCUR_CFG_OC_SET_FILTER_COUNT, TRUE,  eErr_OutputOverCurr},
+    {AswVoltCur_OC_Clr, AswCurrType, AswVoltCurCmp_Min,    ASWVOLTCUR_CFG_CLR_OC_THR, ASWVOLTCUR_CFG_OC_CLR_FILTER_COUNT, FALSE, eErr_OutputOverCurr},
 };
 
 

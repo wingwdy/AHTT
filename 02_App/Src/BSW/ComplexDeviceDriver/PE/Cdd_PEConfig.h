@@ -32,7 +32,7 @@
 #define CDDPE_CFG_LN_REVERSE_MIN_VOLT                           (1500u)
 #define CDDPE_CFG_LN_REVERSE_MAX_VOLT                           (2300u)
 
-#define CDDPE_CFG_LN_REVERSE_FILTER_TIME                        (2000u)
+#define CDDPE_CFG_LN_REVERSE_FILTER_TIME                        (3000u)
 #define CDDPE_CFG_LN_REVERSE_CHECK_MAXTIME                      (5000u)
 
 

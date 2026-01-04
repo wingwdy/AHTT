@@ -84,18 +84,18 @@ static void CddPE_LnDetect(CddPEState_Struct *pPECtrl)
         curLNState = eCddPEState_LNNormal;
     }
 
-   if (pPECtrl->eTempLNState != curLNState)
-   {
-       pPECtrl->eTempLNState = curLNState;
-       pPECtrl->peFilterTimer = Common_GetSystick();
-   }
-   else
-   {
-       if (Common_JudgeTimeoutMs(pPECtrl->peFilterTimer, CDDPE_CFG_LN_REVERSE_FILTER_TIME)) /*火零反接检测滤波时间 */
-       {
-           pPECtrl->eLNState = curLNState;
-       }
-   }
+    if (pPECtrl->eTempLNState != curLNState)
+    {
+        pPECtrl->eTempLNState = curLNState;
+        pPECtrl->peFilterTimer = Common_GetSystick();
+    }
+    else
+    {
+        if (Common_JudgeTimeoutMs(pPECtrl->peFilterTimer, CDDPE_CFG_LN_REVERSE_FILTER_TIME)) /*火零反接检测滤波时间 */
+        {
+            pPECtrl->eLNState = curLNState;
+        }
+    }
 
     if (pPECtrl->eLNState != eCddPEState_LNUnkown)
     {
@@ -123,7 +123,7 @@ static void CddPE_PeDetect(CddPEState_Struct *pPECtrl)
 {
     CddPEState_Enum curPEState = eCddPEState_PEUnkown;
 
-    if (pPECtrl->eLNState != eCddPEState_LNReverse) /* 火零正常 */
+    if (pPECtrl->eLNState == eCddPEState_LNNormal) /* 火零正常 */
     {
         if (pPECtrl->peVolt >= CDDPE_CFG_PE_UNCONN_MIN_VOLT && pPECtrl->peVolt <= CDDPE_CFG_PE_UNCONN_MAX_VOLT)
         {
@@ -143,9 +143,9 @@ static void CddPE_PeDetect(CddPEState_Struct *pPECtrl)
         {
             if (Common_JudgeTimeoutMs(pPECtrl->peFilterTimer, CDDPE_CFG_PE_CHECK_FILTER_TIME))
             {
-                if(curPEState != pPECtrl->ePEState)
+                if (curPEState != pPECtrl->ePEState)
                 {
-                    if(curPEState == eCddPEState_PEUnconn)
+                    if (curPEState == eCddPEState_PEUnconn)
                     {
                         CDDPE_CFG_AswErrHandle_PileSetErrCallback(eErr_PEBreakFault);
                     }

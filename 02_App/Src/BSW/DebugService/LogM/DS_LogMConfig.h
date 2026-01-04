@@ -37,6 +37,8 @@ typedef enum
     DSLogMModule_Charge,
     DSLogMModule_ErrorHandle,
     DSLogMModule_Led,
+    DSLogMModule_Temp,
+    DSLogMModule_VoltCur,
 
     /*CDD */
     DSLogMModule_CP,
