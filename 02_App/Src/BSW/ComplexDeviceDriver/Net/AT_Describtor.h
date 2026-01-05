@@ -36,11 +36,12 @@ typedef struct
 	char *cAT;
 	char *cATAnswer;
 	uint8_t maxTryCnt;
-	uint32_t waitTimeout;									
+	uint32_t waitTimeout;
+	uint32_t maxAckTimeout;
 	char *cMeanings;
 	uint16_t (*pFuncPackAT)(uint8_t socketID, uint8_t *pData);
-	uint8_t (*pFuncRecvHandle)(uint8_t socketID, uint8_t *pData, uint16_t dataLen);						
-	uint8_t (*pFuncFailHandle)(uint8_t socketID, uint8_t atTaskID); 
+	uint8_t (*pFuncRecvHandle)(uint8_t socketID, uint8_t *pData, uint16_t dataLen);
+	uint8_t (*pFuncFailHandle)(uint8_t socketID, uint8_t atTaskID);
 }ATCmdDescribtor_Struct;
 
 typedef struct

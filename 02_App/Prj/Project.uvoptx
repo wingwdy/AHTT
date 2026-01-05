@@ -119,6 +119,11 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
+          <Key>DLGUARM</Key>
+          <Name>_</Name>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
           <Key>DLGTARM</Key>
           <Name>(6010=-1,-1,-1,-1,0)(6018=-1,-1,-1,-1,0)(6019=-1,-1,-1,-1,0)(6008=-1,-1,-1,-1,0)(6009=-1,-1,-1,-1,0)(6014=-1,-1,-1,-1,0)(6015=-1,-1,-1,-1,0)(6003=-1,-1,-1,-1,0)(6000=-1,-1,-1,-1,0)</Name>
         </SetRegEntry>
@@ -142,9 +147,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>393</LineNumber>
+          <LineNumber>369</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134236764</Address>
+          <Address>134237914</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -153,23 +158,23 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_Drv_EG800AK.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/BSW/ComplexDeviceDriver/Net/Cdd_Drv_EG800AK.c\393</Expression>
+          <Expression>\\D3_A32FB_GD32E503\../Src/BSW/ComplexDeviceDriver/Net/Cdd_Drv_EG800AK.c\369</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>415</LineNumber>
+          <LineNumber>361</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>0</Address>
+          <Address>134237846</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
-          <Filename>..\Src\ASW\ASW_CHG\Asw_LedEventConfig.c</Filename>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_Drv_EG800AK.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression></Expression>
+          <Expression>\\D3_A32FB_GD32E503\../Src/BSW/ComplexDeviceDriver/Net/Cdd_Drv_EG800AK.c\361</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -182,6 +187,31 @@
           <count>1</count>
           <WinNumber>1</WinNumber>
           <ItemText>g_stCddDrvEG800AKCtrl</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>g_adc0DMABuf,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>g_stSensorGun,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>temp,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>5</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>g_stSensorEnv.tempValue,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>6</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pCmdDescribtor</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -398,7 +428,7 @@
 
   <Group>
     <GroupName>BSW/ComplexDeviceDriver</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -433,26 +463,14 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_Drv_BL0942.c</PathWithFileName>
-      <FilenameWithoutPath>Cdd_Drv_BL0942.c</FilenameWithoutPath>
+      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\RCD\Cdd_Rcd.c</PathWithFileName>
+      <FilenameWithoutPath>Cdd_Rcd.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
       <FileNumber>13</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_MeterM.c</PathWithFileName>
-      <FilenameWithoutPath>Cdd_MeterM.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>3</GroupNumber>
-      <FileNumber>14</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -464,67 +482,19 @@
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
+      <FileNumber>14</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_MeterM.c</PathWithFileName>
+      <FilenameWithoutPath>Cdd_MeterM.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>3</GroupNumber>
       <FileNumber>15</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\RCD\Cdd_Rcd.c</PathWithFileName>
-      <FilenameWithoutPath>Cdd_Rcd.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>3</GroupNumber>
-      <FileNumber>16</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Relay\Cdd_Relay.c</PathWithFileName>
-      <FilenameWithoutPath>Cdd_Relay.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>3</GroupNumber>
-      <FileNumber>17</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Relay\Cdd_RelayConfig.c</PathWithFileName>
-      <FilenameWithoutPath>Cdd_RelayConfig.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>3</GroupNumber>
-      <FileNumber>18</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Sensor\Cdd_Sensor.c</PathWithFileName>
-      <FilenameWithoutPath>Cdd_Sensor.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>3</GroupNumber>
-      <FileNumber>19</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Sensor\Cdd_SensorConfig.c</PathWithFileName>
-      <FilenameWithoutPath>Cdd_SensorConfig.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>3</GroupNumber>
-      <FileNumber>20</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -536,13 +506,73 @@
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>21</FileNumber>
+      <FileNumber>16</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_Drv_BL0942.c</PathWithFileName>
+      <FilenameWithoutPath>Cdd_Drv_BL0942.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>3</GroupNumber>
+      <FileNumber>17</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_Drv_BL0942Config.c</PathWithFileName>
       <FilenameWithoutPath>Cdd_Drv_BL0942Config.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>3</GroupNumber>
+      <FileNumber>18</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Relay\Cdd_Relay.c</PathWithFileName>
+      <FilenameWithoutPath>Cdd_Relay.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>3</GroupNumber>
+      <FileNumber>19</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Relay\Cdd_RelayConfig.c</PathWithFileName>
+      <FilenameWithoutPath>Cdd_RelayConfig.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>3</GroupNumber>
+      <FileNumber>20</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Sensor\Cdd_Sensor.c</PathWithFileName>
+      <FilenameWithoutPath>Cdd_Sensor.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>3</GroupNumber>
+      <FileNumber>21</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Sensor\Cdd_SensorConfig.c</PathWithFileName>
+      <FilenameWithoutPath>Cdd_SensorConfig.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -613,8 +643,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_Drv_EG800AK.c</PathWithFileName>
-      <FilenameWithoutPath>Cdd_Drv_EG800AK.c</FilenameWithoutPath>
+      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_NetMConfig.c</PathWithFileName>
+      <FilenameWithoutPath>Cdd_NetMConfig.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -625,14 +655,26 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_NetMConfig.c</PathWithFileName>
-      <FilenameWithoutPath>Cdd_NetMConfig.c</FilenameWithoutPath>
+      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_Drv_EG800AK.c</PathWithFileName>
+      <FilenameWithoutPath>Cdd_Drv_EG800AK.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
       <FileNumber>29</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_Drv_EG800AKConfig.c</PathWithFileName>
+      <FilenameWithoutPath>Cdd_Drv_EG800AKConfig.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>3</GroupNumber>
+      <FileNumber>30</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -644,7 +686,7 @@
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>30</FileNumber>
+      <FileNumber>31</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -656,7 +698,7 @@
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>31</FileNumber>
+      <FileNumber>32</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -668,25 +710,13 @@
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>32</FileNumber>
+      <FileNumber>33</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Net\AT_TCP.c</PathWithFileName>
       <FilenameWithoutPath>AT_TCP.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>3</GroupNumber>
-      <FileNumber>33</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_Drv_EG800AKConfig.c</PathWithFileName>
-      <FilenameWithoutPath>Cdd_Drv_EG800AKConfig.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

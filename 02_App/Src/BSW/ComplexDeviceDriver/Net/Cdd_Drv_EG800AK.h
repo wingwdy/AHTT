@@ -44,6 +44,7 @@
 ******************************************************************************/
 typedef struct 
 {
+    uint8_t readyFlag;
     uint8_t  atTryCount;
     uint32_t atWaitTickStart;
     uint8_t atTaskArray[CDDDRV_EG800AK_CFG_AT_TASK_COUNT];
@@ -89,6 +90,7 @@ typedef struct
 
     uint8_t currentTaskSocketIndex;
     uint8_t currentTaskCmd;
+    uint32_t waitAtAckTickStart;
     const ATCmdDescribtor_Struct *currentTaskATDescribtor;
 
     CddDrvEG800AKATCtrl_Struct stModuleAtCtrl;
@@ -113,7 +115,7 @@ void CddDrvEG800AK_MainFunction(void);
 /* 模块内使用 */
 void CddDrvEG800AK_SetModuleState(CddNetMModuleState_Enum eModuleState);
 uint8_t CddDrvEG800AK_AddCmd(uint8_t socketIndex, uint8_t cmd);
-void CddDrvEG800AK_DeleteCmd(void);
+void CddDrvEG800AK_DeleteCmd(uint8_t socketIndex);
 void CddDrvEG800AK_ClearSocketCmd(uint8_t socketIndex);
 #endif
 

@@ -447,14 +447,9 @@
               <FilePath>..\Src\BSW\ComplexDeviceDriver\CP\Cdd_CPConfig.c</FilePath>
             </File>
             <File>
-              <FileName>Cdd_Drv_BL0942.c</FileName>
+              <FileName>Cdd_Rcd.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_Drv_BL0942.c</FilePath>
-            </File>
-            <File>
-              <FileName>Cdd_MeterM.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_MeterM.c</FilePath>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\RCD\Cdd_Rcd.c</FilePath>
             </File>
             <File>
               <FileName>Cdd_PE.c</FileName>
@@ -462,9 +457,24 @@
               <FilePath>..\Src\BSW\ComplexDeviceDriver\PE\Cdd_PE.c</FilePath>
             </File>
             <File>
-              <FileName>Cdd_Rcd.c</FileName>
+              <FileName>Cdd_MeterM.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\RCD\Cdd_Rcd.c</FilePath>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_MeterM.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_MeterMConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_MeterMConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_Drv_BL0942.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_Drv_BL0942.c</FilePath>
+            </File>
+            <File>
+              <FileName>Cdd_Drv_BL0942Config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_Drv_BL0942Config.c</FilePath>
             </File>
             <File>
               <FileName>Cdd_Relay.c</FileName>
@@ -485,16 +495,6 @@
               <FileName>Cdd_SensorConfig.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\ComplexDeviceDriver\Sensor\Cdd_SensorConfig.c</FilePath>
-            </File>
-            <File>
-              <FileName>Cdd_MeterMConfig.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_MeterMConfig.c</FilePath>
-            </File>
-            <File>
-              <FileName>Cdd_Drv_BL0942Config.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Meter\Cdd_Drv_BL0942Config.c</FilePath>
             </File>
             <File>
               <FileName>Cdd_Drv_WS2812B.c</FileName>
@@ -522,14 +522,19 @@
               <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_NetM.c</FilePath>
             </File>
             <File>
+              <FileName>Cdd_NetMConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_NetMConfig.c</FilePath>
+            </File>
+            <File>
               <FileName>Cdd_Drv_EG800AK.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_Drv_EG800AK.c</FilePath>
             </File>
             <File>
-              <FileName>Cdd_NetMConfig.c</FileName>
+              <FileName>Cdd_Drv_EG800AKConfig.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_NetMConfig.c</FilePath>
+              <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_Drv_EG800AKConfig.c</FilePath>
             </File>
             <File>
               <FileName>AT_MQTT.c</FileName>
@@ -550,11 +555,6 @@
               <FileName>AT_TCP.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\AT_TCP.c</FilePath>
-            </File>
-            <File>
-              <FileName>Cdd_Drv_EG800AKConfig.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\BSW\ComplexDeviceDriver\Net\Cdd_Drv_EG800AKConfig.c</FilePath>
             </File>
           </Files>
         </Group>
