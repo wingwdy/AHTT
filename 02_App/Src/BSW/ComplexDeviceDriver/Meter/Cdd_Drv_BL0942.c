@@ -290,15 +290,19 @@ static void CddDrvVL0942_RefreshData(uint8_t port, CddDrvBL0942_Struct *pBL0942)
 {
     uint8_t index = 2;
     uint8_t data[4] = { 0 };
+    uint64_t temp= 0;
 
     /* 拷贝 I_RMS --- 电流有效值 */
     memcpy(data, pBL0942->cacheBuf + index, 3);
     index += 3;
-    pBL0942->rms_current = Common_FourUint8ToUint32(data) * 1000 / CDDDRV_BL0942_CFG_CURRENT_K;
+
+    temp = (uint64_t)Common_FourUint8ToUint32(data) * 1000 / CDDDRV_BL0942_CFG_CURRENT_K;
+    pBL0942->rms_current = (uint32_t)temp;
 
     /* 拷贝 V_RMS --- 电压有效值 */
     memcpy(data, pBL0942->cacheBuf + index, 3);
-    pBL0942->rms_voltage = Common_FourUint8ToUint32(data) * 100 / CDDDRV_BL0942_CFG_VOLTAGE_K;
+    temp = (uint64_t)Common_FourUint8ToUint32(data) * 100 / CDDDRV_BL0942_CFG_VOLTAGE_K;
+    pBL0942->rms_voltage = (uint32_t)temp;
     index += 3; 
 
     /* I_FAST_RMS */
