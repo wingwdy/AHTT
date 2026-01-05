@@ -122,11 +122,11 @@ static uint8_t CddSensor_SearchGunTemperature(uint16_t adcValue)
     uint16_t midAdc = 0;
 
     /* 处理边界情况 */
-    if (adcValue <= c_stSensorAdcMapGunNTC[0].adcVal)
+    if (adcValue <= c_stSensorAdcMapGunNTC[CDDSENSOR_CFG_GUN_NTC_ADC_MAP_NUM - 1].adcVal)
     {
         index = CDDSENSOR_CFG_GUN_NTC_ADC_MAP_NUM - 1;
     }
-    else if (adcValue >= c_stSensorAdcMapGunNTC[CDDSENSOR_CFG_GUN_NTC_ADC_MAP_NUM - 1].adcVal)
+    else if (adcValue >= c_stSensorAdcMapGunNTC[0].adcVal)
     {
         index = 0;
     }
@@ -185,7 +185,7 @@ uint8_t CddSensor_GetEnvTemperature(void)
 	return g_stSensorEnv.tempValue;
 }
 
-uint8_t CddSensor_GetGunTempTemperature(uint8_t port)
+uint8_t CddSensor_GetGunTemperature(uint8_t port)
 {   
     uint8_t i = 0;
 

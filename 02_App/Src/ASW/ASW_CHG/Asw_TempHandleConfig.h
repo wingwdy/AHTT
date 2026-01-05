@@ -48,7 +48,7 @@
 #define ASWTEMP_CFG_LIMIT_CURRENT                       (25600u)
 
 
-#define ASWTEMP_CFG_GetGunTemp(port)                    CddSensor_GetGunTempTemperature(port)
+#define ASWTEMP_CFG_GetGunTemp(port)                    CddSensor_GetGunTemperature(port)
 #define ASWTEMP_CFG_GetEnvTemp()                        CddSensor_GetEnvTemperature()
 
 #define ASWTEMP_CFG_LogPrint(fmt, ...)                  DSLOGM_Debug(DSLogMModule_Temp, fmt, ##__VA_ARGS__)

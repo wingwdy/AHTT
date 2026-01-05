@@ -42,7 +42,7 @@
 *    Global Function Prototypes
 ******************************************************************************/
 extern uint8_t CddSensor_GetEnvTemperature(void);
-extern uint8_t CddSensor_GetGunTempTemperature(uint8_t ucPort);
+extern uint8_t CddSensor_GetGunTemperature(uint8_t port);
 extern void CddSensor_InitMemory(void);
 extern void CddSensor_MainFunction(void);
 
