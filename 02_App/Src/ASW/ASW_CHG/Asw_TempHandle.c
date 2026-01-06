@@ -132,14 +132,14 @@ void AswGunTemp_Manage(uint8_t port)
                 if (pTempHandle->arFilterState[AswGunTempThr105].validStatus == TRUE)
                 {/* 温度大于105 进入停充 */
                     pTempHandle->workState = ASWTEMP_WORK_STATE_FAULT;
-                    ASWTEMP_CFG_LogPrint("[枪：%d]温度大于%d,[正常] --> [故障]\r\n", port, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr105] - 50);
+                    ASWTEMP_CFG_LogPrint("[枪：%d]当前充电枪温度%d℃大于%d℃,[正常] --> [故障]\r\n", port, pTempHandle->temperatue - 50, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr105] - 50);
                 }
                 else
                 {/* 温度大于90且小于105 进入限流 */
                     pTempHandle->workState = ASWTEMP_WORK_STATE_LIMITCURR_A;
                     pTempHandle->level1_Tick = Common_GetSystick();
                     pTempHandle->level0_Tick = Common_GetSystick();
-                    ASWTEMP_CFG_LogPrint("[枪：%d]温度大于%d,[正常] --> [限流A]\r\n", port, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr90] - 50);
+                    ASWTEMP_CFG_LogPrint("[枪：%d]当前充电枪温度%d℃大于%d℃,[正常] --> [限流A]\r\n", port, pTempHandle->temperatue - 50, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr90] - 50);
                 }
             }
             break;
@@ -149,14 +149,14 @@ void AswGunTemp_Manage(uint8_t port)
             if (pTempHandle->arFilterState[AswGunTempThr105].validStatus == TRUE)
             {/* 温度大于105，进入停充*/
                 pTempHandle->workState = ASWTEMP_WORK_STATE_FAULT;
-                ASWTEMP_CFG_LogPrint("[枪：%d]温度大于%d,[限流A] --> [故障]\r\n", port, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr105] - 50);
+                ASWTEMP_CFG_LogPrint("[枪：%d]当前充电枪温度%d℃大于%d℃,[限流A] --> [故障]\r\n", port, pTempHandle->temperatue - 50, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr105] - 50);
             }
             if (Common_JudgeTimeoutMs(pTempHandle->level1_Tick, ASWTEMP_CFG_GUN_ABOVE_90_KEEP_TIME))
             {
                 if (pTempHandle->arFilterState[AswGunTempThr90].validStatus == TRUE)
                 { /* 5分钟后温度大于90，进入停充 */
                     pTempHandle->workState = ASWTEMP_WORK_STATE_FAULT;
-                    ASWTEMP_CFG_LogPrint("[枪：%d]5分钟后温度大于%d, [限流A] --> [故障]\r\n", port, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr90] - 50);
+                    ASWTEMP_CFG_LogPrint("[枪：%d]5分钟后,当前充电枪温度%d℃大于%d℃, [限流A] --> [故障]\r\n", port, pTempHandle->temperatue - 50, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr90] - 50);
 
                 }
                 else
@@ -164,7 +164,7 @@ void AswGunTemp_Manage(uint8_t port)
                     pTempHandle->workState = ASWTEMP_WORK_STATE_LIMITCURR_B;
                     pTempHandle->level1_Tick = Common_GetSystick();
                     pTempHandle->level0_Tick = Common_GetSystick();
-                    ASWTEMP_CFG_LogPrint("[枪：%d]5分钟后温度小于%d, [限流A] --> [限流B]\r\n", port, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr90] - 50);
+                    ASWTEMP_CFG_LogPrint("[枪：%d]5分钟后,当前充电枪温度%d℃小于%d℃, [限流A] --> [限流B]\r\n", port, pTempHandle->temperatue - 50, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr90] - 50);
                 }
             }
             break;
@@ -181,7 +181,8 @@ void AswGunTemp_Manage(uint8_t port)
                 Common_JudgeTimeoutMs(pTempHandle->level1_Tick, ASWTEMP_CFG_GUN_ABOVE_90_KEEP_TIME))
             {
                 pTempHandle->workState = ASWTEMP_WORK_STATE_FAULT;
-                ASWTEMP_CFG_LogPrint("[枪：%d]温度大于%d且持续5分钟 或 温度大于%d, [限流B] --> [故障]\r\n", port, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr90] - 50,
+                ASWTEMP_CFG_LogPrint("[枪：%d]当前充电枪温度%d℃大于%d℃且持续5分钟 或 温度大于%d℃, [限流B] --> [故障]\r\n", 
+                    port,pTempHandle->temperatue - 50, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr90] - 50,
                     g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr105] - 50);
             }
 
@@ -195,7 +196,8 @@ void AswGunTemp_Manage(uint8_t port)
                 if (Common_JudgeTimeoutMs(pTempHandle->level0_Tick, ASWTEMP_CFG_GUN_BELOW_75_KEEP_TIME))
                 {
                     pTempHandle->workState = ASWTEMP_WORK_STATE_NORMAL;
-                    ASWTEMP_CFG_LogPrint("[枪：%d]温度小于%d且持续5分钟, [限流B] --> [正常]\r\n", port, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr75] - 50);  
+                    ASWTEMP_CFG_LogPrint("[枪：%d]当前充电枪温度%d℃小于%d℃且持续5分钟, [限流B] --> [正常]\r\n", 
+                        port, pTempHandle->temperatue - 50, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr75] - 50);  
                 }
             }
             break;
@@ -206,7 +208,8 @@ void AswGunTemp_Manage(uint8_t port)
             if (pTempHandle->arFilterState[AswGunTempThr60].validStatus == FALSE)
             {
                 pTempHandle->workState = ASWTEMP_WORK_STATE_NORMAL;
-                ASWTEMP_CFG_LogPrint("[枪：%d]温度小于%d, [故障] --> [正常]\r\n", port, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr60] - 50); 
+                ASWTEMP_CFG_LogPrint("[枪：%d]当前充电枪温度%d℃小于%d℃, [故障] --> [正常]\r\n", 
+                    port,pTempHandle->temperatue - 50, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr60] - 50); 
             }
             break;
         }
@@ -251,7 +254,8 @@ void AswEnvTemp_Manage(void)
                 pTempHandle->workState = ASWTEMP_WORK_STATE_LIMITCURR_A;
                 pTempHandle->level1_Tick = Common_GetSystick();
                 pTempHandle->level0_Tick = Common_GetSystick();
-                ASWTEMP_CFG_LogPrint("环境温度大于%d, [正常] --> [限流A]\r\n", pTempHandle->arFilterThr[AswEnvTempThr85] - 50);
+                ASWTEMP_CFG_LogPrint("当前环境温度%d℃大于%d℃, [正常] --> [限流A]\r\n", 
+                    pTempHandle->temperatue - 50, pTempHandle->arFilterThr[AswEnvTempThr85] - 50);
             }
             break;
         }
@@ -262,14 +266,16 @@ void AswEnvTemp_Manage(void)
                 if (pTempHandle->arFilterState[AswEnvTempThr85].validStatus == TRUE)
                 {/* 5分钟后，温度大于85度，进入停充 */
                     pTempHandle->workState = ASWTEMP_WORK_STATE_FAULT;
-                    ASWTEMP_CFG_LogPrint("5分钟后环境温度大于%d, [限流A] --> [故障]\r\n", pTempHandle->arFilterThr[AswEnvTempThr85] - 50);
+                    ASWTEMP_CFG_LogPrint("5分钟后当前环境温度%d℃大于%d℃, [限流A] --> [故障]\r\n", 
+                        pTempHandle->temperatue - 50, pTempHandle->arFilterThr[AswEnvTempThr85] - 50);
                 }
                 else
                 {/* 5分钟后，温度小于85度，继续限流 */
                     pTempHandle->workState = ASWTEMP_WORK_STATE_LIMITCURR_B;
                     pTempHandle->level1_Tick = Common_GetSystick();
                     pTempHandle->level0_Tick = Common_GetSystick();
-                    ASWTEMP_CFG_LogPrint("5分钟后环境温度小于%d, [限流A] --> [限流B]\r\n", pTempHandle->arFilterThr[AswEnvTempThr85] - 50);
+                    ASWTEMP_CFG_LogPrint("5分钟后当前环境温度%d℃小于%d℃, [限流A] --> [限流B]\r\n", 
+                        pTempHandle->temperatue - 50, pTempHandle->arFilterThr[AswEnvTempThr85] - 50);
                 }
             }
             break;
@@ -286,7 +292,8 @@ void AswEnvTemp_Manage(void)
                 if (Common_JudgeTimeoutMs(pTempHandle->level1_Tick, ASWTEMP_CFG_ENV_ABOVE_85_KEEP_TIME))
                 {
                     pTempHandle->workState = ASWTEMP_WORK_STATE_FAULT;
-                    ASWTEMP_CFG_LogPrint("5分钟后环境温度大于%d, [限流B] --> [故障]\r\n", pTempHandle->arFilterThr[AswEnvTempThr85] - 50);
+                    ASWTEMP_CFG_LogPrint("5分钟后当前环境温度%d℃大于%d℃, [限流B] --> [故障]\r\n", 
+                        pTempHandle->temperatue - 50, pTempHandle->arFilterThr[AswEnvTempThr85] - 50);
                 }
             }
 
@@ -300,7 +307,8 @@ void AswEnvTemp_Manage(void)
                 if (Common_JudgeTimeoutMs(pTempHandle->level0_Tick, ASWTEMP_CFG_ENV_BELOW_65_KEEP_TIME))
                 {
                     pTempHandle->workState = ASWTEMP_WORK_STATE_NORMAL;
-                    ASWTEMP_CFG_LogPrint("5分钟后环境温度小于%d, [限流B] --> [正常]\r\n", pTempHandle->arFilterThr[AswEnvTempThr65] - 50);
+                    ASWTEMP_CFG_LogPrint("5分钟后当前环境温度%d℃小于%d℃, [限流B] --> [正常]\r\n", 
+                        pTempHandle->temperatue - 50, pTempHandle->arFilterThr[AswEnvTempThr65] - 50);
                 }
             }
             break;
@@ -310,7 +318,8 @@ void AswEnvTemp_Manage(void)
             if (pTempHandle->arFilterState[AswEnvTempThr65].validStatus == FALSE)
             {/* 温度小于65度， 恢复正常 */
                 pTempHandle->workState = ASWTEMP_WORK_STATE_NORMAL;
-                ASWTEMP_CFG_LogPrint("环境温度小于%d, [故障] --> [正常]\r\n", pTempHandle->arFilterThr[AswEnvTempThr65] - 50);
+                ASWTEMP_CFG_LogPrint("当前环境温度%d℃小于%d℃, [故障] --> [正常]\r\n", 
+                    pTempHandle->temperatue - 50, pTempHandle->arFilterThr[AswEnvTempThr65] - 50);
 
             }
             break;
