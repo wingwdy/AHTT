@@ -60,6 +60,8 @@ uint16_t Common_TwoUint8ToUint16(uint8_t *pData);
 void Common_Uint16ToTwoUint8(uint8_t *pData, uint16_t curVal);
 
 uint8_t* Common_SearchData(uint8_t *pData, uint16_t dataLen, void *pString, uint16_t stringLen);
+uint16_t Common_ReplaceStr(uint8_t* pData, uint16_t nDataLen, char* cDestStr, void* pReplace, uint16_t nReplaceLen, char* pDefault);
+uint16_t Common_ReplaceNum(uint8_t* pData, uint16_t nDataLen, char* cDestStr, uint16_t replace, uint16_t defaultNum);
 #endif /* COMMON_H_ */
 
 

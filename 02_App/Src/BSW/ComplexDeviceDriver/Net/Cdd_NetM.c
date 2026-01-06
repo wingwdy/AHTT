@@ -18,7 +18,7 @@
 *    Header File Inclusion
 *******************************************************************************/
 #include "Cdd_NetM.h"
-
+#include "Cdd_NetMConfig.h"
 
 
 /*******************************************************************************
@@ -48,8 +48,11 @@ typedef enum
 *******************************************************************************/
 typedef struct
 {
-    uint8_t useFlag;                            /* 表示该链路是否使用 */
+    uint8_t usedFlag;                            /* 表示该链路是否使用 */
     uint8_t validFlag;                          /* 表示该链路是否创建 */
+    uint8_t frameQueueIndex;
+    uint8_t socketIndex;
+    CddNetMSocketType_Enum eSocketType;
     CddNetMPlatType_Enum ePlatType;  
     CddNetMSocketPara_Union stSocketPara;
 }CddNetMLinkPara_Struct;
@@ -61,7 +64,7 @@ typedef struct
     uint8_t curNetDev;
     uint8_t curNetDevChooseSuccess;    
     uint32_t switchNetTickStart;
-    CddNetMLinkPara_Struct NetMLinkPara[CDD_NETM_DEV_COUNT][CCDD_NETM_CFG_LINK_COUNT];
+    CddNetMLinkPara_Struct stLinkPara[CDD_NETM_CFG_DEV_COUNT][CCDD_NETM_CFG_LINK_COUNT];
 }CddNetMCtx_Struct;
 
 
@@ -87,7 +90,7 @@ static uint8_t CddNetM_IsFileLinkExist(void)
     
     for(index = 0U; index < CCDD_NETM_CFG_LINK_COUNT; index++)
     {
-        pLinkPara = &g_stCddNetMCtx.NetMLinkPara[CDD_NETM_DEV_DEFAULT][index];
+        pLinkPara = &g_stCddNetMCtx.stLinkPara[CDD_NETM_CFG_DEV_4G][index];
 
         if((TRUE == pLinkPara->validFlag) &&
            (eCddNetMPlatType_File == pLinkPara->ePlatType))
@@ -107,7 +110,7 @@ static CddNetMLinkPara_Struct* CddNetM_FindFreeLink(void)
     
     for(index = 0U; index < CCDD_NETM_CFG_LINK_COUNT; index++)
     {
-        pLinkPara = &g_stCddNetMCtx.NetMLinkPara[CDD_NETM_DEV_DEFAULT][index];
+        pLinkPara = &g_stCddNetMCtx.stLinkPara[CDD_NETM_CFG_DEV_4G][index];
 
         if(FALSE == pLinkPara->validFlag)
         {
@@ -119,7 +122,88 @@ static CddNetMLinkPara_Struct* CddNetM_FindFreeLink(void)
     return pRetVal;    
 }
 
-GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSocketPara_Union socketPara, CddNetMPlatType_Enum ePlatType)
+void CddNetM_DelSingleLink(CddNetMPlatType_Enum ePlatType)
+{
+
+
+
+    
+
+}
+
+void CddNetM_SetLinkDisconnect(CddNetMPlatType_Enum ePlatType)
+{
+
+
+
+
+}
+
+static void CddNetM_CheckSocketCreate(void)
+{
+    CddNetMLinkPara_Struct *pLinkPata = NULL;
+    uint8_t index = 0U;
+
+    if (g_stCddNetMCtx.curNetDev == CDD_NETM_CFG_DEV_4G)
+    {
+		if (c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].getModuleState != NULL &&
+			c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].getModuleState() == eCddNetMModuleState_Work)
+		{
+			for (index = 0; index < CCDD_NETM_CFG_LINK_COUNT; index++)
+			{
+				pLinkPata = &g_stCddNetMCtx.stLinkPara[CDD_NETM_CFG_DEV_4G][index];
+
+				if (pLinkPata->usedFlag == FALSE && pLinkPata->validFlag == TRUE)
+				{
+					if (c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].creatSocket != NULL)
+					{
+						c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].creatSocket(pLinkPata->eSocketType, &pLinkPata->stSocketPara, 
+							&pLinkPata->socketIndex, pLinkPata->frameQueueIndex, pLinkPata->ePlatType);
+						pLinkPata->usedFlag = TRUE;
+					}
+				}
+			}
+		}
+    }
+
+    /* 预留以太网的创建逻辑，无需求，暂不实现 */
+}
+
+static void CddNetM_WorkStateManage(void)
+{
+    switch (g_stCddNetMCtx.eWorkState)
+    {
+        case eCddNetMWorkState_Init:
+        {
+            g_stCddNetMCtx.eWorkState = eCddNetMWorkState_ChooseNet;
+            break;
+        }
+
+        case eCddNetMWorkState_ChooseNet:
+        {
+            /* 暂未实现网络切换逻辑，后续有需求再实现 */
+            g_stCddNetMCtx.curNetDev = CDD_NETM_CFG_DEV_4G;
+            g_stCddNetMCtx.curNetDevChooseSuccess = TRUE;
+            CddNetM_CheckSocketCreate();
+            g_stCddNetMCtx.eWorkState = eCddNetMWorkState_NetWorking;
+            break;
+        }
+        case eCddNetMWorkState_NetWorking:
+        {
+            break;
+        }
+        case eCddNetMWorkState_SwitchNet:
+        {
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+}
+
+GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSocketPara_Union socketPara, CddNetMPlatType_Enum ePlatType, uint8_t frameQueueIndex)
 {
     GlobalRet_Enum retVal = eGlobalRet_OK;
     CddNetMLinkPara_Struct* pLinkPara = NULL;
@@ -138,7 +222,9 @@ GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSock
         {
             pLinkPara->validFlag = TRUE;
             pLinkPara->ePlatType = ePlatType;
+            pLinkPara->eSocketType = eSocketType;
             pLinkPara->stSocketPara = socketPara;
+            pLinkPara->frameQueueIndex = frameQueueIndex;
         }
         else
         {
@@ -149,36 +235,26 @@ GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSock
     return retVal;
 }
 
-static void CddNetM_WorkStateManage(void)
-{
-    switch (g_stCddNetMCtx.eWorkState)
-    {
-        case eCddNetMWorkState_Init:
-        {
-            g_stCddNetMCtx.eWorkState = eCddNetMWorkState_ChooseNet;
-            break;
-        }
 
-        case eCddNetMWorkState_ChooseNet:
+
+void CddNetM_SwitchPhyChannel(uint8_t moduleDev)
+{
+
+
+}
+
+void CddNetM_MainFunction(void)
+{
+    uint8_t netDev = 0U;
+
+    for (netDev = 0; netDev < CDD_NETM_CFG_DEV_COUNT; netDev++)
+    {
+        if (c_NetMModuleOpsTable[netDev].pFuncMainFunction != NULL)
         {
-            break;
-        }
-        case eCddNetMWorkState_NetWorking:
-        {
-            break;
-        }
-        case eCddNetMWorkState_SwitchNet:
-        {
-            break;
-        }
-        default:
-        {
-            break;
+            c_NetMModuleOpsTable[netDev].pFuncMainFunction();
         }
     }
 }
-
-
 
 
 

@@ -16,8 +16,8 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "Cdd_NetM.h"
-
+#include "Cdd_NetMConfig.h"
+#include "Cdd_Drv_EG800AK.h"
 
 
 /*******************************************************************************
@@ -52,9 +52,10 @@
 *    Global variables Declaration
 *******************************************************************************/
 
-const CddNetMModuleOps_Struct c_NetMModuleOpsTable[CDD_NETM_DEV_COUNT] = {
-    [CDD_NETM_DEV_4G] = 
+const CddNetMModuleOps_Struct c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_COUNT] = {
+    [CDD_NETM_CFG_DEV_4G] = 
     {
+        .pFuncMainFunction = CddDrvEG800AK_MainFunction,
         .getModuleState = NULL,
         .getSocketState = NULL,
         .setSocketDisconnect = NULL,

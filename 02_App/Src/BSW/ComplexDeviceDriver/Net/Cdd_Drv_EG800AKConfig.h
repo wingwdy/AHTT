@@ -28,9 +28,6 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-/* 需要sim卡状态连接到了模组的检测脚 */
-#define CDDDRV_EG800AK_CFG_CPIN_DETECT_HW_SUPPORT       FALSE
-
 #define CDDDRV_EG800AK_CFG_PwrOff()                     McalPort_SetPin(eMcalPortPinChanel_PC15_4GPwrEn)
 #define CDDDRV_EG800AK_CFG_PwrOn()                      McalPort_ResetPin(eMcalPortPinChanel_PC15_4GPwrEn)
 #define CDDDRV_EG800AK_CFG_PwrKeyOff()                  McalPort_SetPin(eMcalPortPinChanel_PC14_4GPwrKeyEn)
@@ -66,6 +63,8 @@
 
 #define CDDDRV_EG800AK_CFG_ICCID_LEN                    20
 
+#define CDDDRV_EG800AK_CFG_RECONECT_TIMEOUT(x)          (5000 * x)
+#define CDDDRV_EG800AK_CFG_RECONECT_MAX_TIMES           5
 
 /******************************************************************************
 *    Enum Definition

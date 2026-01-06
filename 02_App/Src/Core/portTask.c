@@ -31,8 +31,7 @@
 #include "Cdd_PE.h"
 #include "Cdd_MeterM.h"
 #include "Cdd_LedM.h"
-#include "Cdd_Drv_EG800AK.h"
-
+#include "Cdd_NetM.h"
 
 #include "Mcal_If.h"
 
@@ -140,7 +139,6 @@ void portTask_CreatAllTask(void)
 	}
 }
 
-
 static void Task_10msA(void *arg)
 {
     while (1)
@@ -177,7 +175,7 @@ static void Task_20msB(void *arg)
 {
     while (1)
     {
-        CddDrvEG800AK_MainFunction();
+        CddNetM_MainFunction();
         DSConsole_MainFunction();
         vTaskDelay(20);
     }

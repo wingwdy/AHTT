@@ -36,7 +36,12 @@
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-
+typedef enum
+{
+    CddDrvEG800AKAbnormalHandle_Null,
+    CddDrvEG800AKAbnormalHandle_Reboot,
+    CddDrvEG800AKAbnormalHandle_CFun,
+}CddDrvEG800AKAbnormalHandle_Enum;
 
 
 /******************************************************************************
@@ -52,7 +57,7 @@ typedef struct
 
 typedef struct
 {
-    uint8_t useFlag;
+    uint8_t usedFlag;
     uint8_t socketIndex;
 
     CddNetMSocketState_Enum eSocketState;
@@ -62,6 +67,9 @@ typedef struct
     uint32_t disconectTickStart;
     uint8_t reconectTimes;
     CddDrvEG800AKATCtrl_Struct stSocketAtCtrl;
+
+    uint8_t user_data[32];
+    void *specificPara;
 
  	void (*stateHandle)(void *socketCtrl);
     void (*socketDisconnectCallback)(void *socketCtrl);
@@ -80,6 +88,11 @@ typedef struct
     uint32_t powerCtrlStartTick;            /*: 重启控制时间 */
 
     uint8_t cmdTaskStep;                    /*: cmd 处理步骤 */
+
+    CddDrvEG800AKAbnormalHandle_Enum eCurrentAbnormalHandleType;
+    CddDrvEG800AKAbnormalHandle_Enum eLastAbnormalHandleType;
+
+    uint8_t abNormalHandleStep;             /*: 异常处理步骤 */
 
     uint8_t transparentMode;                /* TRUE: 透传模式 */
     uint32_t transparentModeStartTick;      /* 透传模式起始时间 */
@@ -114,9 +127,11 @@ void CddDrvEG800AK_MainFunction(void);
 
 /* 模块内使用 */
 void CddDrvEG800AK_SetModuleState(CddNetMModuleState_Enum eModuleState);
+CddNetMModuleState_Enum CddDrvEG800AK_GetModuleState(void);
 uint8_t CddDrvEG800AK_AddCmd(uint8_t socketIndex, uint8_t cmd);
 void CddDrvEG800AK_DeleteCmd(uint8_t socketIndex);
 void CddDrvEG800AK_ClearSocketCmd(uint8_t socketIndex);
+
 #endif
 
 

@@ -19,17 +19,38 @@
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Cdd_NetMConfig.h"
 #include "Global.h"
 
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define CDD_NETM_DEV_4G              0
-#define CDD_NETM_DEV_DEFAULT         CDD_NETM_DEV_4G
-// #define CDD_NETM_DEV_ETH          1 
-#define CDD_NETM_DEV_COUNT           1
+#define CDD_NETM_CFG_DEV_4G                      0
+
+#if 0
+#define CDD_NETM_CFG_DEV_ETH                     1
+#endif
+
+#define CDD_NETM_CFG_DEV_COUNT                   1
+
+
+#define CDD_NETM_CFG_LINKPARA_LEN                256
+
+#define CDD_NETM_CFG_IP_LEN						 72
+
+/* config for FTP */
+#define CDD_NETM_CFG_FTP_FILENAME_LEN            64
+#define CDD_NETM_CFG_FTP_PATH_LEN                48
+#define CDD_NETM_CFG_FTP_USERNAME_LEN            24
+#define CDD_NETM_CFG_FTP_PASSWD_LEN              24
+
+/* config for FTP */
+#define CDD_NETM_CFG_MQTT_TOPIC_COUNT            5
+#define CDD_NETM_CFG_MQTT_TOPIC_LEN              16
+#define CDD_NETM_CFG_MQTT_DEVICE_NAME_LEN        32
+#define CDD_NETM_CFG_MQTT_PRODUCT_SECRET_LEN     32
+#define CDD_NETM_CFG_MQTT_PRODUCT_KEY_LEN        32
+#define CDD_NETM_CFG_MQTT_PID_LEN                20
 
 /******************************************************************************
 *    Enum Definition
@@ -50,15 +71,15 @@ typedef enum
     eCddNetMSocketType_MQTT,
     eCddNetMSocketType_FTP,
 	eCddNetMSocketType_Count,
-}CddNetMSocketType_Enum;
+}CddNetMSocketType_Enum; 
 
 typedef enum 
 {
 	eCddNetMSocketState_Init,
 	eCddNetMSocketState_Connecting,
 	eCddNetMSocketState_ConnectOK,
-	eCddNetMSocketState_Abnormal,
-    eCddNetMSocketState_Delete,
+	eCddNetMSocketState_Abnormal, 
+    eCddNetMSocketState_WaitReconnect,
 }CddNetMSocketState_Enum;
 
 typedef enum
@@ -125,15 +146,7 @@ typedef union
 }CddNetMSocketPara_Union;
 
 
-typedef struct
-{
-	CddNetMModuleState_Enum (*getModuleState)(void);
-	CddNetMSocketState_Enum (*getSocketState)(uint8_t socketIndex);
-	void (*setSocketDisconnect)(uint8_t socketIndex);
-	uint8_t (*creatSocket)(CddNetMSocketType_Enum socketType, CddNetMSocketPara_Union *pSocketPara, uint8_t *pSocketIndex);
-	void (*delAllSocket)(void);
-	void (*delSingleSocket)(uint8_t socketIndex);
-}CddNetMModuleOps_Struct;
+
 
 /******************************************************************************
 *    Global variables Declaration
@@ -144,10 +157,11 @@ typedef struct
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSocketPara_Union socketPara, CddNetMPlatType_Enum ePlatType);
-
-
-
+void CddNetM_SwitchPhyChannel(uint8_t moduleDev);
+GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSocketPara_Union socketPara, CddNetMPlatType_Enum ePlatType, uint8_t frameQueueIndex);
+void CddNetM_DelSingleLink(CddNetMPlatType_Enum ePlatType);
+void CddNetM_SetLinkDisconnect(CddNetMPlatType_Enum ePlatType);
+void CddNetM_MainFunction(void);
 #endif /* CDD_NETM_H_ */
 
 

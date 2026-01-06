@@ -260,3 +260,78 @@ uint8_t* Common_SearchData(uint8_t *pData, uint16_t dataLen, void *pString, uint
 
 	return pTr;
 }
+
+uint16_t Common_ReplaceStr(uint8_t* pData, uint16_t nDataLen, char* cDestStr, void* pReplace, uint16_t nReplaceLen, char* pDefault)
+{
+	uint8_t *pDest = NULL;
+	char cTailStr[100];
+	void *pCopyData = pReplace;
+	uint16_t nCopyLen = nReplaceLen;
+	uint16_t nDestStrLen = strlen(cDestStr);
+    uint16_t offset = 0;
+    uint16_t tailLen = 0;
+
+	memset(cTailStr, 0x00, sizeof(cTailStr));
+
+	pDest = Common_SearchData(pData, nDataLen, cDestStr, nDestStrLen);
+
+	if (NULL != pDest)
+	{
+		offset = pDest - pData;
+
+        // 计算尾部字符串长度，并确保不会溢出cTailStr缓冲区
+        tailLen = nDataLen - offset - nDestStrLen;
+
+        if (tailLen >= sizeof(cTailStr))
+        {
+            tailLen = sizeof(cTailStr) - 1; // 确保留出终止符空间
+        }
+        
+        // 保存尾巴
+        strncpy(cTailStr, (char*)(pDest + nDestStrLen), tailLen);
+        cTailStr[tailLen] = '\0'; // 确保字符串终止
+
+        //默认
+        if (0 == nCopyLen)
+        {
+            pCopyData = pDefault;
+
+            if (pDefault != NULL) 
+            {
+                nCopyLen = strlen(pDefault);
+            } 
+            else 
+            {
+                nCopyLen = 0;
+            }
+        }
+
+        memcpy(pDest, pCopyData, nCopyLen);
+        pDest += nCopyLen;
+
+        // 加上尾巴
+        strcpy((char*)pDest, cTailStr);
+
+        // 重新计算长度
+        nDataLen = offset + nCopyLen + strlen(cTailStr);
+	}
+
+	return nDataLen;
+}
+
+uint16_t Common_ReplaceNum(uint8_t* pData, uint16_t nDataLen, char* cDestStr, uint16_t replace, uint16_t defaultNum)
+{
+    uint16_t dataLen = 0;
+    char cReplace[32] = { 0 };
+    char cDefault[32] = { 0 };
+
+    // 验证输入参数
+    if (pData != NULL && cDestStr != NULL) 
+    {
+        snprintf(cReplace, sizeof(cReplace), "%d", replace);
+        snprintf(cDefault, sizeof(cDefault), "%d", defaultNum);
+        dataLen = Common_ReplaceStr(pData, nDataLen, cDestStr, cReplace, strlen(cReplace), cDefault);
+    }
+
+    return dataLen;
+}

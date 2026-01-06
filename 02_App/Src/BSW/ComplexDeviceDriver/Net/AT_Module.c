@@ -17,7 +17,7 @@
 *    Header File Inclusion
 *******************************************************************************/
 #include "AT_Module.h"
-
+#include "Cdd_Drv_EG800AK.h"
 
 
 /*******************************************************************************
@@ -44,20 +44,22 @@
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-static uint8_t ATModule_RecvSimStatus(uint8_t socketID, uint8_t *pData, uint16_t dataLen);
-static uint8_t ATModule_RecvCGREG(uint8_t socketID, uint8_t *pData, uint16_t dataLen);
+static uint8_t ATModule_RecvSimStatus(uint8_t socketID, void * socketPara, uint8_t *pData, uint16_t dataLen);
+static uint8_t ATModule_RecvCGREG(uint8_t socketID, void * socketPara, uint8_t *pData, uint16_t dataLen);
 
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
 const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
 {
-    [eATModuleCmd_QueryModule] =  
+    [eATModuleCmd_QueryModule] =
     { "ATI\r\n",                               "ATI",             3,          5000,     3000,  "识别模块",
         NULL,                                   NULL,                         NULL},
+
     [eATModuleCmd_SetSimStatusReportEnable] =  
     { "AT+QSIMSTAT=1\r\n",                     "AT+QSIMSTAT=1",   3,          5000,     3000,  "sim卡状态上报使能",
         NULL,                                   NULL,                         NULL},
+
     [eATModuleCmd_QuerySimStatus] =  
     { "AT+QSIMSTAT?\r\n",                      "+QSIMSTAT:",      3,          5000,     3000,  "sim卡状态查询",
         NULL,                                   ATModule_RecvSimStatus,       NULL},
@@ -109,7 +111,16 @@ const ATUrcDescribtor_Struct c_stATCmdDescribtor[1] =
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-static uint8_t ATModule_RecvSimStatus(uint8_t socketID, uint8_t *pData, uint16_t dataLen)
+static void ATModule_FailHandle(uint8_t socketID, void * socketPara, uint8_t atTaskID)
+{
+      
+
+
+
+
+}
+
+static uint8_t ATModule_RecvSimStatus(uint8_t socketID, void * socketPara, uint8_t *pData, uint16_t dataLen)
 {
     uint8_t *pTemp = NULL;
     int32_t status = 0;
@@ -125,10 +136,9 @@ static uint8_t ATModule_RecvSimStatus(uint8_t socketID, uint8_t *pData, uint16_t
     return ret;
 }
 
-#include "Asw_ErrorHandle.h"
-
-static uint8_t ATModule_RecvCGREG(uint8_t socketID, uint8_t *pData, uint16_t dataLen)
+static uint8_t ATModule_RecvCGREG(uint8_t socketID, void * socketPara, uint8_t *pData, uint16_t dataLen)
 {
+
     int32_t en = 0;
     int32_t status = 0;
     uint8_t ret = FALSE;
@@ -139,7 +149,6 @@ static uint8_t ATModule_RecvCGREG(uint8_t socketID, uint8_t *pData, uint16_t dat
     if (status == 1 || status == 5)
     {
         ret = TRUE;
-        AswErrhandle_ResetErrExsitCallback(0, eErr_PlatformOffline);
     }
 
     return ret;
