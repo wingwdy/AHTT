@@ -545,7 +545,8 @@ static void CddDrvEG800AK_noCommTimeoutDetect(void)
         g_stCddDrvEG800AKCtrl.noCommTickStart = Common_GetSystick();
         CddDrvEG800AK_SetModuleState(eCddNetMModuleState_AbNormal);
         CddDrvEG800AK_SetAbnormalType(CddDrvEG800AKAbnormalHandle_Reboot);
-        CDDDRV_EG800AK_CFG_LogPrint("4G 模组无数据通信超时 %d ms!", CDDDRV_EG800AK_CFG_NO_COMM_TIMEOUT);    }
+        CDDDRV_EG800AK_CFG_LogPrint("4G 模组无数据通信超时 %d ms!", CDDDRV_EG800AK_CFG_NO_COMM_TIMEOUT);    
+    }
 }
 
 static void CddDrvEG800AK_StartModuleCfg(void)
@@ -751,9 +752,48 @@ static void CddDrvEG800AK_ClearAllSocketCmd(void)
 
 static void CddDrvEG800AK_SocketDisconnectCallback(void *socketCtrl)
 {
+    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketCtrl;
+    uint8_t socketIndex = 0;
+    uint8_t flag = TRUE;
+    uint8_t exsistSocketFlag = FALSE;
 
+    if (pSocketCtrl->ePlatType == eCddNetMPlatType_O)
+    {
+        //chenlstodo: 清掉运营平台相关数据
+    }
+    else if (pSocketCtrl->ePlatType == eCddNetMPlatType_OM)
+    {
+        //chenlstodo: 清掉运维平台相关数据
+    }
+    else
+    {}
 
+    for (socketIndex = 0; socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT; socketIndex++)
+    {
+        pSocketCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex];
 
+        if (pSocketCtrl->usedFlag == TRUE)
+        {
+            exsistSocketFlag = TRUE;
+            if (pSocketCtrl->reconectTimes < CDDDRV_EG800AK_CFG_RECONECT_MAX_TIMES)
+            {
+                flag = FALSE;
+                break;
+            }
+        }
+    }
+
+    if (flag == TRUE && exsistSocketFlag == TRUE)
+    {
+        for (socketIndex = 0; socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT; socketIndex++)
+        {
+            pSocketCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex];
+            pSocketCtrl->reconectTimes = 0;
+        }
+
+        CddDrvEG800AK_SetModuleState(eCddNetMModuleState_AbNormal);
+        CddDrvEG800AK_SetAbnormalType(CddDrvEG800AKAbnormalHandle_CFun);
+    }
 }
 
 uint8_t CddDrvEG800AK_AddCmd(uint8_t socketIndex, uint8_t cmd)
@@ -913,7 +953,6 @@ void CddDrvEG800AK_SetModuleState(CddNetMModuleState_Enum eModuleState)
         else if (eModuleState == eCddNetMModuleState_Cfg)
         {
             CddDrvEG800AK_StartModuleCfg();
-            g_stCddDrvEG800AKCtrl.noCommTickStart = Common_GetSystick();
         }
         else
         {}

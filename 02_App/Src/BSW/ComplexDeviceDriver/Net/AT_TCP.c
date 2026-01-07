@@ -159,7 +159,7 @@ static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint
         pPrivate->waitTcpConnectOkTickStart = Common_GetSystick();
         ret = TRUE;
     }
-    
+
     return ret;
 }
 
@@ -254,7 +254,6 @@ static void ATTCP_FailHandle(uint8_t socketIndex, void * socketPara, uint8_t atT
     else
     {
         ATTCP_CloseSocket(pSocketCtrl);
-        ATTCP_SetSocketState(socketIndex, pSocketCtrl, eCddNetMSocketState_Abnormal);
     }
 }
 
@@ -306,7 +305,6 @@ static void ATTCP_SocketStateMange(uint8_t socketIndex, CddDrvEG800AKSocketCtrl_
             if (Common_JudgeTimeoutMs(pPrivate->waitTcpConnectOkTickStart, ATTCP_WAIT_IPOPEN_TIMEOUT))
             {
                 ATTCP_CloseSocket(pSocketCtrl);
-                ATTCP_SetSocketState(socketIndex, pSocketCtrl, eCddNetMSocketState_Abnormal);
             }
         }
     }
@@ -388,6 +386,7 @@ void ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
 
                 if (pSocketCtrl->ePlatType == eCddNetMPlatType_O)
                 {
+                    pSocketCtrl->reconectTimes = 0;
                     AswErrhandle_ResetErrExsitCallback(0, eErr_PlatformOffline);
                     CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]运营平台建立连接成功!\r\n", socketIndex);
                 }
@@ -396,7 +395,6 @@ void ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
         else
         {
             ATTCP_CloseSocket(pSocketCtrl);
-            ATTCP_SetSocketState(socketIndex, pSocketCtrl, eCddNetMSocketState_Abnormal);
         }
     }
 }
@@ -418,7 +416,6 @@ void ATTCP_UrcClose(uint8_t *pData, void * modulePara, uint16_t dataLen)
         {
             pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
             ATTCP_CloseSocket(pSocketCtrl);
-            ATTCP_SetSocketState(socketIndex, pSocketCtrl, eCddNetMSocketState_Abnormal);
             CDDDRV_EG800AK_CFG_LogPrint("[socket: %d] 后台主动断开连接!\r\n", socketIndex);
         }
     }
@@ -434,6 +431,8 @@ void ATTCP_CloseSocket(void *socketCtrl)
     {
         CddDrvEG800AK_ClearSocketCmd(pSocketCtrl->socketIndex);
         CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATTCPCmd_Close);
+
+        ATTCP_SetSocketState(pSocketCtrl->socketIndex, pSocketCtrl, eCddNetMSocketState_Abnormal);
     }
 }
 
