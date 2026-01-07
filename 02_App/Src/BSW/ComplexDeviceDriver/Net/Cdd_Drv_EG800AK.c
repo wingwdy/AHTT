@@ -384,6 +384,8 @@ static void CddDrvEG800AK_ATTaskRecvHandle(uint8_t *recvbuf)
 
     if (dataLen > 0)
     {
+        g_stCddDrvEG800AKCtrl.noCommTickStart = Common_GetSystick();
+
         recvbuf[dataLen] = 0;
         
         if (g_stCddDrvEG800AKCtrl.currentTaskCmd != 0)
@@ -534,6 +536,16 @@ static uint8_t CddDrvEG800AK_CheckAllSocketCloseFinish(void)
     }
 
     return ret;
+}
+
+static void CddDrvEG800AK_noCommTimeoutDetect(void)
+{ 
+    if (Common_JudgeTimeoutMs(g_stCddDrvEG800AKCtrl.noCommTickStart ,CDDDRV_EG800AK_CFG_NO_COMM_TIMEOUT))
+    {
+        g_stCddDrvEG800AKCtrl.noCommTickStart = Common_GetSystick();
+        CddDrvEG800AK_SetModuleState(eCddNetMModuleState_AbNormal);
+        CddDrvEG800AK_SetAbnormalType(CddDrvEG800AKAbnormalHandle_Reboot);
+        CDDDRV_EG800AK_CFG_LogPrint("4G 模组无数据通信超时 %d ms!", CDDDRV_EG800AK_CFG_NO_COMM_TIMEOUT);    }
 }
 
 static void CddDrvEG800AK_StartModuleCfg(void)
@@ -901,6 +913,7 @@ void CddDrvEG800AK_SetModuleState(CddNetMModuleState_Enum eModuleState)
         else if (eModuleState == eCddNetMModuleState_Cfg)
         {
             CddDrvEG800AK_StartModuleCfg();
+            g_stCddDrvEG800AKCtrl.noCommTickStart = Common_GetSystick();
         }
         else
         {}
@@ -940,6 +953,8 @@ void CddDrvEG800AK_MainFunction(void)
 
         CddDrvEG800AK_SocketStateHandle();
     }
+
+    CddDrvEG800AK_noCommTimeoutDetect();
 }
 
 

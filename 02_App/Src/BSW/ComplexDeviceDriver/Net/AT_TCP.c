@@ -67,6 +67,7 @@ static uint8_t ATTCP_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *
 static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATTCP_RecvWrite(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
+static uint8_t ATTCP_RecvClose(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static void ATTCP_FailHandle(uint8_t socketIndex, void * socketPara, uint8_t atTaskID);
 
 /*******************************************************************************
@@ -76,19 +77,19 @@ const ATCmdDescribtor_Struct c_stTCPATCmdDescribtor[eATTCPCmd_Count] =
 {
     [eATTCPCmd_Open] =
     { "AT+QIOPEN=1,[ID],\"TCP\",\"[MIP]\",[MPORT],0,0\r\n",     "+QIOPEN",        3,   5000,      3000,  TRUE, "建立连接",
-       ATTCP_PackOpenSocket,                                    ATTCP_RecvOpenSocket,               ATTCP_FailHandle},
+    ATTCP_PackOpenSocket,                                       ATTCP_RecvOpenSocket,                    ATTCP_FailHandle},
 
     [eATTCPCmd_Read] =
     { "AT+QIRD=[ID],1460\r\n",                                  "+QIRD:",         3,   3000,      500,   FALSE, "数据读取",
-       ATTCP_PackReadData,                                      ATTCP_RecvData,                     ATTCP_FailHandle},
+    ATTCP_PackReadData,                                         ATTCP_RecvData,                          ATTCP_FailHandle},
 
     [eATTCPCmd_Write] =
     { "AT+QISEND=[ID],[LEN]\r\n",                               "> ",             3,   3000,      2000,  FALSE, "数据发送",
-      ATTCP_PackWriteData,                                      ATTCP_RecvWrite,                    ATTCP_FailHandle},
+    ATTCP_PackWriteData,                                        ATTCP_RecvWrite,                         ATTCP_FailHandle},
 
     [eATTCPCmd_Close] =
     { "AT+QICLOSE=[ID]\r\n",                                    "+QICLOSE",       3,   5000,      3000,  TRUE, "关闭连接",
-       ATTCP_PackQIPClose,                                      NULL,                               ATTCP_FailHandle},
+    ATTCP_PackQIPClose,                                         ATTCP_RecvClose,                         ATTCP_FailHandle},
 };
 
 /*************************************************************************
@@ -158,7 +159,7 @@ static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint
         pPrivate->waitTcpConnectOkTickStart = Common_GetSystick();
         ret = TRUE;
     }
-
+    
     return ret;
 }
 
@@ -218,6 +219,14 @@ static uint8_t ATTCP_RecvWrite(uint8_t socketIndex, void * socketPara, uint8_t *
     return TRUE;
 }
 
+static uint8_t ATTCP_RecvClose(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
+{  
+    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
+
+    ATTCP_SetSocketState(pSocketCtrl->socketIndex, pSocketCtrl, eCddNetMSocketState_WaitReconnect);
+    return TRUE;
+}
+
 static uint8_t ATTCP_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
@@ -263,6 +272,10 @@ static void ATTCP_SetSocketState(uint8_t socketIndex, void *socketPara, CddNetMS
             if (eSocketState == eCddNetMSocketState_Connecting)
             {
                 pPrivate->waitTcpConnectOkFlag = FALSE;
+            }
+            else if (eSocketState == eCddNetMSocketState_WaitReconnect)
+            {
+                pPrivate->reconnectInterval = 0;
             }
         }
     }
@@ -336,6 +349,7 @@ static void ATTCP_SocketStateMange(uint8_t socketIndex, CddDrvEG800AKSocketCtrl_
 
             pPrivate->reconnectInterval = CDDDRV_EG800AK_CFG_RECONECT_TIMEOUT(pSocketCtrl->reconectTimes);
             pSocketCtrl->disconectTickStart = Common_GetSystick();
+            CDDDRV_EG800AK_CFG_LogPrint("[socket: %d] %d ms 后进行第 %d 次 重新连接!\r\n", socketIndex, pPrivate->reconnectInterval, pSocketCtrl->reconectTimes);
         }
         else
         {
@@ -403,6 +417,7 @@ void ATTCP_UrcClose(uint8_t *pData, void * modulePara, uint16_t dataLen)
         if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
         {
             pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
+            ATTCP_CloseSocket(pSocketCtrl);
             ATTCP_SetSocketState(socketIndex, pSocketCtrl, eCddNetMSocketState_Abnormal);
             CDDDRV_EG800AK_CFG_LogPrint("[socket: %d] 后台主动断开连接!\r\n", socketIndex);
         }

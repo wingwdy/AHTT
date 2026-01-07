@@ -55,6 +55,8 @@
 
 #define CDDDRV_EG800AK_CFG_TRANSPARENT_TIMEOUT          1000
 
+#define CDDDRV_EG800AK_CFG_NO_COMM_TIMEOUT              (3 * 60000)
+
 #define CDDDRV_EG800AK_CFG_SOCKET_COUNT                 3
 
 #define CDDDRV_EG800AK_CFG_AT_TASK_COUNT                20
@@ -63,7 +65,7 @@
 
 #define CDDDRV_EG800AK_CFG_ICCID_LEN                    20
 
-#define CDDDRV_EG800AK_CFG_RECONECT_TIMEOUT(x)          (5000 * x)
+#define CDDDRV_EG800AK_CFG_RECONECT_TIMEOUT(x)          (10000 * x)
 #define CDDDRV_EG800AK_CFG_RECONECT_MAX_TIMES           5
 
 /******************************************************************************

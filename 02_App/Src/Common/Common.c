@@ -253,6 +253,7 @@ uint8_t* Common_SearchData(uint8_t *pData, uint16_t dataLen, void *pString, uint
 		if (0 == memcmp(pData, pString, stringLen))
 		{
 			pTr = pData;
+            break;
 		}
 		pData++;
 		dataLen--;

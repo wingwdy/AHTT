@@ -115,6 +115,8 @@ typedef struct
 
     CddNetMModuleState_Enum eModuleState;
 
+    uint32_t noCommTickStart;               /* 无数据通信计数器 */
+
     uint8_t currentTaskSocketIndex;
     uint8_t currentTaskCmd;
     uint32_t waitAtAckTickStart;
