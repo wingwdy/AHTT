@@ -43,7 +43,7 @@ typedef enum
 *    Typedef Definition
 ******************************************************************************/
 typedef void (*typeFuncDecode)(uint8_t *pData, uint16_t dataLen, uint16_t topicLen, uint8_t *pTopic, uint16_t *dealLen);
-typedef void (*typeFuncTransmit)(uint8_t *pData, uint16_t dataLen);
+typedef void (*typeFuncTransmit)(uint8_t *pData, uint16_t dataLen, void *userData);
 
 /******************************************************************************
 *    Global variables Declaration
@@ -63,7 +63,7 @@ GlobalRet_Enum FrameQueue_PopRx(uint8_t channelID, char *pTopic, uint16_t *pTopi
 GlobalRet_Enum FrameQueue_GetLastTxFrameDataLen(uint8_t channelID, uint16_t *pDataLen, char *pTopic, uint16_t *pTopicLen);
 GlobalRet_Enum FrameQueue_GetLastRxFrameDataLen(uint8_t channelID, uint16_t *pDataLen, char *pTopic, uint16_t *pTopicLen);
 GlobalRet_Enum FrameQueue_ProcessRxData(uint8_t channelID, typeFuncDecode pDecodeFunc);
-GlobalRet_Enum FrameQueue_TransmitTxData(uint8_t channelID, typeFuncTransmit pTransmitFunc);
+GlobalRet_Enum FrameQueue_TransmitTxData(uint8_t channelID, typeFuncTransmit pTransmitFunc, void *userData);
 #endif /* FRAME_QUEUE_H_ */
 
 

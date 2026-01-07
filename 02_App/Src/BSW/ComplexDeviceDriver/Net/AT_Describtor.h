@@ -38,6 +38,7 @@ typedef struct
 	uint8_t maxTryCnt;
 	uint32_t waitTimeout;
 	uint32_t maxAckTimeout;
+	uint8_t printFlag;
 	char *cMeanings;
 	uint16_t (*pFuncPackAT)(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t nATLen);
 	uint8_t (*pFuncRecvHandle)(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
@@ -47,7 +48,8 @@ typedef struct
 typedef struct
 {
 	char *cUrc;
-	uint8_t (*pFuncRecvHandle)(uint8_t *pData, uint16_t dataLen);
+	void (*pFuncRecvHandle)(uint8_t *pData, void * modulePara, uint16_t dataLen);
+	uint8_t printFlag;
 	char *cMeanings;
 }ATUrcDescribtor_Struct;
 

@@ -18,7 +18,7 @@
 *******************************************************************************/
 #include "AT_Module.h"
 #include "Cdd_Drv_EG800AK.h"
-
+#include "AT_TCP.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -44,7 +44,7 @@
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-uint16_t ATModule_PackConfigAPN(uint8_t socketIndex, void * modulePara, uint8_t *pData, uint16_t nATLen);
+static uint16_t ATModule_PackConfigAPN(uint8_t socketIndex, void * modulePara, uint8_t *pData, uint16_t nATLen);
 
 static uint8_t ATModule_RecvSimStatus(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATModule_RecvCGREG(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen);
@@ -61,77 +61,79 @@ static void ATModule_FailHandle(uint8_t socketID, void * modulePara, uint8_t atT
 const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
 {
     [eATModuleCmd_QueryModule] =
-    { "ATI\r\n",                               "ATI",             3,          5000,     3000,  "识别模块",
+    { "ATI\r\n",                               "ATI",             3,          5000,     3000,  TRUE, "识别模块",
         NULL,                                   NULL,                         ATModule_FailHandle},
 
     [eATModuleCmd_SetSimStatusReportEnable] =  
-    { "AT+QSIMSTAT=1\r\n",                     "AT+QSIMSTAT=1",   3,          5000,     3000,  "sim卡状态上报使能",
+    { "AT+QSIMSTAT=1\r\n",                     "AT+QSIMSTAT=1",   3,          5000,     3000,  TRUE, "sim卡状态上报使能",
         NULL,                                   NULL,                         NULL},
 
     [eATModuleCmd_QuerySimStatus] =  
-    { "AT+QSIMSTAT?\r\n",                      "+QSIMSTAT:",      3,          5000,     3000,  "sim卡状态查询",
+    { "AT+QSIMSTAT?\r\n",                      "+QSIMSTAT:",      3,          5000,     3000,  TRUE, "sim卡状态查询",
         NULL,                                   ATModule_RecvSimStatus,       NULL},
 
     [eATModuleCmd_QuerySimRecognizeStatus] =  
-    { "AT+CPIN?\r\n",                          "+CPIN: READY",    3,          10000,    3000,  "sim识别状态查询",
-    NULL,                                      NULL,                NULL},
+    { "AT+CPIN?\r\n",                          "+CPIN: READY",    10,          3000,     1000,  TRUE, "sim识别状态查询",
+    NULL,                                      NULL,                          NULL},
 
     [eATModuleCmd_QueryIccid] =  
-    { "AT+QCCID\r\n",                          "+QCCID: ",         3,          10000,    3000,  "sim卡iccid查询",
+    { "AT+QCCID\r\n",                          "+QCCID: ",         3,          10000,    3000,  TRUE, "sim卡iccid查询",
     NULL,                                      ATModule_RecvIccid,            ATModule_FailHandle},
 
     [eATModuleCmd_QueryCsq] =  
-    { "AT+CSQ\r\n",                            "+CSQ:",           3,          5000,     3000,  "查询信号强度",
+    { "AT+CSQ\r\n",                            "+CSQ:",           3,          5000,     3000,  TRUE, "查询信号强度",
     NULL,                                      ATModule_RecvCSQ,              NULL},
 
     [eATModuleCmd_QueryNtpClk] =  
-    { "AT+QNTP=1,\"ntp1.aliyun.com\"\r\n",    "+QNTP:",           3,          5000,     3000,  "查询NTP时间",
+    { "AT+QNTP=1,\"ntp1.aliyun.com\"\r\n",    "+QNTP:",           3,          5000,     3000,  TRUE, "查询NTP时间",
     NULL,                                      NULL,                NULL},
 
     [eATModuleCmd_QueryCGREG] =  
-    { "AT+CGREG?\r\n",                        "+CGREG:",          3,          10000,    3000,  "PS服务网络连接状态查询",
+    { "AT+CGREG?\r\n",                        "+CGREG:",          3,          10000,    3000,  TRUE, "PS服务网络连接状态查询",
     NULL,                                      ATModule_RecvCGREG,            ATModule_FailHandle},
 
     [eATModuleCmd_QueryCOPS] =  
-    { "AT+COPS?\r\n",                         "+COPS:",           10,         3000,     3000,  "查询运营商",
+    { "AT+COPS?\r\n",                         "+COPS:",           10,         3000,     3000,  TRUE, "查询运营商",
     NULL,                                      ATModule_RecvCOPS,             ATModule_FailHandle},
 
     [eATModuleCmd_QueryNetWorkInfo] =  
-    { "AT+QNWINFO\r\n",                        "+QNWINFO:",       3,          10000,    3000,  "查询网络信息",
+    { "AT+QNWINFO\r\n",                        "+QNWINFO:",       3,          10000,    3000,  TRUE, "查询网络信息",
     NULL,                                      NULL,                          ATModule_FailHandle},
 
     [eATModuleCmd_ConfigAPN] =  
-    { "AT+QICSGP=1,1,\"[APN]\",\"\",\"\",0\r\n", "+QICSGP",       3,          10000,    3000,  "配置APN",
+    { "AT+QICSGP=1,1,\"[APN]\",\"\",\"\",0\r\n", "+QICSGP",       3,          10000,    3000,  TRUE, "配置APN",
     ATModule_PackConfigAPN,                    ATModule_RecvOKACK,            ATModule_FailHandle},
 
     [eATModuleCmd_ActivePDP] =  
-    { "AT+QIACT=1\r\n",                        "+QIACT",          3,          10000,    3000,  "激活PDP",
+    { "AT+QIACT=1\r\n",                        "+QIACT",          3,          10000,    3000,  TRUE, "激活PDP",
     NULL,                                      NULL,                          ATModule_FailHandle},
     
     [eATModuleCmd_QueryPDPState] =  
-    { "AT+QIACT?\r\n",                         "+QIACT",          3,          10000,    3000,  "查询PDP状态",
+    { "AT+QIACT?\r\n",                         "+QIACT",          3,          10000,    3000,  TRUE, "查询PDP状态",
     NULL,                                      ATModule_RecvPDPState,         ATModule_FailHandle},
 
     [eATModuleCmd_SetCFUN0] =  
-    { "AT+CFUN=0\r\n",                         "+CFUN=0",         3,          10000,    3000,  "设置最小功能模式",
+    { "AT+CFUN=0\r\n",                         "+CFUN=0",         3,          10000,    3000,  TRUE, "设置最小功能模式",
     NULL,                                      NULL,                ATModule_FailHandle},
 
     [eATModuleCmd_SetCFUN1] =  
-    { "AT+CFUN=1\r\n",                         "+CFUN=1",         3,          10000,    3000,  "设置全功能模式",
+    { "AT+CFUN=1\r\n",                         "+CFUN=1",         3,          10000,    3000,  TRUE, "设置全功能模式",
     NULL,                                      NULL,                ATModule_FailHandle},
 };
 
-const ATUrcDescribtor_Struct c_stATCmdDescribtor[1] =
+const ATUrcDescribtor_Struct c_stATUrcDescribtor[5] =
 {
-
-
+    [0] = { "+QIOPEN:",             ATTCP_UrcQIPOpen,    TRUE,    "建立连接"},
+    [1] = { "SEND OK",              ATTCP_UrcSendOK,     FALSE,   "数据发送成功"},
+    [2] = { "+QNTP:",               NULL,                TRUE,    "网络时间同步"},
+    [3] = { "+QIURC: \"closed\"",   ATTCP_UrcClose,      TRUE,    "断开连接"},
 };
 
 
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-uint16_t ATModule_PackConfigAPN(uint8_t socketIndex, void * modulePara, uint8_t *pData, uint16_t nATLen)
+static uint16_t ATModule_PackConfigAPN(uint8_t socketIndex, void * modulePara, uint8_t *pData, uint16_t nATLen)
 {
     CddDrvEG800AKCtrl_Struct *pModulePara = (CddDrvEG800AKCtrl_Struct *)modulePara;
 	char cApn[24] = {0};
@@ -301,7 +303,7 @@ static uint8_t ATModule_RecvOKACK(uint8_t socketID, void * socketPara, uint8_t *
     return ret;
 }
 
-#include "Asw_ErrorHandle.h"
+
 
 
 static uint8_t ATModule_RecvPDPState(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen)
@@ -318,7 +320,6 @@ static uint8_t ATModule_RecvPDPState(uint8_t socketID, void * modulePara, uint8_
 
         if (activeState == 1)
         {
-            AswErrhandle_ResetErrExsitCallback(0, eErr_PlatformOffline);
             CddDrvEG800AK_SetModuleState(eCddNetMModuleState_Work);
             ret = TRUE;
         }

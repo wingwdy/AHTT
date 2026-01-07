@@ -62,7 +62,7 @@ typedef enum
 *    Global variables Declaration
 ******************************************************************************/
 extern const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[eATModuleCmd_QueryCount];
-extern const ATUrcDescribtor_Struct c_stATCmdDescribtor[1];
+extern const ATUrcDescribtor_Struct c_stATUrcDescribtor[5];
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/

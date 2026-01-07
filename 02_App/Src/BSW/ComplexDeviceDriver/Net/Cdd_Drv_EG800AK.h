@@ -78,10 +78,12 @@ typedef struct
     uint8_t reconectTimes;
     CddDrvEG800AKATCtrl_Struct stSocketAtCtrl;
 
+    uint32_t periodDetectDataSendTick;
+
     uint8_t user_data[32];
     void *specificPara;
 
- 	void (*stateHandle)(void *socketCtrl);
+ 	void (*stateHandle)(uint8_t socketIndex, void *socketCtrl);
     void (*socketDisconnectCallback)(void *socketCtrl);
     void (*socketCloseHandle)(void *socketCtrl);
 } CddDrvEG800AKSocketCtrl_Struct;
@@ -107,6 +109,7 @@ typedef struct
 
     uint8_t transparentMode;                /* TRUE: 透传模式 */
     uint32_t transparentModeStartTick;      /* 透传模式起始时间 */
+    uint8_t transparentSocketIndex;         /* 透传模式Socket */
 
     CddDrvEG800AKInfo_Struct stModuleInfo;  /* 模块信息 */
 
@@ -132,16 +135,23 @@ typedef struct
 *    Global Function Prototypes
 ******************************************************************************/
 void CddDrvEG800AK_MainFunction(void);
+CddNetMModuleState_Enum CddDrvEG800AK_GetModuleState(void);
 uint8_t CddDrvEG800AK_CreatSocket(CddNetMSocketType_Enum socketType, CddNetMSocketPara_Union *pSocketPara, 
     uint8_t *pSocketIndex, CddNetMPlatType_Enum ePlatType);
+void CddDrvEG800AK_DelAllSocket(void);
+void CddDrvEG800AK_SetSocketDisconnect(uint8_t socketIndex);
+CddNetMSocketState_Enum CddDrvEG800AK_GetSocketState(uint8_t socketIndex);
+void CddDrvEG800AK_DelSingleSocket(uint8_t socketIndex);
+
 /* 模块内使用 */
 void CddDrvEG800AK_SetModuleState(CddNetMModuleState_Enum eModuleState);
-CddNetMModuleState_Enum CddDrvEG800AK_GetModuleState(void);
+void CddDrvEG800AK_EnterTransparentMode(uint8_t socketIndex);
+void CddDrvEG800AK_ExitTransparentMode(void);
+uint8_t CddDrvEG800AK_CheckTransparentMode(void);
 uint8_t CddDrvEG800AK_AddCmd(uint8_t socketIndex, uint8_t cmd);
 void CddDrvEG800AK_DeleteCmd(uint8_t socketIndex);
 void CddDrvEG800AK_ClearSocketCmd(uint8_t socketIndex);
 void CddDrvEG800AK_SetAbnormalType(CddDrvEG800AKAbnormalHandle_Enum eAbnormalType);
-
 #endif
 
 

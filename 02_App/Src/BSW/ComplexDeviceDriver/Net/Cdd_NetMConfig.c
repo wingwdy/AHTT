@@ -56,12 +56,12 @@ const CddNetMModuleOps_Struct c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_COUNT] = {
     [CDD_NETM_CFG_DEV_4G] = 
     {
         .pFuncMainFunction = CddDrvEG800AK_MainFunction,
-        .getModuleState = NULL,
-        .getSocketState = NULL,
-        .setSocketDisconnect = NULL,
-        .creatSocket = NULL,
-        .delAllSocket = NULL,
-        .delSingleSocket = NULL,
+        .getModuleState = CddDrvEG800AK_GetModuleState,
+        .getSocketState = CddDrvEG800AK_GetSocketState,
+        .setSocketDisconnect = CddDrvEG800AK_SetSocketDisconnect,
+        .creatSocket = CddDrvEG800AK_CreatSocket,
+        .delAllSocket = CddDrvEG800AK_DelAllSocket,
+        .delSingleSocket = CddDrvEG800AK_DelSingleSocket,
     },
 };
 

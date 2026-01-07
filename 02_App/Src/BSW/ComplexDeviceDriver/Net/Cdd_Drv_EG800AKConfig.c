@@ -15,6 +15,7 @@
 #include "Cdd_Drv_EG800AKConfig.h"
 #include "AT_Describtor.h"
 #include "AT_Module.h"
+#include "AT_TCP.h"
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
@@ -49,16 +50,31 @@
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-const CddDrvEG800AKATConfig_Struct c_stCddDrvEG800AKATConfigTable[eCddNetMSocketType_Count] =
+const CddDrvEG800AKSocketConfig_Struct c_stCddDrvEG800AKSocketConfigTable[eCddNetMSocketType_Count] =
 {
     [eCddNetMSocketType_Null] = 
     {
         .cmdTaskCount = eATModuleCmd_QueryCount,
         .pATCmdDescribtorTable = c_stModuleATCmdDescribtor,
     },
+
+    [eCddNetMSocketType_TCP] = 
+    {
+        .cmdTaskCount = eATTCPCmd_Count,
+        .pATCmdDescribtorTable = c_stTCPATCmdDescribtor,
+        .stateHandle = ATTCP_StateHandle,
+        .socketCloseHandle = ATTCP_CloseSocket,
+    },
 };
 
+void CDDDRVEG800AK_CFG_WriteData(uint8_t *pData, uint16_t len, void *userData)
+{
+    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)userData;
 
+    CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]Send Data[%d]: ", pSocketCtrl->socketIndex, len);
+    DSLogM_HexOutput(pData, len);
+    CDDDRV_EG800AK_CFG_WriteData(pData, len);
+}
 
 
 

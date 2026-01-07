@@ -722,7 +722,7 @@
           <GroupName>ThridParty/Mbedtls</GroupName>
         </Group>
         <Group>
-          <GroupName>ThridParty/Cjson</GroupName>
+          <GroupName>ThridParty/CJson</GroupName>
         </Group>
         <Group>
           <GroupName>ThirdParty/FlashDB</GroupName>

@@ -462,7 +462,6 @@ GlobalRet_Enum FrameQueue_PopTx(uint8_t channelID, char *pTopic, uint16_t *pTopi
     PARA_ASSERT_RET(channelID < FRAME_QUEUE_CHANNEL_COUNT, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pDstData != NULL && pDataSize != NULL, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pDCB->initFlag == TRUE, eGlobalRet_NotInit);
-        PARA_ASSERT_RET(pDCB->initFlag == TRUE, eGlobalRet_NotInit);
 
     if (pDCB->frameType == eFrameQueueType_MQTT)
     {
@@ -613,7 +612,7 @@ GlobalRet_Enum FrameQueue_ProcessRxData(uint8_t channelID, typeFuncDecode pDecod
     return eRet;
 }
 
-GlobalRet_Enum FrameQueue_TransmitTxData(uint8_t channelID, typeFuncTransmit pTransmitFunc)
+GlobalRet_Enum FrameQueue_TransmitTxData(uint8_t channelID, typeFuncTransmit pTransmitFunc, void *userData)
 {
     FrameQueueCtrlDCB_Struct *pDCB = &g_stFrameQueueCtrlDCB[channelID];
     GlobalRet_Enum eRet = eGlobalRet_OK;
@@ -649,7 +648,7 @@ GlobalRet_Enum FrameQueue_TransmitTxData(uint8_t channelID, typeFuncTransmit pTr
             if (pDCB->frameType == eFrameQueueType_MQTT)
             {
                 pFrameData = pDCB->pTXBuf + sizeof(FrameQueueHead_Struct) + topicLen;
-                pTransmitFunc(pFrameData, dataLen);
+                pTransmitFunc(pFrameData, dataLen, userData);
 
                 memmove(pDCB->pTXBuf, 
                         pDCB->pTXBuf + sizeof(FrameQueueHead_Struct) + dataLen + topicLen, 
@@ -660,7 +659,7 @@ GlobalRet_Enum FrameQueue_TransmitTxData(uint8_t channelID, typeFuncTransmit pTr
             else if (pDCB->frameType == eFrameQueueType_TCP)
             {
                 pFrameData = pDCB->pTXBuf + sizeof(FrameQueueHead_Struct);
-                pTransmitFunc(pFrameData, dataLen);
+                pTransmitFunc(pFrameData, dataLen, userData);
 
                 memmove(pDCB->pTXBuf, 
                         pDCB->pTXBuf + sizeof(FrameQueueHead_Struct) + dataLen, 

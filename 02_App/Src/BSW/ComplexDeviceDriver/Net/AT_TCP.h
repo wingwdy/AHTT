@@ -29,11 +29,12 @@
 ******************************************************************************/
 typedef enum
 {
-    eATTcpCmd_Null,
-    eATTcpCmd_Open,
-    eATTcpCmd_Read,
-    eATTcpCmd_Write,
-    eATTcpCmd_Close,
+    eATTCPCmd_Null,
+    eATTCPCmd_Open,
+    eATTCPCmd_Read,
+    eATTCPCmd_Write,
+    eATTCPCmd_Close,
+    eATTCPCmd_Count,
 }ATTcpCmd_Enum;
 
 
@@ -56,14 +57,18 @@ typedef enum
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-
+extern const ATCmdDescribtor_Struct c_stTCPATCmdDescribtor[eATTCPCmd_Count];
 
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void ATTCP_StateHandle(uint8_t socketIndex, void *socketPara);
+void ATTCP_StateHandle(uint8_t socketIndex, void *socketCtrl);
+void ATTCP_CloseSocket(void *socketCtrl);
 
+void ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen);
+void ATTCP_UrcSendOK(uint8_t *pData, void * modulePara, uint16_t dataLen);
+void ATTCP_UrcClose(uint8_t *pData, void * modulePara, uint16_t dataLen);
 #endif
 
 

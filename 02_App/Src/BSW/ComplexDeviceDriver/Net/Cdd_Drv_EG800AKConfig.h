@@ -76,19 +76,22 @@
 typedef struct 
 {
     uint8_t cmdTaskCount;
-    const ATCmdDescribtor_Struct *pATCmdDescribtorTable; 
-}CddDrvEG800AKATConfig_Struct;
+    const ATCmdDescribtor_Struct *pATCmdDescribtorTable;
+ 	void (*stateHandle)(uint8_t socketIndex, void *socketCtrl);
+    void (*socketCloseHandle)(void *socketCtrl);
+}CddDrvEG800AKSocketConfig_Struct;
 
 
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-extern const CddDrvEG800AKATConfig_Struct c_stCddDrvEG800AKATConfigTable[eCddNetMSocketType_Count];
+extern const CddDrvEG800AKSocketConfig_Struct c_stCddDrvEG800AKSocketConfigTable[eCddNetMSocketType_Count];
 
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
+void CDDDRVEG800AK_CFG_WriteData(uint8_t *pData, uint16_t len, void *userData);
 #endif /* CDD_DRV_EG800AK_CONFIG_H_ */
 
 
