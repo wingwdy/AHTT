@@ -43,7 +43,7 @@ typedef struct
 	CddNetMSocketState_Enum (*getSocketState)(uint8_t socketIndex);
 	void (*setSocketDisconnect)(uint8_t socketIndex);
 	uint8_t (*creatSocket)(CddNetMSocketType_Enum socketType, CddNetMSocketPara_Union *pSocketPara, 
-        uint8_t *pSocketIndex, uint8_t frameQueueIndex, CddNetMPlatType_Enum ePlatType);
+        uint8_t *pSocketIndex, CddNetMPlatType_Enum ePlatType);
 	void (*delAllSocket)(void);
 	void (*delSingleSocket)(uint8_t socketIndex);
 }CddNetMModuleOps_Struct;

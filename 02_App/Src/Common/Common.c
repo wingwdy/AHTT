@@ -264,14 +264,12 @@ uint8_t* Common_SearchData(uint8_t *pData, uint16_t dataLen, void *pString, uint
 uint16_t Common_ReplaceStr(uint8_t* pData, uint16_t nDataLen, char* cDestStr, void* pReplace, uint16_t nReplaceLen, char* pDefault)
 {
 	uint8_t *pDest = NULL;
-	char cTailStr[100];
+	char cTailStr[100] = { 0 };
 	void *pCopyData = pReplace;
 	uint16_t nCopyLen = nReplaceLen;
 	uint16_t nDestStrLen = strlen(cDestStr);
     uint16_t offset = 0;
     uint16_t tailLen = 0;
-
-	memset(cTailStr, 0x00, sizeof(cTailStr));
 
 	pDest = Common_SearchData(pData, nDataLen, cDestStr, nDestStrLen);
 

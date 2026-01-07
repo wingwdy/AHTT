@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : SysCfg.h
-* Description        : Code for Confiuration for system function
+* File Name          : Verion.h
+* Description        : Code for Version definition
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,29 +11,23 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef SYSCFG_H_
-#define SYSCFG_H_
+#ifndef VERSION_H_
+#define VERSION_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
+#define  APP_SW_MAJOR_VERSION                           (1u)
+#define  APP_SW_MINOR_VERSION                           (0u)
+#define  APP_SW_CUSTORM_VERSION                         (0u)
+#define  APP_SW_PATCH_VERSION                           (0u)
 
+#define  APP_SW_VERSION_STRING                         "1.0.0.0"
+#define  APP_SW_VERSION_DATE                           "2026/01/06"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
 
-#define   SYSCFG_CFG_PRODUCT_CODE               "D3_A32FB"
-
-#define   SYSCFG_CFG_MAX_OUTPUT_CURRENT         (32000U)
-#define   SYSCFG_CFG_MIN_OUTPUT_CURRENT         (6000U)
-
-#define   SYSCFG_CFG_OS_HEAP_SIZE               (50 * 1024U)
-
-#define   SYSCFG_CFG_VECT_TAB_OFFSET            (0x0000U)
-
-#define   SYSTEM_CFG_WATCHDOG_ENABLE            (FALSE)
-
-#define   SYSCFG_CFG_GUN_NUM                    (1U)
 
 /******************************************************************************
 *    Enum Definition
@@ -50,4 +44,4 @@
 ******************************************************************************/
 
 
-#endif /* SYSCFG_H_ */
+#endif /* VERSION_H_ */

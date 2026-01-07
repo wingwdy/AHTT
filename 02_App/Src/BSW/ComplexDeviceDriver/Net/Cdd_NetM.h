@@ -158,7 +158,7 @@ typedef union
 *    Global Function Prototypes
 ******************************************************************************/
 void CddNetM_SwitchPhyChannel(uint8_t moduleDev);
-GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSocketPara_Union socketPara, CddNetMPlatType_Enum ePlatType, uint8_t frameQueueIndex);
+GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSocketPara_Union socketPara, CddNetMPlatType_Enum ePlatType);
 void CddNetM_DelSingleLink(CddNetMPlatType_Enum ePlatType);
 void CddNetM_SetLinkDisconnect(CddNetMPlatType_Enum ePlatType);
 void CddNetM_MainFunction(void);

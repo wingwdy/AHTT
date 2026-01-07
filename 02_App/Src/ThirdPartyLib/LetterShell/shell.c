@@ -13,6 +13,8 @@
 #include "stdio.h"
 #include "stdarg.h"
 #include "shell_ext.h"
+#include "Version.h"
+#include "SysCfg.h"
 
 
 #if SHELL_USING_CMD_EXPORT == 1
@@ -68,16 +70,12 @@ enum
 static const char *shellText[] =
 {
     [SHELL_TEXT_INFO] =
-        "\r\n"
-        " _         _   _                  _          _ _ \r\n"
-        "| |    ___| |_| |_ ___ _ __   ___| |__   ___| | |\r\n"
-        "| |   / _ \\ __| __/ _ \\ '__| / __| '_ \\ / _ \\ | |\r\n"
-        "| |__|  __/ |_| ||  __/ |    \\__ \\ | | |  __/ | |\r\n"
-        "|_____\\___|\\__|\\__\\___|_|    |___/_| |_|\\___|_|_|\r\n"
-        "\r\n"
-        "Build:       "__DATE__" "__TIME__"\r\n"
-        "Version:     "SHELL_VERSION"\r\n"
-        "Copyright:   (c) 2020 Letter\r\n",
+    "\n****************************************************************\n"
+    "*  Build:                 "__DATE__" "__TIME__"\t\t\t\t\t *\r\n"
+    "*  AppVersion:      "APP_SW_VERSION_STRING"\t\t\t\t\t\t\t\t\t *\r\n"
+    "*  ProductCode:    "SYSCFG_CFG_PRODUCT_CODE"\t\t\t\t\t\t\t\t *\r\n"
+    "*  Copyright:         (c) 2099 GENO\t\t\t\t\t\t\t *\r\n"
+    "****************************************************************",
     [SHELL_TEXT_CMD_TOO_LONG] = 
         "\r\nWarning: Command is too long\r\n",
     [SHELL_TEXT_CMD_LIST] = 

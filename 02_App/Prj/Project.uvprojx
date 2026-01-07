@@ -1007,6 +1007,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\Core\utils.c</FilePath>
             </File>
+            <File>
+              <FileName>Version.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Src\Version.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

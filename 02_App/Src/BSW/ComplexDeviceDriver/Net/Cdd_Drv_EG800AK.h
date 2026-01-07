@@ -43,6 +43,16 @@ typedef enum
     CddDrvEG800AKAbnormalHandle_CFun,
 }CddDrvEG800AKAbnormalHandle_Enum;
 
+//服务商
+typedef enum 
+{
+	CddDrvSimOperator_Null,
+	CddDrvSimOperator_CMCC,					/* 移动 */
+	CddDrvSimOperator_CUCC,					/* 联通 */
+	CddDrvSimOperator_CTCC,					/* 电信 */
+	CddDrvSimOperator_Other,				    /* 其他 */
+}CddDrvSimOperator_Enum;
+
 
 /******************************************************************************
 *    Typedef Definition
@@ -79,7 +89,8 @@ typedef struct
 typedef struct
 {
     char iccid[CDDDRV_EG800AK_CFG_ICCID_LEN + 1];
-
+    uint8_t csq;
+    CddDrvSimOperator_Enum eOperatorType;
 }CddDrvEG800AKInfo_Struct;
 
 typedef struct
@@ -115,22 +126,21 @@ typedef struct
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-/* 限模块内使用， 禁止其它模块直接访问 */
-extern CddDrvEG800AKCtrl_Struct g_stCddDrvEG800AKCtrl;
 
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void CddDrvEG800AK_InitMemory(void);
 void CddDrvEG800AK_MainFunction(void);
-
+uint8_t CddDrvEG800AK_CreatSocket(CddNetMSocketType_Enum socketType, CddNetMSocketPara_Union *pSocketPara, 
+    uint8_t *pSocketIndex, CddNetMPlatType_Enum ePlatType);
 /* 模块内使用 */
 void CddDrvEG800AK_SetModuleState(CddNetMModuleState_Enum eModuleState);
 CddNetMModuleState_Enum CddDrvEG800AK_GetModuleState(void);
 uint8_t CddDrvEG800AK_AddCmd(uint8_t socketIndex, uint8_t cmd);
 void CddDrvEG800AK_DeleteCmd(uint8_t socketIndex);
 void CddDrvEG800AK_ClearSocketCmd(uint8_t socketIndex);
+void CddDrvEG800AK_SetAbnormalType(CddDrvEG800AKAbnormalHandle_Enum eAbnormalType);
 
 #endif
 

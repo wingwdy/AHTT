@@ -19,7 +19,7 @@
 *******************************************************************************/
 #include "Cdd_NetM.h"
 #include "Cdd_NetMConfig.h"
-
+#include "string.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -50,7 +50,6 @@ typedef struct
 {
     uint8_t usedFlag;                            /* 表示该链路是否使用 */
     uint8_t validFlag;                          /* 表示该链路是否创建 */
-    uint8_t frameQueueIndex;
     uint8_t socketIndex;
     CddNetMSocketType_Enum eSocketType;
     CddNetMPlatType_Enum ePlatType;  
@@ -71,13 +70,16 @@ typedef struct
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-
+static CddNetMCtx_Struct g_stCddNetMCtx;
 
 
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-static CddNetMCtx_Struct g_stCddNetMCtx;
+static uint8_t CddNetM_IsFileLinkExist(void);
+static CddNetMLinkPara_Struct* CddNetM_FindFreeLink(void);
+static void CddNetM_WorkStateManage(void);
+static void CddNetM_CheckSocketCreate(void);
 
 /*******************************************************************************
 *    Function Source Code
@@ -158,7 +160,7 @@ static void CddNetM_CheckSocketCreate(void)
 					if (c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].creatSocket != NULL)
 					{
 						c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].creatSocket(pLinkPata->eSocketType, &pLinkPata->stSocketPara, 
-							&pLinkPata->socketIndex, pLinkPata->frameQueueIndex, pLinkPata->ePlatType);
+							&pLinkPata->socketIndex, pLinkPata->ePlatType);
 						pLinkPata->usedFlag = TRUE;
 					}
 				}
@@ -171,10 +173,17 @@ static void CddNetM_CheckSocketCreate(void)
 
 static void CddNetM_WorkStateManage(void)
 {
+    CddNetMSocketPara_Union socketPara = { 0 };
+
     switch (g_stCddNetMCtx.eWorkState)
     {
         case eCddNetMWorkState_Init:
         {
+            socketPara.stTcpPara.frameQueueChannelID = 0;
+            strcpy(socketPara.stTcpPara.ip, "evse-dev.gongniu.cn");
+            socketPara.stTcpPara.port = 15455;
+        
+            CddNetM_CreatLink(eCddNetMSocketType_TCP, socketPara, eCddNetMPlatType_O);
             g_stCddNetMCtx.eWorkState = eCddNetMWorkState_ChooseNet;
             break;
         }
@@ -203,7 +212,7 @@ static void CddNetM_WorkStateManage(void)
     }
 }
 
-GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSocketPara_Union socketPara, CddNetMPlatType_Enum ePlatType, uint8_t frameQueueIndex)
+GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSocketPara_Union socketPara, CddNetMPlatType_Enum ePlatType)
 {
     GlobalRet_Enum retVal = eGlobalRet_OK;
     CddNetMLinkPara_Struct* pLinkPara = NULL;
@@ -224,7 +233,6 @@ GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSock
             pLinkPara->ePlatType = ePlatType;
             pLinkPara->eSocketType = eSocketType;
             pLinkPara->stSocketPara = socketPara;
-            pLinkPara->frameQueueIndex = frameQueueIndex;
         }
         else
         {
@@ -246,6 +254,8 @@ void CddNetM_SwitchPhyChannel(uint8_t moduleDev)
 void CddNetM_MainFunction(void)
 {
     uint8_t netDev = 0U;
+
+    CddNetM_WorkStateManage();
 
     for (netDev = 0; netDev < CDD_NETM_CFG_DEV_COUNT; netDev++)
     {
