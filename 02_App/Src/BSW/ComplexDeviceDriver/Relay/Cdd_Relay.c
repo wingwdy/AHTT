@@ -58,9 +58,11 @@ typedef struct
     uint8_t shortCutDetectResult;
     FilterProfile1_Struct stFilterShortCutDetect;
     uint32_t shortCutDetectTimer;
-    
-    FilterProfile1_Struct stFilterAdhesionDetect;
 
+    FilterProfile1_Struct stFilterAdhesionDetect;
+    uint8_t adhesionDetectValidFlag;
+    uint32_t adhesionDetectStartTick;
+    
     FilterProfile1_Struct stFilterMaloperationDetect;
     uint32_t relayCtrlHoldTick;
 }CddRelayCtrl_Struct;
@@ -84,10 +86,6 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
 *******************************************************************************/
 static void CddRelay_IdleHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
 {    
-    pRelayCtrl->stRelayState.status = (uint8_t)c_stCddRelayOpsConfigTable.pFuncGetSwitchStatus(port);
-
-    Filter_Profile1(&pRelayCtrl->stRelayState, CDDRELAY_CFG_STATE_FILTER_COUNT);
-
     if (pRelayCtrl->eRelayCtrlOpt == eCddRelayCtrlState_SwitchOn)
     {
         if (pRelayCtrl->stRelayState.validStatus == (uint8_t)eCddRelayState_Off)
@@ -101,7 +99,7 @@ static void CddRelay_IdleHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
 
         if (Filter_Profile1(&pRelayCtrl->stFilterMaloperationDetect, CDDRELAY_CFG_MALOPERATION_FILTER_COUNT))
         {
-            if (pRelayCtrl->stFilterAdhesionDetect.validStatus == TRUE)
+            if (pRelayCtrl->stFilterMaloperationDetect.validStatus == TRUE)
             {
                 AswErrhandle_SetErrExsitCallback(port, eErr_JcqMaloperation);
             }
@@ -120,19 +118,33 @@ static void CddRelay_IdleHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
 
         if (Filter_Profile1(&pRelayCtrl->stFilterAdhesionDetect, CDDRELAY_CFG_ADHESION_FILTER_COUNT))
         {
+            pRelayCtrl->adhesionDetectValidFlag = TRUE;
+            CDDRELAY_CFG_LogPrint("[枪：%d]粘连检测完成!\r\n", port);
             if (pRelayCtrl->stFilterAdhesionDetect.validStatus == TRUE)
             {
                 AswErrhandle_SetErrExsitCallback(port, eErr_JcqSynechiaFault);
             }
         }
-
-        if ((pRelayCtrl->stFilterAdhesionDetect.validStatus == TRUE) &&
-           (TRUE == CDDRELAY_CFG_CheckGunPlugout(port)))
+        else if (pRelayCtrl->adhesionDetectValidFlag == FALSE)
+        {
+            if (Common_JudgeTimeoutMs(pRelayCtrl->adhesionDetectStartTick, CDDRELAY_CFG_ADHESION_DETECT_TIMEOUT))
+            {
+                pRelayCtrl->adhesionDetectStartTick = Common_GetSystick();
+                pRelayCtrl->adhesionDetectValidFlag = TRUE;
+                CDDRELAY_CFG_LogPrint("[枪：%d]粘连检测完成!\r\n", port);
+            }
+        }
+        else
+        {}
+        
+        if ((pRelayCtrl->stFilterMaloperationDetect.validStatus == TRUE) &&
+            (TRUE == CDDRELAY_CFG_CheckGunPlugout(port)))
         {
             memset(&pRelayCtrl->stFilterMaloperationDetect, 0x00, sizeof(FilterProfile1_Struct));
             AswErrhandle_ResetErrExsitCallback(port, eErr_JcqMaloperation);
         }
     }
+ 
 }
 
 static void CddRelay_SwitchOnHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
@@ -155,20 +167,13 @@ static void CddRelay_SwitchOnHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
 
             break;
         }
-        case CDDRELAY_CTRL_STEP_2:
-        {
-            if (Common_JudgeTimeoutMs(pRelayCtrl->relayCtrlHoldTick, CDDRELAY_CFG_ACT_DELAY_TIMEOUT))
-            {
-                pRelayCtrl->relayCtrlStep = CDDRELAY_CTRL_STEP_3;
-            }
 
-            break;
-        }
-        case CDDRELAY_CTRL_STEP_3:
+        case CDDRELAY_CTRL_STEP_2:
         {
             pRelayCtrl->eRelayCtrlState = eCddRelayCtrlState_Idle;
             break;
         }
+
         default:
         {
             pRelayCtrl->eRelayCtrlState = eCddRelayCtrlState_Idle;
@@ -186,17 +191,13 @@ static void CddRelay_SwitchOffHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCt
             if (Common_JudgeTimeoutMs(pRelayCtrl->relayCtrlHoldTick, CDDRELAY_CFG_ACT_DELAY_TIMEOUT))
             {
                 pRelayCtrl->relayCtrlStep = CDDRELAY_CTRL_STEP_2;
-
-                if (c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOff != NULL)
-                {
-                    c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOff(port);
-                }
             }
 
             break;
         }
         case CDDRELAY_CTRL_STEP_2:
         {
+            pRelayCtrl->adhesionDetectStartTick = Common_GetSystick();
             pRelayCtrl->eRelayCtrlState = eCddRelayCtrlState_Idle;
             break;
         }
@@ -210,6 +211,10 @@ static void CddRelay_SwitchOffHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCt
 
 static void CddRelay_RelayStateManage(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
 {
+    pRelayCtrl->stRelayState.status = (uint8_t)c_stCddRelayOpsConfigTable.pFuncGetSwitchStatus(port);
+
+    Filter_Profile1(&pRelayCtrl->stRelayState, CDDRELAY_CFG_STATE_FILTER_COUNT);
+
     switch (pRelayCtrl->eRelayCtrlState)
     {
         case eCddRelayCtrlState_Idle:
@@ -233,6 +238,8 @@ static void CddRelay_RelayStateManage(uint8_t port, CddRelayCtrl_Struct *pRelayC
             break;       
         }   
     }
+
+
 }
 
 static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
@@ -246,14 +253,7 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
 
         case CDDRELAY_SHORTCUT_STEP1:
         {
-            if (eCddRelayState_On == CddRelay_GetRelayState(port))
-            {
-                pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_FAIL;
-                pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
-                CDDRELAY_CFG_LogPrint("[枪：%d]输出短路检测时，继电器未断开!\r\n", port);
-                AswErrhandle_SetErrExsitCallback(port, eErr_ShortCircleErr);
-            }
-            else
+            if (pRelayCtrl->adhesionDetectValidFlag == TRUE)
             {
                 if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOn != NULL)
                 {
@@ -387,6 +387,7 @@ void CddRelay_InitMemory(void)
 
         memset(pRelayCtrl, 0x00, sizeof(CddRelayCtrl_Struct));
         pRelayCtrl->eRelayCtrlOpt = eCddRelayCtrlState_SwitchOff;
+        pRelayCtrl->adhesionDetectStartTick = Common_GetSystick();
     }
 }
 
@@ -420,6 +421,7 @@ void CddRelay_CtrlSwichOn(uint8_t port)
             {
                 c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOn(port);
             }
+
             CDDRELAY_CFG_LogPrint("[枪：%d]请求闭合继电器!\r\n", port);
             memset(&pRelayCtrl->stFilterMaloperationDetect, 0x00, sizeof(FilterProfile1_Struct));
         }
@@ -444,7 +446,9 @@ void CddRelay_CtrlSwichOff(uint8_t port)
                 c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOff(port);
             }
 
-            memset(&pRelayCtrl->stFilterMaloperationDetect, 0x00, sizeof(FilterProfile1_Struct));
+            pRelayCtrl->adhesionDetectValidFlag = FALSE;
+
+            memset(&pRelayCtrl->stFilterAdhesionDetect, 0x00, sizeof(FilterProfile1_Struct));
             CDDRELAY_CFG_LogPrint("[枪：%d]请求断开继电器!\r\n", port);
         }
     }

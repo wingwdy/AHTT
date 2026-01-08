@@ -26,11 +26,13 @@
 *    Macro Definition
 ******************************************************************************/
 #define CDDRELAY_CFG_CALL_CYCLE                            (10u)
-#define CDDRELAY_CFG_STATE_FILTER_COUNT                    (50u / CDDRELAY_CFG_CALL_CYCLE)
-#define CDDRELAY_CFG_ADHESION_FILTER_COUNT                 (500u / CDDRELAY_CFG_CALL_CYCLE)
-#define CDDRELAY_CFG_MALOPERATION_FILTER_COUNT             (500u / CDDRELAY_CFG_CALL_CYCLE)                                             
+#define CDDRELAY_CFG_STATE_FILTER_COUNT                    (200u / CDDRELAY_CFG_CALL_CYCLE)
+#define CDDRELAY_CFG_ADHESION_FILTER_COUNT                 (2000u / CDDRELAY_CFG_CALL_CYCLE)
+#define CDDRELAY_CFG_MALOPERATION_FILTER_COUNT             (2000u / CDDRELAY_CFG_CALL_CYCLE) 
+#define CDDRELAY_CFG_ADHESION_DETECT_TIMEOUT               (2000u)
+
 #define CDDRELAY_CFG_ACT_HOLD_TIMEOUT                      (100)
-#define CDDRELAY_CFG_ACT_DELAY_TIMEOUT                     (300)
+#define CDDRELAY_CFG_ACT_DELAY_TIMEOUT                     (5000)
 
 #define CDDRELAY_CFG_ADC_BUFF_POINT                        (MCALADC_ADC0_SAMPLE_CNT)
 #define CDDRELAY_CFG_SHORTCUT_UPPER_LIMIT                  240

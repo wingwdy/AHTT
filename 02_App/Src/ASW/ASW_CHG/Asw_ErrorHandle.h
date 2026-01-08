@@ -52,8 +52,8 @@ typedef enum
     eErr_BphaseInputLessVol,                 /* 交流B相输入欠压 */
     eErr_CphaseInputLessVol,                 /* 交流C相输入欠压 */
     eErr_OutputOverCurr,                     /* 交流输出过流 */
-    eErr_JcqMaloperation,                    /* 交流输出接触器误动拒动 */
-    eErr_JcqSynechiaFault,                   /* 交流输出接触器粘连 */
+    eErr_JcqMaloperation,                    /* 交流输出继电器误动拒动 */
+    eErr_JcqSynechiaFault,                   /* 交流输出继电器粘连 */
     eErr_HmiCommErr,                         /* 人机交互通信故障 */
     eErr_ReaderCommErr,                      /* 读卡器通信故障 */
 

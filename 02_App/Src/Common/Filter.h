@@ -36,15 +36,6 @@ typedef enum
     eFilterIOChannel_Count,
 }FilterIOChannel_Enum;
 
-typedef enum
-{
-    eFilterAnalogChannel_CP,
-    eFilterAnalogChannel_EnvNtc,
-    eFilterAnalogChannel_GunNtc,
-    eFilterAnalogChannel_ShortCut,
-    eFilterAnalogChannel_PE,
-    eFilterAnalogChannel_Count,
-}FilterAnalogChannel_Enum;
 
 /******************************************************************************
 *    Typedef Definition

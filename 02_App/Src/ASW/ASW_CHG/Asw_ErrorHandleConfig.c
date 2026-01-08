@@ -67,8 +67,8 @@ const AswErrorHandleConfig_Struct c_AswErrorHandleConfigTable[eErr_Num] =
     {eErr_BphaseInputLessVol, AswErrorOwner_Pile,  AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "交流B相输入欠压"},
     {eErr_CphaseInputLessVol, AswErrorOwner_Pile,  AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "交流C相输入欠压"},
     {eErr_OutputOverCurr,     AswErrorOwner_Gun,   AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "交流输出过流"}, 
-    {eErr_JcqMaloperation,    AswErrorOwner_Gun,   AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "交流输出接触器误动拒动"},         
-    {eErr_JcqSynechiaFault,   AswErrorOwner_Gun,   AswErrorLevel_5, AswErrorLevel_5, AswErrorClear_External,   1,     0,   "交流输出接触器粘连"},       
+    {eErr_JcqMaloperation,    AswErrorOwner_Gun,   AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "交流输出继电器误动拒动"},         
+    {eErr_JcqSynechiaFault,   AswErrorOwner_Gun,   AswErrorLevel_5, AswErrorLevel_5, AswErrorClear_External,   1,     0,   "交流输出继电器粘连"},       
     {eErr_HmiCommErr,         AswErrorOwner_Pile,  AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "人机交互通信故障"},      
     {eErr_ReaderCommErr,      AswErrorOwner_Gun,   AswErrorLevel_2, AswErrorLevel_2, AswErrorClear_External,   1,     0,   "读卡器通信故障"}, 
 

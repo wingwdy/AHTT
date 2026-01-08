@@ -213,7 +213,7 @@ uint8_t Filter_Profile1(FilterProfile1_Struct *pFilterStatus, uint32_t filterCnt
 
     if (pFilterStatus->status != pFilterStatus->validStatus)
     {
-        if ( pFilterStatus->filterCount < filterMaxCnt)
+        if (pFilterStatus->filterCount < filterMaxCnt)
         {
             pFilterStatus->filterCount++;
         }
