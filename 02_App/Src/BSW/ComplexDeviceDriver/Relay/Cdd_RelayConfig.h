@@ -39,6 +39,7 @@
 #define CDDRELAY_CFG_SHORTCUT_LOWER_LIMIT                  200
 
 #define CDDRELAY_CFG_SHORTCUT_TIMEOUT                      (5000)
+#define CDDRELAY_CFG_SHORTCUT_FINSH_DELAY                  (500)
 #define CDDRELAY_CFG_SHORTCUT_FILTER_COUNT                 (500 /  CDDRELAY_CFG_CALL_CYCLE)
 
 #define CDDRELAY_CFG_CheckGunPlugout(port)                 (eCddCPVolState_12V == CddCP_GetVolState(port))

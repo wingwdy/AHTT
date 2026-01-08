@@ -56,6 +56,7 @@ typedef struct
 
     uint8_t shortCutDetectStep;
     uint8_t shortCutDetectResult;
+    uint32_t shortCutFinishDelay;
     FilterProfile1_Struct stFilterShortCutDetect;
     uint32_t shortCutDetectTimer;
 
@@ -300,8 +301,8 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
                 {
                     if (pRelayCtrl->stFilterShortCutDetect.validStatus == TRUE)
                     {
-                        pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_SUCCESS;
-                        pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
+                        pRelayCtrl->shortCutFinishDelay = Common_GetSystick();
+                        pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP3;
                         CDDRELAY_CFG_LogPrint("[枪：%d]输出短路检测成功!\r\n", port);
 
                         if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff != NULL)
@@ -312,6 +313,17 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
                         CDDRELAY_CFG_LogPrint("[枪：%d]断开输出短路检测回路!\r\n", port);
                     }
                 }
+            }
+
+            break;
+        }
+
+        case CDDRELAY_SHORTCUT_STEP3:
+        {
+            if (Common_JudgeTimeoutMs(pRelayCtrl->shortCutFinishDelay, CDDRELAY_CFG_SHORTCUT_FINSH_DELAY))
+            {
+                pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_SUCCESS;
+                pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
             }
 
             break;
