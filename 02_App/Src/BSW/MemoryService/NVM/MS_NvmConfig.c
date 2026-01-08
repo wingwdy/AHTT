@@ -47,13 +47,17 @@
 static void MSNvmConfig_DefaultGun0Qrcode(uint8_t *pIndata, uint16_t dataLen);
 static void MSNvmConfig_DefaultGun0MeterEnergy(uint8_t *pIndata, uint16_t dataLen);
 static void MSNvmConfig_DefaultGun0OrderInfo(uint8_t *pIndata, uint16_t dataLen);
-
+static void MSNvmConfig_DefaultModeParam(uint8_t *pIndata, uint16_t dataLen);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
 static uint8_t g_MSNvmQrcodeRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmDrcode_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 static uint8_t g_MSNvmOrderInfoRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmOrderInfo_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 static uint8_t g_MSNvmMeterEnergyRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmMeterEnergy_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
+static uint8_t g_MSNvmModeParamRam[sizeof(MSNvmModeParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
+
+
+
 
 const MSNvmBlockDescriptor_Struct c_stMSNvmBlockDescriptorTable[eMSNvmBlockID_Count] = 
 {
@@ -85,8 +89,16 @@ const MSNvmBlockDescriptor_Struct c_stMSNvmBlockDescriptorTable[eMSNvmBlockID_Co
         .pFuncDefault = MSNvmConfig_DefaultGun0OrderInfo,
     },
 
-    /* TSDB */
+    [eMSNvmBlockID_ModeParam] = 
+    {
+        .blockSize = sizeof(MSNvmModeParam_Struct),
+        .ramBlockDataAddr = g_MSNvmModeParamRam,
+        .deviceID = MSMEMIF_DEVICE_EA_KVDB,
+        .memIfID = eKVDBAdaptChannel_ModeParam,
+        .pFuncDefault = MSNvmConfig_DefaultModeParam,
+    },
 
+    /* TSDB */
     [eMSNvmBlockID_OrderRecord] = 
     {
         .blockSize = sizeof(MSNvmOrderInfo_Struct),
@@ -123,7 +135,10 @@ static void MSNvmConfig_DefaultGun0OrderInfo(uint8_t *pIndata, uint16_t dataLen)
     memset(pIndata, 0x00, dataLen);
 }
 
-
+static void MSNvmConfig_DefaultModeParam(uint8_t *pIndata, uint16_t dataLen)
+{
+    memset(pIndata, 0x00, dataLen);
+}
 
 
 

@@ -31,6 +31,7 @@ typedef enum
 	eKVDBAdaptChannel_Gun0Qrcode,
 	eKVDBAdaptChannel_Gun0OrderInfo,
 	eKVDBAdaptChannel_Gun0MeterEnergy,
+	eKVDBAdaptChannel_ModeParam,
 	eKVDBAdaptChannel_Count,
 }KVDBAdaptChannel_Enum;
 

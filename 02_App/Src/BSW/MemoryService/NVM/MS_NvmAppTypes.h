@@ -47,6 +47,15 @@ typedef struct
     uint64_t meterEnergy;
 }MSNvmMeterEnergy_Struct;
 
+typedef struct
+{
+    uint8_t isFactoryMode;       /* 是否为厂内模式 */
+    uint8_t isGBMode;            /* 是否为国标模式 */
+    uint8_t isAgingTestFinish;   /* 是否完成老化测试 */
+    uint8_t isSynTime;           /* 是否同步时间 */
+    uint32_t sysTimeStamp;       /* 同步时间戳 */
+}MSNvmModeParam_Struct;
+
 /* 订单记录 */
 typedef struct 
 {
