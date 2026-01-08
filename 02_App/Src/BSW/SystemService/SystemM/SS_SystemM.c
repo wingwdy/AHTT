@@ -21,6 +21,7 @@
 #include "Asw_Charge.h"
 #include "Asw_TempHandle.h"
 #include "Asw_VoltCurHandle.h"
+
 #include "Cdd_Relay.h"
 #include "Cdd_CP.h"
 #include "Cdd_Rcd.h"
@@ -28,6 +29,8 @@
 #include "Cdd_Sensor.h"
 #include "Cdd_MeterM.h"
 #include "Cdd_LedM.h"
+#include "Cdd_ModeM.h"
+
 #include "MS_Nvm.h"
 
 #include "Mcal_If.h" 
@@ -92,6 +95,7 @@ static void SSSystemM_InitTwo(void)
 
 static void SSSystemM_InitThree(void)
 {
+    CddModeM_InitMemory();
     CddLedM_InitMemory();
     CddMeterM_InitMemory();
     CddRelay_InitMemory();

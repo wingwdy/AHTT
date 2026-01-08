@@ -41,6 +41,7 @@ typedef enum
     DSLogMModule_VoltCur,
 
     /*CDD */
+    DSLogMModule_ModeM,
     DSLogMModule_4G,
     DSLogMModule_CP,
     DSLogMModule_Meter,

@@ -21,6 +21,7 @@
 #include "Common.h"
 #include "SysCfg.h"
 #include "DS_LogM.h"
+#include "Cdd_ModeM.h"
 
 
 /******************************************************************************
@@ -32,8 +33,8 @@
 
 #define ASWLED_CFG_LogPrint(fmt, ...)                   DSLOGM_Debug(DSLogMModule_EVSE, fmt, ##__VA_ARGS__)
 
-#define ASWLED_CFG_IsQBStandardMode()                   (FALSE)       
-#define ASWLED_CFG_IsFactoryMode()                      (FALSE)
+#define ASWLED_CFG_IsQBStandardMode()                   (CddModeM_IsGBMode() == FALSE)       
+#define ASWLED_CFG_IsFactoryMode()                      (CddModeM_IsFactoryMode() == TRUE)
 #define ASWLED_CFG_IsOTAing()                           (FALSE)          
 /******************************************************************************
 *    Enum Definition

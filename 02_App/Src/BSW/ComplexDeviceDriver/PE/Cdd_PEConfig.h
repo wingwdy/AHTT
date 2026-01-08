@@ -18,7 +18,7 @@
 *    Header File Inclusion
 ******************************************************************************/
 #include "Mcal_Adc.h"
-
+#include "Cdd_ModeM.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -36,7 +36,7 @@
 #define CDDPE_CFG_LN_REVERSE_CHECK_MAXTIME                      (5000u)
 
 
-#define CDDPE_CFG_IsQBStandardMode()                            (FALSE)
+#define CDDPE_CFG_IsQBStandardMode()                            (CddModeM_IsGBMode() == FALSE)
 #define CDDPE_CFG_AswErrHandle_PileSetErrCallback(errType)      AswErrhandle_SetErrExsitCallback(0, errType)
 #define CDDPE_CFG_AswErrHandle_PileResetErrCallback(errType)    AswErrhandle_ResetErrExsitCallback(0, errType)
 

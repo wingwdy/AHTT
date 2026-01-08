@@ -32,6 +32,7 @@
 #include "Cdd_MeterM.h"
 #include "Cdd_LedM.h"
 #include "Cdd_NetM.h"
+#include "Cdd_ModeM.h"
 
 #include "Mcal_If.h"
 
@@ -185,6 +186,7 @@ static void Task_100msA(void *arg)
 {
     while (1)
     {
+        CddModeM_MainFunction();
         CddMeterM_MainFunction();
         CddSensor_MainFunction();
         AswVoltCurHandle_MainFunction();
