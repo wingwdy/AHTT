@@ -38,6 +38,7 @@
 
 #include "DS_LogM.h"
 #include "DS_Console.h"
+#include "SS_Tm.h"
 
 #include "Common.h"
 #include "stdio.h"
@@ -83,6 +84,7 @@ static void SSSystemM_InitOne(void)
     McalIf_Init();
     DSLogM_InitMemory();
     DSConsole_Init();
+    SSTM_InitMemory();
     SSSystemM_ShowInfo();
     McalMcu_ClearResetFlags();
 }

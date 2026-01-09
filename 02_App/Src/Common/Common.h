@@ -37,7 +37,40 @@
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+/* 日期时间结构体 */
+typedef struct
+{
+    uint16_t year;
+    uint8_t month;
+    uint8_t day;
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
+    uint16_t millisecond;
+}CommonDateTime_Struct;
 
+typedef union
+{
+    uint8_t data[7];      /* 7字节数组格式 */
+    struct
+    {
+        uint16_t millisecond    : 16;   /* 毫秒 (0-59999) */
+        uint8_t  minute         : 6;    /* 分钟 (0-59) */
+        uint8_t  minute_iv      : 1;    /* 分钟无效标志 */
+        uint8_t  minute_su      : 1;    /* 分钟夏令时标志 */
+        uint8_t  hour           : 5;    /* 小时 (0-23) */
+        uint8_t  hour_iv        : 1;    /* 小时无效标志 */
+        uint8_t  hour_reserved  : 1;    /* 保留位 */
+        uint8_t  hour_su        : 1;    /* 小时夏令时标志 */
+        uint8_t  day            : 5;    /* 日期 (1-31) */
+        uint8_t  weekday        : 3;    /* 星期几 (0=周一, 1=周二, ..., 6=周日) */
+        uint8_t  month          : 4;    /* 月份 (1-12) */
+        uint8_t  month_iv       : 1;    /* 月无效标志 */
+        uint8_t  month_reserved : 3;    /* 保留位 */
+        uint8_t  year           : 7;    /* 年 (0-99, 代表2000+年份) */
+        uint8_t  year_iv        : 1;    /* 年无效标志 */
+    } field;                          /* 按字段访问 */
+} Cp56Time2a_Struct;
 
 /******************************************************************************
 *    Global variables Declaration
@@ -62,6 +95,10 @@ void Common_Uint16ToTwoUint8(uint8_t *pData, uint16_t curVal);
 uint8_t* Common_SearchData(uint8_t *pData, uint16_t dataLen, void *pString, uint16_t stringLen);
 uint16_t Common_ReplaceStr(uint8_t* pData, uint16_t nDataLen, char* cDestStr, void* pReplace, uint16_t nReplaceLen, char* pDefault);
 uint16_t Common_ReplaceNum(uint8_t* pData, uint16_t nDataLen, char* cDestStr, uint16_t replace, uint16_t defaultNum);
+
+uint32_t Common_DateTimeToTimestamp(CommonDateTime_Struct *dt);
+void Conmon_TimestampToDateTime(uint32_t timestamp, CommonDateTime_Struct *dt);
+void Common_TimestampToCp56Time2a(uint32_t timestamp, uint8_t *cp56time2a);
 #endif /* COMMON_H_ */
 
 

@@ -23,6 +23,7 @@
 #include "Asw_VoltCurHandle.h"
 
 #include "DS_Console.h"
+#include "SS_Tm.h"
 
 #include "Cdd_CP.h"
 #include "Cdd_Relay.h"
@@ -76,7 +77,7 @@ static void Task_10msB(void *arg);
 static void Task_100msA(void *arg);
 static void Task_20msA(void *arg);
 static void Task_20msB(void *arg);
-
+static void Task_1SecA(void *arg);
 
 /*******************************************************************************
 *    Global variables Declaration
@@ -88,6 +89,7 @@ static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
     {"App20msA",        Task_20msA,          NULL,         256,   4 } ,
     {"App20msB",        Task_20msB,          NULL,         1536,  5 } ,
     {"App100msA",       Task_100msA,         NULL,         512,   5 } ,
+    {"App1SecA",        Task_1SecA,          NULL,         256,   4 } ,
 };
 
 /*******************************************************************************
@@ -109,7 +111,7 @@ void portTask_ShowStackInfo(void)
 		pTaskCtr = &g_stTaskCtrBlkTable[index];
 
         uxHighWaterMark = uxTaskGetStackHighWaterMark(pTaskCtr->taskHandle);
-        PORTTASK_CFG_LogPrint("线程名: %s, \t总分配: %4d 字节, \t剩余: %4d 字节, \t空置率: %d%% \r\n", 
+        PORTTASK_CFG_LogPrint("线程名: %s,\t\t总分配: %4d 字节, \t剩余: %4d 字节, \t空置率: %d%% \r\n", 
             pTaskCtr->cTaskName, pTaskCtr->usStackDepth * 4, uxHighWaterMark * 4, uxHighWaterMark * 100 / pTaskCtr->usStackDepth);
     }
 
@@ -192,6 +194,15 @@ static void Task_100msA(void *arg)
         AswVoltCurHandle_MainFunction();
         AswTempHandle_MainFunction();
         vTaskDelay(100);
+    }
+}
+
+static void Task_1SecA(void *arg)
+{
+    while (1)
+    {
+        SSTM_MainFunction();
+        vTaskDelay(1000);
     }
 }
 

@@ -19,6 +19,7 @@
 #include "AT_Module.h"
 #include "Cdd_Drv_EG800AK.h"
 #include "AT_TCP.h"
+#include "SS_Tm.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -55,6 +56,8 @@ static uint8_t ATModule_RecvOKACK(uint8_t socketID, void * modulePara, uint8_t *
 static uint8_t ATModule_RecvPDPState(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen);
 
 static void ATModule_FailHandle(uint8_t socketID, void * modulePara, uint8_t atTaskID);
+
+static void ATModule_UrcNtp(uint8_t *pData, void * modulePara, uint16_t dataLen);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -85,7 +88,7 @@ const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
     NULL,                                      ATModule_RecvCSQ,              NULL},
 
     [eATModuleCmd_QueryNtpClk] =  
-    { "AT+QNTP=1,\"ntp1.aliyun.com\"\r\n",    "+QNTP:",           3,          5000,     3000,  TRUE, "查询NTP时间",
+    { "AT+QNTP=1,\"ntp1.aliyun.com\"\r\n",    "+QNTP=",           3,          5000,     3000,  TRUE, "查询NTP时间",
     NULL,                                      NULL,                NULL},
 
     [eATModuleCmd_QueryCGREG] =  
@@ -125,7 +128,7 @@ const ATUrcDescribtor_Struct c_stATUrcDescribtor[5] =
 {
     [0] = { "+QIOPEN:",             ATTCP_UrcQIPOpen,    TRUE,    "建立连接"},
     [1] = { "SEND OK",              ATTCP_UrcSendOK,     FALSE,   "数据发送成功"},
-    [2] = { "+QNTP:",               NULL,                TRUE,    "网络时间同步"},
+    [2] = { "+QNTP:",               ATModule_UrcNtp,     TRUE,    "网络时间同步"},
     [3] = { "+QIURC: \"closed\"",   ATTCP_UrcClose,      TRUE,    "断开连接"},
 };
 
@@ -133,6 +136,32 @@ const ATUrcDescribtor_Struct c_stATUrcDescribtor[5] =
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
+static void ATModule_UrcNtp(uint8_t *pData, void * modulePara, uint16_t dataLen)
+{
+	uint8_t *pTemp = NULL;
+	int32_t time[7] = {0};
+	uint32_t tmp_year = 0;
+    int32_t s32Temp;
+    CommonDateTime_Struct dateTime = { 0 };
+
+	pTemp = Common_SearchData(pData, dataLen, "+QNTP:", strlen("+QNTP:"));
+
+	if (NULL != pTemp)
+	{
+        sscanf((char*)pTemp,"+QNTP: %d,\"%d/%d/%d,%d:%d:%d+\r\n", &s32Temp, &tmp_year,
+                &time[2],&time[3],&time[4],&time[5],&time[6]);
+
+        dateTime.year = tmp_year;
+        dateTime.month = time[2];
+        dateTime.day = time[3];
+        dateTime.hour = time[4] + 8;
+        dateTime.minute = time[5];
+        dateTime.second = time[6];
+        dateTime.millisecond = 0;
+        SSTM_SynTimeByDateTime(&dateTime);
+	}
+}
+
 static uint16_t ATModule_PackConfigAPN(uint8_t socketIndex, void * modulePara, uint8_t *pData, uint16_t nATLen)
 {
     CddDrvEG800AKCtrl_Struct *pModulePara = (CddDrvEG800AKCtrl_Struct *)modulePara;

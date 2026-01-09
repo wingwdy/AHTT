@@ -20,6 +20,7 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "Mcal_Uart.h"
+#include "SS_Tm.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -73,10 +74,15 @@ static void DSLogM_OutputFilter(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum
 *******************************************************************************/
 static void DSLogM_OutputFilter(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum eLevel, const char *fmt, va_list args)
 {
+    char timestr[32] = { 0 };
+    uint16_t tempLen = 0;
     uint16_t dataLen = 0;
+    SSTM_GetTimeStr(timestr);
+    sprintf((char *)g_stLogMCtrl.cacheBuf, "[%s]", timestr);
 
-    dataLen = vsnprintf((char *)g_stLogMCtrl.cacheBuf, DSLOGM_CFG_ASYN_BUFF_SIZE, fmt, args);
-    McalUart_WriteData(eMcalUartChanel_Debug, g_stLogMCtrl.cacheBuf, dataLen);
+    tempLen = strlen((char *)g_stLogMCtrl.cacheBuf);
+    dataLen = vsnprintf((char *)g_stLogMCtrl.cacheBuf + tempLen, DSLOGM_CFG_ASYN_BUFF_SIZE, fmt, args);
+    McalUart_WriteData(eMcalUartChanel_Debug, g_stLogMCtrl.cacheBuf, dataLen + tempLen);
 }
 
 const char* DSLogM_GetModuleName(DSLogMModule_Enum eModule)

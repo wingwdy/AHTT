@@ -1,5 +1,5 @@
 /******************************************************************************
-* File Name          : template_Config.h
+* File Name          : template.h
 * Description        : Code for xxxxxxxxxxx
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
@@ -11,14 +11,12 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef CDD_MODEM_H_
-#define CDD_MODEM_H_
-
+#ifndef SS_TM_H_
+#define SS_TM_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Cdd_NetM.h"
-
+#include "Common.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -34,7 +32,6 @@
 ******************************************************************************/
 
 
-
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
@@ -44,17 +41,15 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void CddModeM_InitMemory(void);
-void CddModeM_MainFunction(void);
-
-uint8_t CddModeM_IsGBMode(void);
-uint8_t CddModeM_IsFactoryMode(void);
-void CddModeM_EnterGBMode(void);
-void CddModeM_ExitGBMode(void);
-void CddModeM_EnterFactoryMode(void);
-void CddModeM_ExsitFactoryMode(void);
+void SSTM_SynTimeBySecTimeStamp(uint32_t neWSecTimeStamp);
+void SSTM_SynTimeByDateTime(CommonDateTime_Struct *pTime);
+void SSTM_MainFunction(void);
+void SSTM_InitMemory(void);
+uint32_t SSTM_GetSecTimestamp(void);
+uint32_t SSTM_GetMsecTimestamp(void);
+uint8_t SSTM_GetSyncTimeFlag(void);
+void SSTM_GetTimeStr(char *pTimeStr);
 #endif
-
 
 
 

@@ -21,7 +21,7 @@
 #include "Cdd_MeterM.h"
 #include "Cdd_ModeMConfig.h"
 #include "MS_Nvm.h"
-
+#include "SS_Tm.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -110,8 +110,46 @@ static uint8_t CddModeM_CheckEnterFactoryModeCondition(void)
     return g_stCddModeMCtx.fctPinStatusFilter.validStatus;
 }
 
+static uint8_t CddModeM_CheckExsitFactoryModeCondition(void)
+{
+    uint32_t currentTimeStamp = 0;
+    uint8_t exsitFlag = FALSE;
+    uint32_t timeDiff = 0;
 
+    if (g_stCddModeMCtx.modeParam.isSynTime == FALSE)
+    {
+        if (SSTM_GetSyncTimeFlag() == TRUE)
+        {
+            g_stCddModeMCtx.modeParam.isSynTime = TRUE;
+            g_stCddModeMCtx.modeParam.sysTimeStamp = SSTM_GetSecTimestamp();
+            MSNvm_WriteParaBlock(eMSNvmBlockID_ModeParam, (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct));
+        }
+    }
+    else
+    {
+        if (SSTM_GetSyncTimeFlag() == TRUE)
+        {
+            currentTimeStamp = SSTM_GetSecTimestamp();
 
+            if (currentTimeStamp >= g_stCddModeMCtx.modeParam.sysTimeStamp)
+            {
+                timeDiff = currentTimeStamp - g_stCddModeMCtx.modeParam.sysTimeStamp;
+            }
+            else
+            {
+                timeDiff = (0xFFFFFFFF - g_stCddModeMCtx.modeParam.sysTimeStamp) + currentTimeStamp;
+            }
+
+            if (timeDiff >= CDD_MODEM_CFG_FACTORY_TIMEOUT)
+            {
+                CDDMODE_CFG_LogPrint("进入产线超过72小时!!\r\n");
+                exsitFlag = TRUE;
+            }
+        }
+    }
+
+    return exsitFlag;
+}
 
 void CddModeM_InitMemory(void)
 {
@@ -120,7 +158,7 @@ void CddModeM_InitMemory(void)
     if (eGlobalRet_OK != MSNvm_ReadParaBlock(eMSNvmBlockID_ModeParam, 
         (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct)))
     {
-        CDDCP_CFG_LogPrint("读取模式参数失败!\r\n");
+        CDDMODE_CFG_LogPrint("读取模式参数失败!\r\n");
     }
 }
 
@@ -128,7 +166,12 @@ void CddModeM_MainFunction(void)
 {
     if (g_stCddModeMCtx.modeParam.isFactoryMode == TRUE)
     {
-        CddModeM_AgingTestHandle(); 
+        CddModeM_AgingTestHandle();
+
+        if (TRUE == CddModeM_CheckExsitFactoryModeCondition())
+        {
+            CddModeM_ExsitFactoryMode();
+        }
     }
     else
     {
@@ -143,13 +186,13 @@ void CddModeM_EnterFactoryMode(void)
 { 
     if (g_stCddModeMCtx.modeParam.isFactoryMode == FALSE)
     {
-        CDDCP_CFG_LogPrint("进入厂内模式!\r\n");
+        CDDMODE_CFG_LogPrint("进入厂内模式!\r\n");
         g_stCddModeMCtx.modeParam.isFactoryMode = TRUE;
         MSNvm_WriteParaBlock(eMSNvmBlockID_ModeParam, (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct));
     }
     else
     {
-        CDDCP_CFG_LogPrint("已在厂内模式!\r\n");
+        CDDMODE_CFG_LogPrint("已在厂内模式!\r\n");
     }
 }
 
@@ -157,52 +200,54 @@ void CddModeM_ExsitFactoryMode(void)
 { 
     if (g_stCddModeMCtx.modeParam.isFactoryMode == TRUE)
     {
-        CDDCP_CFG_LogPrint("退出厂内模式!\r\n");
+        CDDMODE_CFG_LogPrint("退出厂内模式!\r\n");
         g_stCddModeMCtx.modeParam.isFactoryMode = FALSE;
+        g_stCddModeMCtx.modeParam.isSynTime = FALSE;
+        g_stCddModeMCtx.modeParam.sysTimeStamp = 0;
         MSNvm_WriteParaBlock(eMSNvmBlockID_ModeParam, (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct));
     }
     else
     {
-        CDDCP_CFG_LogPrint("已退出厂内模式!\r\n");
+        CDDMODE_CFG_LogPrint("已退出厂内模式!\r\n");
     }
 }
 
 void CddModeM_ExitGBMode(void)
 { 
-    if (g_stCddModeMCtx.modeParam.isGBMode == TRUE)
+    if (g_stCddModeMCtx.modeParam.isQBMode == FALSE)
     {
-        CDDCP_CFG_LogPrint("进入兼容模式!\r\n");
-        g_stCddModeMCtx.modeParam.isGBMode = FALSE;
+        CDDMODE_CFG_LogPrint("进入兼容模式!\r\n");
+        g_stCddModeMCtx.modeParam.isQBMode = TRUE;
         MSNvm_WriteParaBlock(eMSNvmBlockID_ModeParam, (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct));
     }
     else
     {
-        CDDCP_CFG_LogPrint("已在兼容模式!\r\n");
+        CDDMODE_CFG_LogPrint("已在兼容模式!\r\n");
     }
 }
 
 void CddModeM_EnterGBMode(void)
 { 
-    if (g_stCddModeMCtx.modeParam.isGBMode == FALSE)
+    if (g_stCddModeMCtx.modeParam.isQBMode == TRUE)
     {
-        CDDCP_CFG_LogPrint("进入国标模式!\r\n");
-        g_stCddModeMCtx.modeParam.isGBMode = TRUE;
+        CDDMODE_CFG_LogPrint("进入国标模式!\r\n");
+        g_stCddModeMCtx.modeParam.isQBMode = FALSE;
         MSNvm_WriteParaBlock(eMSNvmBlockID_ModeParam, (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct));
     }
     else
     {
-        CDDCP_CFG_LogPrint("已在国标模式!\r\n");
+        CDDMODE_CFG_LogPrint("已在国标模式!\r\n");
     }
 }
 
 uint8_t CddModeM_IsFactoryMode(void)
-{
+{  
     return g_stCddModeMCtx.modeParam.isFactoryMode;
 }
 
 uint8_t CddModeM_IsGBMode(void)
 {
-    return g_stCddModeMCtx.modeParam.isGBMode;
+    return (g_stCddModeMCtx.modeParam.isQBMode == FALSE);
 }
 
 uint8_t CddModeM_IsAgingTestFinish(void)

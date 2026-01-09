@@ -28,9 +28,11 @@
 #define CDD_MODEM_CFG_AGING_TEST_CURRENT_THRESHOLD         (28000U)
 #define CDD_MODEM_CFG_AGING_TEST_TIMEOUT                   (27 * 60000U)
 
+#define CDD_MODEM_CFG_FACTORY_TIMEOUT                      (72 * 3600)
+
 #define CDD_MODEM_CFG_FCT_FILTER_POINT                     (300 / CDD_MODEM_CFG_CALL_CYCLE)
 
-#define CDDCP_CFG_LogPrint(fmt, ...)                       DSLOGM_Debug(DSLogMModule_ModeM, fmt, ##__VA_ARGS__)
+#define CDDMODE_CFG_LogPrint(fmt, ...)                     DSLOGM_Debug(DSLogMModule_ModeM, fmt, ##__VA_ARGS__)
 
 
 /******************************************************************************

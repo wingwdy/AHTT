@@ -50,7 +50,7 @@ typedef struct
 typedef struct
 {
     uint8_t isFactoryMode;       /* 是否为厂内模式 */
-    uint8_t isGBMode;            /* 是否为国标模式 */
+    uint8_t isQBMode;            /* 是否为国标模式 0-表示国标模式 */
     uint8_t isAgingTestFinish;   /* 是否完成老化测试 */
     uint8_t isSynTime;           /* 是否同步时间 */
     uint32_t sysTimeStamp;       /* 同步时间戳 */

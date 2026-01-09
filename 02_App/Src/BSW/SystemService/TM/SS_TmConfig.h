@@ -11,17 +11,24 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef CDD_MODEM_H_
-#define CDD_MODEM_H_
+#ifndef SS_TM_CONFIG_H_
+#define SS_TM_CONFIG_H_
+
+/******************************************************************************
+* Include Files
+******************************************************************************/
+
 
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Cdd_NetM.h"
+
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+#define TM_SYNC_THRESHOLD_SECONDS       5U        /* 对时阈值，时间差小于5秒则不进行对时 */
+
 
 
 /******************************************************************************
@@ -44,16 +51,8 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void CddModeM_InitMemory(void);
-void CddModeM_MainFunction(void);
+#endif /* SS_TM_CONFIG_H_ */
 
-uint8_t CddModeM_IsGBMode(void);
-uint8_t CddModeM_IsFactoryMode(void);
-void CddModeM_EnterGBMode(void);
-void CddModeM_ExitGBMode(void);
-void CddModeM_EnterFactoryMode(void);
-void CddModeM_ExsitFactoryMode(void);
-#endif
 
 
 

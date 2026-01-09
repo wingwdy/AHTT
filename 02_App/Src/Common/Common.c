@@ -23,7 +23,38 @@
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
+#define COMMON_IsLeapYear(year)   (((year) % 4 == 0 && (year) % 100 != 0) || (year) % 400 == 0)
 
+/* CP56TIME2A格式定义 */
+#define COMMON_CP56TIME2A_MS_LSB_OFFSET      0         /* 毫秒低字节偏移 */
+#define COMMON_CP56TIME2A_MS_MSB_OFFSET      1         /* 毫秒高字节偏移 */
+#define COMMON_CP56TIME2A_MINUTE_OFFSET      2         /* 分钟偏移 */
+#define COMMON_CP56TIME2A_HOUR_OFFSET        3         /* 小时偏移 */
+#define COMMON_CP56TIME2A_DAY_OFFSET         4         /* 日偏移 */
+#define COMMON_CP56TIME2A_MONTH_OFFSET       5         /* 月偏移 */
+#define COMMON_CP56TIME2A_YEAR_OFFSET        6         /* 年偏移 */
+
+/* CP56TIME2A字段掩码 */
+#define COMMON_CP56TIME2A_MINUTE_MASK        0x3F      /* 分钟掩码 (0-59) */
+#define COMMON_CP56TIME2A_MINUTE_IV_MASK     0x40      /* 无效标志位 */
+#define COMMON_CP56TIME2A_MINUTE_SU_MASK     0x80      /* 夏令时标志位 */
+#define COMMON_CP56TIME2A_HOUR_MASK          0x1F      /* 小时掩码 (0-23) */
+#define COMMON_CP56TIME2A_HOUR_IV_MASK       0x20      /* 无效标志位 */
+#define COMMON_CP56TIME2A_HOUR_SU_MASK       0x80      /* 夏令时标志位 */
+#define COMMON_CP56TIME2A_DAY_MASK           0x1F      /* 日掩码 (1-31) */
+#define COMMON_CP56TIME2A_DAY_WDAY_MASK      0xE0      /* 星期几掩码 */
+#define COMMON_CP56TIME2A_MONTH_MASK         0x0F      /* 月掩码 (1-12) */
+#define COMMON_CP56TIME2A_MONTH_IV_MASK      0x10      /* 无效标志位 */
+#define COMMON_CP56TIME2A_YEAR_MASK          0x7F      /* 年掩码 (0-99, 代表2000+年份) */
+#define COMMON_CP56TIME2A_YEAR_IV_MASK       0x80      /* 无效标志位 */
+
+/* CP56TIME2A质量标志位定义 */
+#define COMMON_CP56TIME2A_MINUTE_IV          0x40      /* 分钟无效标志 */
+#define COMMON_CP56TIME2A_MINUTE_SU          0x80      /* 分钟夏令时标志 */
+#define COMMON_CP56TIME2A_HOUR_IV            0x20      /* 小时无效标志 */    
+#define COMMON_CP56TIME2A_HOUR_SU            0x80      /* 小时夏令时标志 */
+#define COMMON_CP56TIME2A_MONTH_IV           0x10      /* 月无效标志 */
+#define COMMON_CP56TIME2A_YEAR_IV            0x80      /* 年无效标志 */
 
 /*******************************************************************************
 *    Enum Definition
@@ -85,6 +116,10 @@ static const uint8_t c_CRCLowByte[] =
     0x40
 };
 
+static const uint8_t c_daysInMonth[2][12] = {
+    {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},  /* 非闰年 */
+    {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}   /* 闰年 */
+};
 
 /*******************************************************************************
 *    Static Local Functions Declaration
@@ -95,6 +130,161 @@ static const uint8_t c_CRCLowByte[] =
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
+static uint8_t Common_IsLeapYear(uint16_t year)
+{
+    return COMMON_IsLeapYear(year) ? 1 : 0;
+}
+
+static uint8_t Common_DaysInMonth(uint16_t year, uint8_t month)
+{
+    if (month < 1 || month > 12)
+    {
+        return 0;
+    }
+    
+    return c_daysInMonth[Common_IsLeapYear(year)][month - 1];
+}
+
+static uint32_t Common_DateToDays(uint16_t year, uint8_t month, uint8_t day)
+{
+    uint32_t days = 0;
+    uint16_t y;
+    
+    // 从1970年开始计算
+    for (y = 1970; y < year; y++)
+    {
+        days += Common_IsLeapYear(y) ? 366 : 365;
+    }
+    
+    // 加上当年的月份天数
+    for (y = 1; y < month; y++)
+    {
+        days += Common_DaysInMonth(year, y);
+    }
+    
+    // 加上当月天数
+    days += day - 1; // 减1是因为当天也要计算
+    return days;
+}
+
+static void Common_DaysToDate(uint32_t days, CommonDateTime_Struct *dt)
+{
+    uint16_t year = 1970;
+    uint8_t month = 1;
+    uint8_t day = 1;
+    
+    // 计算年份
+    while (days >= (Common_IsLeapYear(year) ? 366 : 365))
+    {
+        days -= (Common_IsLeapYear(year) ? 366 : 365);
+        year++;
+    }
+    
+    // 计算月份
+    while (days >= Common_DaysInMonth(year, month))
+    {
+        days -= Common_DaysInMonth(year, month);
+        month++;
+    }
+    
+    // 计算日期
+    day = (uint8_t)(days + 1);
+    
+    dt->year = year;
+    dt->month = month;
+    dt->day = day;
+}
+
+
+static uint8_t Common_GetCp56Time2aWeekday(uint32_t days)
+{
+    // 1970年1月1日是星期四, 在CP56TIME2A中索引为3 (在CP56TIME2A中是3，因为0表示周一)
+    return (days + 3) % 7; 
+}
+
+uint32_t Common_DateTimeToTimestamp(CommonDateTime_Struct *dt)
+{
+    uint32_t timestamp = 0;
+    uint32_t days = 0;
+    
+    // 计算日期部分的天数
+    days = Common_DateToDays(dt->year, dt->month, dt->day);
+    
+    // 转换为时间戳 (天数 * 24小时 * 3600秒 + 小时 * 3600 + 分钟 * 60 + 秒)
+    timestamp = days * 86400UL;
+    timestamp += dt->hour * 3600UL;
+    timestamp += dt->minute * 60UL;
+    timestamp += dt->second;
+    
+    return timestamp;
+}
+
+void Conmon_TimestampToDateTime(uint32_t timestamp, CommonDateTime_Struct *dt)
+{
+    uint32_t days = timestamp / 86400UL;
+    uint32_t remainder = timestamp % 86400UL;
+    
+    // 计算日期部分
+    Common_DaysToDate(days, dt);
+    
+    // 计算时间部分
+    dt->hour = (uint8_t)(remainder / 3600);
+    remainder %= 3600;
+    dt->minute = (uint8_t)(remainder / 60);
+    dt->second = (uint8_t)(remainder % 60);
+    dt->millisecond = 0; // 时间戳本身不包含毫秒
+}
+
+void Common_TimestampToCp56Time2a(uint32_t timestamp, uint8_t *cp56time2a)
+{
+    uint8_t qualityFlags = 0;
+    CommonDateTime_Struct dt;
+    uint16_t milliSec = 0; // 假设毫秒为0
+    uint32_t days;
+
+    // 将时间戳转换为日期时间结构
+    Conmon_TimestampToDateTime(timestamp, &dt);
+
+     // 计算从1970年1月1日到指定日期的天数
+    days = Common_DateToDays(dt.year, dt.month, dt.day);
+    
+    // 填充CP56TIME2A格式
+    // 毫秒 (低字节)COMMON_
+    cp56time2a[COMMON_CP56TIME2A_MS_LSB_OFFSET] = (uint8_t)(milliSec & 0xFF);
+    // 毫秒 (高字节)
+    cp56time2a[COMMON_CP56TIME2A_MS_MSB_OFFSET] = (uint8_t)((milliSec >> 8) & 0xFF);
+    // 分钟 (加上质量标志位)
+    cp56time2a[COMMON_CP56TIME2A_MINUTE_OFFSET] = (dt.minute & COMMON_CP56TIME2A_MINUTE_MASK) | qualityFlags;
+    // 小时 (加上质量标志位)
+    cp56time2a[COMMON_CP56TIME2A_HOUR_OFFSET] = (dt.hour & COMMON_CP56TIME2A_HOUR_MASK) | qualityFlags;
+    // 日 (加上星期几信息)
+    cp56time2a[COMMON_CP56TIME2A_DAY_OFFSET] = (dt.day & COMMON_CP56TIME2A_DAY_MASK) | ((Common_GetCp56Time2aWeekday(days) & 0x07) << 5);
+    // 月 (加上无效标志)
+    cp56time2a[COMMON_CP56TIME2A_MONTH_OFFSET] = (dt.month & COMMON_CP56TIME2A_MONTH_MASK) | qualityFlags;
+    // 年 (加上无效标志)
+    cp56time2a[COMMON_CP56TIME2A_YEAR_OFFSET] = ((dt.year - 2000) & COMMON_CP56TIME2A_YEAR_MASK) | qualityFlags;
+}
+
+uint32_t Common_Cp56Time2aToTimestamp(const uint8_t *cp56time2a)
+{
+    CommonDateTime_Struct dt = {0};
+    uint32_t timestamp;
+
+    // 解析CP56TIME2A格式
+    dt.millisecond = ((uint16_t)cp56time2a[COMMON_CP56TIME2A_MS_MSB_OFFSET] << 8) | 
+                     cp56time2a[COMMON_CP56TIME2A_MS_LSB_OFFSET];
+    dt.minute = cp56time2a[COMMON_CP56TIME2A_MINUTE_OFFSET] & COMMON_CP56TIME2A_MINUTE_MASK;
+    dt.hour = cp56time2a[COMMON_CP56TIME2A_HOUR_OFFSET] & COMMON_CP56TIME2A_HOUR_MASK;
+    dt.day = cp56time2a[COMMON_CP56TIME2A_DAY_OFFSET] & COMMON_CP56TIME2A_DAY_MASK;
+    dt.month = cp56time2a[COMMON_CP56TIME2A_MONTH_OFFSET] & COMMON_CP56TIME2A_MONTH_MASK;
+    dt.year = (cp56time2a[COMMON_CP56TIME2A_YEAR_OFFSET] & COMMON_CP56TIME2A_YEAR_MASK) + 2000;
+    
+    // 将日期时间转换为时间戳
+    timestamp = Common_DateTimeToTimestamp(&dt);
+    return timestamp;
+}
+
+
 uint16_t Common_CalcCRC16(uint8_t *pData, uint16_t dataLen)
 {
     uint8_t crcHi = 0xFF;                            
