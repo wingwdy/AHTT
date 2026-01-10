@@ -48,6 +48,11 @@ static void MSNvmConfig_DefaultGun0Qrcode(uint8_t *pIndata, uint16_t dataLen);
 static void MSNvmConfig_DefaultGun0MeterEnergy(uint8_t *pIndata, uint16_t dataLen);
 static void MSNvmConfig_DefaultGun0OrderInfo(uint8_t *pIndata, uint16_t dataLen);
 static void MSNvmConfig_DefaultModeParam(uint8_t *pIndata, uint16_t dataLen);
+static void MSNvmConfig_MeterCaliParam(uint8_t *pIndata, uint16_t dataLen);
+static void MSNvmConfig_PlatParam(uint8_t *pIndata, uint16_t dataLen);
+static void MSNvmConfig_PlatPrivateParam(uint8_t *pIndata, uint16_t dataLen);
+
+
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -55,9 +60,9 @@ static uint8_t g_MSNvmQrcodeRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmDrcode_Struct) +
 static uint8_t g_MSNvmOrderInfoRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmOrderInfo_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 static uint8_t g_MSNvmMeterEnergyRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmMeterEnergy_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 static uint8_t g_MSNvmModeParamRam[sizeof(MSNvmModeParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
-
-
-
+static uint8_t g_MSNvmMeterCaliParam[sizeof(MSNvmMeterCaliParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
+static uint8_t g_MSNvmPlatParam[sizeof(MSNvmPlatParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
+static uint8_t g_MSNvmPlatPrivateParam[sizeof(MSNvmPlatPrivateParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 
 const MSNvmBlockDescriptor_Struct c_stMSNvmBlockDescriptorTable[eMSNvmBlockID_Count] = 
 {
@@ -96,6 +101,33 @@ const MSNvmBlockDescriptor_Struct c_stMSNvmBlockDescriptorTable[eMSNvmBlockID_Co
         .deviceID = MSMEMIF_DEVICE_EA_KVDB,
         .memIfID = eKVDBAdaptChannel_ModeParam,
         .pFuncDefault = MSNvmConfig_DefaultModeParam,
+    },
+
+    [eMSNvmBlockID_MeterCaliParam] = 
+    {
+        .blockSize = sizeof(MSNvmMeterCaliParam_Struct),
+        .ramBlockDataAddr = g_MSNvmMeterCaliParam,
+        .deviceID = MSMEMIF_DEVICE_EA_KVDB,
+        .memIfID = eKVDBAdaptChannel_MeterCaliParam,
+        .pFuncDefault = MSNvmConfig_MeterCaliParam,
+    },
+
+    [eMSNvmBlockID_PlatParam] = 
+    {
+        .blockSize = sizeof(MSNvmPlatParam_Struct),
+        .ramBlockDataAddr = g_MSNvmPlatParam,
+        .deviceID = MSMEMIF_DEVICE_EA_KVDB,
+        .memIfID = eKVDBAdaptChannel_PlatParam,
+        .pFuncDefault = MSNvmConfig_PlatParam,
+    },
+
+    [eMSNvmBlockID_PlatPrivateParam] = 
+    {
+        .blockSize = sizeof(MSNvmPlatPrivateParam_Struct),
+        .ramBlockDataAddr = g_MSNvmPlatPrivateParam,
+        .deviceID = MSMEMIF_DEVICE_EA_KVDB,
+        .memIfID = eKVDBAdaptChannel_PlatPrivateParam,
+        .pFuncDefault = MSNvmConfig_PlatPrivateParam,
     },
 
     /* TSDB */
@@ -140,11 +172,20 @@ static void MSNvmConfig_DefaultModeParam(uint8_t *pIndata, uint16_t dataLen)
     memset(pIndata, 0x00, dataLen);
 }
 
+static void MSNvmConfig_MeterCaliParam(uint8_t *pIndata, uint16_t dataLen)
+{
+    memset(pIndata, 0x00, dataLen);
+}
 
+static void MSNvmConfig_PlatParam(uint8_t *pIndata, uint16_t dataLen)
+{
+    memset(pIndata, 0x00, dataLen);
+}
 
-
-
-
+static void MSNvmConfig_PlatPrivateParam(uint8_t *pIndata, uint16_t dataLen)
+{
+    memset(pIndata, 0x00, dataLen);
+}
 
 
 

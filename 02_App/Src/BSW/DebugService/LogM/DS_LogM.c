@@ -75,9 +75,12 @@ static void DSLogM_OutputFilter(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum
 static void DSLogM_OutputFilter(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum eLevel, const char *fmt, va_list args)
 {
     char timestr[32] = { 0 };
+    char msStr[8] = { 0 };
     uint16_t tempLen = 0;
     uint16_t dataLen = 0;
     SSTM_GetTimeStr(timestr);
+    sprintf(msStr, ".%03d", Common_GetSystick() % 1000);
+    strcat(timestr, msStr);
     sprintf((char *)g_stLogMCtrl.cacheBuf, "[%s]", timestr);
 
     tempLen = strlen((char *)g_stLogMCtrl.cacheBuf);

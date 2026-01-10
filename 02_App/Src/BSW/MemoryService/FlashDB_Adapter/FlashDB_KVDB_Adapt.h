@@ -32,8 +32,16 @@ typedef enum
 	eKVDBAdaptChannel_Gun0OrderInfo,
 	eKVDBAdaptChannel_Gun0MeterEnergy,
 	eKVDBAdaptChannel_ModeParam,
+	eKVDBAdaptChannel_MeterCaliParam,
+	eKVDBAdaptChannel_PlatParam,
+	eKVDBAdaptChannel_PlatPrivateParam,
 	eKVDBAdaptChannel_Count,
 }KVDBAdaptChannel_Enum;
+
+
+
+
+
 
 /******************************************************************************
 *    Typedef Definition
