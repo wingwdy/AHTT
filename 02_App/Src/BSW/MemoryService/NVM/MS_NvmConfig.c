@@ -18,9 +18,12 @@
 *    Header File Inclusion
 *******************************************************************************/
 #include "MS_NvmConfig.h"
-#include "MS_Nvm.h"
+#include "MS_Nvm.h"                                 
 #include "MS_NvmAppTypes.h"
 #include "MS_MemIf.h"
+
+
+#include "Asw_PlatM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -179,7 +182,7 @@ static void MSNvmConfig_MeterCaliParam(uint8_t *pIndata, uint16_t dataLen)
 
 static void MSNvmConfig_PlatParam(uint8_t *pIndata, uint16_t dataLen)
 {
-    memset(pIndata, 0x00, dataLen);
+    AswPlatM_DefaultPlatParam(pIndata);
 }
 
 static void MSNvmConfig_PlatPrivateParam(uint8_t *pIndata, uint16_t dataLen)

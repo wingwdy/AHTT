@@ -19,6 +19,11 @@
 #include "DS_ConsoleConfig.h"
 
 #include "Asw_Charge.h"
+#include "Asw_PlatM.h"
+
+
+
+
 #include "Mcal_Mcu.h"
 #include "PortTask.h"
 #include "Cdd_ModeM.h"
@@ -57,9 +62,17 @@ static int32_t DSConsoleCfg_ChargeCtrl(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_ShowStack(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_EnterFactoryMode(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_HandleGbMode(int32_t argc, char *argv[]);
+static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[]);
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
+DSCONSOLE_CFG_ADD_CMD(reboot,        DSConsoleCfg_Reboot, "reboot" reboot system);
+DSCONSOLE_CFG_ADD_CMD(charge,        DSConsoleCfg_ChargeCtrl, "charge start/stop 0/1" start/stop charge);
+DSCONSOLE_CFG_ADD_CMD(showStack,     DSConsoleCfg_ShowStack, "showStack" show stack info);
+DSCONSOLE_CFG_ADD_CMD(testmode,      DSConsoleCfg_EnterFactoryMode, "testmode" Enter factoryMode);
+DSCONSOLE_CFG_ADD_CMD(gbmode,        DSConsoleCfg_HandleGbMode, "gbmode 1 / 2" EnterGbMode/ExsitGbMode);
+DSCONSOLE_CFG_ADD_CMD(set,           DSConsoleCfg_SetPara, "set xxx" set param);
+
 static int32_t DSConsoleCfg_Reboot(int32_t argc, char *argv[])
 {
     McalMcu_SystemReset();
@@ -68,7 +81,6 @@ static int32_t DSConsoleCfg_Reboot(int32_t argc, char *argv[])
 
 static int32_t DSConsoleCfg_ChargeCtrl(int32_t argc, char *argv[])
 {
-    int32_t ret = 0;
     uint8_t port = 0;
 
     if (argc == 3)
@@ -84,16 +96,10 @@ static int32_t DSConsoleCfg_ChargeCtrl(int32_t argc, char *argv[])
             AswCharge_StopAuth(port);
         }
         else
-        {
-            ret = -1;
-        }
-    }
-    else
-    {
-        ret = -1;
+        {}
     }
 
-    return ret;
+    return 0;
 }
 
 static int32_t DSConsoleCfg_ShowStack(int32_t argc, char *argv[])
@@ -131,11 +137,110 @@ static int32_t DSConsoleCfg_HandleGbMode(int32_t argc, char *argv[])
     return 0;
 }
 
-DSCONSOLE_CFG_ADD_CMD(reboot,        DSConsoleCfg_Reboot, "reboot" reboot system);
-DSCONSOLE_CFG_ADD_CMD(charge,        DSConsoleCfg_ChargeCtrl, "charge start/stop 0/1" start/stop charge);
-DSCONSOLE_CFG_ADD_CMD(showStack,     DSConsoleCfg_ShowStack, "showStack" show stack info);
-DSCONSOLE_CFG_ADD_CMD(testmode,      DSConsoleCfg_EnterFactoryMode, "testmode" Enter factoryMode);
-DSCONSOLE_CFG_ADD_CMD(gbmode,        DSConsoleCfg_HandleGbMode, "gbmode 1 / 2" EnterGbMode/ExsitGbMode);
+static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
+{
+    int32_t port = 0;
+    uint8_t *pTemp = NULL;
+    uint8_t setResult = FALSE;
+
+    if (argc == 3)
+    {
+        /* 设置平台桩号 */
+        if (0 == strcmp(argv[1], "dn"))
+        {
+            if (TRUE == AswPlatM_SetPileDn(argv[2], strlen(argv[2])))
+            {
+                DSCONSOLE_CFG_LogPrint("Set PileDn: \"%s\" ok!\r\n", argv[2]);
+            }
+            else
+            {
+                DSCONSOLE_CFG_LogPrint("Set PileDn failed!\r\n");
+            }
+        }
+        /* 设置运维桩号 */
+        else if (0 == strcmp(argv[1], "odn"))
+        {
+            if (TRUE == AswPlatM_SetFixPileDn(argv[2], strlen(argv[2])))
+            {
+                DSCONSOLE_CFG_LogPrint("Set PileOdn: \"%s\" ok!\r\n", argv[2]);
+            }
+            else
+            {
+                DSCONSOLE_CFG_LogPrint("Set PileOdn failed!\r\n");
+            }
+        }
+        else if (0 == strcmp(argv[1], "plat"))
+        {
+            char platName[16 + 1] = {0};
+
+            if (sscanf(argv[2], "%16s", platName) == 1)
+            {
+                if (TRUE == AswPlatM_SetPlatType(platName))
+                {
+                    setResult = TRUE;
+                    DSCONSOLE_CFG_LogPrint("Set plat: \"%s\" ok!\r\n", platName);
+                }
+            }
+
+            if (setResult == FALSE)
+            {
+                DSCONSOLE_CFG_LogPrint("Set plat failed!\r\n");
+            } 
+        }
+        /* 设置参数 */
+        else if (0 == strcmp(argv[1], "para"))
+        {
+            /* 设置IP端口 */
+            if (NULL != (pTemp = Common_SearchData((uint8_t *)argv[2], strlen(argv[2]), "ip:", strlen("ip:"))))
+            {
+                pTemp += strlen("ip:");
+
+                if (strlen((char *)pTemp) < CDD_NETM_CFG_IP_LEN)
+                {
+                    char ip[CDD_NETM_CFG_IP_LEN + 1] = {0};
+
+                    if (sscanf((char *)pTemp, "%72[^,],%d", ip, &port) == 2)
+                    {
+                        if (TRUE == AswPlatM_SetPlatMainIpPort(ip, strlen(ip), (uint16_t)port))
+                        {
+                            DSCONSOLE_CFG_LogPrint("Set Pile ip: \"%s\", port= %d ok!\r\n", ip, port);
+                            setResult = TRUE;
+                        }
+                    }
+                }
+
+                if (setResult == FALSE)
+                {
+                    DSCONSOLE_CFG_LogPrint("Set Pile ip port failed!\r\n");
+                }
+            }
+            else if (NULL != (pTemp = Common_SearchData((uint8_t *)argv[2], strlen(argv[2]), "port:", strlen("port:"))))
+            {
+                pTemp += strlen("port:");
+                if (sscanf((char *)pTemp, "%d", &port) == 1)
+                {
+                    if (TRUE == AswPlatM_SetPlatMainPort((uint16_t)port))
+                    {
+                        DSCONSOLE_CFG_LogPrint("Set Pile port= %d ok!\r\n", port);
+                        setResult = TRUE;
+                    }
+                }
+
+                if (setResult == FALSE)
+                {
+                    DSCONSOLE_CFG_LogPrint("Set Pile port failed!\r\n");
+                }
+            }
+            else
+            {}
+        }
+    }
+
+    return 0;
+}
+
+
+
 
 
 

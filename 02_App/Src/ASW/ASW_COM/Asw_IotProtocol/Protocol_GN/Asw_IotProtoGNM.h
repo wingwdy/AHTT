@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Verion.h
-* Description        : Code for Version definition
+* File Name          : template.h
+* Description        : Code for xxxxxxxxxxx
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,18 +11,12 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef VERSION_H_
-#define VERSION_H_
+#ifndef ASW_IOT_PROTO_GNM_H_
+#define ASW_IOT_PROTO_GNM_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#define  APP_SW_MAJOR_VERSION                           (1u)
-#define  APP_SW_MINOR_VERSION                           (0u)
-#define  APP_SW_CUSTORM_VERSION                         (0u)
-#define  APP_SW_PATCH_VERSION                           (1u)
-
-#define  APP_SW_VERSION_STRING                         "1.0.0.1"
-#define  APP_SW_VERSION_DATE                           "2026/01/12"
+#include "Common.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -32,16 +26,57 @@
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-
+typedef enum
+{
+	eIOTGNWorkState_Init,
+	eIOTGNWorkState_Offline,
+	eIOTGNWorkState_Login,
+	eIOTGNWorkState_Normal,
+}IotGNWorkState_Enum;
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+typedef struct 
+{
+    uint8_t frameQueueChannelID;
+    IotGNWorkState_Enum eWorkState;
+
+    
+}IotGNCtx_Struct;
+
+
+/******************************************************************************
+*    Global variables Declaration
+******************************************************************************/
+
 
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
+void IotGN_FillLinkPara(CddNetMSocketPara_Union *pLinkPara);
+void IotGN_InitMemory(void);
+void IotGN_MainFunction(void);
+#endif
 
 
-#endif /* VERSION_H_ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

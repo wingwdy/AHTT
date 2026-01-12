@@ -26,7 +26,7 @@
 #define MSNVM_ORDER_MAX_LEN                512
 #define MSNVM_ERROR_INFO_MAX_LEN           32
 
-#define MSNVM_PILE_SN_LEN                  40
+#define MSNVM_PILE_DN_LEN                  40
 
 #define MSNVM_PLAT_PRIVATE_PARAM_LEN       512
 
@@ -75,15 +75,18 @@ typedef struct
 /* 平台参数 */
 typedef struct
 {
-    char platPileSn[MSNVM_PILE_SN_LEN];        /* 运营平台桩号 */
-    char fixPileSn[MSNVM_PILE_SN_LEN];         /* 运维平台桩号 */
-    char platMainIp[MSNVM_PLAT_IP_LEN];             /* 运营平台IP */
-    uint16_t platMainPort;                          /* 运营平台端口 */
-    char platAuxiliaryIp[MSNVM_PLAT_IP_LEN];        /* 运维平台IP */
-    char platAuxiliaryPort;                         /* 运维平台IP */
-    uint8_t platAuxiliaryDisable;                   /* 运维平台失能标记 0-表示使能*/
-    uint8_t platMainType;                           /* 运营平台类型 gn, ykc...*/
-    uint8_t platMainCardType;                       /* 运营卡类型 gn, ykc...*/
+    char platPileDn[MSNVM_PILE_DN_LEN];        /* 运营平台桩号 */
+    char fixPileDn[MSNVM_PILE_DN_LEN];         /* 运维平台桩号 */
+
+    char platMainIp[MSNVM_PLAT_IP_LEN];        /* 运营平台IP */
+    uint16_t platMainPort;                     /* 运营平台端口 */
+
+    char platAuxiliaryIp[MSNVM_PLAT_IP_LEN];   /* 运维平台IP */
+    uint16_t platAuxiliaryPort;                /* 运维平台IP */
+    uint8_t platAuxiliaryDisable;              /* 运维平台失能标记 0-表示使能*/
+
+    uint8_t platMainType;                      /* 运营平台类型 gn, ykc...*/
+    uint8_t platMainCardType;                  /* 运营卡类型 gn, ykc...*/
     uint8_t reverse[64];
 }MSNvmPlatParam_Struct;
 

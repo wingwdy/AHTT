@@ -69,15 +69,15 @@ const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
 
     [eATModuleCmd_SetSimStatusReportEnable] =  
     { "AT+QSIMSTAT=1\r\n",                     "AT+QSIMSTAT=1",   3,          5000,     3000,  TRUE, "sim卡状态上报使能",
-        NULL,                                   NULL,                         NULL},
+        NULL,                                   NULL,                         ATModule_FailHandle},
 
     [eATModuleCmd_QuerySimStatus] =  
     { "AT+QSIMSTAT?\r\n",                      "+QSIMSTAT:",      3,          5000,     3000,  TRUE, "sim卡状态查询",
-        NULL,                                   ATModule_RecvSimStatus,       NULL},
+        NULL,                                   ATModule_RecvSimStatus,       ATModule_FailHandle},
 
     [eATModuleCmd_QuerySimRecognizeStatus] =  
     { "AT+CPIN?\r\n",                          "+CPIN: READY",    10,          3000,     1000,  TRUE, "sim识别状态查询",
-    NULL,                                      NULL,                          NULL},
+    NULL,                                      NULL,                          ATModule_FailHandle},
 
     [eATModuleCmd_QueryIccid] =  
     { "AT+QCCID\r\n",                          "+QCCID: ",         3,          10000,    3000,  TRUE, "sim卡iccid查询",
@@ -89,7 +89,7 @@ const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
 
     [eATModuleCmd_QueryNtpClk] =  
     { "AT+QNTP=1,\"ntp1.aliyun.com\"\r\n",    "+QNTP=",           3,          5000,     3000,  TRUE, "查询NTP时间",
-    NULL,                                      NULL,                NULL},
+    NULL,                                      NULL,                          NULL},
 
     [eATModuleCmd_QueryCGREG] =  
     { "AT+CGREG?\r\n",                        "+CGREG:",          3,          10000,    3000,  TRUE, "PS服务网络连接状态查询",
@@ -117,11 +117,11 @@ const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
 
     [eATModuleCmd_SetCFUN0] =  
     { "AT+CFUN=0\r\n",                         "+CFUN=0",         3,          10000,    3000,  TRUE, "设置最小功能模式",
-    NULL,                                      NULL,                ATModule_FailHandle},
+    NULL,                                      NULL,                         ATModule_FailHandle},
 
     [eATModuleCmd_SetCFUN1] =  
     { "AT+CFUN=1\r\n",                         "+CFUN=1",         3,          10000,    3000,  TRUE, "设置全功能模式",
-    NULL,                                      NULL,                ATModule_FailHandle},
+    NULL,                                      NULL,                         ATModule_FailHandle},
 };
 
 const ATUrcDescribtor_Struct c_stATUrcDescribtor[5] =
@@ -331,9 +331,6 @@ static uint8_t ATModule_RecvOKACK(uint8_t socketID, void * socketPara, uint8_t *
 
     return ret;
 }
-
-
-
 
 static uint8_t ATModule_RecvPDPState(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen)
 {

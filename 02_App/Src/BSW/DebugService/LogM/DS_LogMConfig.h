@@ -39,6 +39,7 @@ typedef enum
     DSLogMModule_Led,
     DSLogMModule_Temp,
     DSLogMModule_VoltCur,
+    DSLogMModule_PlatM,
 
     /*CDD */
     DSLogMModule_ModeM,
@@ -50,6 +51,7 @@ typedef enum
 
     /*System Service */
     DSLogMModule_System,
+    DSLogMModule_Console,
 
     /*Memory Service */
     DSLogMModule_Flash,

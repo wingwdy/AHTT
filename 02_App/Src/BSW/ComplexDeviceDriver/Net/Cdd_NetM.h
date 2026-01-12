@@ -71,7 +71,7 @@ typedef enum
     eCddNetMSocketType_MQTT,
     eCddNetMSocketType_FTP,
 	eCddNetMSocketType_Count,
-}CddNetMSocketType_Enum; 
+}CddNetMSocketType_Enum;
 
 typedef enum 
 {
@@ -129,6 +129,8 @@ typedef struct
     uint8_t frameQueueChannelID;
     CddNetMMqttVersion_Enum eVersion;
     uint16_t keepAliveTime;
+    uint16_t port;
+    char ip[CDD_NETM_CFG_IP_LEN + 1];
     uint8_t topicCount;
     char topic[CDD_NETM_CFG_MQTT_TOPIC_COUNT][CDD_NETM_CFG_MQTT_TOPIC_LEN + 1];
     char deviceName[CDD_NETM_CFG_MQTT_DEVICE_NAME_LEN + 1];

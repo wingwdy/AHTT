@@ -339,7 +339,7 @@
               <MiscControls>-Wno-invalid-source-encoding</MiscControls>
               <Define>GD32E50X,GD32E50X_HD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\ASW\ASW_CHG;..\Src\BSW\SystemService\SystemM;..\Src\BSW\DebugService\LogM;..\Src\ThirdPartyLib\FlashDB\port\fal\inc;..\Src\ThirdPartyLib\FlashDB\inc;..\Src\BSW\MemoryService\FlashDB_Adapter;..\Src\BSW\MemoryService\MemIf;..\Src\BSW\MemoryService\NVM;..\Src\BSW\MemoryService\EA;..\Src\ThirdPartyLib\LetterShell;..\Src\BSW\DebugService\Console;..\Src\BSW\ComplexDeviceDriver\CP;..\Src\BSW\ComplexDeviceDriver\Meter;..\Src\BSW\ComplexDeviceDriver\PE;..\Src\BSW\ComplexDeviceDriver\RCD;..\Src\BSW\ComplexDeviceDriver\Relay;..\Src\BSW\ComplexDeviceDriver\Sensor;..\Src\BSW\ComplexDeviceDriver\Led;..\Src\BSW\ComplexDeviceDriver\Net;..\Src\BSW\ComplexDeviceDriver\ModeM;..\Src\BSW\SystemService\TM</IncludePath>
+              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\BSW\SystemService\SystemM;..\Src\BSW\SystemService\TM;..\Src\BSW\DebugService\LogM;..\Src\BSW\DebugService\Console;..\Src\ThirdPartyLib\FlashDB\port\fal\inc;..\Src\ThirdPartyLib\FlashDB\inc;..\Src\BSW\MemoryService\FlashDB_Adapter;..\Src\BSW\MemoryService\MemIf;..\Src\BSW\MemoryService\NVM;..\Src\BSW\MemoryService\EA;..\Src\ThirdPartyLib\LetterShell;..\Src\BSW\ComplexDeviceDriver\CP;..\Src\BSW\ComplexDeviceDriver\Meter;..\Src\BSW\ComplexDeviceDriver\PE;..\Src\BSW\ComplexDeviceDriver\RCD;..\Src\BSW\ComplexDeviceDriver\Relay;..\Src\BSW\ComplexDeviceDriver\Sensor;..\Src\BSW\ComplexDeviceDriver\Led;..\Src\BSW\ComplexDeviceDriver\Net;..\Src\BSW\ComplexDeviceDriver\ModeM;..\Src\ASW\ASW_COM;..\Src\ASW\ASW_CHG\Charge;..\Src\ASW\ASW_CHG\Errorhandle;..\Src\ASW\ASW_CHG\EVSE;..\Src\ASW\ASW_CHG\LedEvent;..\Src\ASW\ASW_CHG\Temp;..\Src\ASW\ASW_CHG\VoltCur;..\Src\ASW\ASW_COM\Asw_PlatM;..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_GN;..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_OM;..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_XDT;..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC21</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -384,54 +384,126 @@
           <GroupName>ASW/CHG</GroupName>
           <Files>
             <File>
-              <FileName>Asw_ErrorHandleConfig.c</FileName>
+              <FileName>Asw_Charge.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_CHG\Asw_ErrorHandleConfig.c</FilePath>
+              <FilePath>..\Src\ASW\ASW_CHG\Charge\Asw_Charge.c</FilePath>
             </File>
             <File>
               <FileName>Asw_ErrorHandle.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_CHG\Asw_ErrorHandle.c</FilePath>
+              <FilePath>..\Src\ASW\ASW_CHG\Errorhandle\Asw_ErrorHandle.c</FilePath>
             </File>
             <File>
-              <FileName>Asw_TempHandle.c</FileName>
+              <FileName>Asw_ErrorHandleConfig.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_CHG\Asw_TempHandle.c</FilePath>
-            </File>
-            <File>
-              <FileName>Asw_VoltCurHandle.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_CHG\Asw_VoltCurHandle.c</FilePath>
-            </File>
-            <File>
-              <FileName>Asw_VoltCurHandleConfig.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_CHG\Asw_VoltCurHandleConfig.c</FilePath>
+              <FilePath>..\Src\ASW\ASW_CHG\Errorhandle\Asw_ErrorHandleConfig.c</FilePath>
             </File>
             <File>
               <FileName>Asw_EVSE.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_CHG\Asw_EVSE.c</FilePath>
-            </File>
-            <File>
-              <FileName>Asw_Charge.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_CHG\Asw_Charge.c</FilePath>
+              <FilePath>..\Src\ASW\ASW_CHG\EVSE\Asw_EVSE.c</FilePath>
             </File>
             <File>
               <FileName>Asw_LedEvent.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_CHG\Asw_LedEvent.c</FilePath>
+              <FilePath>..\Src\ASW\ASW_CHG\LedEvent\Asw_LedEvent.c</FilePath>
             </File>
             <File>
               <FileName>Asw_LedEventConfig.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_CHG\Asw_LedEventConfig.c</FilePath>
+              <FilePath>..\Src\ASW\ASW_CHG\LedEvent\Asw_LedEventConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_TempHandle.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_CHG\Temp\Asw_TempHandle.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_VoltCurHandle.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_CHG\VoltCur\Asw_VoltCurHandle.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_VoltCurHandleConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_CHG\VoltCur\Asw_VoltCurHandleConfig.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>ASW/COM</GroupName>
+          <Files>
+            <File>
+              <FileName>Asw_PlatM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_PlatM\Asw_PlatM.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_PlatMConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_PlatM\Asw_PlatMConfig.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoGNM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_GN\Asw_IotProtoGNM.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoGNRecv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_GN\Asw_IotProtoGNRecv.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoGNSend.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_GN\Asw_IotProtoGNSend.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoOMM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_OM\Asw_IotProtoOMM.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoOMRecv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_OM\Asw_IotProtoOMRecv.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoOMSend.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_OM\Asw_IotProtoOMSend.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoXDTM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_XDT\Asw_IotProtoXDTM.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoXDTRecv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_XDT\Asw_IotProtoXDTRecv.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoXDTSend.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_XDT\Asw_IotProtoXDTSend.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoYKC21.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC21\Asw_IotProtoYKC21.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoYKC21Recv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC21\Asw_IotProtoYKC21Recv.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoYKC21Send.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC21\Asw_IotProtoYKC21Send.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>BSW/ComplexDeviceDriver</GroupName>

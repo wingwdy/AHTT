@@ -37,6 +37,24 @@
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+typedef struct
+{
+	uint32_t cycTimer;		/* 周期计时器 */ 
+	uint8_t immdFlag;		/* 立即发送标志 */
+	uint8_t sendEnable;		/* 发送使能 */
+	uint8_t sendFlag;		/* 发送标记 */
+	uint16_t sendSeq;		/* 序列号 */
+}CommonSendCtrl_Struct;
+
+typedef struct 
+{
+	uint32_t cycTimer;      /* 周期计时器 */
+	uint8_t recvEnable;     /* 立即发送标志 */
+	uint8_t timerEnable;    /* 发送使能 */
+	uint32_t rptCnt;		/* 发送标记 */
+	uint8_t recvFlag;       /* 已接收标记 */
+}CommonRecvCtrl_Struct;
+
 /* 日期时间结构体 */
 typedef struct
 {

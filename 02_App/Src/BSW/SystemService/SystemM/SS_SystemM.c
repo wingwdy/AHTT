@@ -22,6 +22,8 @@
 #include "Asw_TempHandle.h"
 #include "Asw_VoltCurHandle.h"
 
+#include "Asw_PlatM.h"
+
 #include "Cdd_Relay.h"
 #include "Cdd_CP.h"
 #include "Cdd_Rcd.h"
@@ -104,6 +106,8 @@ static void SSSystemM_InitThree(void)
     CddCP_InitMemory();
     CddRcd_InitMemory();
     CddPE_InitMemory();
+
+    AswPlatM_InitMemory();
 
     AswEVSE_InitMemory();
     AswCharge_InitMemory();

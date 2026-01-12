@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : DS_LogMConfig.c
-* Description        : Code for log manage
+* File Name          : template.c
+* Description        : Code for xxxxxxxxxxx
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -16,10 +16,11 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "DS_LogM.h"
-
-
-
+#include "MS_Nvm.h"
+#include "Asw_PlatM.h"
+#include "Cdd_NetM.h"
+#include "Asw_PlatMConfig.h"
+#include "FrameQueue.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -38,47 +39,88 @@
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
+typedef struct
+{
+    MSNvmPlatParam_Struct stPlatParam;
 
-
+}AswPlatMCtx_Struct;
 
 
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-
+static AswPlatMCtx_Struct g_stAswPlatMCtx = { 0 };
 
 
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-
-
-
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-const char *g_logMModuleName[DSLogMModule_Count] = 
+static AswPlatMProtocolDescriptor_Struct *AswPlatM_GetProtocolDescriptor(void)
 {
-    "EVSE",
-    "Charge",
-    "ErrorHandle",
-    "Led",
-    "Temp",
-    "VoltCur",
-    "PlatM",
+    AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = NULL;
+    return pProtocolDescriptor;
+}
 
-    "ModeM",
-    "4G",
-    "CP",
-    "Meter",
-    "RCD",
-    "Relay",
+MSNvmPlatParam_Struct * AswPlatM_GetPlatParamPtr(void)
+{
+    return &g_stAswPlatMCtx.stPlatParam;
+}
 
-    "Flash",
-    "Console",
-    
-    "System",
-};
+void AswPlatM_DefaultPlatParam(void *param)
+{
+    MSNvmPlatParam_Struct *pPlatParam = (MSNvmPlatParam_Struct *)param;
+
+    memset(pPlatParam, 0x00, sizeof(MSNvmPlatParam_Struct));
+
+    pPlatParam->platMainType = eAswPlatType_GN;
+    strcpy(pPlatParam->platMainIp, "pile.gongniu.cn");
+    pPlatParam->platMainPort = 5455;
+
+    strcpy(pPlatParam->platAuxiliaryIp, "pmgmt.gongniu.cn");
+    pPlatParam->platAuxiliaryPort = 45113;
+}
+
+void AswPlatM_InitMemory(void)
+{
+    AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = NULL;
+    MSNvmPlatParam_Struct *pParam = &g_stAswPlatMCtx.stPlatParam;
+    CddNetMSocketPara_Union stSocketPara = { 0 };
+    FrameQueueType_Enum eFrame;
+
+    if (MSNvm_ReadParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)pParam, sizeof(MSNvmPlatParam_Struct)) != eGlobalRet_OK)
+    {
+        AswPlatM_DefaultPlatParam(pParam);
+    }
+
+    /* 注册运营平台链接 */
+    pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
+
+    if (pProtocolDescriptor->pFuncInit != NULL)
+    {
+        pProtocolDescriptor->pFuncInit();
+    }
+
+    if (pProtocolDescriptor->pFuncFillLinkPara != NULL)
+    {
+        pProtocolDescriptor->pFuncFillLinkPara(&stSocketPara);
+    }
+
+    CddNetM_CreatLink(pProtocolDescriptor->eSocketType, stSocketPara, eCddNetMPlatType_O);
+}
+
+void AswPlatM_MainFunction(void)
+{  
+
+
+
+
+
+
+
+}
 
 
 

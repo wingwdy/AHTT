@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Verion.h
-* Description        : Code for Version definition
+* File Name          : template_Config.h
+* Description        : Code for xxxxxxxxxxx
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,24 +11,20 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef VERSION_H_
-#define VERSION_H_
+#ifndef ASW_PLATM_CONFIG_H_
+#define ASW_PLATM_CONFIG_H_
+
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#define  APP_SW_MAJOR_VERSION                           (1u)
-#define  APP_SW_MINOR_VERSION                           (0u)
-#define  APP_SW_CUSTORM_VERSION                         (0u)
-#define  APP_SW_PATCH_VERSION                           (1u)
-
-#define  APP_SW_VERSION_STRING                         "1.0.0.1"
-#define  APP_SW_VERSION_DATE                           "2026/01/12"
-
+#include "Common.h"
+#include "Cdd_NetM.h"
+#include "DS_LogM.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
 
-
+#define ASWPLATM_CFG_LogPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_PlatM, fmt, ##__VA_ARGS__)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -38,10 +34,48 @@
 *    Typedef Definition
 ******************************************************************************/
 
+typedef struct
+{
+    char *pName;
+    char *cProtoMeaning;
+    CddNetMSocketType_Enum eSocketType;
+    void (*pFuncFillLinkPara)(CddNetMSocketPara_Union *pLinkPara);
+    void (*pFuncInit)(void);
+    void (*pMainFunction);
+
+}AswPlatMProtocolDescriptor_Struct;
+
+
+/******************************************************************************
+*    Global variables Declaration
+******************************************************************************/
+extern const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAswPlatType_Count];
+
 
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
 
+#endif
 
-#endif /* VERSION_H_ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

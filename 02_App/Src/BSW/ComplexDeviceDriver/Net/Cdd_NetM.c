@@ -175,24 +175,10 @@ static void CddNetM_CheckSocketCreate(void)
 
 static void CddNetM_WorkStateManage(void)
 {
-    CddNetMSocketPara_Union socketPara = { 0 };
-
-    uint8_t txbuf[10] = {1,2,3,4,5,6,7,8,9} ;
-
     switch (g_stCddNetMCtx.eWorkState)
     {
         case eCddNetMWorkState_Init:
         {
-            uint8_t frameQueueChannelID = 0;
-            FrameQueue_Creat(eFrameQueueType_TCP, 512, 512, &frameQueueChannelID);
-
-            FrameQueue_PushTx(frameQueueChannelID, NULL, 0, txbuf, 10);
-
-            socketPara.stTcpPara.frameQueueChannelID = frameQueueChannelID;
-            strcpy(socketPara.stTcpPara.ip, "evse.gongniu.cn");
-            socketPara.stTcpPara.port = 5455;
-        
-            CddNetM_CreatLink(eCddNetMSocketType_TCP, socketPara, eCddNetMPlatType_O);
             g_stCddNetMCtx.eWorkState = eCddNetMWorkState_ChooseNet;
             break;
         }

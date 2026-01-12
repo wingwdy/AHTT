@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Verion.h
-* Description        : Code for Version definition
+* File Name          : template.h
+* Description        : Code for xxxxxxxxxxx
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,18 +11,13 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef VERSION_H_
-#define VERSION_H_
+#ifndef ASW_PLATM_H_
+#define ASW_PLATM_H_
+
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#define  APP_SW_MAJOR_VERSION                           (1u)
-#define  APP_SW_MINOR_VERSION                           (0u)
-#define  APP_SW_CUSTORM_VERSION                         (0u)
-#define  APP_SW_PATCH_VERSION                           (1u)
-
-#define  APP_SW_VERSION_STRING                         "1.0.0.1"
-#define  APP_SW_VERSION_DATE                           "2026/01/12"
+#include "MS_Nvm.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -32,16 +27,59 @@
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-
+typedef enum
+{
+    eAswPlatType_GN,
+    eAswPlatType_YKC21,    
+    eAswPlatType_XDT,
+    eAswPlatType_Count,
+}AswPlatType_Enum;
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
 
 
+
 /******************************************************************************
-*    Global Function Prototypes
+*    Global variables Declaration
 ******************************************************************************/
 
 
-#endif /* VERSION_H_ */
+
+/******************************************************************************
+*    Global Function Prototypes
+******************************************************************************/
+uint8_t AswPlatM_SetPileDn(char *pPileDn, uint8_t len);
+uint8_t AswPlatM_SetFixPileDn(char *pFixPileDn, uint8_t len);
+uint8_t AswPlatM_SetPlatMainIpPort(char *pIp, uint8_t ipLen, uint16_t port);
+uint8_t AswPlatM_SetPlatMainPort(uint16_t port);
+uint8_t AswPlatM_SetPlatType(char *platName);
+
+void AswPlatM_DefaultPlatParam(void *param);
+MSNvmPlatParam_Struct * AswPlatM_GetPlatParamPtr(void);
+void AswPlatM_InitMemory(void);
+void AswPlatM_MainFunction(void);
+
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

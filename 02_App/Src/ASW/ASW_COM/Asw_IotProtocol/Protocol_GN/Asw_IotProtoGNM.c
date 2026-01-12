@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : DS_LogMConfig.c
-* Description        : Code for log manage
+* File Name          : template.c
+* Description        : Code for xxxxxxxxxxx
  -------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -16,9 +16,10 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "DS_LogM.h"
-
-
+#include "Asw_PlatM.h"
+#include "Cdd_NetM.h"
+#include "FrameQueue.h"
+#include "Asw_IotProtoGNM.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -41,44 +42,74 @@
 
 
 
-
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
 
 
 
+
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-
+IotGNCtx_Struct *pIotGNCtx = NULL;
 
 
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-const char *g_logMModuleName[DSLogMModule_Count] = 
+
+
+
+
+void IotGN_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
 {
-    "EVSE",
-    "Charge",
-    "ErrorHandle",
-    "Led",
-    "Temp",
-    "VoltCur",
-    "PlatM",
+    MSNvmPlatParam_Struct *pParam = AswPlatM_GetPlatParamPtr();
 
-    "ModeM",
-    "4G",
-    "CP",
-    "Meter",
-    "RCD",
-    "Relay",
+    if (pLinkPara != NULL && pIotGNCtx != NULL)
+    {
+        strcpy(pLinkPara->stTcpPara.ip, pParam->platMainIp);
+        pLinkPara->stTcpPara.port = pParam->platMainPort;
+        FrameQueue_Creat(eFrameQueueType_TCP, 3072, 3072, &pIotGNCtx->frameQueueChannelID);
+        pLinkPara->stTcpPara.frameQueueChannelID = pIotGNCtx->frameQueueChannelID;
+    }
+}
 
-    "Flash",
-    "Console",
-    
-    "System",
-};
+void IotGN_InitMemory(void)
+{
+    pIotGNCtx = (IotGNCtx_Struct *)malloc(sizeof(IotGNCtx_Struct));
+    if (pIotGNCtx != NULL)
+    {
+        memset(pIotGNCtx, 0, sizeof(IotGNCtx_Struct));
+    }
+}
+
+void IotGN_MainFunction(void)
+{
+    switch (pIotGNCtx->eWorkState)
+    {
+        case eIOTGNWorkState_Init:
+        {
+            break;
+        }
+        case eIOTGNWorkState_Offline:
+        {
+            break;
+        }
+        case eIOTGNWorkState_Login:
+        {
+            break;
+        }
+        case eIOTGNWorkState_Normal:
+        {
+            break;
+        }
+        default:
+        {
+            pIotGNCtx->eWorkState = eIOTGNWorkState_Init;
+        }
+    }
+}
 
 
 

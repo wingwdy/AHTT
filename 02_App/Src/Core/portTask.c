@@ -22,6 +22,8 @@
 #include "Asw_TempHandle.h"
 #include "Asw_VoltCurHandle.h"
 
+#include "Asw_PlatM.h"
+
 #include "DS_Console.h"
 #include "SS_Tm.h"
 
@@ -179,6 +181,7 @@ static void Task_20msB(void *arg)
     while (1)
     {
         CddNetM_MainFunction();
+        AswPlatM_MainFunction();
         DSConsole_MainFunction();
         vTaskDelay(20);
     }
