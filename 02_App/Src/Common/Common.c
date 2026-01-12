@@ -284,6 +284,109 @@ uint32_t Common_Cp56Time2aToTimestamp(const uint8_t *cp56time2a)
     return timestamp;
 }
 
+void Common_SetSendEnable(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t enable)
+{ 
+    CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
+
+    if (pSendCtrl != NULL)
+    {
+        pSendCtrl->sendEnable = enable;
+    }
+}
+
+uint8_t Common_GetSendEnable(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
+{
+    CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
+    uint8_t sendEnable = FALSE;
+
+    if (pSendCtrl != NULL)
+    {
+        sendEnable = pSendCtrl->sendEnable;
+    }
+
+    return sendEnable;
+}
+
+void Common_SetSendFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t flag)
+{
+    CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
+
+    if (pSendCtrl != NULL)
+    {
+        pSendCtrl->sendFlag = flag;
+    }
+}
+
+uint8_t Common_GetSendFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
+{
+    CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
+    uint8_t sendFlag = FALSE;
+
+    if (pSendCtrl != NULL)
+    {
+        sendFlag = pSendCtrl->sendFlag;
+    }
+
+    return sendFlag;
+}
+
+void Common_SetSendTick(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint32_t tick)
+{
+    CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
+
+    if (pSendCtrl != NULL)
+    {
+        pSendCtrl->cycTimer = tick;
+    }
+}
+
+uint32_t Common_GetSendTick(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
+{
+    CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
+    uint32_t cycTimer = pSendCtrl->cycTimer;
+
+    if (pSendCtrl != NULL)
+    {
+        cycTimer = pSendCtrl->cycTimer;
+    }
+
+    return cycTimer;
+}
+
+void Common_SetSendimmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t flag)
+{
+    CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
+
+    if (pSendCtrl != NULL)
+    {
+        pSendCtrl->immdFlag = flag;
+    }
+}
+
+uint8_t Common_GetSendimmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
+{ 
+    CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
+    uint8_t immdFlag = FALSE;
+
+    if (pSendCtrl != NULL)
+    {
+        immdFlag = pSendCtrl->immdFlag;
+    }
+
+    return immdFlag;
+}
+
+void Common_SetRecvEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t enable)
+{ 
+    CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
+
+    if (pRecvCtrl != NULL)
+    {
+        pRecvCtrl->recvEnable = enable;
+    }
+}
+
+
 
 uint16_t Common_CalcCRC16(uint8_t *pData, uint16_t dataLen)
 {

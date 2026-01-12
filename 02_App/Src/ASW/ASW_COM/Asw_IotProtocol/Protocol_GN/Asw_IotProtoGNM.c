@@ -58,9 +58,31 @@ IotGNCtx_Struct *pIotGNCtx = NULL;
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
+static CommonSendCtrl_Struct* IotGN_GetSendCtrl(uint8_t port, uint8_t cmd)
+{
+    CommonSendCtrl_Struct* pSendCtrl = NULL;
 
+    switch (cmd)
+    {
+        case IOT_GN_CMD_LOGIN_REQ:  pSendCtrl = &pIotGNCtx->stSendCtrl[port][0];   break;
+        default: break;
+    }
 
+    return pSendCtrl;
+}
 
+static CommonRecvCtrl_Struct* IotGN_GetRecvCtrl(uint8_t port, uint8_t cmd)
+{
+    CommonRecvCtrl_Struct* pRecvCtrl = NULL;
+
+    switch (cmd)
+    {
+        case IOT_GN_CMD_LOGIN_RSP:  pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][0];   break;
+        default: break;
+    }
+
+    return pRecvCtrl;
+}
 
 void IotGN_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
 {
@@ -82,6 +104,9 @@ void IotGN_InitMemory(void)
     {
         memset(pIotGNCtx, 0, sizeof(IotGNCtx_Struct));
     }
+
+    pIotGNCtx->pFuncSendCtrl = IotGN_GetSendCtrl;
+    pIotGNCtx->pFuncRecvCtrl = IotGN_GetRecvCtrl;
 }
 
 void IotGN_MainFunction(void)

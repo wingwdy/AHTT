@@ -87,9 +87,11 @@ typedef union
         uint8_t  month_reserved : 3;    /* 保留位 */
         uint8_t  year           : 7;    /* 年 (0-99, 代表2000+年份) */
         uint8_t  year_iv        : 1;    /* 年无效标志 */
-    } field;                          /* 按字段访问 */
+    } field;                            /* 按字段访问 */
 } Cp56Time2a_Struct;
 
+typedef CommonSendCtrl_Struct* (*typeFuncSendCtrl)(uint8_t port, uint8_t cmd);
+typedef CommonRecvCtrl_Struct* (*typeFuncRecvCtrl)(uint8_t port, uint8_t cmd);
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
@@ -98,6 +100,16 @@ typedef union
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
+void Common_SetSendEnable(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t enable);
+uint8_t Common_GetSendEnable(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd);
+void Common_SetSendFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t flag);
+uint8_t Common_GetSendFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd);
+void Common_SetSendTick(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint32_t tick);
+uint32_t Common_GetSendTick(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd);
+void Common_SetSendimmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t flag);
+uint8_t Common_GetSendimmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd);
+void Common_SetRecvEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t enable);
+
 uint16_t Common_CalcCRC16(uint8_t *pData, uint16_t dataLen);
 void Common_InsertSort(uint16_t *pData, uint16_t n);
 void Common_BubbleSort(uint16_t *pData, uint16_t size);

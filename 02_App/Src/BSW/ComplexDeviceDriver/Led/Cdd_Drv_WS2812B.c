@@ -458,6 +458,7 @@ void CddDrvWS2812B_UpdateLedDispType(uint8_t ch, uint8_t ledDispType)
 void CddDrvWS2812B_MainFunction(void)
 {
     CddDrvWS2812BChannel_Enum eCh;
+    static uint32_t rgbFreshTick = 0;
 
     for (eCh = eCddDrvWS2812BChannel_0; eCh < eCddDrvWS2812BChannel_Count; eCh++)
     {
@@ -469,6 +470,12 @@ void CddDrvWS2812B_MainFunction(void)
     {
         CddDrvWS2812B_Show();
         memcpy(g_LastCddDrvWS2812BLedRgbBuf, g_CddDrvWS2812BLedRgbBuf, sizeof(g_CddDrvWS2812BLedRgbBuf));
+        rgbFreshTick = Common_GetSystick();
+    }
+
+    if (Common_JudgeTimeoutMs(rgbFreshTick, CDDDRV_WS2812B_CFG_REFRESH_PERIOD))
+    {
+        CddDrvWS2812B_Show();
     }
 }
 
