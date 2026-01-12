@@ -25,7 +25,7 @@
 
 #define ASWEVSE_CFG_QUIT_STATE0_TIMEOUT              (300)    
 
-#define ASWEVSE_CFG_DIODE_DETECT_ENABLE              (TRUE)
+#define ASWEVSE_CFG_DIODE_DETECT_ENABLE              (FALSE)
 
 #define ASWEVSE_CFG_ENTER_STATE2_DELAY               (1000)
 
