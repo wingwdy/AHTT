@@ -19,7 +19,6 @@
 #include "AT_TCP.h"
 #include "Cdd_NetM.h"
 #include "Cdd_Drv_EG800AK.h"
-#include "Asw_ErrorHandle.h"
 #include "FrameQueue.h"
 
 /*******************************************************************************
@@ -173,6 +172,7 @@ static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *p
     uint8_t ret = FALSE;
     int32_t recvLen = 0;
     uint16_t offset = 0;
+    
     pTemp = Common_SearchData(pData, dataLen, "ERROR", strlen("ERROR"));
 
     if (pTemp == NULL)
@@ -181,7 +181,7 @@ static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *p
 
         if (pTemp != NULL)
         {
-            if (sscanf((char*)pTemp, "+QIRD: %d\r", &recvLen) < 0 || 0 == recvLen)
+            if (sscanf((char*)pTemp, "+QIRD: %d\r", &recvLen) != 1 || 0 == recvLen)
             {
                 ret = TRUE;
             }
@@ -370,31 +370,36 @@ void ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
     ATTcpPrivate_Struct *pPrivate = NULL;
     int32_t socketIndex = 0;
     int32_t connectState = 0;
+    uint8_t *pTemp = NULL;
 
-    sscanf((char*)pData, "+QIOPEN: %d,%d\r", &socketIndex, &connectState);
-
-    if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
+    if (NULL != (pTemp = Common_SearchData(pData, dataLen, "+QIOPEN: ", strlen("+QIOPEN: "))))
     {
-        pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
-        pPrivate = (ATTcpPrivate_Struct *)pSocketCtrl->user_data;
-
-        if (connectState == 0)
+        if (2 == sscanf((char*)pTemp, "+QIOPEN: %d,%d\r\n", &socketIndex, &connectState))
         {
-            if (pPrivate->waitTcpConnectOkFlag == TRUE)
+            if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
             {
-                ATTCP_SetSocketState(socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
+                pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
+                pPrivate = (ATTcpPrivate_Struct *)pSocketCtrl->user_data;
 
-                if (pSocketCtrl->ePlatType == eCddNetMPlatType_O)
+                if (connectState == 0)
                 {
-                    pSocketCtrl->reconectTimes = 0;
-                    AswErrhandle_ResetErrExsitCallback(0, eErr_PlatformOffline);
-                    CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]运营平台建立连接成功!\r\n", socketIndex);
+                    if (pPrivate->waitTcpConnectOkFlag == TRUE)
+                    {
+                        ATTCP_SetSocketState(socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
+
+                        if (pSocketCtrl->ePlatType == eCddNetMPlatType_O)
+                        {
+                            pSocketCtrl->reconectTimes = 0;
+                            CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]运营平台建立连接成功!\r\n", socketIndex);
+                        }
+                    }
+                }
+                else
+                {
+                    CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]连接失败，errcode: %d !\r\n", socketIndex, connectState);
+                    ATTCP_CloseSocket(pSocketCtrl);
                 }
             }
-        }
-        else
-        {
-            ATTCP_CloseSocket(pSocketCtrl);
         }
     }
 }
@@ -410,7 +415,7 @@ void ATTCP_UrcClose(uint8_t *pData, void * modulePara, uint16_t dataLen)
     CddDrvEG800AKCtrl_Struct *pModulePara = (CddDrvEG800AKCtrl_Struct *)modulePara;
     int32_t socketIndex = 0;
 
-    if (sscanf((char*)pData, "+QIURC: \"closed\",%d", &socketIndex) >= 0)
+    if (sscanf((char*)pData, "+QIURC: \"closed\",%d", &socketIndex) == 1)
     {
         if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
         {
