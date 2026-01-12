@@ -42,7 +42,7 @@ typedef enum
     eErr_EmergencyStop,                      /* 急停故障 */        
     eErr_InputLineReversed,                  /* 火零反接 */
     eErr_LeakageCurrErr,                     /* 漏电流故障 */ 
-    eErr_ShortCircleErr,                     /* 短路故障 */ 
+    eErr_ShortCircleErr,                     /* 充电前输出短路故障 */ 
     eErr_RCDSelfcheckErr,                    /* RCD自检故障 */             
     eErr_AphaseInputOverVol,                 /* 交流A相输入过压 */ 
 

@@ -57,7 +57,7 @@ const AswErrorHandleConfig_Struct c_AswErrorHandleConfigTable[eErr_Num] =
     {eErr_EmergencyStop,      AswErrorOwner_Pile,  AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "急停故障"},
     {eErr_InputLineReversed,  AswErrorOwner_Pile,  AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "火零反接"},
     {eErr_LeakageCurrErr,     AswErrorOwner_Pile,  AswErrorLevel_5, AswErrorLevel_5, AswErrorClear_External,   1,     0,   "漏电流故障"},
-    {eErr_ShortCircleErr,     AswErrorOwner_Gun,   AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "短路故障"},
+    {eErr_ShortCircleErr,     AswErrorOwner_Gun,   AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "充电前输出短路故障"},
     {eErr_RCDSelfcheckErr,    AswErrorOwner_Pile,  AswErrorLevel_5, AswErrorLevel_5, AswErrorClear_External,   1,     0,   "RCD自检故障"},
     {eErr_AphaseInputOverVol, AswErrorOwner_Pile,  AswErrorLevel_4, AswErrorLevel_4, AswErrorClear_External,   1,     0,   "交流A相输入过压"},
 

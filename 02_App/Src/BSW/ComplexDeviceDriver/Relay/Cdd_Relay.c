@@ -34,6 +34,7 @@
 #define CDDRELAY_SHORTCUT_STEP1         1
 #define CDDRELAY_SHORTCUT_STEP2         2
 #define CDDRELAY_SHORTCUT_STEP3         3
+#define CDDRELAY_SHORTCUT_STEP4         4
 /*******************************************************************************
 *    Enum Definition
 *******************************************************************************/
@@ -276,7 +277,7 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
             if (Common_JudgeTimeoutMs(pRelayCtrl->shortCutDetectTimer, CDDRELAY_CFG_SHORTCUT_TIMEOUT))
             {
                 pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_FAIL;
-                pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
+                pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP4;
                 CDDRELAY_CFG_LogPrint("[枪：%d]输出短路检测超时[%d]ms!\r\n", port, CDDRELAY_CFG_SHORTCUT_TIMEOUT);
                 AswErrhandle_SetErrExsitCallback(port, eErr_ShortCircleErr);
                 if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff != NULL)
@@ -328,6 +329,18 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
 
             break;
         }
+
+        case CDDRELAY_SHORTCUT_STEP4:
+        {
+            if (TRUE == CDDRELAY_CFG_CheckGunPlugout(port))
+            {
+                AswErrhandle_ResetErrExsitCallback(port, eErr_ShortCircleErr);
+                pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
+            }
+
+            break;
+        }
+
         default:
         {
             break;
@@ -371,7 +384,8 @@ void CddRelay_SetReqStopShortCutDetect(uint8_t port)
 
     if (port < SYSCFG_CFG_GUN_NUM)
     {
-        if (pRelayCtrl->shortCutDetectStep != CDDRELAY_SHORTCUT_STEP0)
+        if (pRelayCtrl->shortCutDetectStep != CDDRELAY_SHORTCUT_STEP0 &&
+            pRelayCtrl->shortCutDetectStep != CDDRELAY_SHORTCUT_STEP4)
         {
             pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
             pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;

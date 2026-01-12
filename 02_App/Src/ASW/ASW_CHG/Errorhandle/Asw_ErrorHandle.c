@@ -182,7 +182,6 @@ static void AswErrHandle_RefreshChargeCondition(AswErrorHandle_Struct *pErrorHan
 void AswErrHandle_InitMemory(void)
 {
     memset(g_stAswErrorHandle, 0x00, sizeof(g_stAswErrorHandle));
-    AswErrhandle_SetErrExsitCallback(0, eErr_PlatformOffline);
 }
 
 void AswErrhandle_SetErrExsitCallback(uint8_t port, AswErrorType_Enum errType)
