@@ -124,23 +124,6 @@ static CddNetMLinkPara_Struct* CddNetM_FindFreeLink(void)
     return pRetVal;    
 }
 
-void CddNetM_DelSingleLink(CddNetMPlatType_Enum ePlatType)
-{
-
-
-
-    
-
-}
-
-void CddNetM_SetLinkDisconnect(CddNetMPlatType_Enum ePlatType)
-{
-
-
-
-
-}
-
 static void CddNetM_CheckSocketCreate(void)
 {
     CddNetMLinkPara_Struct *pLinkPata = NULL;
@@ -170,8 +153,6 @@ static void CddNetM_CheckSocketCreate(void)
 
     /* 预留以太网的创建逻辑，无需求，暂不实现 */
 }
-
-#include "FrameQueue.h"
 
 static void CddNetM_WorkStateManage(void)
 {
@@ -207,6 +188,53 @@ static void CddNetM_WorkStateManage(void)
     }
 }
 
+void CddNetM_DelSingleLink(CddNetMPlatType_Enum ePlatType)
+{
+
+
+
+    
+
+}
+
+void CddNetM_SetLinkDisconnect(CddNetMPlatType_Enum ePlatType)
+{
+
+
+
+
+}
+
+uint8_t CddNetM_CheckLinkConnectOK(CddNetMPlatType_Enum ePlatType)
+{
+	CddNetMLinkPara_Struct *pChannelDCB = NULL;
+	uint8_t curNetDev = g_stCddNetMCtx.curNetDev;
+	uint8_t ret = FALSE;
+	uint8_t index = 0; 
+
+	if (g_stCddNetMCtx.curNetDevChooseSuccess == TRUE)
+	{
+        for (index = 0; index < CCDD_NETM_CFG_LINK_COUNT; index++)
+        {
+            pChannelDCB = &g_stCddNetMCtx.stLinkPara[curNetDev][index];
+            
+            if (pChannelDCB->ePlatType == ePlatType)
+            {
+                if (c_NetMModuleOpsTable[curNetDev].getSocketState != NULL)
+                {
+                    if (c_NetMModuleOpsTable[curNetDev].getSocketState(pChannelDCB->socketIndex) == eCddNetMSocketState_ConnectOK)
+                    {
+                        ret = TRUE;
+                    }
+                }
+
+                break;
+            }
+        }
+	}
+	
+	return ret;
+}
 GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSocketPara_Union socketPara, CddNetMPlatType_Enum ePlatType)
 {
     GlobalRet_Enum retVal = eGlobalRet_OK;
