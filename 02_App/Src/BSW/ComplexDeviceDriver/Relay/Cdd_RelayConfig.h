@@ -35,7 +35,7 @@
 #define CDDRELAY_CFG_ACT_DELAY_TIMEOUT                     (5000)
 
 #define CDDRELAY_CFG_ADC_BUFF_POINT                        (MCALADC_ADC0_SAMPLE_CNT)
-#define CDDRELAY_CFG_SHORTCUT_UPPER_LIMIT                  250
+#define CDDRELAY_CFG_SHORTCUT_UPPER_LIMIT                  260
 #define CDDRELAY_CFG_SHORTCUT_LOWER_LIMIT                  200
 
 #define CDDRELAY_CFG_SHORTCUT_TIMEOUT                      (5000)
