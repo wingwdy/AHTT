@@ -62,6 +62,9 @@ const CddNetMModuleOps_Struct c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_COUNT] = {
         .creatSocket = CddDrvEG800AK_CreatSocket,
         .delAllSocket = CddDrvEG800AK_DelAllSocket,
         .delSingleSocket = CddDrvEG800AK_DelSingleSocket,
+        .getIccid = CddDrvEG800AK_GetIccid,
+        .getCsq = CddDrvEG800AK_GetCsq,
+        .getOperator = CddDrvEG800AK_GetOperatorType,
     },
 };
 

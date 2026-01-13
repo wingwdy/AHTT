@@ -40,7 +40,7 @@ typedef enum
     DSLogMModule_Temp,
     DSLogMModule_VoltCur,
     DSLogMModule_PlatM,
-
+    DSLogMModule_Proto,
     /*CDD */
     DSLogMModule_ModeM,
     DSLogMModule_4G,

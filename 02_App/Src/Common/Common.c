@@ -353,7 +353,7 @@ uint32_t Common_GetSendTick(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
     return cycTimer;
 }
 
-void Common_SetSendimmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t flag)
+void Common_SetSendImmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t flag)
 {
     CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
 
@@ -363,7 +363,7 @@ void Common_SetSendimmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, u
     }
 }
 
-uint8_t Common_GetSendimmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
+uint8_t Common_GetSendImmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
 { 
     CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
     uint8_t immdFlag = FALSE;
@@ -386,8 +386,106 @@ void Common_SetRecvEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uin
     }
 }
 
+void Common_SetRecvSeq(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint32_t recvSeq)
+{
+    CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
 
+    if (pRecvCtrl != NULL)
+    {
+        pRecvCtrl->recvSeq = recvSeq;
+    }
+}
 
+uint32_t Common_GetRecvSeq(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
+{
+    CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
+    uint32_t recvSeq = 0;
+
+    if (pRecvCtrl != NULL)
+    {
+        recvSeq = pRecvCtrl->recvSeq;
+    }
+
+    return recvSeq;
+}
+
+void Common_SetRecvTimerEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t enable)
+{
+    CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
+
+    if (pRecvCtrl != NULL)
+    {
+        pRecvCtrl->timerEnable = enable;
+    }
+}
+uint8_t Common_GetRecvTimerEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
+{
+    CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
+    uint8_t timerEnable = FALSE;
+
+    if (pRecvCtrl != NULL)
+    {
+        timerEnable = pRecvCtrl->timerEnable;
+    }
+
+    return timerEnable;
+}
+
+void Common_SetRecvTick(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint32_t tick)
+{ 
+    CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
+
+    if (pRecvCtrl != NULL)
+    {
+        pRecvCtrl->cycTimer = tick;
+    }
+}
+
+uint32_t Common_GetRecvTick(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
+{
+    CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
+    uint32_t cycTimer = pRecvCtrl->cycTimer;
+
+    if (pRecvCtrl != NULL)
+    {
+        cycTimer = pRecvCtrl->cycTimer;
+    }
+
+    return cycTimer;
+}
+
+void Common_SetRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
+{
+    CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
+
+    if (pRecvCtrl != NULL)
+    {
+        pRecvCtrl->rptCount++;
+    }
+}
+
+void Common_ClearRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
+{
+    CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
+
+    if (pRecvCtrl != NULL)
+    {
+        pRecvCtrl->rptCount = 0;
+    }
+}
+
+uint8_t Common_GetRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
+{
+    CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
+    uint8_t rptCount = 0;
+
+    if (pRecvCtrl != NULL)
+    {
+        rptCount = pRecvCtrl->rptCount;
+    }
+
+    return rptCount;
+}
 uint16_t Common_CalcCRC16(uint8_t *pData, uint16_t dataLen)
 {
     uint8_t crcHi = 0xFF;                            
@@ -626,4 +724,36 @@ uint16_t Common_ReplaceNum(uint8_t* pData, uint16_t nDataLen, char* cDestStr, ui
     }
 
     return dataLen;
+}
+
+void Common_AsciiToBCD(char *pASC, char *pBCD, uint16_t length)
+{
+    uint16_t index;
+    
+    // 通过条件保护块替代提前return
+    if (pASC != NULL && pBCD != NULL && length > 0)
+    {
+        for (index = 0; index < length; index += 2)
+        {
+            // ASCII合法性检查，非法则中断处理
+            if (pASC[index] < '0' || pASC[index] > '9') 
+            {
+                break;
+            }
+            
+            if (index + 1 < length)
+            {
+                if (pASC[index + 1] < '0' || pASC[index + 1] > '9') 
+                {
+                    break;
+                }
+                pBCD[index / 2] = ((pASC[index] - '0') << 4) | (pASC[index + 1] - '0');
+            }
+            else
+            {
+                // 奇数长度时高4位清零
+                pBCD[index / 2] = (pASC[index] - '0') & 0x0F;  
+            }
+        }
+    }
 }

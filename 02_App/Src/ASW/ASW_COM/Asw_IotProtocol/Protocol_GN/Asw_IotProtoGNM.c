@@ -20,7 +20,9 @@
 #include "Cdd_NetM.h"
 #include "FrameQueue.h"
 #include "Asw_IotProtoGNM.h"
-
+#include "Asw_ErrorHandle.h" 
+#include "Asw_IotProtoGNSend.h"
+#include "Asw_IotProtoGNRecv.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -84,6 +86,50 @@ static CommonRecvCtrl_Struct* IotGN_GetRecvCtrl(uint8_t port, uint8_t cmd)
     return pRecvCtrl;
 }
 
+static void IotGN_WSInitHandle(void)
+{
+    pIotGNCtx->eWorkState = eIOTGNWorkState_Offline;
+}
+
+static void IotGN_WSOfflineHandle(void)
+{
+    AswErrhandle_SetErrExsitCallback(0, eErr_PlatformOffline);
+    pIotGNCtx->eWorkState = eIOTGNWorkState_Login;
+}
+
+static void IotGN_WSLoginHandle(void)
+{
+    if (TRUE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_O))
+    {
+        AswErrhandle_ResetErrExsitCallback(0, eErr_PlatformOffline);
+        pIotGNCtx->eWorkState = eIOTGNWorkState_Normal;
+
+        Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, 0, IOT_GN_CMD_LOGIN_REQ, TRUE);
+    }
+}
+
+static void IotGN_WSNormalHandle(void)
+{
+    if (FALSE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_O))
+    {
+        IotGN_OfflineHandle();
+    }
+    else
+    {
+        IotLX_UpCtrlSendDeal();
+
+        IotGN_UpCtrlRecvDeal();
+    }
+}
+
+void IotGN_OfflineHandle(void)
+{
+    CddNetM_SetLinkDisconnect(eCddNetMPlatType_O);
+    memset(pIotGNCtx->stSendCtrl, 0x00, sizeof(pIotGNCtx->stSendCtrl));
+    memset(pIotGNCtx->stRecvCtrl, 0x00, sizeof(pIotGNCtx->stRecvCtrl));
+    pIotGNCtx->eWorkState = eIOTGNWorkState_Offline;
+}
+
 void IotGN_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
 {
     MSNvmPlatParam_Struct *pParam = AswPlatM_GetPlatParamPtr();
@@ -115,18 +161,22 @@ void IotGN_MainFunction(void)
     {
         case eIOTGNWorkState_Init:
         {
+            IotGN_WSInitHandle();
             break;
         }
         case eIOTGNWorkState_Offline:
         {
+            IotGN_WSOfflineHandle();
             break;
         }
         case eIOTGNWorkState_Login:
         {
+            IotGN_WSLoginHandle();
             break;
         }
         case eIOTGNWorkState_Normal:
         {
+            IotGN_WSNormalHandle();
             break;
         }
         default:

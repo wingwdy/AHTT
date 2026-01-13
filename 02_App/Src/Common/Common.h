@@ -43,16 +43,17 @@ typedef struct
 	uint8_t immdFlag;		/* 立即发送标志 */
 	uint8_t sendEnable;		/* 发送使能 */
 	uint8_t sendFlag;		/* 发送标记 */
-	uint16_t sendSeq;		/* 序列号 */
+	uint32_t sendSeq;		/* 序列号 */
 }CommonSendCtrl_Struct;
 
 typedef struct 
 {
 	uint32_t cycTimer;      /* 周期计时器 */
-	uint8_t recvEnable;     /* 立即发送标志 */
-	uint8_t timerEnable;    /* 发送使能 */
-	uint32_t rptCnt;		/* 发送标记 */
+	uint8_t recvEnable;     /* 接收使能 */
+	uint8_t timerEnable;    /* 接收超时计时使能 */
 	uint8_t recvFlag;       /* 已接收标记 */
+    uint8_t rptCount;       /* 重试次数 */
+    uint32_t recvSeq;       /* 序列号 */
 }CommonRecvCtrl_Struct;
 
 /* 日期时间结构体 */
@@ -106,9 +107,18 @@ void Common_SetSendFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8
 uint8_t Common_GetSendFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd);
 void Common_SetSendTick(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint32_t tick);
 uint32_t Common_GetSendTick(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd);
-void Common_SetSendimmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t flag);
-uint8_t Common_GetSendimmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd);
+void Common_SetSendImmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t flag);
+uint8_t Common_GetSendImmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd);
 void Common_SetRecvEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t enable);
+void Common_SetRecvSeq(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint32_t recvSeq);
+uint32_t Common_GetRecvSeq(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd);
+uint8_t Common_GetRecvTimerEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd);
+void Common_SetRecvTimerEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t enable);
+uint32_t Common_GetRecvTick(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd);
+void Common_SetRecvTick(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint32_t tick);
+void Common_SetRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd);
+void Common_ClearRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd);
+uint8_t Common_GetRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd);
 
 uint16_t Common_CalcCRC16(uint8_t *pData, uint16_t dataLen);
 void Common_InsertSort(uint16_t *pData, uint16_t n);
@@ -129,6 +139,8 @@ uint16_t Common_ReplaceNum(uint8_t* pData, uint16_t nDataLen, char* cDestStr, ui
 uint32_t Common_DateTimeToTimestamp(CommonDateTime_Struct *dt);
 void Conmon_TimestampToDateTime(uint32_t timestamp, CommonDateTime_Struct *dt);
 void Common_TimestampToCp56Time2a(uint32_t timestamp, uint8_t *cp56time2a);
+
+void Common_AsciiToBCD(char *pASC, char *pBCD, uint16_t length);
 #endif /* COMMON_H_ */
 
 

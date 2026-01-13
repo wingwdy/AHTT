@@ -188,6 +188,40 @@ static void CddNetM_WorkStateManage(void)
     }
 }
 
+uint16_t CddNetM_GetCsq(void)
+{
+    uint16_t csq = 0;
+
+    if (c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].getCsq != NULL)
+    {
+        csq = c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].getCsq();
+    }
+
+    return csq;
+}
+
+CddNetMOperator_Enum CddNetM_GetOperatorType(void)
+{
+    CddNetMOperator_Enum eOperator = eCddNetMOperator_Null;
+
+    if (c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].getOperator != NULL)
+    {
+        eOperator = c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].getOperator();
+    }
+
+    return eOperator;
+}
+
+void CddNetM_GetIccid(uint8_t *pICCID)
+{
+    if (c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].getIccid != NULL)
+    {
+        c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].getIccid((char *)pICCID);
+    }
+}
+
+
+
 void CddNetM_DelSingleLink(CddNetMPlatType_Enum ePlatType)
 {
 
@@ -199,10 +233,28 @@ void CddNetM_DelSingleLink(CddNetMPlatType_Enum ePlatType)
 
 void CddNetM_SetLinkDisconnect(CddNetMPlatType_Enum ePlatType)
 {
+	CddNetMLinkPara_Struct *pChannelDCB = NULL;
+	uint8_t curNetDev = g_stCddNetMCtx.curNetDev;
+	uint8_t ret = FALSE;
+	uint8_t index = 0; 
 
+	if (g_stCddNetMCtx.curNetDevChooseSuccess == TRUE)
+	{
+        for (index = 0; index < CCDD_NETM_CFG_LINK_COUNT; index++)
+        {
+            pChannelDCB = &g_stCddNetMCtx.stLinkPara[curNetDev][index];
+            
+            if (pChannelDCB->ePlatType == ePlatType)
+            {
+                if (c_NetMModuleOpsTable[curNetDev].setSocketDisconnect != NULL)
+                {
+                    c_NetMModuleOpsTable[curNetDev].setSocketDisconnect(pChannelDCB->socketIndex);
+                }
 
-
-
+                break;
+            }
+        }
+	}
 }
 
 uint8_t CddNetM_CheckLinkConnectOK(CddNetMPlatType_Enum ePlatType)

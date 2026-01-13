@@ -46,6 +46,9 @@ typedef struct
         uint8_t *pSocketIndex, CddNetMPlatType_Enum ePlatType);
 	void (*delAllSocket)(void);
 	void (*delSingleSocket)(uint8_t socketIndex);
+	void (*getIccid)(char *pICCID);
+	uint8_t (*getCsq)(void);
+	CddNetMOperator_Enum (*getOperator)(void);
 }CddNetMModuleOps_Struct;
 
 

@@ -144,6 +144,7 @@ static uint8_t ATTCP_RecvQIPClose(uint8_t socketIndex, void * socketPara, uint8_
     return TRUE;
 }
 
+
 static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
@@ -172,7 +173,7 @@ static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *p
     uint8_t ret = FALSE;
     int32_t recvLen = 0;
     uint16_t offset = 0;
-    
+
     pTemp = Common_SearchData(pData, dataLen, "ERROR", strlen("ERROR"));
 
     if (pTemp == NULL)
@@ -197,8 +198,10 @@ static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *p
                     if ((dataLen - offset) >= recvLen)
                     {
                         FrameQueue_PushRx(pSocketPara->stTcpPara.frameQueueChannelID, NULL, 0, pDest, recvLen);
+                        /*
                         CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]Recv Data[%d]: ", pSocketCtrl->socketIndex, recvLen);
-                        DSLogM_HexOutput(pDest, recvLen);
+                        DSLogM_HexOutput(pDest, recvLen); 
+                        */
                     }
 
                     ret = TRUE;
@@ -422,6 +425,31 @@ void ATTCP_UrcClose(uint8_t *pData, void * modulePara, uint16_t dataLen)
             pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
             ATTCP_CloseSocket(pSocketCtrl);
             CDDDRV_EG800AK_CFG_LogPrint("[socket: %d] 后台主动断开连接!\r\n", socketIndex);
+        }
+    }
+}
+
+void ATTCP_UrcRecv(uint8_t *pData, void * modulePara, uint16_t dataLen)
+{
+    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = NULL;
+    CddDrvEG800AKCtrl_Struct *pModulePara = (CddDrvEG800AKCtrl_Struct *)modulePara;
+    int32_t socketIndex = 0;
+    ATTcpPrivate_Struct *pPrivate = NULL;
+    uint8_t *pTemp = NULL;
+
+    if (NULL != (pTemp = Common_SearchData(pData, dataLen, "+QIURC: \"recv\"", strlen("+QIURC: \"recv\""))))
+    {
+        pTemp += strlen("+QIURC: \"recv\"");
+
+        if (sscanf((char*)pTemp, ",%d\r", &socketIndex) == 1)
+        {
+            if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
+            {
+                pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
+                pPrivate = (ATTcpPrivate_Struct *)pSocketCtrl->user_data;
+                CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATTCPCmd_Read);
+                pPrivate->cycleReadTickStart = Common_GetSystick();
+            }
         }
     }
 }

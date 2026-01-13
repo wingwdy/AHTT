@@ -66,6 +66,7 @@ const char *g_logMModuleName[DSLogMModule_Count] =
     "Temp",
     "VoltCur",
     "PlatM",
+    "Protocol",
 
     "ModeM",
     "4G",
@@ -76,7 +77,7 @@ const char *g_logMModuleName[DSLogMModule_Count] =
 
     "Flash",
     "Console",
-    
+
     "System",
 };
 

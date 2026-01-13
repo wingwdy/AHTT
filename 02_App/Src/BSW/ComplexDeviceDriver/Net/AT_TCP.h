@@ -69,6 +69,7 @@ void ATTCP_CloseSocket(void *socketCtrl);
 void ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen);
 void ATTCP_UrcSendOK(uint8_t *pData, void * modulePara, uint16_t dataLen);
 void ATTCP_UrcClose(uint8_t *pData, void * modulePara, uint16_t dataLen);
+void ATTCP_UrcRecv(uint8_t *pData, void * modulePara, uint16_t dataLen);
 #endif
 
 

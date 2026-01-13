@@ -750,6 +750,24 @@ static void CddDrvEG800AK_ClearAllSocketCmd(void)
     }
 }
 
+void CddDrvEG800AK_GetIccid(char *pICCID)
+{
+    if (pICCID != NULL)
+    {
+        memcpy(pICCID, g_stCddDrvEG800AKCtrl.stModuleInfo.iccid, CDDDRV_EG800AK_CFG_ICCID_LEN);
+    }
+}
+
+uint8_t CddDrvEG800AK_GetCsq(void)
+{
+    return g_stCddDrvEG800AKCtrl.stModuleInfo.csq;
+}
+
+CddNetMOperator_Enum CddDrvEG800AK_GetOperatorType(void)
+{
+    return g_stCddDrvEG800AKCtrl.stModuleInfo.eOperatorType;
+}
+
 static void CddDrvEG800AK_SocketDisconnectCallback(void *socketCtrl)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketCtrl;

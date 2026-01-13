@@ -55,6 +55,16 @@
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
+//服务商
+typedef enum 
+{
+	eCddNetMOperator_Null,
+	eCddNetMOperator_CMCC,					/* 移动 */
+	eCddNetMOperator_CUCC,					/* 联通 */
+	eCddNetMOperator_CTCC,					/* 电信 */
+	eCddNetMOperator_Other,				    /* 其他 */
+}CddNetMOperator_Enum;
+
 
 typedef enum
 {
@@ -165,6 +175,9 @@ GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSock
 void CddNetM_DelSingleLink(CddNetMPlatType_Enum ePlatType);
 void CddNetM_SetLinkDisconnect(CddNetMPlatType_Enum ePlatType);
 void CddNetM_MainFunction(void);
+uint16_t CddNetM_GetCsq(void);
+void CddNetM_GetIccid(uint8_t *pICCID);
+CddNetMOperator_Enum CddNetM_GetOperatorType(void);
 #endif /* CDD_NETM_H_ */
 
 

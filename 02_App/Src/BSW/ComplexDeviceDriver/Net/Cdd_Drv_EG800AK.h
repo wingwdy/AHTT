@@ -43,17 +43,6 @@ typedef enum
     CddDrvEG800AKAbnormalHandle_CFun,
 }CddDrvEG800AKAbnormalHandle_Enum;
 
-//服务商
-typedef enum 
-{
-	CddDrvSimOperator_Null,
-	CddDrvSimOperator_CMCC,					/* 移动 */
-	CddDrvSimOperator_CUCC,					/* 联通 */
-	CddDrvSimOperator_CTCC,					/* 电信 */
-	CddDrvSimOperator_Other,				    /* 其他 */
-}CddDrvSimOperator_Enum;
-
-
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
@@ -92,7 +81,7 @@ typedef struct
 {
     char iccid[CDDDRV_EG800AK_CFG_ICCID_LEN + 1];
     uint8_t csq;
-    CddDrvSimOperator_Enum eOperatorType;
+    CddNetMOperator_Enum eOperatorType;
 }CddDrvEG800AKInfo_Struct;
 
 typedef struct
@@ -144,6 +133,9 @@ void CddDrvEG800AK_DelAllSocket(void);
 void CddDrvEG800AK_SetSocketDisconnect(uint8_t socketIndex);
 CddNetMSocketState_Enum CddDrvEG800AK_GetSocketState(uint8_t socketIndex);
 void CddDrvEG800AK_DelSingleSocket(uint8_t socketIndex);
+void CddDrvEG800AK_GetIccid(char *pICCID);
+uint8_t CddDrvEG800AK_GetCsq(void);
+CddNetMOperator_Enum CddDrvEG800AK_GetOperatorType(void);
 
 /* 模块内使用 */
 void CddDrvEG800AK_SetModuleState(CddNetMModuleState_Enum eModuleState);

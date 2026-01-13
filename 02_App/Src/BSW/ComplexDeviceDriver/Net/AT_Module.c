@@ -130,6 +130,7 @@ const ATUrcDescribtor_Struct c_stATUrcDescribtor[5] =
     [1] = { "SEND OK",              ATTCP_UrcSendOK,     FALSE,   "数据发送成功"},
     [2] = { "+QNTP:",               ATModule_UrcNtp,     TRUE,    "网络时间同步"},
     [3] = { "+QIURC: \"closed\"",   ATTCP_UrcClose,      TRUE,    "断开连接"},
+    [4] = { "+QIURC: \"recv\"",     ATTCP_UrcRecv,       FALSE,   "新数据通知"},
 };
 
 
@@ -168,15 +169,15 @@ static uint16_t ATModule_PackConfigAPN(uint8_t socketIndex, void * modulePara, u
 	char cApn[24] = {0};
 
 	//替代APN字符
-	if(CddDrvSimOperator_CMCC == pModulePara->stModuleInfo.eOperatorType)
+	if(eCddNetMOperator_CMCC == pModulePara->stModuleInfo.eOperatorType)
 	{
 		memcpy(cApn, AT_MODULE_APN_YD, strlen(AT_MODULE_APN_YD));
 	}
-	else if(CddDrvSimOperator_CUCC == pModulePara->stModuleInfo.eOperatorType)
+	else if(eCddNetMOperator_CUCC == pModulePara->stModuleInfo.eOperatorType)
 	{
 		memcpy(cApn, AT_MODULE_APN_LT, strlen(AT_MODULE_APN_LT));
 	}
-	else if(CddDrvSimOperator_CTCC == pModulePara->stModuleInfo.eOperatorType)
+	else if(eCddNetMOperator_CTCC == pModulePara->stModuleInfo.eOperatorType)
 	{
 		memcpy(cApn, AT_MODULE_APN_DX, strlen(AT_MODULE_APN_DX));
 	}
@@ -295,22 +296,22 @@ static uint8_t ATModule_RecvCOPS(uint8_t socketID, void * modulePara, uint8_t *p
 	{
 		if(NULL != Common_SearchData(pData, dataLen, "MOBILE", strlen("MOBILE")))
 		{
-			pModulePara->stModuleInfo.eOperatorType = CddDrvSimOperator_CMCC;
+			pModulePara->stModuleInfo.eOperatorType = eCddNetMOperator_CMCC;
 			ret = TRUE;
 		}
 		else if(NULL != Common_SearchData(pData, dataLen, "UNICOM", strlen("UNICOM")))
 		{
-			pModulePara->stModuleInfo.eOperatorType = CddDrvSimOperator_CUCC;
+			pModulePara->stModuleInfo.eOperatorType = eCddNetMOperator_CUCC;
 			ret = TRUE;
 		}
 		else if(NULL != Common_SearchData(pData, dataLen, "UNICOM", strlen("UNICOM")))
 		{
-			pModulePara->stModuleInfo.eOperatorType = CddDrvSimOperator_CUCC;
+			pModulePara->stModuleInfo.eOperatorType = eCddNetMOperator_CUCC;
 			ret = TRUE;
 		}
 		else if(NULL != Common_SearchData(pData, dataLen, "CT", strlen("CT")))
 		{
-			pModulePara->stModuleInfo.eOperatorType = CddDrvSimOperator_CTCC;
+			pModulePara->stModuleInfo.eOperatorType = eCddNetMOperator_CTCC;
 			ret = TRUE;
 		}
 	}

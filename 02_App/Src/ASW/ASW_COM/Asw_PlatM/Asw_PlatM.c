@@ -165,9 +165,6 @@ uint8_t AswPlatM_SetPlatType(char *platName)
 
     return ret;
 }
-
-
-
 static const AswPlatMProtocolDescriptor_Struct *AswPlatM_GetProtocolDescriptor(void)
 {
     AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = NULL;
@@ -180,6 +177,8 @@ static const AswPlatMProtocolDescriptor_Struct *AswPlatM_GetProtocolDescriptor(v
 
     return &c_stAswPlatMProtocolDescriptorTable[ePlatType];
 }
+
+
 
 
 
@@ -235,13 +234,12 @@ void AswPlatM_InitMemory(void)
 
 void AswPlatM_MainFunction(void)
 {  
+    const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
 
-
-
-
-
-
-
+    if (pProtocolDescriptor->pMainFunction != NULL)
+    {
+        pProtocolDescriptor->pMainFunction();
+    }
 }
 
 

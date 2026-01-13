@@ -41,7 +41,7 @@ typedef struct
     CddNetMSocketType_Enum eSocketType;
     void (*pFuncFillLinkPara)(CddNetMSocketPara_Union *pLinkPara);
     void (*pFuncInit)(void);
-    void (*pMainFunction);
+    void (*pMainFunction)(void);
 
 }AswPlatMProtocolDescriptor_Struct;
 

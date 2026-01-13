@@ -18,9 +18,12 @@
 ******************************************************************************/
 #include "Common.h"
 #include "Asw_IotProtoGNTypes.h"
+#include "SysCfg.h"
+#include "Cdd_NetM.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+
 
 
 /******************************************************************************
@@ -37,12 +40,21 @@ typedef enum
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+
+
 typedef struct 
 {
-    uint8_t frameQueueChannelID;
     IotGNWorkState_Enum eWorkState;
+
+    uint8_t queueBusyFlag;
+    uint32_t waitQueueIdleTick;
+    uint8_t sendIndex;
+	uint8_t sendPort;
+    uint16_t reqSeq;
+
     typeFuncSendCtrl pFuncSendCtrl;
     typeFuncRecvCtrl pFuncRecvCtrl;
+    uint8_t frameQueueChannelID;
     CommonSendCtrl_Struct stSendCtrl[SYSCFG_CFG_GUN_NUM][IOT_GN_CMD_SEND_COUNT];
     CommonRecvCtrl_Struct stRecvCtrl[SYSCFG_CFG_GUN_NUM][IOT_GN_CMD_RECV_COUNT];
 }IotGNCtx_Struct;
@@ -57,7 +69,7 @@ typedef struct
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-
+void IotGN_OfflineHandle(void);
 void IotGN_FillLinkPara(CddNetMSocketPara_Union *pLinkPara);
 void IotGN_InitMemory(void);
 void IotGN_MainFunction(void);
