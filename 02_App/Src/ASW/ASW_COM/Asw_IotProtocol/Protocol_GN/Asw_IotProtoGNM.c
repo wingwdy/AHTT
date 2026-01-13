@@ -66,7 +66,8 @@ static CommonSendCtrl_Struct* IotGN_GetSendCtrl(uint8_t port, uint8_t cmd)
 
     switch (cmd)
     {
-        case IOT_GN_CMD_LOGIN_REQ:  pSendCtrl = &pIotGNCtx->stSendCtrl[port][0];   break;
+        case IOT_GN_CMD_LOGIN_REQ:      pSendCtrl = &pIotGNCtx->stSendCtrl[port][0];   break;
+        case IOT_GN_CMD_HEARTBEAT_REQ:  pSendCtrl = &pIotGNCtx->stSendCtrl[port][1];   break;
         default: break;
     }
 
@@ -79,7 +80,8 @@ static CommonRecvCtrl_Struct* IotGN_GetRecvCtrl(uint8_t port, uint8_t cmd)
 
     switch (cmd)
     {
-        case IOT_GN_CMD_LOGIN_RSP:  pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][0];   break;
+        case IOT_GN_CMD_LOGIN_RSP:      pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][0];   break;
+        case IOT_GN_CMD_HEARTBEAT_RSP:  pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][1];   break;
         default: break;
     }
 
@@ -101,9 +103,7 @@ static void IotGN_WSLoginHandle(void)
 {
     if (TRUE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_O))
     {
-        AswErrhandle_ResetErrExsitCallback(0, eErr_PlatformOffline);
         pIotGNCtx->eWorkState = eIOTGNWorkState_Normal;
-
         Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, 0, IOT_GN_CMD_LOGIN_REQ, TRUE);
     }
 }
@@ -119,6 +119,8 @@ static void IotGN_WSNormalHandle(void)
         IotLX_UpCtrlSendDeal();
 
         IotGN_UpCtrlRecvDeal();
+
+        IotGN_TimeoutDetect();
     }
 }
 

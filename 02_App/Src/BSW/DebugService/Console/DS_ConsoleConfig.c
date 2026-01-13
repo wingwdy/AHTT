@@ -61,6 +61,7 @@ static int32_t DSConsoleCfg_Reboot(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_ChargeCtrl(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_ShowStack(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_EnterFactoryMode(int32_t argc, char *argv[]);
+static int32_t DSConsoleCfg_ExsistFactoryMode(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_HandleGbMode(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[]);
 /*******************************************************************************
@@ -70,6 +71,7 @@ DSCONSOLE_CFG_ADD_CMD(reboot,        DSConsoleCfg_Reboot, "reboot" reboot system
 DSCONSOLE_CFG_ADD_CMD(charge,        DSConsoleCfg_ChargeCtrl, "charge start/stop 0/1" start/stop charge);
 DSCONSOLE_CFG_ADD_CMD(showStack,     DSConsoleCfg_ShowStack, "showStack" show stack info);
 DSCONSOLE_CFG_ADD_CMD(testmode,      DSConsoleCfg_EnterFactoryMode, "testmode" Enter factoryMode);
+DSCONSOLE_CFG_ADD_CMD(workmode,      DSConsoleCfg_ExsistFactoryMode, "workmode" Exsist factoryMode);
 DSCONSOLE_CFG_ADD_CMD(gbmode,        DSConsoleCfg_HandleGbMode, "gbmode 1 / 2" EnterGbMode/ExsitGbMode);
 DSCONSOLE_CFG_ADD_CMD(set,           DSConsoleCfg_SetPara, "set xxx" set param);
 
@@ -111,6 +113,12 @@ static int32_t DSConsoleCfg_ShowStack(int32_t argc, char *argv[])
 static int32_t DSConsoleCfg_EnterFactoryMode(int32_t argc, char *argv[])
 {
     CddModeM_EnterFactoryMode();
+    return 0;
+}
+
+static int32_t DSConsoleCfg_ExsistFactoryMode(int32_t argc, char *argv[])
+{
+    CddModeM_ExsitFactoryMode();
     return 0;
 }
 
@@ -194,6 +202,29 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
             if (NULL != (pTemp = Common_SearchData((uint8_t *)argv[2], strlen(argv[2]), "ip:", strlen("ip:"))))
             {
                 pTemp += strlen("ip:");
+
+                if (strlen((char *)pTemp) < CDD_NETM_CFG_IP_LEN)
+                {
+                    char ip[CDD_NETM_CFG_IP_LEN + 1] = {0};
+
+                    if (sscanf((char *)pTemp, "%72[^,],%d", ip, &port) == 2)
+                    {
+                        if (TRUE == AswPlatM_SetPlatMainIpPort(ip, strlen(ip), (uint16_t)port))
+                        {
+                            DSCONSOLE_CFG_LogPrint("Set Pile ip: \"%s\", port= %d ok!\r\n", ip, port);
+                            setResult = TRUE;
+                        }
+                    }
+                }
+
+                if (setResult == FALSE)
+                {
+                    DSCONSOLE_CFG_LogPrint("Set Pile ip port failed!\r\n");
+                }
+            }
+            else if (NULL != (pTemp = Common_SearchData((uint8_t *)argv[2], strlen(argv[2]), "domain:", strlen("domain:"))))
+            {
+                pTemp += strlen("domain:");
 
                 if (strlen((char *)pTemp) < CDD_NETM_CFG_IP_LEN)
                 {

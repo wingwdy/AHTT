@@ -18,7 +18,7 @@
 *******************************************************************************/
 #include "Asw_IotProtoGNM.h"
 #include "FrameQueue.h"
-
+#include "Asw_ErrorHandle.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -45,7 +45,7 @@
 *******************************************************************************/
 
 static uint8_t IotGN_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
-
+static uint8_t IotGN_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -62,7 +62,20 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .maxTimeout = 10 * 1000,
         .maxTryCnt = 3,
         .matchCmd = IOT_GN_CMD_LOGIN_REQ,
+        .printFlag = TRUE,
         .cMeaning = "登陆应答",
+    },
+
+    [1] = 
+    {
+        .cmd = IOT_GN_CMD_HEARTBEAT_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .pRecvParse = IotGN_RecvHeartBeatRsp,
+        .maxTimeout = 10 * 1000,
+        .maxTryCnt = 3,
+        .matchCmd = IOT_GN_CMD_HEARTBEAT_REQ,
+        .printFlag = FALSE,
+        .cMeaning = "心跳应答",
     },
 };
 
@@ -146,12 +159,16 @@ static void IotGN_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                 frameLen = Common_TwoUint8ToUint16(pFrameHead->dataLen);
                 if (TRUE == pCmdRecvCtrl->pRecvParse(&port, (uint8_t *)pFrameHead + sizeof(IotGNFrameHead_Struct), frameLen - sizeof(IotGNFrameHead_Struct) - 2))
                 {
-                    ASWGN_CFG_LogPrint("[枪：%d]接收[cmd: %02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
-                    DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
+                    if (pCmdRecvCtrl->printFlag)
+                    {
+                        IOTGN_CFG_LogPrint("[枪：%d]接收[cmd: %02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
+                    }
 
                     if (pCmdRecvCtrl->cmdType == IOT_GN_CMDTYPE_RESPONSE)
                     {
                         Common_SetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, pFrameHead->cmd, FALSE);
+                        Common_ClearRptCount(pIotGNCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
                     }
                     else
                     {
@@ -167,6 +184,14 @@ static void IotGN_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                         Common_SetSendFlag(pIotGNCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, FALSE);
                     }
                 }
+                else
+                {
+                    if (pCmdRecvCtrl->printFlag)
+                    {
+                        IOTGN_CFG_LogPrint("[枪：x]接收[cmd: %02X, %s][%d] 处理失败: ", pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
+                    }
+                }
             }
         }
     }
@@ -174,22 +199,57 @@ static void IotGN_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
 
 static uint8_t IotGN_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
+    uint8_t index = 0;
+    uint8_t *pRecvData = r_data;
+    uint8_t gunNo = 0;
+
+    index += 7;
+
+    if (pRecvData[index] == 0x00)
+    {
+        AswErrhandle_ResetErrExsitCallback(0, eErr_PlatformOffline);
+
+        for (gunNo = 0; gunNo < SYSCFG_CFG_GUN_NUM; gunNo++)
+        {
+            Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, gunNo, IOT_GN_CMD_HEARTBEAT_REQ, TRUE);
+        }
+    }
+    else
+    {
+        IOTGN_CFG_LogPrint("登陆失败，失败原因：%d\r\n", pRecvData[index]);
+        IotGN_OfflineHandle();
+    }
+
     return TRUE;
 }
 
+static uint8_t IotGN_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    uint8_t index = 0;
+    uint8_t *pRecvData = r_data;
+    uint8_t gunNo = 0;
+
+    index += 7;
+
+    if (pRecvData[index] > 0)
+    {
+        pRecvData[index]--;
+        port[0] = pRecvData[index];
+    }
+
+    return TRUE;
+}
+
+
+
+
 static void IotGN_CmdTimeoutHandle_3Times(uint8_t port, const IotGNRecvCtrl_Struct *pCmdRecvCtrl)
 {
-
-
-
 
 }
 
 static void IotGN_CmdTimeoutHandle(uint8_t port, uint16_t cmd)
 {
-
-
-
 
 }
 
@@ -227,6 +287,8 @@ void IotGN_TimeoutDetect(void)
             {
                 Common_SetRptCount(pIotGNCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
                 timeoutCount = Common_GetRptCount(pIotGNCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
+
+                IOTGN_CFG_LogPrint("[cmd:%d %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, timeoutCount, pCmdRecvCtrl->maxTimeout);
 
                 if (pCmdRecvCtrl->maxTryCnt == 0xFFFF)
                 {

@@ -20,7 +20,7 @@
 #include "Cdd_Drv_EG800AK.h"
 #include "AT_TCP.h"
 #include "SS_Tm.h"
-
+#include "Asw_ErrorHandle.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -48,6 +48,7 @@
 static uint16_t ATModule_PackConfigAPN(uint8_t socketIndex, void * modulePara, uint8_t *pData, uint16_t nATLen);
 
 static uint8_t ATModule_RecvSimStatus(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen);
+static uint8_t ATModule_RecvCPIN(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATModule_RecvCGREG(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATModule_RecvIccid(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATModule_RecvCSQ(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen);
@@ -77,7 +78,7 @@ const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
 
     [eATModuleCmd_QuerySimRecognizeStatus] =  
     { "AT+CPIN?\r\n",                          "+CPIN: READY",    10,          3000,     1000,  TRUE, "sim识别状态查询",
-    NULL,                                      NULL,                          ATModule_FailHandle},
+    NULL,                                      ATModule_RecvCPIN,             ATModule_FailHandle},
 
     [eATModuleCmd_QueryIccid] =  
     { "AT+QCCID\r\n",                          "+QCCID: ",         3,          10000,    3000,  TRUE, "sim卡iccid查询",
@@ -200,6 +201,11 @@ static void ATModule_FailHandle(uint8_t socketID, void * modulePara, uint8_t atT
         CddDrvEG800AK_SetModuleState(eCddNetMModuleState_AbNormal);
         CddDrvEG800AK_SetAbnormalType(CddDrvEG800AKAbnormalHandle_Reboot);
     }
+
+    if (eATModuleCmd_QuerySimRecognizeStatus == atTaskID)
+    {
+        AswErrhandle_SetErrExsitCallback(0, eErr_NetNoSIMErr);
+    }
 }
 
 static uint8_t ATModule_RecvSimStatus(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen)
@@ -217,6 +223,13 @@ static uint8_t ATModule_RecvSimStatus(uint8_t socketID, void * modulePara, uint8
 
     return ret;
 }
+
+static uint8_t ATModule_RecvCPIN(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen)
+{
+    AswErrhandle_ResetErrExsitCallback(0, eErr_NetNoSIMErr);
+    return TRUE;
+}
+
 
 static uint8_t ATModule_RecvIccid(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen)
 {

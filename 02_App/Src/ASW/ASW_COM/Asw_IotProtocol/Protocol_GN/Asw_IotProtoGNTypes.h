@@ -21,7 +21,7 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define ASWGN_CFG_LogPrint(fmt, ...)            DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
+#define IOTGN_CFG_LogPrint(fmt, ...)            DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
 
 #define IOT_GN_TXRX_BUFFER_SIZE                 (3072U)
 
@@ -41,10 +41,12 @@
 #define IOT_GN_CMD_NULL                         (0x00U)             /* 无效 */
 
 #define IOT_GN_CMD_LOGIN_REQ                    (0x01U)             /* 登陆 */
-#define IOT_GN_CMD_SEND_COUNT                   (0x01U)
+#define IOT_GN_CMD_HEARTBEAT_REQ                (0x03U)             /* 心跳请求 */
+#define IOT_GN_CMD_SEND_COUNT                   (0x02U)
 
 #define IOT_GN_CMD_LOGIN_RSP                    (0x02U)             /* 登陆应答 */
-#define IOT_GN_CMD_RECV_COUNT                   (0x01U)
+#define IOT_GN_CMD_HEARTBEAT_RSP                (0x04U)             /* 心跳应答 */
+#define IOT_GN_CMD_RECV_COUNT                   (0x02U)
 
 /******************************************************************************
 *    Enum Definition
@@ -64,6 +66,7 @@ typedef struct
     uint32_t sendCycle;
     IotGN_pSendPackFuncType pSendFunc;
 	uint16_t matchCmd;
+    uint8_t printFlag;
     char *cMeaning;
 }IotGNSendCtrl_Struct;
 
@@ -75,6 +78,7 @@ typedef struct
 	uint16_t maxTimeout;
 	uint16_t maxTryCnt;
 	uint16_t matchCmd;
+    uint8_t printFlag;
     char *cMeaning;
 }IotGNRecvCtrl_Struct;
 

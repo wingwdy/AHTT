@@ -45,6 +45,7 @@
 *    Global Function Prototypes
 ******************************************************************************/
 void IotGN_UpCtrlRecvDeal(void);
+void IotGN_TimeoutDetect(void);
 #endif /* ASW_IOT_PROTO_GNM_RECV_H_ */
 
 

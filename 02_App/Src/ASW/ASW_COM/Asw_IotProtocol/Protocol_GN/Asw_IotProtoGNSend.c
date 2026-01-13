@@ -20,7 +20,7 @@
 #include "Asw_PlatM.h"
 #include "Version.h"
 #include "FrameQueue.h"
-
+#include "Asw_ErrorHandle.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -48,7 +48,7 @@
 *    Static Local Functions Declaration
 *******************************************************************************/
 static uint16_t IotGN_SendLoginReq(uint8_t port, uint8_t *pBuf);
-
+static uint16_t IotGN_SendHeartBeat(uint8_t port, uint8_t *pBuf);
 
 /*******************************************************************************
 *    Global variables Declaration
@@ -64,7 +64,19 @@ static const IotGNSendCtrl_Struct c_stIotGNSendctrlTable[IOT_GN_CMD_SEND_COUNT] 
         .matchCmd = IOT_GN_CMD_LOGIN_RSP,
         .pSendFunc = IotGN_SendLoginReq,
         .sendCycle = 0,
+        .printFlag = TRUE,
         .cMeaning = "登陆认证"
+    },
+
+    [1] = 
+    {
+        .cmd = IOT_GN_CMD_HEARTBEAT_REQ,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .matchCmd = IOT_GN_CMD_LOGIN_RSP,
+        .pSendFunc = IotGN_SendHeartBeat,
+        .sendCycle = 10000,
+        .printFlag = FALSE,
+        .cMeaning = "设备心跳"
     },
 };
 
@@ -104,10 +116,10 @@ static uint16_t IotGN_SendLoginReq(uint8_t port, uint8_t *pBuf)
     srand(Common_GetSystick());
     randomNum = rand();
 
-    /* 桩号 */
+    /* 设备编码 */
     Common_AsciiToBCD(pParam->platPileDn, (char *)&pBuf[dataLen], 14);
     dataLen += 7;
-     /* 设备编码 */
+     /* 设备识别码 */
 #if (SYSCFG_CFG_GUN_NUM == 1)
     sprintf((char *)&pBuf[dataLen], "%s", SYSCFG_CFG_PRODUCT_CODE);
     dataLen += 16;
@@ -151,6 +163,35 @@ static uint16_t IotGN_SendLoginReq(uint8_t port, uint8_t *pBuf)
         pBuf[dataLen] = 0x02;
     else
         pBuf[dataLen] = 0xFF;
+
+    dataLen += 1;
+    return dataLen;
+}
+
+static uint16_t IotGN_SendHeartBeat(uint8_t port, uint8_t *pBuf)
+{
+    MSNvmPlatParam_Struct * pParam =  AswPlatM_GetPlatParamPtr();
+    uint16_t dataLen = 0;
+
+    CddNetMOperator_Enum eOperator = CddNetM_GetOperatorType();
+
+    /* 设备编码 */
+    Common_AsciiToBCD(pParam->platPileDn, (char *)&pBuf[dataLen], 14);
+    dataLen += 7;
+
+    /* 终端号 */
+    pBuf[dataLen] = port + 1;
+    dataLen += 1;
+
+    if (AswErrHandle_IsExsistError(port) == TRUE)
+    {
+        /* 故障 */
+        pBuf[dataLen] = 0x01;
+    }
+    else
+    {
+        pBuf[dataLen] = 0x00;
+    }
 
     dataLen += 1;
     return dataLen;
@@ -243,8 +284,11 @@ void IotLX_UpCtrlSendDeal(void)
                             break;
                         }
 
-                        ASWGN_CFG_LogPrint("[枪: %d]发送[cmd: %02X, %s][%d]: ", port, pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
-                        DSLogM_HexOutput(txBuf, dataLen);
+                        if (pCmdSendCtrl->printFlag)
+                        {
+                            IOTGN_CFG_LogPrint("[枪：%d]发送[cmd: %02X, %s][%d]: ", port, pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
+                            DSLogM_HexOutput(txBuf, dataLen);
+                        }
 
                         Common_SetSendFlag(pIotGNCtx->pFuncSendCtrl, port, pCmdSendCtrl->cmd, TRUE);
                         Common_SetSendImmdFlag(pIotGNCtx->pFuncSendCtrl, port, pCmdSendCtrl->cmd, FALSE);
