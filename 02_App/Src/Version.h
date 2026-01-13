@@ -23,7 +23,7 @@
 #define  APP_SW_PATCH_VERSION                           (2u)
 
 #define  APP_SW_VERSION_STRING                         "1.0.0.2"
-#define  APP_SW_VERSION_DATE                           "2026/01/12"
+#define  APP_SW_VERSION_DATE                           "2026/01/13"
 
 /******************************************************************************
 *    Macro Definition
