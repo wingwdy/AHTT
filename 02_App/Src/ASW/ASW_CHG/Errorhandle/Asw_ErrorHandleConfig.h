@@ -28,8 +28,9 @@
 
 #define ASWERR_CFG_MULTI_ENABLE                       FALSE
 
-#define ASWERR_CFG_ErrStateChangeNotice(port, eErr, flag, pErrHandle)  do\
+#define ASWERR_CFG_ErrStateChangeNotice(port, eErr, flag, errLevel)  do\
                                                              {\
+                                                                AswErrHandle_NoticeCallBack(port, eErr, flag, errLevel);\
                                                              }while(0)
                                                              
 #define ASWERR_CFG_LogPrint(fmt, ...)                 DSLOGM_Debug(DSLogMModule_ErrorHandle, fmt, ##__VA_ARGS__)
@@ -79,13 +80,11 @@ typedef struct
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-
-
-
+extern const AswErrorHandleConfig_Struct c_AswErrorHandleConfigTable[eErr_Num];
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-extern const AswErrorHandleConfig_Struct c_AswErrorHandleConfigTable[eErr_Num];
+void AswErrHandle_NoticeCallBack(uint8_t port, AswErrorType_Enum errType, uint8_t flag, AswErrorLevel_Enum errLevel);
 
 #endif /* ASW_ERRORHANDLE_CONFIG_H_ */
 

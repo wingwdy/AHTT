@@ -56,7 +56,6 @@ uint16_t CddCP_GetVoltage(uint8_t port);
 void CddCP_AdjustCurRateCurrent(uint8_t port, uint32_t current);
 void CddCP_StartPWM(uint8_t port);
 void CddCP_StopPWM(uint8_t port);
-void CddCP_SetErrNotice(uint8_t port);
 void CddCP_SetReqStartWakeup(uint8_t port);
 void CddCP_SetReqStopWakeUp(uint8_t port);
 uint8_t CddCP_GetWakeupStatus(uint8_t port);
@@ -65,6 +64,7 @@ void CddCP_SetReqStopDiodeExsitDetect(uint8_t port);
 uint8_t CddCP_GetDiodeExsitDetectResult(uint8_t port);
 void CddCP_MainFunction(void);
 void CddCP_InitMemory(void);
+void CddCP_SetCriticalErrNotice(uint8_t port);
 #endif
  
 

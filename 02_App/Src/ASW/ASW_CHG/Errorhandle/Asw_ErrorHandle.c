@@ -98,7 +98,7 @@ static void AswErrHandle_SetErrHandle(uint8_t port, AswErrorHandle_Struct *pErro
 
         ASWERR_CFG_LogPrint("[枪：%d]故障：[%s] 产生\r\n", port, pConfig->errDesc);
         AswErrHandle_RefreshChargeCondition(pErrorHandle);
-        ASWERR_CFG_ErrStateChangeNotice(port, errType, TRUE, pErrorHandle);
+        ASWERR_CFG_ErrStateChangeNotice(port, errType, TRUE, pErrorHandle->arErrLevel[errType]);
     }
 }
 
@@ -129,7 +129,7 @@ static void AswErrHandle_ClearErrHandle(uint8_t port, AswErrorHandle_Struct *pEr
 
         pErrorHandle->arErrLevel[errType] = AswErrorLevel_0;
         AswErrHandle_RefreshChargeCondition(pErrorHandle);
-        ASWERR_CFG_ErrStateChangeNotice(port, errType, FALSE, pErrorHandle);
+        ASWERR_CFG_ErrStateChangeNotice(port, errType, FALSE, pErrorHandle->arErrLevel[errType]);
     }
 }
 
@@ -321,7 +321,6 @@ uint8_t AswErrHandle_IsExsistError(uint8_t port)
 
     return ret;
 }
-
 
 
 

@@ -60,6 +60,8 @@ typedef struct
     uint32_t diodeDetectStartTick;            /* 二极管检测CP拉-12V计时 */
     FilterProfile1_Struct diodeFilter;        /* 二极管检测结果滤波 */
 
+    uint8_t criticalErrorState;               /* 严重故障状态发-12V */
+
     uint16_t curSetCpDuty;                    /* 当前CP设置占空比 */ 
     uint16_t cpVol;                           /* CP电压，保留3位小数 */ 
     CddCPVolState_Enum eValidCpVolState;      /* CP电压状态 */
@@ -440,14 +442,6 @@ void CddCP_AdjustCurRateCurrent(uint8_t port, uint32_t current)
     }
 }
 
-void CddCP_SetErrNotice(uint8_t port)
-{
-    if (port < SYSCFG_CFG_GUN_NUM)
-    {
-        CddCP_SetPwmDuty(port, 0);
-    }
-}
-
 CddCPVolState_Enum CddCP_GetVolState(uint8_t port)
 {
     CddCPCtrl_Struct *pCpCtrl = &g_stCddCPCtrl[port];
@@ -480,11 +474,14 @@ void CddCP_SetReqStartWakeup(uint8_t port)
 
     if (port < SYSCFG_CFG_GUN_NUM)
     {
-        if (pCpCtrl->wakeupStep == CDDCP_WAKEUP_STEP0)
+        if (pCpCtrl->criticalErrorState == FALSE)
         {
-            pCpCtrl->wakeupStatus = GLOBAL_OPT_STATE_PROCESS;
-            pCpCtrl->wakeupStep = CDDCP_WAKEUP_STEP1;
-            CDDCP_CFG_LogPrint("[枪：%d]请求尝试CP唤醒!\r\n");
+            if (pCpCtrl->wakeupStep == CDDCP_WAKEUP_STEP0)
+            {
+                pCpCtrl->wakeupStatus = GLOBAL_OPT_STATE_PROCESS;
+                pCpCtrl->wakeupStep = CDDCP_WAKEUP_STEP1;
+                CDDCP_CFG_LogPrint("[枪：%d]请求尝试CP唤醒!\r\n");
+            }
         }
     }
 }
@@ -500,9 +497,12 @@ void CddCP_SetReqStopWakeUp(uint8_t port)
             pCpCtrl->wakeupStep = CDDCP_WAKEUP_STEP0;
             pCpCtrl->wakeupStatus = GLOBAL_OPT_STATE_IDLE;
 
-            if (pCpCtrl->curSetCpDuty != 0)
+            if (pCpCtrl->criticalErrorState == FALSE)
             {
-                CddCP_SetPwmDuty(port, 1000);
+                if (pCpCtrl->curSetCpDuty != 0)
+                {
+                    CddCP_SetPwmDuty(port, 1000);
+                }
             }
 
             CDDCP_CFG_LogPrint("[枪：%d]请求中断CP唤醒!\r\n");
@@ -529,12 +529,15 @@ void CddCP_SetReqStartDiodeExsitDetect(uint8_t port)
 
     if (port < SYSCFG_CFG_GUN_NUM)
     {
-        if (pCpCtrl->diodeDetectStep == CDDCP_DIODE_DETECT_STEP0)
+        if (pCpCtrl->criticalErrorState == FALSE)
         {
-            pCpCtrl->diodeDetectStep = CDDCP_DIODE_DETECT_STEP1;
-            pCpCtrl->diodeDetectResult = GLOBAL_OPT_STATE_PROCESS;
-            memset(&pCpCtrl->diodeFilter, 0x00, sizeof(FilterProfile1_Struct));
-            CDDCP_CFG_LogPrint("[枪：%d]请求执行二极管存在性检测!\r\n");
+            if (pCpCtrl->diodeDetectStep == CDDCP_DIODE_DETECT_STEP0)
+            {
+                pCpCtrl->diodeDetectStep = CDDCP_DIODE_DETECT_STEP1;
+                pCpCtrl->diodeDetectResult = GLOBAL_OPT_STATE_PROCESS;
+                memset(&pCpCtrl->diodeFilter, 0x00, sizeof(FilterProfile1_Struct));
+                CDDCP_CFG_LogPrint("[枪：%d]请求执行二极管存在性检测!\r\n");
+            }
         }
     }
 }
@@ -567,20 +570,39 @@ uint8_t CddCP_GetDiodeExsitDetectResult(uint8_t port)
     return ret;
 }
 
+void CddCP_SetCriticalErrNotice(uint8_t port)
+{
+    CddCPCtrl_Struct *pCpCtrl = &g_stCddCPCtrl[port];
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        if (pCpCtrl->criticalErrorState == FALSE)
+        {
+            pCpCtrl->criticalErrorState = TRUE;
+            pCpCtrl->cpPWMOutputEnable = FALSE;
+            CddCP_SetPwmDuty(port, 0);
+            CDDCP_CFG_LogPrint("[枪：%d]发生严重错误, CP=-12V!\r\n", port);
+        }
+    }
+}
+
 void CddCP_StartPWM(uint8_t port)
 {
     CddCPCtrl_Struct *pCpCtrl = &g_stCddCPCtrl[port];
 
     if (port < SYSCFG_CFG_GUN_NUM)
     {
-        if (pCpCtrl->cpPWMOutputEnable != TRUE)
+        if (pCpCtrl->criticalErrorState == FALSE)
         {
-            pCpCtrl->cpPWMOutputEnable = TRUE;
-            CDDCP_CFG_LogPrint("[枪：%d]CP开始发送PWM! PWM对应电流值：%d.%03d\r\n",port, pCpCtrl->curAjustCurrent / 1000,
-            pCpCtrl->curAjustCurrent % 1000);
-        }
+            if (pCpCtrl->cpPWMOutputEnable != TRUE)
+            {
+                pCpCtrl->cpPWMOutputEnable = TRUE;
+                CDDCP_CFG_LogPrint("[枪：%d]CP开始发送PWM! PWM对应电流值：%d.%03d\r\n",port, pCpCtrl->curAjustCurrent / 1000,
+                pCpCtrl->curAjustCurrent % 1000);
+            }
 
-        CddCP_AdjustCurRateCurrent(port, pCpCtrl->curAjustCurrent);
+            CddCP_AdjustCurRateCurrent(port, pCpCtrl->curAjustCurrent);
+        }
     }
 }
 
@@ -593,9 +615,15 @@ void CddCP_StopPWM(uint8_t port)
         if (pCpCtrl->cpPWMOutputEnable != FALSE)
         {
             pCpCtrl->cpPWMOutputEnable = FALSE;
-            CddCP_AdjustCurRateCurrent(port, 0);
+
+            if (pCpCtrl->criticalErrorState == FALSE)
+            {
+                CddCP_AdjustCurRateCurrent(port, 0);
+            }
+
             CDDCP_CFG_LogPrint("[枪：%d]CP停止发送PWM!\r\n",port);
         }
+        
     }
 }
 
