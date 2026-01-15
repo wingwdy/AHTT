@@ -106,6 +106,11 @@ uint8_t AswChargeIf_GetGunTemperature(uint8_t port)
     return CddSensor_GetGunTemperature(port);
 }
 
+uint64_t AswChargeIf_GetMeterEnergyVal(uint8_t port)
+{
+    return CddMeterM_GetEnergyVal(port);
+}
+
 
 
 

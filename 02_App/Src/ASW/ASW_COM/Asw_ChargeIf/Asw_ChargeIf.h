@@ -11,25 +11,16 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-
+#ifndef ASW_CHARGE_IF_H_
+#define ASW_CHARGE_IF_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#ifndef ASW_CHARGEIF_H_
-#define ASW_CHARGEIF_H_
+#include "Common.h"
+#include "Asw_Charge.h"
 
 /******************************************************************************
 *    Macro Definition
-******************************************************************************/
-#include "Common.h"
-#include "Asw_Charge.h"
-/******************************************************************************
-*    Enum Definition
-******************************************************************************/
-
-
-/******************************************************************************
-*    Typedef Definition
 ******************************************************************************/
 #define ASWCHARGEIF_WORKSTATE_IDLE           ASWCHARGE_WORKSTATE_IDLE      /* 空闲状态 */
 #define ASWCHARGEIF_WORKSTATE_READY          ASWCHARGE_WORKSTATE_READY     /* 已准备状态 */
@@ -41,7 +32,14 @@
 #define ASWCHARGEIF_WORKSTATE_STOPPING       ASWCHARGE_WORKSTATE_STOPPING  /* 停止中状态 */
 #define ASWCHARGEIF_WORKSTATE_FINISH         ASWCHARGE_WORKSTATE_FINISH    /* 停止完成状态 */
 
+/******************************************************************************
+*    Enum Definition
+******************************************************************************/
 
+
+/******************************************************************************
+*    Typedef Definition
+******************************************************************************/
 
 
 /******************************************************************************
@@ -58,7 +56,8 @@ uint32_t AswChargeIf_GetOutputVoltage(uint8_t port);
 uint32_t AswChargeIf_GetOutputCurrent(uint8_t port);
 uint8_t AswChargeIf_GetChargeState(uint8_t port);
 uint8_t AswChargeIf_GetGunTemperature(uint8_t port);
-#endif
+uint64_t AswChargeIf_GetMeterEnergyVal(uint8_t port);
+#endif /* ASW_CHARGEIF_H_ */
 
 
 

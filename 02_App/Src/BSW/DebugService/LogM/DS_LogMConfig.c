@@ -67,6 +67,7 @@ const char *g_logMModuleName[DSLogMModule_Count] =
     "VoltCur",
     "PlatM",
     "Protocol",
+    "Monitor",
 
     "ModeM",
     "4G",

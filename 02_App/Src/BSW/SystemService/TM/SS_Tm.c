@@ -46,6 +46,7 @@ typedef struct
     uint32_t secSysTimestamp;
     uint32_t lastTickCount;
     uint8_t syncSysTimeFlag;
+    CommonDateTime_Struct dateTime;
     char timeStr[32];
     SemaphoreHandle_t mutex;
 }SSTimeCtrl_Struct;
@@ -71,7 +72,6 @@ static void SSTM_UpdateSysTimeStamp(void)
 {
     uint32_t currentTickCount = Common_GetSystick();
     uint32_t tickDiff = 0;
-    CommonDateTime_Struct dateTime;
 
     xSemaphoreTake(g_stTmCtrl.mutex, portMAX_DELAY);
 
@@ -92,11 +92,11 @@ static void SSTM_UpdateSysTimeStamp(void)
         g_stTmCtrl.lastTickCount = currentTickCount;
     }
 
-    Conmon_TimestampToDateTime(g_stTmCtrl.secSysTimestamp, &dateTime);
+    Conmon_TimestampToDateTime(g_stTmCtrl.secSysTimestamp, &g_stTmCtrl.dateTime);
 
     sprintf(g_stTmCtrl.timeStr, "%04d-%02d-%02d %02d:%02d:%02d",
-        dateTime.year, dateTime.month, dateTime.day, 
-        dateTime.hour, dateTime.minute, dateTime.second);
+        g_stTmCtrl.dateTime.year, g_stTmCtrl.dateTime.month, g_stTmCtrl.dateTime.day, 
+        g_stTmCtrl.dateTime.hour, g_stTmCtrl.dateTime.minute, g_stTmCtrl.dateTime.second);
 
     xSemaphoreGive(g_stTmCtrl.mutex);
 }
@@ -161,6 +161,14 @@ void SSTM_SynTimeByDateTime(CommonDateTime_Struct *pTime)
 uint8_t SSTM_GetSyncTimeFlag(void)
 {
     return g_stTmCtrl.syncSysTimeFlag;
+}
+
+void SSTM_GetDateTime(CommonDateTime_Struct *pTime)
+{
+    if (pTime != NULL)
+    {
+        memcpy(pTime, &g_stTmCtrl.dateTime, sizeof(CommonDateTime_Struct));
+    }
 }
 
 void SSTM_InitMemory(void)

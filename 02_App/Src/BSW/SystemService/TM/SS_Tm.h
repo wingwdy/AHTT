@@ -48,6 +48,7 @@ void SSTM_InitMemory(void);
 uint32_t SSTM_GetSecTimestamp(void);
 uint32_t SSTM_GetMsecTimestamp(void);
 uint8_t SSTM_GetSyncTimeFlag(void);
+void SSTM_GetDateTime(CommonDateTime_Struct *pTime);
 void SSTM_GetTimeStr(char *pTimeStr);
 #endif
 

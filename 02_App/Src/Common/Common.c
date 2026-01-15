@@ -757,3 +757,29 @@ void Common_AsciiToBCD(char *pASC, uint8_t *pBCD, uint16_t length)
         }
     }
 }
+
+void Common_BCDToBIN(uint8_t *pBCD, uint8_t *pBIN, uint16_t length)
+{ 
+    uint16_t index = 0;
+
+    if (pBCD != NULL && pBIN != NULL && length > 0)
+    {
+        for (index = 0; index < length; index++) 
+        {
+            pBIN[index] = (pBCD[index] / 16) * 10 + pBCD[index] % 16;
+        }
+    }
+}
+
+void Common_BINToBCD(uint8_t *pBIN, uint8_t *pBCD, uint16_t length)
+{
+    uint16_t index = 0;
+
+    if (pBCD != NULL && pBIN != NULL && length > 0)
+    {
+        for (index = 0; index < length; index++) 
+        {
+            pBCD[index] = (pBIN[index] / 10) * 16 + pBIN[index] % 10;
+        }
+    }
+}

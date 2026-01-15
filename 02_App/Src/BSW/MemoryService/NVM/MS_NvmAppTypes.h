@@ -103,10 +103,11 @@ typedef struct
 }MSNvmPlatParam_Struct;
 
 /* 订单记录 */
-typedef struct 
+typedef union 
 {
+    
     uint8_t userData[MSNVM_ORDER_MAX_LEN];
-}MSNvmOrderInfo_Struct;
+}MSNvmOrderInfo_Union;
 
 /* 故障记录 */
 typedef struct 

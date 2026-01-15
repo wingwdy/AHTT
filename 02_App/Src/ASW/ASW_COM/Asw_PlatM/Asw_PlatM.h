@@ -18,7 +18,7 @@
 *    Header File Inclusion
 ******************************************************************************/
 #include "MS_Nvm.h"
-
+#include "Asw_Monitor.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -55,13 +55,16 @@ uint8_t AswPlatM_SetFixPileDn(char *pFixPileDn, uint8_t len);
 uint8_t AswPlatM_SetPlatMainIpPort(char *pIp, uint8_t ipLen, uint16_t port);
 uint8_t AswPlatM_SetPlatMainPort(uint16_t port);
 uint8_t AswPlatM_SetPlatType(char *platName);
+AswPlatType_Enum AswPlatM_GetPlatType(void);
 
 void AswPlatM_DefaultPlatParam(void *param);
 MSNvmPlatParam_Struct * AswPlatM_GetPlatParamPtr(void);
 void AswPlatM_InitMemory(void);
 void AswPlatM_MainFunction(void);
 
-
+uint8_t AswPlatM_FillChargeRecord(uint8_t port, MSNvmOrderInfo_Union *pOrderData);
+void AswPlatM_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Union *pOrderData, uint8_t orderSaveState);
+void AswPlatM_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pBillMode);
 #endif
 
 

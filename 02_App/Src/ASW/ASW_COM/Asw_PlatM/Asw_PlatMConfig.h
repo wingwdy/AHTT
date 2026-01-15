@@ -20,6 +20,7 @@
 #include "Common.h"
 #include "Cdd_NetM.h"
 #include "DS_LogM.h"
+#include "Asw_Monitor.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -42,7 +43,9 @@ typedef struct
     void (*pFuncFillLinkPara)(CddNetMSocketPara_Union *pLinkPara);
     void (*pFuncInit)(void);
     void (*pMainFunction)(void);
-
+    uint8_t (*pFuncFillChargeRecord)(uint8_t port, MSNvmOrderInfo_Union *pOrderData);
+    void (*pFuncPackChargeRecord)(uint8_t port, MSNvmOrderInfo_Union *pOrderData, uint8_t orderSaveState);
+    void (*pFuncTransformBillMode)(uint8_t port, AswMonitorBillMode_Struct *pBillMode);
 }AswPlatMProtocolDescriptor_Struct;
 
 

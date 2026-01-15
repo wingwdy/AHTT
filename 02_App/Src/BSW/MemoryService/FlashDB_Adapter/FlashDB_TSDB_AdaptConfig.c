@@ -63,7 +63,7 @@ TSDBAdaptConfig_Struct g_stTSDBAdaptConfigTable[eTSDBAdaptChannel_Count] =
         .pFuncSetUnlock = TSDBAdaptConfig_SetUnlock,
         .dbName = "charge_recode",
         .flashPartName = FAL_TSDB_NAME_CHARGE_RECORD,
-	    .maxLen = sizeof(MSNvmOrderInfo_Struct),
+	    .maxLen = sizeof(MSNvmOrderInfo_Union),
         .staticInfo = { 0 },
     },
 

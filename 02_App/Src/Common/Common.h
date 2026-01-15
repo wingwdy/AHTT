@@ -141,6 +141,8 @@ void Conmon_TimestampToDateTime(uint32_t timestamp, CommonDateTime_Struct *dt);
 void Common_TimestampToCp56Time2a(uint32_t timestamp, uint8_t *cp56time2a);
 
 void Common_AsciiToBCD(char *pASC, uint8_t *pBCD, uint16_t length);
+void Common_BCDToBIN(uint8_t *pBCD, uint8_t *pBIN, uint16_t length);
+void Common_BINToBCD(uint8_t *pBIN, uint8_t *pBCD, uint16_t length);
 #endif /* COMMON_H_ */
 
 
