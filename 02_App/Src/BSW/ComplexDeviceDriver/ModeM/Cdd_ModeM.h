@@ -53,6 +53,7 @@ void CddModeM_EnterGBMode(void);
 void CddModeM_ExitGBMode(void);
 void CddModeM_EnterFactoryMode(void);
 void CddModeM_ExsitFactoryMode(void);
+uint8_t CddModeM_IsAgingTestFinish(void);
 #endif
 
 

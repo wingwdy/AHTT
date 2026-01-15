@@ -45,6 +45,7 @@ typedef struct
     FilterProfile1_Struct fctPinStatusFilter;
     uint8_t isAgingTestStart;
     uint32_t agingTestTickStart;
+    uint32_t agingTestExsistTickStart;
     MSNvmModeParam_Struct modeParam;
 }CddModeMCtx_Struct;
 
@@ -73,7 +74,9 @@ static void CddModeM_AgingTestHandle(void)
             if (CddMeterM_GetRmsCurrent(0) > CDD_MODEM_CFG_AGING_TEST_CURRENT_THRESHOLD)
             {
                 g_stCddModeMCtx.isAgingTestStart = TRUE;
+                g_stCddModeMCtx.agingTestExsistTickStart = Common_GetSystick();
                 g_stCddModeMCtx.agingTestTickStart = Common_GetSystick();
+                CDDMODE_CFG_LogPrint("进入老化测试!\r\n");
             }
         }
         else
@@ -82,13 +85,20 @@ static void CddModeM_AgingTestHandle(void)
             {
                 if (Common_JudgeTimeoutMs(g_stCddModeMCtx.agingTestTickStart, CDD_MODEM_CFG_AGING_TEST_TIMEOUT))
                 {
+                    CDDMODE_CFG_LogPrint("老化完成!\r\n");
                     g_stCddModeMCtx.modeParam.isAgingTestFinish = TRUE;
                     MSNvm_WriteParaBlock(eMSNvmBlockID_ModeParam, (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct));
                 }
+
+                g_stCddModeMCtx.agingTestExsistTickStart = Common_GetSystick();
             }
             else
             {
-                g_stCddModeMCtx.isAgingTestStart = FALSE;
+                if (Common_JudgeTimeoutMs(g_stCddModeMCtx.agingTestExsistTickStart, CDD_MODEM_CFG_EXSIST_AGING_TEST_TIMEOUT))
+                {
+                    CDDMODE_CFG_LogPrint("电流不满足条件，老化中止!\r\n");
+                    g_stCddModeMCtx.isAgingTestStart = FALSE;
+                }
             }
         }
     }
@@ -254,6 +264,7 @@ uint8_t CddModeM_IsAgingTestFinish(void)
 {
     return g_stCddModeMCtx.modeParam.isAgingTestFinish;
 }
+
 
 
 

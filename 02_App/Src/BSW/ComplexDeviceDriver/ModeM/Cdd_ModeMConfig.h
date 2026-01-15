@@ -27,6 +27,7 @@
 
 #define CDD_MODEM_CFG_AGING_TEST_CURRENT_THRESHOLD         (28000U)
 #define CDD_MODEM_CFG_AGING_TEST_TIMEOUT                   (27 * 60000U)
+#define CDD_MODEM_CFG_EXSIST_AGING_TEST_TIMEOUT            (10 * 1000U)
 
 #define CDD_MODEM_CFG_FACTORY_TIMEOUT                      (72 * 3600)
 

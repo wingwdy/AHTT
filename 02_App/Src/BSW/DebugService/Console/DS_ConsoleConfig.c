@@ -64,6 +64,8 @@ static int32_t DSConsoleCfg_EnterFactoryMode(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_ExsistFactoryMode(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_HandleGbMode(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[]);
+static int32_t DSConsoleCfg_ReadAgingState(int32_t argc, char *argv[]);
+
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
@@ -74,6 +76,8 @@ DSCONSOLE_CFG_ADD_CMD(testmode,      DSConsoleCfg_EnterFactoryMode, "testmode" E
 DSCONSOLE_CFG_ADD_CMD(workmode,      DSConsoleCfg_ExsistFactoryMode, "workmode" Exsist factoryMode);
 DSCONSOLE_CFG_ADD_CMD(gbmode,        DSConsoleCfg_HandleGbMode, "gbmode 1 / 2" EnterGbMode/ExsitGbMode);
 DSCONSOLE_CFG_ADD_CMD(set,           DSConsoleCfg_SetPara, "set xxx" set param);
+DSCONSOLE_CFG_ADD_CMD(ReadAgingState,DSConsoleCfg_ReadAgingState, "ReadAgingState" ReadAgingState);
+
 
 static int32_t DSConsoleCfg_Reboot(int32_t argc, char *argv[])
 {
@@ -267,6 +271,13 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
         }
     }
 
+    return 0;
+}
+
+
+static int32_t DSConsoleCfg_ReadAgingState(int32_t argc, char *argv[])
+{
+    DSCONSOLE_CFG_LogPrint("AgingState: %d\r\n", CddModeM_IsAgingTestFinish());
     return 0;
 }
 
