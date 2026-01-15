@@ -46,6 +46,10 @@
 
 static uint8_t IotGN_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotGN_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvBillModeVerifyRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvBillMode4RateRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvBillModeMultRateRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvCallRealData(uint8_t *port, uint8_t *r_data, uint16_t len);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -74,8 +78,56 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .maxTimeout = 10 * 1000,
         .maxTryCnt = 3,
         .matchCmd = IOT_GN_CMD_HEARTBEAT_REQ,
-        .printFlag = FALSE,
+        .printFlag = TRUE,
         .cMeaning = "心跳应答",
+    },
+
+    [2] = 
+    {
+        .cmd = IOT_GN_CMD_BILLMODE_VERIFY_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .pRecvParse = IotGN_RecvBillModeVerifyRsp,
+        .maxTimeout = 10 * 1000,
+        .maxTryCnt = 3,
+        .matchCmd = IOT_GN_CMD_BILLMODE_VERIFY_REQ,
+        .printFlag = TRUE,
+        .cMeaning = "计费模型验证应答",
+    },
+
+    [3] = 
+    {
+        .cmd = IOT_GN_CMD_BILLMODE_4RATE_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .pRecvParse = IotGN_RecvBillMode4RateRsp,
+        .maxTimeout = 10 * 1000,
+        .maxTryCnt = 3,
+        .matchCmd = IOT_GN_CMD_BILLMODE_REQ,
+        .printFlag = TRUE,
+        .cMeaning = "计费模型请求应答",
+    },
+
+    [4] = 
+    {
+        .cmd = IOT_GN_CMD_BILLMODE_MUTIRATE_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .pRecvParse = IotGN_RecvBillModeMultRateRsp,
+        .maxTimeout = 10 * 1000,
+        .maxTryCnt = 3,
+        .matchCmd = IOT_GN_CMD_BILLMODE_REQ,
+        .printFlag = TRUE,
+        .cMeaning = "计费模型请求应答",
+    },
+
+    [5] = 
+    {
+        .cmd = IOT_GN_CMD_CALL_REALDATA,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .pRecvParse = IotGN_RecvCallRealData,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_GN_CMD_CALL_REALDATA_ACK,
+        .printFlag = TRUE,
+        .cMeaning = "召测实时数据",
     },
 };
 
@@ -199,11 +251,9 @@ static void IotGN_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
 
 static uint8_t IotGN_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-    uint8_t index = 0;
+    uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t gunNo = 0;
-
-    index += 7;
 
     if (pRecvData[index] == 0x00)
     {
@@ -212,6 +262,7 @@ static uint8_t IotGN_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
         for (gunNo = 0; gunNo < SYSCFG_CFG_GUN_NUM; gunNo++)
         {
             Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, gunNo, IOT_GN_CMD_HEARTBEAT_REQ, TRUE);
+            Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, gunNo, IOT_GN_CMD_BILLMODE_VERIFY_REQ, TRUE);
         }
     }
     else
@@ -225,11 +276,8 @@ static uint8_t IotGN_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 
 static uint8_t IotGN_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-    uint8_t index = 0;
+    uint8_t index = 7;
     uint8_t *pRecvData = r_data;
-    uint8_t gunNo = 0;
-
-    index += 7;
 
     if (pRecvData[index] > 0)
     {
@@ -240,7 +288,100 @@ static uint8_t IotGN_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_t l
     return TRUE;
 }
 
+static uint8_t IotGN_RecvBillModeVerifyRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    uint8_t index = 7;
+    uint8_t *pRecvData = r_data;
+    uint8_t verifyRes = FALSE;
 
+    if (memcmp(pBillMode->billModeID, &pRecvData[index], 2) == 0)
+    {
+        index += 2;
+
+        if (pRecvData[index] == 0x00)
+        {
+            verifyRes = TRUE;
+            IOTGN_CFG_LogPrint("计费模型，不需要更新！\r\n");
+        }
+    }
+
+    if (verifyRes == FALSE)
+    {
+        IOTGN_CFG_LogPrint("计费模型变化，需要更新！\r\n");
+        Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, 0, IOT_GN_CMD_BILLMODE_REQ, TRUE);
+    }
+
+    return TRUE;
+}
+
+
+static uint8_t IotGN_RecvBillMode4RateRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    uint8_t index = 7;
+    uint8_t *pRecvData = r_data;
+    uint8_t temp = 0;
+
+    pBillMode->billType = IOT_GN_BILLMODE_RATE_TYPE_4;
+    memcpy(pBillMode->billModeID, &pRecvData[index], 2);
+    index += 2;
+
+    for (temp = 0; temp < 4; temp++)
+    {
+        memcpy(&pBillMode->elecPriceRate[temp], &pRecvData[index], 4);
+        index += 4;
+        memcpy(&pBillMode->servePriceRate[temp], &pRecvData[index], 4);
+        index += 4;   
+    }
+
+    pBillMode->measure_wastage_rates = pRecvData[index++];
+    memcpy(pBillMode->period_rate, &pRecvData[index], 48);
+    index += 48;
+
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotGNCtx->param, sizeof(MSNvmPlatPrivateParam_Union));
+    return TRUE;
+}
+
+static uint8_t IotGN_RecvBillModeMultRateRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    uint8_t index = 7;
+    uint8_t *pRecvData = r_data;
+    uint8_t temp = 0;
+
+    pBillMode->billType = IOT_GN_BILLMODE_RATE_TYPE_4;
+    memcpy(pBillMode->billModeID, &pRecvData[index], 2);
+    index += 2;
+
+    pBillMode->measure_wastage_rates = pRecvData[index++];
+
+    for (temp = 0; temp < 9; temp++)
+    {
+        memcpy(&pBillMode->elecPriceRate[temp], &pRecvData[index], 4);
+        index += 4;
+        memcpy(&pBillMode->servePriceRate[temp], &pRecvData[index], 4);
+        index += 4;   
+    }
+
+    Common_SetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, 0, IOT_GN_CMD_BILLMODE_4RATE_RSP, FALSE);
+    Common_ClearRptCount(pIotGNCtx->pFuncRecvCtrl, 0, IOT_GN_CMD_BILLMODE_4RATE_RSP);
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotGNCtx->param, sizeof(MSNvmPlatPrivateParam_Union));
+    return TRUE;
+}
+
+static uint8_t IotGN_RecvCallRealData(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    uint8_t index = 7;
+    uint8_t *pRecvData = r_data;
+
+    if (pRecvData[index] > 0)
+    {
+        port[0] = pRecvData[index] - 1;
+    }
+
+    return TRUE;
+}
 
 
 static void IotGN_CmdTimeoutHandle_3Times(uint8_t port, const IotGNRecvCtrl_Struct *pCmdRecvCtrl)

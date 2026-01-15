@@ -284,7 +284,7 @@ uint32_t Common_Cp56Time2aToTimestamp(const uint8_t *cp56time2a)
     return timestamp;
 }
 
-void Common_SetSendEnable(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t enable)
+void Common_SetSendEnable(typeFuncSendCtrl pFunc, uint8_t port, uint16_t cmd, uint8_t enable)
 { 
     CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
 
@@ -294,7 +294,7 @@ void Common_SetSendEnable(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uin
     }
 }
 
-uint8_t Common_GetSendEnable(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
+uint8_t Common_GetSendEnable(typeFuncSendCtrl pFunc, uint8_t port, uint16_t cmd)
 {
     CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
     uint8_t sendEnable = FALSE;
@@ -307,7 +307,7 @@ uint8_t Common_GetSendEnable(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
     return sendEnable;
 }
 
-void Common_SetSendFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t flag)
+void Common_SetSendFlag(typeFuncSendCtrl pFunc, uint8_t port, uint16_t cmd, uint8_t flag)
 {
     CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
 
@@ -317,7 +317,7 @@ void Common_SetSendFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8
     }
 }
 
-uint8_t Common_GetSendFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
+uint8_t Common_GetSendFlag(typeFuncSendCtrl pFunc, uint8_t port, uint16_t cmd)
 {
     CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
     uint8_t sendFlag = FALSE;
@@ -330,7 +330,7 @@ uint8_t Common_GetSendFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
     return sendFlag;
 }
 
-void Common_SetSendTick(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint32_t tick)
+void Common_SetSendTick(typeFuncSendCtrl pFunc, uint8_t port, uint16_t cmd, uint32_t tick)
 {
     CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
 
@@ -340,7 +340,7 @@ void Common_SetSendTick(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint3
     }
 }
 
-uint32_t Common_GetSendTick(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
+uint32_t Common_GetSendTick(typeFuncSendCtrl pFunc, uint8_t port, uint16_t cmd)
 {
     CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
     uint32_t cycTimer = pSendCtrl->cycTimer;
@@ -353,7 +353,7 @@ uint32_t Common_GetSendTick(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
     return cycTimer;
 }
 
-void Common_SetSendImmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t flag)
+void Common_SetSendImmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint16_t cmd, uint8_t flag)
 {
     CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
 
@@ -363,7 +363,7 @@ void Common_SetSendImmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd, u
     }
 }
 
-uint8_t Common_GetSendImmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd)
+uint8_t Common_GetSendImmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint16_t cmd)
 { 
     CommonSendCtrl_Struct* pSendCtrl = pFunc(port, cmd);
     uint8_t immdFlag = FALSE;
@@ -376,7 +376,7 @@ uint8_t Common_GetSendImmdFlag(typeFuncSendCtrl pFunc, uint8_t port, uint8_t cmd
     return immdFlag;
 }
 
-void Common_SetRecvEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t enable)
+void Common_SetRecvEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint16_t cmd, uint8_t enable)
 { 
     CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
 
@@ -386,7 +386,7 @@ void Common_SetRecvEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uin
     }
 }
 
-void Common_SetRecvSeq(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint32_t recvSeq)
+void Common_SetRecvSeq(typeFuncRecvCtrl pFunc, uint8_t port, uint16_t cmd, uint32_t recvSeq)
 {
     CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
 
@@ -396,7 +396,7 @@ void Common_SetRecvSeq(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint32
     }
 }
 
-uint32_t Common_GetRecvSeq(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
+uint32_t Common_GetRecvSeq(typeFuncRecvCtrl pFunc, uint8_t port, uint16_t cmd)
 {
     CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
     uint32_t recvSeq = 0;
@@ -409,7 +409,7 @@ uint32_t Common_GetRecvSeq(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
     return recvSeq;
 }
 
-void Common_SetRecvTimerEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint8_t enable)
+void Common_SetRecvTimerEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint16_t cmd, uint8_t enable)
 {
     CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
 
@@ -418,7 +418,7 @@ void Common_SetRecvTimerEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd
         pRecvCtrl->timerEnable = enable;
     }
 }
-uint8_t Common_GetRecvTimerEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
+uint8_t Common_GetRecvTimerEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint16_t cmd)
 {
     CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
     uint8_t timerEnable = FALSE;
@@ -431,7 +431,7 @@ uint8_t Common_GetRecvTimerEnable(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t 
     return timerEnable;
 }
 
-void Common_SetRecvTick(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint32_t tick)
+void Common_SetRecvTick(typeFuncRecvCtrl pFunc, uint8_t port, uint16_t cmd, uint32_t tick)
 { 
     CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
 
@@ -441,7 +441,7 @@ void Common_SetRecvTick(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd, uint3
     }
 }
 
-uint32_t Common_GetRecvTick(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
+uint32_t Common_GetRecvTick(typeFuncRecvCtrl pFunc, uint8_t port, uint16_t cmd)
 {
     CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
     uint32_t cycTimer = pRecvCtrl->cycTimer;
@@ -454,7 +454,7 @@ uint32_t Common_GetRecvTick(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
     return cycTimer;
 }
 
-void Common_SetRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
+void Common_SetRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint16_t cmd)
 {
     CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
 
@@ -464,7 +464,7 @@ void Common_SetRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
     }
 }
 
-void Common_ClearRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
+void Common_ClearRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint16_t cmd)
 {
     CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
 
@@ -474,7 +474,7 @@ void Common_ClearRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
     }
 }
 
-uint8_t Common_GetRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint8_t cmd)
+uint8_t Common_GetRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint16_t cmd)
 {
     CommonRecvCtrl_Struct* pRecvCtrl = pFunc(port, cmd);
     uint8_t rptCount = 0;
@@ -726,7 +726,7 @@ uint16_t Common_ReplaceNum(uint8_t* pData, uint16_t nDataLen, char* cDestStr, ui
     return dataLen;
 }
 
-void Common_AsciiToBCD(char *pASC, char *pBCD, uint16_t length)
+void Common_AsciiToBCD(char *pASC, uint8_t *pBCD, uint16_t length)
 {
     uint16_t index;
     

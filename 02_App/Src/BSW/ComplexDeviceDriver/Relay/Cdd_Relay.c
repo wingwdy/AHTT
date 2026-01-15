@@ -257,16 +257,23 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
         {
             if (pRelayCtrl->adhesionDetectValidFlag == TRUE)
             {
-                if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOn != NULL)
+                if (pRelayCtrl->stFilterAdhesionDetect.validStatus == TRUE)
                 {
-                    c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOn(port);
+                    CddRelay_SetReqStopShortCutDetect(port);
                 }
+                else
+                {
+                    if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOn != NULL)
+                    {
+                        c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOn(port);
+                    }
 
-                CDDRELAY_CFG_LogPrint("[枪：%d]投入输出短路检测回路!\r\n", port);
+                    CDDRELAY_CFG_LogPrint("[枪：%d]投入输出短路检测回路!\r\n", port);
 
-                pRelayCtrl->shortCutDetectTimer = Common_GetSystick();
-                pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP2;
-                pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_PROCESS;
+                    pRelayCtrl->shortCutDetectTimer = Common_GetSystick();
+                    pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP2;
+                    pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_PROCESS;
+                }
             }
 
             break;

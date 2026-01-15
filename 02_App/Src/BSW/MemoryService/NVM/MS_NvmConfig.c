@@ -65,7 +65,7 @@ static uint8_t g_MSNvmMeterEnergyRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmMeterEnergy
 static uint8_t g_MSNvmModeParamRam[sizeof(MSNvmModeParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 static uint8_t g_MSNvmMeterCaliParam[sizeof(MSNvmMeterCaliParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 static uint8_t g_MSNvmPlatParam[sizeof(MSNvmPlatParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
-static uint8_t g_MSNvmPlatPrivateParam[sizeof(MSNvmPlatPrivateParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
+static uint8_t g_MSNvmPlatPrivateParam[sizeof(MSNvmPlatPrivateParam_Union) + MSNVM_CFG_ADDTION_CRC16_LEN];
 
 const MSNvmBlockDescriptor_Struct c_stMSNvmBlockDescriptorTable[eMSNvmBlockID_Count] = 
 {
@@ -126,7 +126,7 @@ const MSNvmBlockDescriptor_Struct c_stMSNvmBlockDescriptorTable[eMSNvmBlockID_Co
 
     [eMSNvmBlockID_PlatPrivateParam] = 
     {
-        .blockSize = sizeof(MSNvmPlatPrivateParam_Struct),
+        .blockSize = sizeof(MSNvmPlatPrivateParam_Union),
         .ramBlockDataAddr = g_MSNvmPlatPrivateParam,
         .deviceID = MSMEMIF_DEVICE_EA_KVDB,
         .memIfID = eKVDBAdaptChannel_PlatPrivateParam,

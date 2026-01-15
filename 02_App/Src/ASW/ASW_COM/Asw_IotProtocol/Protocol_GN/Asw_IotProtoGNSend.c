@@ -21,6 +21,8 @@
 #include "Version.h"
 #include "FrameQueue.h"
 #include "Asw_ErrorHandle.h"
+#include "Asw_ChargeIf.h"
+
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -49,7 +51,9 @@
 *******************************************************************************/
 static uint16_t IotGN_SendLoginReq(uint8_t port, uint8_t *pBuf);
 static uint16_t IotGN_SendHeartBeat(uint8_t port, uint8_t *pBuf);
-
+static uint16_t IotGN_SendBillModeVerifyReq(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendBillModeReq(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_ReportRealData(uint8_t port, uint8_t *pBuf);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -72,17 +76,62 @@ static const IotGNSendCtrl_Struct c_stIotGNSendctrlTable[IOT_GN_CMD_SEND_COUNT] 
     {
         .cmd = IOT_GN_CMD_HEARTBEAT_REQ,
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
-        .matchCmd = IOT_GN_CMD_LOGIN_RSP,
+        .matchCmd = IOT_GN_CMD_HEARTBEAT_RSP,
         .pSendFunc = IotGN_SendHeartBeat,
-        .sendCycle = 10000,
-        .printFlag = FALSE,
+        .sendCycle = 60000,
+        .printFlag = TRUE,
         .cMeaning = "设备心跳"
+    },
+
+    [2] = 
+    {
+        .cmd = IOT_GN_CMD_BILLMODE_VERIFY_REQ,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .matchCmd = IOT_GN_CMD_BILLMODE_VERIFY_RSP,
+        .pSendFunc = IotGN_SendBillModeVerifyReq,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "计费模型验证请求"
+    },
+
+    [3] = 
+    {
+        .cmd = IOT_GN_CMD_BILLMODE_REQ,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .matchCmd = IOT_GN_CMD_BILLMODE_4RATE_RSP,
+        .pSendFunc = IotGN_SendBillModeReq,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "计费模型请求"
+    },
+
+    [4] = 
+    {
+        .cmd = IOT_GN_CMD_REPORT_REALDATA,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .matchCmd = IOT_GN_CMD_NULL,
+        .pSendFunc = IotGN_ReportRealData,
+        .sendCycle = 0,
+        .printFlag = TRUE,  
+        .cMeaning = "主动上报实时数据"
+    },
+
+    [5] = 
+    {
+        .cmd = IOT_GN_CMD_CALL_REALDATA_ACK,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .matchCmd = IOT_GN_CMDTYPE_RESPONSE,
+        .pSendFunc = IotGN_ReportRealData,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "实时数据召测应答"
     },
 };
 
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
+
 static uint8_t IotGN_ReportCycleCheck(uint8_t port, uint32_t cmd, uint32_t	sendCyc)
 {
 	uint32_t startTick = Common_GetSendTick(pIotGNCtx->pFuncSendCtrl, port, cmd);
@@ -104,11 +153,8 @@ static uint8_t IotGN_ReportCycleCheck(uint8_t port, uint32_t cmd, uint32_t	sendC
 	return retFlag;
 }
 
-
-
 static uint16_t IotGN_SendLoginReq(uint8_t port, uint8_t *pBuf)
 {
-    MSNvmPlatParam_Struct * pParam =  AswPlatM_GetPlatParamPtr();
     uint16_t dataLen = 0;
     uint32_t randomNum = 0;
     CddNetMOperator_Enum eOperator = CddNetM_GetOperatorType();
@@ -117,8 +163,9 @@ static uint16_t IotGN_SendLoginReq(uint8_t port, uint8_t *pBuf)
     randomNum = rand();
 
     /* 设备编码 */
-    Common_AsciiToBCD(pParam->platPileDn, (char *)&pBuf[dataLen], 14);
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
     dataLen += 7;
+
      /* 设备识别码 */
 #if (SYSCFG_CFG_GUN_NUM == 1)
     sprintf((char *)&pBuf[dataLen], "%s", SYSCFG_CFG_PRODUCT_CODE);
@@ -170,13 +217,11 @@ static uint16_t IotGN_SendLoginReq(uint8_t port, uint8_t *pBuf)
 
 static uint16_t IotGN_SendHeartBeat(uint8_t port, uint8_t *pBuf)
 {
-    MSNvmPlatParam_Struct * pParam =  AswPlatM_GetPlatParamPtr();
     uint16_t dataLen = 0;
-
     CddNetMOperator_Enum eOperator = CddNetM_GetOperatorType();
 
     /* 设备编码 */
-    Common_AsciiToBCD(pParam->platPileDn, (char *)&pBuf[dataLen], 14);
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
     dataLen += 7;
 
     /* 终端号 */
@@ -196,6 +241,90 @@ static uint16_t IotGN_SendHeartBeat(uint8_t port, uint8_t *pBuf)
     dataLen += 1;
     return dataLen;
 }
+
+static uint16_t IotGN_SendBillModeVerifyReq(uint8_t port, uint8_t *pBuf)
+{
+    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    uint16_t dataLen = 0;
+
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+
+    memcpy(&pBuf[dataLen], pBillMode->billModeID, sizeof(pBillMode->billModeID));
+    dataLen += sizeof(pBillMode->billModeID);
+
+    return dataLen;
+}
+
+static uint16_t IotGN_SendBillModeReq(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+    return dataLen;
+}
+
+static uint16_t IotGN_ReportRealData(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+
+    /* 枪号 */
+    pBuf[dataLen++] = port + 1;
+    /* 交易流水号 todo */
+    memset(&pBuf[dataLen], 0x00, 16);
+    dataLen += 16;
+    /* 状态 */
+    pBuf[dataLen++] = IotGN_GetGunState(port);
+
+    /* 枪是否归位 */
+    pBuf[dataLen++] = 02;
+    /* 是否插枪 */
+    pBuf[dataLen++] = (AswChargeIf_CheckGunConnected(port) == TRUE) ? 0x01 : 0x00;
+    /* 输出电压 */
+    Common_Uint16ToTwoUint8(&pBuf[dataLen], AswChargeIf_GetOutputVoltage(port) / 10);
+    dataLen += 2;
+    /* 输出电流 */
+    Common_Uint16ToTwoUint8(&pBuf[dataLen], AswChargeIf_GetOutputCurrent(port) / 100);
+    dataLen += 2;
+    /* 枪线温度 */
+    pBuf[dataLen++] = AswChargeIf_GetGunTemperature(port);
+    /* 枪线编码 */
+    memset(&pBuf[dataLen], 0x00, 8);
+    dataLen += 8;
+    /* SOC */
+    pBuf[dataLen++] = 0x00;
+    /* 电池组最高温度 */
+    pBuf[dataLen++] = 0x00;
+    /* 累计充电时间 todo */
+    memset(&pBuf[dataLen], 0x00, 2);
+    dataLen += 2;
+    /* 剩余时间 */
+    memset(&pBuf[dataLen], 0x00, 2);
+    dataLen += 2;
+    /* 充电度数 todo */
+    memset(&pBuf[dataLen], 0x00, 4);
+    dataLen += 4;
+    /* 计损充电度数 todo */
+    memset(&pBuf[dataLen], 0x00, 4);
+    dataLen += 4;
+    /* 已充金额 todo */
+    memset(&pBuf[dataLen], 0x00, 4);
+    dataLen += 4;
+    /* 硬件故障 todo */
+    memset(&pBuf[dataLen], 0x00, 2);
+    dataLen += 2;
+
+    pIotGNCtx->realDataReportTick[port] = Common_GetSystick();
+    return dataLen;
+}
+
 
 static uint16_t IotGNPackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
 {

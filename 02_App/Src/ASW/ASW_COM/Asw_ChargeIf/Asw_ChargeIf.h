@@ -11,61 +11,37 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef ASW_IOT_PROTO_GNM_H_
-#define ASW_IOT_PROTO_GNM_H_
+
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Common.h"
-#include "Asw_IotProtoGNTypes.h"
-#include "SysCfg.h"
-#include "Cdd_NetM.h"
-#include "Ms_Nvm.h"
+#ifndef ASW_CHARGEIF_H_
+#define ASW_CHARGEIF_H_
+
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-
-
-
+#include "Common.h"
+#include "Asw_Charge.h"
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-	eIOTGNWorkState_Init,
-	eIOTGNWorkState_Offline,
-	eIOTGNWorkState_Login,
-	eIOTGNWorkState_Normal,
-}IotGNWorkState_Enum;
+
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+#define ASWCHARGEIF_WORKSTATE_IDLE           ASWCHARGE_WORKSTATE_IDLE      /* 空闲状态 */
+#define ASWCHARGEIF_WORKSTATE_READY          ASWCHARGE_WORKSTATE_READY     /* 已准备状态 */
+#define ASWCHARGEIF_WORKSTATE_STARTING       ASWCHARGE_WORKSTATE_STARTING  /* 启动中状态 */
+#define ASWCHARGEIF_WORKSTATE_WAKEUP         ASWCHARGE_WORKSTATE_WAKEUP    /* 尝试唤醒状态 */
+#define ASWCHARGEIF_WORKSTATE_CHARGING       ASWCHARGE_WORKSTATE_CHARGING  /* 充电中状态 */
+#define ASWCHARGEIF_WORKSTATE_PAUSEA         ASWCHARGE_WORKSTATE_PAUSEA    /* 车端暂停状态 */
+#define ASWCHARGEIF_WORKSTATE_PAUSEB         ASWCHARGE_WORKSTATE_PAUSEB    /* 桩端暂停状态 */
+#define ASWCHARGEIF_WORKSTATE_STOPPING       ASWCHARGE_WORKSTATE_STOPPING  /* 停止中状态 */
+#define ASWCHARGEIF_WORKSTATE_FINISH         ASWCHARGE_WORKSTATE_FINISH    /* 停止完成状态 */
 
-typedef struct 
-{
-    IotGNWorkState_Enum eWorkState;
-    MSNvmPlatPrivateParam_Union param;
-    typeFuncSendCtrl pFuncSendCtrl;
-    typeFuncRecvCtrl pFuncRecvCtrl;
-    uint8_t frameQueueChannelID;
-    uint8_t pileDnBCD[7];
 
-    /* 离线后需清除数据 */
-    uint8_t queueBusyFlag;
-    uint32_t waitQueueIdleTick;
-    
-    uint8_t sendIndex;
-	uint8_t sendPort;
-    uint16_t reqSeq;
-
-    uint32_t realDataReportTick[SYSCFG_CFG_GUN_NUM];
-    uint8_t lastGunState[SYSCFG_CFG_GUN_NUM];            /* 用于变位上送*/
-    uint8_t lastGunConnectState[SYSCFG_CFG_GUN_NUM];     /* 用于变位上送*/
-
-    CommonSendCtrl_Struct stSendCtrl[SYSCFG_CFG_GUN_NUM][IOT_GN_CMD_SEND_COUNT];
-    CommonRecvCtrl_Struct stRecvCtrl[SYSCFG_CFG_GUN_NUM][IOT_GN_CMD_RECV_COUNT];
-}IotGNCtx_Struct;
 
 
 /******************************************************************************
@@ -77,14 +53,11 @@ typedef struct
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void IotGN_FillLinkPara(CddNetMSocketPara_Union *pLinkPara);
-void IotGN_InitMemory(void);
-void IotGN_MainFunction(void);
-
-/* 内部适用 */
-uint8_t IotGN_GetGunState(uint8_t port);
-uint8_t IotGN_IsCharging(uint8_t port);
-void IotGN_OfflineHandle(void);
+uint8_t AswChargeIf_CheckGunConnected(uint8_t port);
+uint32_t AswChargeIf_GetOutputVoltage(uint8_t port);
+uint32_t AswChargeIf_GetOutputCurrent(uint8_t port);
+uint8_t AswChargeIf_GetChargeState(uint8_t port);
+uint8_t AswChargeIf_GetGunTemperature(uint8_t port);
 #endif
 
 

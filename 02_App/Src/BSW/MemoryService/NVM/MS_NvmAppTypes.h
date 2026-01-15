@@ -22,16 +22,28 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+/* 二维码长度 */
 #define MSNVM_QRCODE_LEN                   256
+
+/* 订单长度 */
 #define MSNVM_ORDER_MAX_LEN                512
+
+/* 故障信息长度 */
 #define MSNVM_ERROR_INFO_MAX_LEN           32
 
+/* 桩编码字符串长度 */
 #define MSNVM_PILE_DN_LEN                  40
 
+/* 各平台私有参数长度 */
 #define MSNVM_PLAT_PRIVATE_PARAM_LEN       512
 
+/* 平台IP长度 */
 #define MSNVM_PLAT_IP_LEN                  72
 
+/* 计费模型 */
+#define MSNVM_GN_BILLMODE_MULTRATE_COUNT   9
+#define MSNVM_GN_BILLMODE_4RATE_COUNT      4
+#define MSNVM_GN_BILLMIDE_PERIOD_COUNT     48
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -107,20 +119,28 @@ typedef struct
 
 /*********************************************************************************************** */
 /* 各平台私有参数定义 */
-typedef union 
+typedef struct 
 {
-    uint8_t paramArr[MSNVM_PLAT_PRIVATE_PARAM_LEN];
-   
-}MSNvmPlatPrivateParam_Union;
+    uint8_t billType;                                           /* 4类电价或者多类电价 */
+    uint8_t billModeID[2];                                      /* 计费模型编号 */
+    uint8_t measure_wastage_rates;                              /* 计量损耗费率 */         
+    uint32_t elecPriceRate[MSNVM_GN_BILLMODE_MULTRATE_COUNT];
+    uint32_t servePriceRate[MSNVM_GN_BILLMODE_MULTRATE_COUNT];
+    uint8_t period_rate[MSNVM_GN_BILLMIDE_PERIOD_COUNT];
+}MSNvmGNParamBillMode_Struct;
 
 
 typedef struct 
 {
-    MSNvmPlatPrivateParam_Union privateParam;
-}MSNvmPlatPrivateParam_Struct;
+    MSNvmGNParamBillMode_Struct stBillMode;
+}MSNvmGNParam_Struct;
 
 
-
+typedef union 
+{
+    MSNvmGNParam_Struct stGNParam;
+    uint8_t paramArr[MSNVM_PLAT_PRIVATE_PARAM_LEN];
+}MSNvmPlatPrivateParam_Union;
 
 
 /******************************************************************************

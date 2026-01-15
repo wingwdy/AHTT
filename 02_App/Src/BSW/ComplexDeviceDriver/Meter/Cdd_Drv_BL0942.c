@@ -49,9 +49,9 @@ typedef enum
 typedef struct
 {
     CddDrvBL0942WorkState_Enum eWorkState;
-    uint32_t rms_voltage;                   /* 平均电压 保留2位小数 */
-    uint32_t rms_current;                   /* 平均电流 保留3位小数 */
-    uint32_t watt;                          /* 有功功率 保留3位小数 */
+    uint32_t rms_voltage;                   /* 平均电压 保留2位小数  单位：V*/
+    uint32_t rms_current;                   /* 平均电流 保留3位小数  单位：A*/
+    uint32_t watt;                          /* 有功功率 保留3位小数  单位：W*/
     uint64_t totalCount;                    /* 总脉冲数 */
     uint32_t tempCount;                     /* 临时脉冲数 */
     uint64_t energy;                        /* 临时累积电能 保留5位小数 */

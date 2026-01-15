@@ -1,5 +1,5 @@
 /******************************************************************************
-* File Name          : template.h
+* File Name          : template_Config.h
 * Description        : Code for xxxxxxxxxxx
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
@@ -11,61 +11,26 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef ASW_IOT_PROTO_GNM_H_
-#define ASW_IOT_PROTO_GNM_H_
+
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Common.h"
-#include "Asw_IotProtoGNTypes.h"
-#include "SysCfg.h"
-#include "Cdd_NetM.h"
-#include "Ms_Nvm.h"
+
+
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
 
 
-
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-	eIOTGNWorkState_Init,
-	eIOTGNWorkState_Offline,
-	eIOTGNWorkState_Login,
-	eIOTGNWorkState_Normal,
-}IotGNWorkState_Enum;
+
 
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
 
-typedef struct 
-{
-    IotGNWorkState_Enum eWorkState;
-    MSNvmPlatPrivateParam_Union param;
-    typeFuncSendCtrl pFuncSendCtrl;
-    typeFuncRecvCtrl pFuncRecvCtrl;
-    uint8_t frameQueueChannelID;
-    uint8_t pileDnBCD[7];
-
-    /* 离线后需清除数据 */
-    uint8_t queueBusyFlag;
-    uint32_t waitQueueIdleTick;
-    
-    uint8_t sendIndex;
-	uint8_t sendPort;
-    uint16_t reqSeq;
-
-    uint32_t realDataReportTick[SYSCFG_CFG_GUN_NUM];
-    uint8_t lastGunState[SYSCFG_CFG_GUN_NUM];            /* 用于变位上送*/
-    uint8_t lastGunConnectState[SYSCFG_CFG_GUN_NUM];     /* 用于变位上送*/
-
-    CommonSendCtrl_Struct stSendCtrl[SYSCFG_CFG_GUN_NUM][IOT_GN_CMD_SEND_COUNT];
-    CommonRecvCtrl_Struct stRecvCtrl[SYSCFG_CFG_GUN_NUM][IOT_GN_CMD_RECV_COUNT];
-}IotGNCtx_Struct;
 
 
 /******************************************************************************
@@ -77,15 +42,9 @@ typedef struct
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void IotGN_FillLinkPara(CddNetMSocketPara_Union *pLinkPara);
-void IotGN_InitMemory(void);
-void IotGN_MainFunction(void);
 
-/* 内部适用 */
-uint8_t IotGN_GetGunState(uint8_t port);
-uint8_t IotGN_IsCharging(uint8_t port);
-void IotGN_OfflineHandle(void);
-#endif
+
+
 
 
 
