@@ -23,7 +23,9 @@
 ******************************************************************************/
 #define ASWCHARGE_CFG_CALL_CYCLE                       (10)
 
-#define ASWCHARGE_CFG_START_TIMEOUT                    15000
+#define ASWCHARGE_CFG_START_TIMEOUT                    30000
+
+#define ASWCHARGE_CFG_PWM_TIMEOUT                      15000
 
 #define ASWCHARGE_CFG_STOP_TIMEOUT                     10000
 

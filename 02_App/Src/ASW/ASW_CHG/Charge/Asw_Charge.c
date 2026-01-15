@@ -47,6 +47,7 @@ typedef struct
     uint8_t tryWakeupFlag;        /* 尝试唤醒标记，TRUE-表示已唤醒过 */
     uint8_t authFlag;             /* 授权标记，TRUE-表示已授权 */
     uint32_t startTimer;          /* 启动超时计时器 */
+    uint32_t pwmStartTimer;       /* PWM发波超时计时器 */
     FilterProfile1_Struct stFilterlittleCur; /* 小电流状态滤波 */
     uint32_t vehiclePauseTimer;   /* 车端暂停超时计时器 */
     uint32_t stopTimer;           /* 停止充电超时计时器 */
@@ -147,6 +148,7 @@ static void AswCharge_ReadyStateHandle(uint8_t port, AswChargeCtrl_Struct *pChar
                 AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STARTING);
                 AswEVSE_StartCharge(port);
                 pChargeCtrl->startTimer = Common_GetSystick();
+                pChargeCtrl->pwmStartTimer = 0;
                 pChargeCtrl->tryWakeupFlag = FALSE;
             }
             else
@@ -190,15 +192,33 @@ static void AswCharge_StartingStateHandle(uint8_t port, AswChargeCtrl_Struct *pC
                 {
                     if (Common_JudgeTimeoutMs(pChargeCtrl->startTimer, ASWCHARGE_CFG_START_TIMEOUT))
                     {
-                        if (pChargeCtrl->tryWakeupFlag == FALSE)
+                        AswErrhandle_SetErrExsitCallback(port, eErr_ChgStartTimeout);
+                    }
+                    else
+                    {
+                        if (evseState == ASWEVSE_STATE_2_DOT)
                         {
-                            AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_WAKEUP);
-                            CddCP_SetReqStartWakeup(port);
-                            pChargeCtrl->tryWakeupFlag = TRUE;
+                            if (pChargeCtrl->pwmStartTimer == 0)
+                            {
+                                pChargeCtrl->pwmStartTimer = Common_GetSystick();
+                            }
                         }
-                        else
+
+                        if (pChargeCtrl->pwmStartTimer != 0)
                         {
-                            AswErrhandle_SetErrExsitCallback(port, eErr_ChgStartTimeout);
+                            if (Common_JudgeTimeoutMs(pChargeCtrl->pwmStartTimer, ASWCHARGE_CFG_PWM_TIMEOUT))
+                            {
+                                if (pChargeCtrl->tryWakeupFlag == FALSE)
+                                {
+                                    AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_WAKEUP);
+                                    CddCP_SetReqStartWakeup(port);
+                                    pChargeCtrl->tryWakeupFlag = TRUE;
+                                }
+                                else
+                                {
+                                    AswErrhandle_SetErrExsitCallback(port, eErr_ChgStartTimeout);
+                                }
+                            }
                         }
                     }
                 }
@@ -249,6 +269,7 @@ static void AswCharge_WakeupStateHandle(uint8_t port, AswChargeCtrl_Struct *pCha
                 {
                     AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STARTING);
                     pChargeCtrl->startTimer = Common_GetSystick();
+                    pChargeCtrl->pwmStartTimer = 0;
                 }
             }
         }    
@@ -387,6 +408,7 @@ static void AswCharge_PauseBStateHandle(uint8_t port, AswChargeCtrl_Struct *pCha
                 {
                     AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STARTING);
                     pChargeCtrl->startTimer = Common_GetSystick();
+                    pChargeCtrl->pwmStartTimer = 0;
                     pChargeCtrl->tryWakeupFlag = FALSE;
                 }
             }
