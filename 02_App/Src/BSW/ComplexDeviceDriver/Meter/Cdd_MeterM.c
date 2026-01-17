@@ -41,13 +41,13 @@
 *******************************************************************************/
 typedef struct
 {
-    uint64_t lastCalcEnergy;
-    uint64_t lastSaveEnergy;
+    uint64_t lastCalcEnergy;   /*  上次计算的电能 小数点后4位，单位：kwh */
+    uint64_t lastSaveEnergy;   /*  上次保存的电能 小数点后4位，单位：kwh */
     uint8_t  errCount;
-    uint64_t totalEnergy;
-    uint32_t periodCalcTick;
-    uint32_t periodSaveTick;
-    uint32_t cyclePrintTick;
+    uint64_t totalEnergy;       /*  累计总电能 小数点后4位，单位：kwh */
+    uint32_t periodCalcTick;    /*  计算增量电能间隔计时 */
+    uint32_t periodSaveTick;    /*  计算保存总电能间隔计时 */
+    uint32_t cyclePrintTick;    /*  打印间隔 */
 }CddMeterM_Struct;
 
 
