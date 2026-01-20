@@ -143,6 +143,11 @@ void Common_TimestampToCp56Time2a(uint32_t timestamp, uint8_t *cp56time2a);
 void Common_AsciiToBCD(char *pASC, uint8_t *pBCD, uint16_t length);
 void Common_BCDToBIN(uint8_t *pBCD, uint8_t *pBIN, uint16_t length);
 void Common_BINToBCD(uint8_t *pBIN, uint8_t *pBCD, uint16_t length);
+uint32_t Common_uintBINToBCD(uint32_t bin);
+
+void Common_SetBitFlag(void *pflag, uint16_t bitPos);
+void Common_ClrBitFlag(void *pflag, uint16_t bitPos);
+uint8_t Common_GetBitFlag(void *pflag, uint16_t bitPos);
 #endif /* COMMON_H_ */
 
 

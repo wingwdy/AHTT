@@ -22,10 +22,9 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define ASWMONITOR_CFG_LogPrint(fmt, ...)       DSLOGM_Debug(DSLogMModule_Monitor, fmt, ##__VA_ARGS__)
+#define ASWMONITOR_CFG_LogPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_Monitor, fmt, ##__VA_ARGS__)
 
-
-
+#define ASWMONITOR_CFG_SAVE_CHARGE_RECORD_PERIOD   (60 * 1000U)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

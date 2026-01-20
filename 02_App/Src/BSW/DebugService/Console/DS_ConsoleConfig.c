@@ -20,7 +20,7 @@
 
 #include "Asw_Charge.h"
 #include "Asw_PlatM.h"
-
+#include "Asw_ErrorHandle.h"
 
 
 
@@ -99,7 +99,7 @@ static int32_t DSConsoleCfg_ChargeCtrl(int32_t argc, char *argv[])
         }
         else if (0 == strcmp(argv[1], "stop"))
         {
-            AswCharge_StopAuth(port);
+            AswErrhandle_SetErrExsitCallback(port, eSrc_MannulStop);
         }
         else
         {}

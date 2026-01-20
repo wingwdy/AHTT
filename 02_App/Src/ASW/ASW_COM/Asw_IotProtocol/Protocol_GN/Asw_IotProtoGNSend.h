@@ -43,7 +43,7 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void IotLX_UpCtrlSendDeal(void);
+void IotGN_UpCtrlSendDeal(void);
 #endif /* ASW_IOT_PROTO_GNM_SEND_H_ */
 
 

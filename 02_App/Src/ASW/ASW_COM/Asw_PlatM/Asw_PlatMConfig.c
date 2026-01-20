@@ -54,6 +54,8 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncFillLinkPara = IotGN_FillLinkPara,
         .pFuncInit = IotGN_InitMemory,
         .pMainFunction = IotGN_MainFunction,
+        .pFuncTransformBillMode = IotGN_TransformBillMode,
+        .pFuncPackChargeRecord = IotGN_PackChargeRecord,
     },
 
     [eAswPlatType_YKC21] =

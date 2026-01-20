@@ -25,9 +25,9 @@
 
 #define CDD_MODEM_CFG_GetFCTPin()                          (MCALPORT_PIN_HIGH == McalPort_GetPin(eMcalPortPinChanel_PC0_FCTPin) ? FALSE : TRUE)
 
-#define CDD_MODEM_CFG_AGING_TEST_CURRENT_THRESHOLD         (28000U)
-#define CDD_MODEM_CFG_AGING_TEST_TIMEOUT                   (27 * 60000U)
-#define CDD_MODEM_CFG_EXSIST_AGING_TEST_TIMEOUT            (10 * 1000U)
+#define CDD_MODEM_CFG_AGING_TEST_CURRENT_THRESHOLD         (28000U)        /* 32A的90% */
+#define CDD_MODEM_CFG_AGING_TEST_TIMEOUT                   (27 * 60000U)   /* 30min的90% */
+#define CDD_MODEM_CFG_EXSIST_AGING_TEST_TIMEOUT            (1000U)
 
 #define CDD_MODEM_CFG_FACTORY_TIMEOUT                      (72 * 3600)
 

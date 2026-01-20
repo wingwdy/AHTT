@@ -21,28 +21,32 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define IOTGN_CFG_IDLE_REALDATA_CYCLE           (5 * 60 * 1000)
-#define IOTGN_CFG_CHARGING_REALDATA_CYCLE       (15 * 1000)
-
-
-
-#define IOTGN_CFG_LogPrint(fmt, ...)            DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
-
-#define IOT_GN_BILLMODE_RATE_TYPE_4             0
-#define IOT_GN_BILLMODE_RATE_TYPE_MULT          1
-
-#define IOT_GN_TXRX_BUFFER_SIZE                 (3072U)
-
-
+/* 通信协议版本 */
 #define IOT_GN_PROTOCOL_VERSION                 (10008U)
 
+/* 通信协议头定义--GN+协议 */
 #define IOT_GN_PLUS_HEAD1                       (0x5AU)                
 #define IOT_GN_PLUS_HEAD2                       (0xA5U)
 
+/* 通信协议头定义--GN协议 */
 #define IOT_GN_HEAD1                            (0xFAU)                
 #define IOT_GN_HEAD2                            (0xAFU)
 
+/* 通信buff缓存定义 */
+#define IOT_GN_TXRX_BUFFER_SIZE                 (3072U)
 
+/* 计费模型类型定义 */
+#define IOT_GN_BILLMODE_RATE_TYPE_4             4
+#define IOT_GN_BILLMODE_RATE_TYPE_MULT          9
+
+/* 实时数据上报周期定义 */
+#define IOTGN_CFG_IDLE_REALDATA_CYCLE           (5 * 60 * 1000)
+#define IOTGN_CFG_CHARGING_REALDATA_CYCLE       (15 * 1000)
+
+/* 日志接口函数定义 */
+#define IOTGN_CFG_LogPrint(fmt, ...)            DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
+
+/* 协议CMD 定义 */
 #define IOT_GN_CMDTYPE_REQUSET			        (0x00U)
 #define IOT_GN_CMDTYPE_RESPONSE                 (0x01U)
 
@@ -55,7 +59,13 @@
 #define IOT_GN_CMD_REPORT_REALDATA              (0x13U)             /* 上报实时数据 */
 #define IOT_GN_CMD_CALL_REALDATA_ACK            (0xF13U)            /* 召测实时数据应答 */
 
-#define IOT_GN_CMD_SEND_COUNT                   (0x06U)
+#define IOT_GN_CMD_REMOTE_STOP_CHARGE_RSP       (0x35U)             /* 远程控制停止充电应答 */
+#define IOT_GN_CMD_REMOTE_START_CHARGE_RSP      (0x33U)             /* 远程控制启动充电应答 */
+
+#define IOT_GN_CMD_MULTI_ORDER_RECORD_REQ       (0x3EU)             /* 多类电价交易记录 */
+#define IOT_GN_CMD_ORDER_RECORD_REQ             (0x3FU)             /* 四类电价交易记录 */
+
+#define IOT_GN_CMD_SEND_COUNT                   (10U)
 
 #define IOT_GN_CMD_LOGIN_RSP                    (0x02U)             /* 登陆应答 */
 #define IOT_GN_CMD_HEARTBEAT_RSP                (0x04U)             /* 心跳应答 */
@@ -64,12 +74,70 @@
 #define IOT_GN_CMD_BILLMODE_MUTIRATE_RSP        (0x0BU)             /* 多类电价应答 */
 #define IOT_GN_CMD_CALL_REALDATA                (0x12U)             /* 召测实时数据 */
 
-#define IOT_GN_CMD_RECV_COUNT                   (0x06U)
+#define IOT_GN_CMD_REMOTE_START_CHARGE          (0x34U)             /* 远程控制启动充电 */
+#define IOT_GN_CMD_REMOTE_STOP_CHARGE           (0x36U)             /* 远程控制停止充电 */
+
+#define IOT_GN_CMD_ORDER_RECORD_RSP             (0x40U)             /* 四类/多类电价交易记录应答 */
+
+#define IOT_GN_CMD_RECV_COUNT                   (9U)
 
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
+typedef enum
+{
+    eIotGNOrderSaveState_Null,
+    eIotGNOrderSaveState_Start,
+    eIotGNOrderSaveState_Finish,
+}IotGNOrderSaveState_Enum;
 
+typedef enum
+{
+    eIotGNStopReason_Null = 0,
+    eIotGNStopReason_CpVoltAbnor = 0x01,          /* CP电压异常 */
+    eIotGNStopReason_CpGroundFault = 0x02,        /* CP对地短路 */
+    eIotGNStopReason_PEBreakFault = 0x03,         /* PE接地故障 */
+    eIotGNStopReason_LeakageCurrErr = 0x07,       /* 漏电故障 */
+
+    eIotGNStopReason_MeterCalcErr = 0x0B,         /* 电能计量故障 */
+    eIotGNStopReason_AmountFault = 0x0C,          /* 充电中金额异常 */
+
+    eIotGNStopReason_JcqMaloperation = 0x13,      /* 继电器误动拒动故障 */
+    eIotGNStopReason_JcqSynechiaFault = 0x14,     /* 继电器粘连故障 */
+
+    eIotGNStopReason_GunTempErr = 0x1B,           /* 枪过温故障 */
+    eIotGNStopReason_DataBaseErr = 0x1D,          /* 数据库错误 */
+
+    eIotGNStopReason_ShortCut = 0x1E,             /* 输出短路 */
+
+    eIotGNStopReason_BillModeErr = 0x21,          /* 计费模型异常 */
+    eIotGNStopReason_StartTimeout = 0x20,         /* 启动超时 */
+    eIotGNStopReason_DiodeStop = 0x25,            /* 车辆无二极管 */
+    eIotGNStopReason_KeyStop = 0x27,              /* 按键停止 */
+
+
+    eIotGNStopReason_AppStop = 0x40,              /* App停止 */
+    eIotGNStopReason_StopByEnergy = 0x42,         /* 按电量停止 */
+    eIotGNStopReason_StopByMoney = 0x43,          /* 按金额停止 */
+    eIotGNStopReason_StopByTime = 0x44,           /* 按时间停止 */
+    eIotGNStopReason_ManualStop = 0x45,           /* 手动停止 */
+    eIotGNStopReason_CarStop = 0x46,              /* 车辆停止 */
+
+    eIotGNStopReason_OtherErr = 0x65,             /* 其它原因 */
+
+    eIotGNStopReason_GunDisconnect = 0x6B,        /* 控制导引断开 */
+    eIotGNStopReason_MeterCommErr = 0x6D,         /* 电表通信中断 */
+    eIotGNStopReason_SumNoEnough = 0x6E,          /* 余额不足 */
+    eIotGNStopReason_EmergencyStop = 0x72,        /* 急停开入 */
+    eIotGNStopReason_TempErr = 0x74,              /* 温度异常 */
+    eIotGNStopReason_OverCurr = 0x75,             /* 输出过流 */
+    eIotGNStopReason_LittleCurr = 0x76,           /* 小电流 */
+    eIotGNStopReason_VoltageErr = 0x79,           /* 电压异常（含过欠压） */
+    eIotGNStopReason_CurrentErr = 0x7A,           /* 电流异常 */
+
+    eIotGNStopReason_PowerOff = 0x83,             /* 掉电故障 */
+    eIotGNStopReason_NoExpectedErr = 0x90,        /* 未知原因 */
+}IotGNStopReason_Enum;
 
 /******************************************************************************
 *    Typedef Definition

@@ -11,15 +11,12 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 *******************************************************************************/
-#include "Cdd_CP.h"
-#include "Cdd_MeterM.h"
-#include "Cdd_Relay.h"
-#include "Asw_ChargeIf.h"
-#include "Cdd_Sensor.h"
+
+
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-
+#include "SS_Ucm.h"
 
 
 
@@ -59,67 +56,17 @@
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-uint8_t AswChargeIf_CheckGunConnected(uint8_t port)
+uint8_t SSUcm_IsUpdating(void)
 {
-    CddCPVolState_Enum eCpVolState = CddCP_GetVolState(port);
-    uint8_t ret = FALSE;
-
-    if (eCpVolState == eCddCPVolState_6V || eCpVolState == eCddCPVolState_9V)
-    {
-        ret = TRUE;
-    }
-
-    return ret;
+    return FALSE;
 }
 
-uint32_t AswChargeIf_GetOutputVoltage(uint8_t port)
-{
-    uint32_t outputVol = 0;
 
-    if (CddRelay_GetRelayState(port) == eCddRelayState_On)
-    {
-        outputVol = CddMeterM_GetRmsVoltage(port);
-    }
 
-    return outputVol;
-}
 
-uint32_t AswChargeIf_GetOutputCurrent(uint8_t port)
-{
-    uint32_t outputCurrent = 0;
 
-    if (CddRelay_GetRelayState(port) == eCddRelayState_On)
-    {
-        outputCurrent = CddMeterM_GetRmsCurrent(port);
-    }
 
-    return outputCurrent;
-}
 
-uint8_t AswChargeIf_GetChargeState(uint8_t port)
-{
-    return AswCharge_GetWorkState(port);
-}
-
-uint8_t AswChargeIf_GetGunTemperature(uint8_t port)
-{
-    return CddSensor_GetGunTemperature(port);
-}
-
-uint64_t AswChargeIf_GetMeterEnergyVal(uint8_t port)
-{
-    return CddMeterM_GetEnergyVal(port);
-}
-
-void AswChargeIf_ChargeStart(uint8_t port)
-{
-    AswCharge_StartAuth(port);
-}
-
-AswErrorType_Enum AswChargeIf_GetStopReason(uint8_t port)
-{
-    return AswCharge_GetStopReason(port);
-}
 
 
 

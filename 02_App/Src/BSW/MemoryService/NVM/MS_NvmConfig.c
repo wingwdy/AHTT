@@ -60,7 +60,7 @@ static void MSNvmConfig_PlatPrivateParam(uint8_t *pIndata, uint16_t dataLen);
 *    Global variables Declaration
 *******************************************************************************/
 static uint8_t g_MSNvmQrcodeRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmDrcode_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
-static uint8_t g_MSNvmOrderInfoRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmOrderInfo_Union) + MSNVM_CFG_ADDTION_CRC16_LEN];
+static uint8_t g_MSNvmOrderInfoRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmOrderInfo_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 static uint8_t g_MSNvmMeterEnergyRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmMeterEnergy_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 static uint8_t g_MSNvmModeParamRam[sizeof(MSNvmModeParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 static uint8_t g_MSNvmMeterCaliParam[sizeof(MSNvmMeterCaliParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
@@ -81,7 +81,7 @@ const MSNvmBlockDescriptor_Struct c_stMSNvmBlockDescriptorTable[eMSNvmBlockID_Co
 
     [eMSNvmBlockID_Gun0OrderInfo] = 
     {
-        .blockSize = sizeof(MSNvmOrderInfo_Union),
+        .blockSize = sizeof(MSNvmOrderInfo_Struct),
         .ramBlockDataAddr = g_MSNvmOrderInfoRam[0],
         .deviceID = MSMEMIF_DEVICE_EA_KVDB,
         .memIfID = eKVDBAdaptChannel_Gun0OrderInfo,
@@ -136,7 +136,7 @@ const MSNvmBlockDescriptor_Struct c_stMSNvmBlockDescriptorTable[eMSNvmBlockID_Co
     /* TSDB */
     [eMSNvmBlockID_OrderRecord] = 
     {
-        .blockSize = sizeof(MSNvmOrderInfo_Union),
+        .blockSize = sizeof(MSNvmOrderInfo_Struct),
         .ramBlockDataAddr = NULL,
         .deviceID = MSMEMIF_DEVICE_EA_TSDB,
         .memIfID = eTSDBAdaptChannel_ChargeRecord,

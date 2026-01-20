@@ -23,6 +23,7 @@
 #include "Asw_VoltCurHandle.h"
 
 #include "Asw_PlatM.h"
+#include "Asw_Monitor.h"
 
 #include "DS_Console.h"
 #include "SS_Tm.h"
@@ -191,9 +192,10 @@ static void Task_100msA(void *arg)
 {
     while (1)
     {
-        CddModeM_MainFunction();
         CddMeterM_MainFunction();
+        CddModeM_MainFunction();
         CddSensor_MainFunction();
+        AswMonitor_MainFunction();
         AswVoltCurHandle_MainFunction();
         AswTempHandle_MainFunction();
         vTaskDelay(100);

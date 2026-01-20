@@ -783,3 +783,46 @@ void Common_BINToBCD(uint8_t *pBIN, uint8_t *pBCD, uint16_t length)
         }
     }
 }
+
+uint8_t Common_GetBitFlag(void *pflag, uint16_t bitPos)
+{
+	uint8_t *p = (uint8_t *)pflag;
+    uint8_t ret = FALSE;
+
+	if((p[bitPos >> 3] & (1 << (bitPos & 0x07))) != 0)
+	{
+		ret =  TRUE;
+	}
+
+    return ret;
+}
+
+
+void Common_SetBitFlag(void *pflag, uint16_t bitPos)
+{
+    uint8_t *p = (uint8_t *)pflag;
+
+    p[bitPos >> 3] |= (1 << (bitPos & 0x07));
+}
+
+void Common_ClrBitFlag(void *pflag, uint16_t bitPos)
+{
+    uint8_t *p = (uint8_t *)pflag;
+
+    p[bitPos >> 3] &= (~(1 << (bitPos & 0x07)));
+}
+
+uint32_t Common_uintBINToBCD(uint32_t bin) 
+{
+    uint32_t bcd = 0;
+    uint32_t shift = 0;
+    
+    while (bin > 0) {
+        // 取出最低位的十进制数字，放到对应的4位BCD位置
+        bcd |= (bin % 10) << (shift * 4);
+        bin /= 10;      // 去掉已处理的最低位
+        shift++;        // 移动到下4个bit位置
+    }
+    
+    return bcd;
+}

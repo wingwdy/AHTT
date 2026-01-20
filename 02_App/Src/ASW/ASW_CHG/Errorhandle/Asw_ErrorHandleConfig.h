@@ -18,7 +18,6 @@
 ******************************************************************************/
 #include "Asw_ErrorHandle.h"
 #include "stdint.h"
-#include "Cdd_CP.h"
 #include "DS_LogM.h"
 
 /******************************************************************************
@@ -39,34 +38,34 @@
 ******************************************************************************/
 typedef enum
 {
-    AswErrorLevel_0,        /* 无效值 */
-    AswErrorLevel_1,        /* 非故障告警类，正常终止类型 */
-    AswErrorLevel_2,        /* 告警提示，不影响充电 */
-    AswErrorLevel_3,        /* 不取消授权、暂停充电，故障次数取消授权清除 */
-    AswErrorLevel_4,        /* 取消授权、停止充电，故障次数取消授权清除 */
-    AswErrorLevel_5,        /* 需要断电才能清除的故障，故障次数掉电清除 */
+    eAswErrorLevel_0,        /* 无效值 */
+    eAswErrorLevel_1,        /* 非故障告警类，正常终止类型 */
+    eAswErrorLevel_2,        /* 告警提示，不影响充电 */
+    eAswErrorLevel_3,        /* 不取消授权、暂停充电，故障次数取消授权清除 */
+    eAswErrorLevel_4,        /* 取消授权、停止充电，故障次数取消授权清除 */
+    eAswErrorLevel_5,        /* 需要断电才能清除的故障，故障次数掉电清除 */
     AswErrorLevel_Cnt,    
 }AswErrorLevel_Enum; 
 
 typedef enum
 {
-    AswErrorClear_None,
-    AswErrorClear_Internal, /* 由该模块，经过恢复时间之后主动清除 */
-    AswErrorClear_External, /* 由外部模块经过检测之后清除 */
+    eAswErrorClear_None,
+    eAswErrorClear_Internal, /* 由该模块，经过恢复时间之后主动清除 */
+    eAswErrorClear_External, /* 由外部模块经过检测之后清除 */
 }AswErrorClear_Enum;
 
 typedef enum
 {
-    AswErrorOwner_None,
-    AswErrorOwner_Gun,      /* 故障属于某把枪 */   
-    AswErrorOwner_Pile,     /* 故障属于整个桩，产生和清除时对应的枪都受影响 */ 
+    eAswErrorOwner_None,
+    eAswErrorOwner_Gun,      /* 故障属于某把枪 */   
+    eAswErrorOwner_Pile,     /* 故障属于整个桩，产生和清除时对应的枪都受影响 */ 
 }AswErrorOwner_Enum;
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
 typedef struct 
 {
-    AswErrorType_Enum eError;         /* 故障类型 */
+    AswErrorType_Enum  eError;        /* 故障类型 */
     AswErrorOwner_Enum eErrOwner;     /* 故障Owner */
     AswErrorLevel_Enum tempErrLevel;  /* 临时故障等级*/
     AswErrorLevel_Enum finalLevel;    /* 最终故障等级*/

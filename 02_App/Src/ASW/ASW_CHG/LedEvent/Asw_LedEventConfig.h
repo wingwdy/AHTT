@@ -22,7 +22,7 @@
 #include "SysCfg.h"
 #include "DS_LogM.h"
 #include "Cdd_ModeM.h"
-
+#include "SS_Ucm.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -35,7 +35,7 @@
 
 #define ASWLED_CFG_IsQBStandardMode()                   (CddModeM_IsGBMode() == FALSE)       
 #define ASWLED_CFG_IsFactoryMode()                      (CddModeM_IsFactoryMode() == TRUE)
-#define ASWLED_CFG_IsOTAing()                           (FALSE)          
+#define ASWLED_CFG_IsOTAing()                           (SSUcm_IsUpdating() == TRUE)          
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

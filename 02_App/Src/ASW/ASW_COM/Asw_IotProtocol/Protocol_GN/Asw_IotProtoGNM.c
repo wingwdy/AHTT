@@ -24,6 +24,7 @@
 #include "Asw_IotProtoGNSend.h"
 #include "Asw_IotProtoGNRecv.h"
 #include "Asw_ChargeIf.h"
+#include "MS_Nvm.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -67,15 +68,18 @@ static CommonSendCtrl_Struct* IotGN_GetSendCtrl(uint8_t port, uint16_t cmd)
 
     switch (cmd)
     {
-        case IOT_GN_CMD_LOGIN_REQ:            pSendCtrl = &pIotGNCtx->stSendCtrl[port][0];   break;
-        case IOT_GN_CMD_HEARTBEAT_REQ:        pSendCtrl = &pIotGNCtx->stSendCtrl[port][1];   break;
-        case IOT_GN_CMD_BILLMODE_VERIFY_REQ:  pSendCtrl = &pIotGNCtx->stSendCtrl[port][2];   break;
-        case IOT_GN_CMD_BILLMODE_REQ:         pSendCtrl = &pIotGNCtx->stSendCtrl[port][3];   break;
-        case IOT_GN_CMD_REPORT_REALDATA:      pSendCtrl = &pIotGNCtx->stSendCtrl[port][4];   break;
-        case IOT_GN_CMD_CALL_REALDATA_ACK:    pSendCtrl = &pIotGNCtx->stSendCtrl[port][5];   break;
+        case IOT_GN_CMD_LOGIN_REQ:                  pSendCtrl = &pIotGNCtx->stSendCtrl[port][0];   break;
+        case IOT_GN_CMD_HEARTBEAT_REQ:              pSendCtrl = &pIotGNCtx->stSendCtrl[port][1];   break;
+        case IOT_GN_CMD_BILLMODE_VERIFY_REQ:        pSendCtrl = &pIotGNCtx->stSendCtrl[port][2];   break;
+        case IOT_GN_CMD_BILLMODE_REQ:               pSendCtrl = &pIotGNCtx->stSendCtrl[port][3];   break;
+        case IOT_GN_CMD_REPORT_REALDATA:            pSendCtrl = &pIotGNCtx->stSendCtrl[port][4];   break;
+        case IOT_GN_CMD_CALL_REALDATA_ACK:          pSendCtrl = &pIotGNCtx->stSendCtrl[port][5];   break;
+        case IOT_GN_CMD_REMOTE_START_CHARGE_RSP:    pSendCtrl = &pIotGNCtx->stSendCtrl[port][6];   break;
+        case IOT_GN_CMD_REMOTE_STOP_CHARGE_RSP:     pSendCtrl = &pIotGNCtx->stSendCtrl[port][7];   break;
+        case IOT_GN_CMD_MULTI_ORDER_RECORD_REQ:     pSendCtrl = &pIotGNCtx->stSendCtrl[port][8];   break;
+        case IOT_GN_CMD_ORDER_RECORD_REQ:           pSendCtrl = &pIotGNCtx->stSendCtrl[port][9];   break;
         default: break;
     }
-
     return pSendCtrl;
 }
 
@@ -85,12 +89,15 @@ static CommonRecvCtrl_Struct* IotGN_GetRecvCtrl(uint8_t port, uint16_t cmd)
 
     switch (cmd)
     {
-        case IOT_GN_CMD_LOGIN_RSP:              pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][0];   break;
-        case IOT_GN_CMD_HEARTBEAT_RSP:          pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][1];   break;
-        case IOT_GN_CMD_BILLMODE_VERIFY_RSP:    pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][2];   break;
-        case IOT_GN_CMD_BILLMODE_4RATE_RSP:     pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][3];   break;
-        case IOT_GN_CMD_BILLMODE_MUTIRATE_RSP:  pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][4];   break;
-        case IOT_GN_CMD_CALL_REALDATA:          pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][5];   break;
+        case IOT_GN_CMD_LOGIN_RSP:                  pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][0];   break;
+        case IOT_GN_CMD_HEARTBEAT_RSP:              pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][1];   break;
+        case IOT_GN_CMD_BILLMODE_VERIFY_RSP:        pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][2];   break;
+        case IOT_GN_CMD_BILLMODE_4RATE_RSP:         pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][3];   break;
+        case IOT_GN_CMD_BILLMODE_MUTIRATE_RSP:      pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][4];   break;
+        case IOT_GN_CMD_CALL_REALDATA:              pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][5];   break;
+        case IOT_GN_CMD_REMOTE_START_CHARGE:        pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][6];   break;
+        case IOT_GN_CMD_REMOTE_STOP_CHARGE:         pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][7];   break;
+        case IOT_GN_CMD_ORDER_RECORD_RSP:           pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][8];   break;
         default: break;
     }
 
@@ -120,7 +127,7 @@ static void IotGN_CycleReportRealData(void)
             realDataReportFlag = TRUE;
         }
 
-        realDataReportCycle = (IotGN_IsCharging(port) == TRUE) ? IOTGN_CFG_CHARGING_REALDATA_CYCLE : IOTGN_CFG_IDLE_REALDATA_CYCLE;
+        realDataReportCycle = (AswMonitor_IsOrderIdle(port) != TRUE) ? IOTGN_CFG_CHARGING_REALDATA_CYCLE : IOTGN_CFG_IDLE_REALDATA_CYCLE;
        
         if (Common_JudgeTimeoutMs(pIotGNCtx->realDataReportTick[port], realDataReportCycle) == TRUE)
         {
@@ -138,9 +145,49 @@ static void IotGN_CycleReportRealData(void)
     }
 }
 
+static void IotGN_CycleDetectUnreporteRecord(void)
+{
+    uint8_t port = 0;
+    uint8_t recordSendFlag = FALSE;
+
+    if (MSNvm_QueryUnreportedRecordCount(eMSNvmBlockID_OrderRecord) > 0)
+    {
+        for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+        {
+            if (Common_GetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_MULTI_ORDER_RECORD_REQ) ||
+                Common_GetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_ORDER_RECORD_REQ) ||
+                Common_GetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, IOT_GN_CMD_ORDER_RECORD_RSP))
+            {
+                recordSendFlag = TRUE;
+                break;
+            }
+        }
+
+        if (recordSendFlag == FALSE)
+        {
+            if (eGlobalRet_OK == MSNvm_QueryLatestUnreportedRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pIotGNCtx->stOrderInfo, 
+                sizeof(MSNvmOrderInfo_Struct), &pIotGNCtx->time))
+            {
+                port = pIotGNCtx->stOrderInfo.platOrderInfo.stGNOrderInfo.port;
+
+                if (pIotGNCtx->stOrderInfo.platOrderInfo.stGNOrderInfo.billmodeType == IOT_GN_BILLMODE_RATE_TYPE_MULT)
+                {
+                    Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_MULTI_ORDER_RECORD_REQ, TRUE);
+                }
+                else
+                {
+                    Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_ORDER_RECORD_REQ, TRUE);
+                }
+            }
+        }
+    }
+}
+
 static void IotGN_CycleDetect(void)
 { 
     IotGN_CycleReportRealData();
+
+    IotGN_CycleDetectUnreporteRecord();
 }
 
 static void IotGN_WSInitHandle(void)
@@ -161,7 +208,7 @@ static void IotGN_WSOfflineHandle(void)
     pIotGNCtx->waitQueueIdleTick = 0;
 
     pIotGNCtx->sendIndex = 0;
-    pIotGNCtx->sendPort = 0;
+    pIotGNCtx->sendPort = 0;    
     pIotGNCtx->reqSeq = 0;
 
     memset(pIotGNCtx->realDataReportTick, 0x00, sizeof(pIotGNCtx->realDataReportTick));
@@ -195,13 +242,156 @@ static void IotGN_WSNormalHandle(void)
     }
     else
     {
-        IotGN_CycleDetect();
+        if (pIotGNCtx->loginSucc == TRUE)
+        {
+            IotGN_CycleDetect();
+        }
 
-        IotLX_UpCtrlSendDeal();
+        IotGN_UpCtrlSendDeal();
 
         IotGN_UpCtrlRecvDeal();
 
         IotGN_TimeoutDetect();
+    }
+}
+
+static IotGNStopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType)
+{
+    uint8_t index = 0;
+    IotGNStopReason_Enum eStopReason = eIotGNStopReason_NoExpectedErr;
+
+    const struct
+    {
+        AswErrorType_Enum errType;
+        IotGNStopReason_Enum stopReason;
+    }stopReasonMap[] = 
+    {
+        {eErr_CpVoltAbnor,        eIotGNStopReason_CpVoltAbnor},
+        {eErr_CpGroundFault,      eIotGNStopReason_CpGroundFault},
+        {eErr_PEBreakFault,       eIotGNStopReason_PEBreakFault},
+        {eErr_EmergencyStop,      eIotGNStopReason_EmergencyStop},
+        {eErr_InputLineReversed,  eIotGNStopReason_OtherErr},
+        {eErr_LeakageCurrErr,     eIotGNStopReason_LeakageCurrErr},
+        {eErr_ShortCircleErr,     eIotGNStopReason_ShortCut},
+        {eErr_RCDSelfcheckErr,    eIotGNStopReason_OtherErr},
+
+        {eErr_AphaseInputOverVol, eIotGNStopReason_VoltageErr},
+        {eErr_AphaseInputLessVol, eIotGNStopReason_VoltageErr},
+        {eErr_OutputOverCurr,     eIotGNStopReason_OverCurr},
+
+        {eErr_JcqMaloperation,    eIotGNStopReason_JcqMaloperation},
+        {eErr_JcqSynechiaFault,   eIotGNStopReason_JcqSynechiaFault},
+        {eErr_ReaderCommErr,      eIotGNStopReason_OtherErr},
+        {eErr_MeterCommErr,       eIotGNStopReason_MeterCommErr},
+        {eErr_EnvOverTempErr,     eIotGNStopReason_TempErr},
+        {eErr_GunOverTempErr,     eIotGNStopReason_GunTempErr},        
+        {eErr_POverTempErr,       eIotGNStopReason_TempErr},  
+        
+        {eErr_DatabaseErr,        eIotGNStopReason_DataBaseErr},       
+        {eErr_MeterCalcErr,       eIotGNStopReason_MeterCalcErr},     
+
+        {eErr_ChgStartTimeout,    eIotGNStopReason_StartTimeout}, 
+        
+        {eErr_DiodeStop,          eIotGNStopReason_DiodeStop},  
+        
+        {eSrc_LittleCurr,         eIotGNStopReason_LittleCurr},   
+        {eSrc_S2BreakOff,         eIotGNStopReason_CarStop},          
+        {eSrc_AppStop,            eIotGNStopReason_AppStop},            
+        {eSrc_MannulStop,         eIotGNStopReason_ManualStop},      
+        {eSrc_CardStop,           eIotGNStopReason_ManualStop},   
+        {eSrc_InsuffBalance,      eIotGNStopReason_SumNoEnough},  
+        {eSrc_StopbyMoney,        eIotGNStopReason_StopByMoney},  
+        {eSrc_StopbyTime,         eIotGNStopReason_StopByTime},  
+        {eSrc_StopbyEnergy,       eIotGNStopReason_StopByEnergy}, 
+        {eErr_GunDisConn,         eIotGNStopReason_GunDisconnect}, 
+    };  
+
+    for (index = 0; index < ARRAY_SIZE(stopReasonMap); index++)
+    {
+        if (errType == stopReasonMap[index].errType)
+        {
+            eStopReason = stopReasonMap[index].stopReason;
+            break;
+        }
+    }
+
+    return eStopReason;
+}
+
+void IotGN_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardBillMode)
+{
+    MSNvmGNParamBillMode_Struct *pGnBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    uint8_t periodCount = 0;
+    uint8_t index = 0;
+    uint16_t startIndex = 0;
+	uint16_t stopIndex = 0;
+
+    if (pStandardBillMode != NULL)
+    {
+        memset(pStandardBillMode, 0x00, sizeof(AswMonitorBillMode_Struct));
+
+        if (pGnBillMode->billType == IOT_GN_BILLMODE_RATE_TYPE_4)
+        {
+            pStandardBillMode->rateCount = 4;
+            pStandardBillMode->billmodeType = ASWMONITOR_BILLMODE_TYPE_FOUR;
+        }
+        else if (pGnBillMode->billType == IOT_GN_BILLMODE_RATE_TYPE_MULT)
+        {
+            pStandardBillMode->rateCount = 9;
+            pStandardBillMode->billmodeType = ASWMONITOR_BILLMODE_TYPE_MULT;
+        }
+        else
+        {}
+
+        if (pStandardBillMode->rateCount != 0)
+        {
+            /* 转换计损比例 */
+            pStandardBillMode->elecLossRate = pGnBillMode->elecLossRate;
+
+            /* 转换费率内容 */
+            memcpy(pStandardBillMode->rateElecPrice, pGnBillMode->elecPriceRate, pStandardBillMode->rateCount * sizeof(uint32_t));
+            memcpy(pStandardBillMode->rateSeverPrice, pGnBillMode->servePriceRate, pStandardBillMode->rateCount * sizeof(uint32_t));
+
+            for (index = 0; index < pStandardBillMode->rateCount; index++)
+            {
+                pStandardBillMode->totalPrice[index] = pStandardBillMode->rateElecPrice[index] + pStandardBillMode->rateSeverPrice[index];
+            }
+
+             /* 转换时段内容 */
+            for (startIndex = 0; startIndex < MSNVM_GN_BILLMIDE_PERIOD_COUNT;)
+            {
+                if ((startIndex == 0) || (pGnBillMode->period_rate[startIndex] != pGnBillMode->period_rate[startIndex - 1]))
+                {
+                    if (periodCount < ASWMONITOR_BILLMODE_PERIOD_COUNT)
+                    {
+                        pStandardBillMode->periodRate[periodCount] = pGnBillMode->period_rate[startIndex];
+                        pStandardBillMode->startTime[periodCount][0] = startIndex / 2;
+                        pStandardBillMode->startTime[periodCount][1] = (startIndex % 2) * 30;
+                    }
+
+                    stopIndex = startIndex + 1;
+
+                    while (stopIndex < MSNVM_GN_BILLMIDE_PERIOD_COUNT &&
+                    pGnBillMode->period_rate[startIndex] == pGnBillMode->period_rate[stopIndex])
+                    {
+                        stopIndex++;
+                    }
+
+                    pStandardBillMode->stopTime[periodCount][0] = stopIndex / 2;
+                    pStandardBillMode->stopTime[periodCount][1] = (stopIndex % 2) * 30;
+
+                    periodCount++;
+                    startIndex = stopIndex;
+                }
+                else
+                { 
+                    startIndex++;
+                }
+            }
+
+            pStandardBillMode->periodCount = periodCount;
+            pStandardBillMode->validFlag = TRUE;
+        }
     }
 }
 
@@ -215,7 +405,7 @@ uint8_t IotGN_GetGunState(uint8_t port)
         {
             gunState = 0x01; /* 故障 */
         }
-        else if (IotGN_IsCharging(port))
+        else if (AswMonitor_IsOrderIdle(port) != TRUE)
         {
             gunState = 0x03; /* 充电中 */
         }
@@ -228,26 +418,10 @@ uint8_t IotGN_GetGunState(uint8_t port)
     return gunState;
 }
 
-uint8_t IotGN_IsCharging(uint8_t port)
-{
-    uint8_t chargeState = AswChargeIf_GetChargeState(port);
-    uint8_t ret = TRUE;
-
-    if (chargeState == ASWCHARGEIF_WORKSTATE_IDLE ||
-        chargeState == ASWCHARGEIF_WORKSTATE_READY ||
-        chargeState == ASWCHARGEIF_WORKSTATE_FINISH)
-    {
-        ret = FALSE;
-    }
-
-    return ret;
-}
-
-
-
 void IotGN_OfflineHandle(void)
 {
     CddNetM_SetLinkDisconnect(eCddNetMPlatType_O);
+    pIotGNCtx->loginSucc = FALSE;
     pIotGNCtx->eWorkState = eIOTGNWorkState_Offline;
 }
 
@@ -262,6 +436,79 @@ void IotGN_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
         FrameQueue_Creat(eFrameQueueType_TCP, 3072, 3072, &pIotGNCtx->frameQueueChannelID);
         pLinkPara->stTcpPara.frameQueueChannelID = pIotGNCtx->frameQueueChannelID;
     }
+}
+
+void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason)
+{ 
+    AswMonitorBillMode_Struct *pBillMode = AswMonitor_GetCurUsedBillModePtr(port);
+    AswMonitorChargeCtrl_Struct *pstChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
+    AswMonitorChargeData_Struct *pChargeData = AswMonitor_GetChargeDataPtr(port);
+    MSNvmGNOrderInfo_Struct *pGnOrder = &pOrderData->platOrderInfo.stGNOrderInfo;
+    uint8_t index = 0;
+
+    if (orderSaveReason == ASWMONITOR_ORDER_SAVE_START)
+    {
+        memset(pGnOrder, 0x00, sizeof(MSNvmGNOrderInfo_Struct));
+
+        if (pBillMode->billmodeType == ASWMONITOR_BILLMODE_TYPE_FOUR)
+        {
+            pGnOrder->billmodeType = IOT_GN_BILLMODE_RATE_TYPE_4;
+        }
+        else
+        {
+            pGnOrder->billmodeType = IOT_GN_BILLMODE_RATE_TYPE_MULT;
+        }
+
+        memcpy(pGnOrder->pileDnBCD, pIotGNCtx->pileDnBCD, 7);
+        pGnOrder->port = port;
+        memcpy(pGnOrder->orderTransactionNum, 
+               pIotGNCtx->stProtoData[port].curUsedOrderTransactionNum, 
+               sizeof(pIotGNCtx->stProtoData[port].curUsedOrderTransactionNum));
+
+        pGnOrder->startTime = pChargeData->chargeStartTime;
+        pGnOrder->stopTime = pChargeData->chargeStopTime;
+        pGnOrder->startMeterVal = pChargeData->startMeterVal;
+        pGnOrder->stopMeterVal = pChargeData->stopMeterVal;
+        pGnOrder->dealDate = pGnOrder->startTime;
+
+        if (pstChargeCtrl->startSrc == ASWMONITOR_ORDER_START_SRC_APP)
+        {
+            pGnOrder->dealFlag = 0x01;
+        }
+        else
+        {
+            pGnOrder->dealFlag = 0x02;
+            memcpy(pGnOrder->logicCardNum, pIotGNCtx->stProtoData[port].authCardID, 8);
+        }
+
+        pOrderData->stopReason = eIotGNStopReason_PowerOff;
+        pOrderData->orderSaveState = eIotGNOrderSaveState_Start;
+    }
+    else
+    {
+        pGnOrder->stopTime = pChargeData->chargeStopTime;
+        pGnOrder->stopMeterVal = pChargeData->stopMeterVal;
+        pGnOrder->totalEnergy = pChargeData->totalEnergy;
+        pGnOrder->totalLossEnergy = pChargeData->totalLossEnergy;
+        pGnOrder->totalMoney = pChargeData->totalMoney;
+
+        for (index = 0; index < 9; index++)
+        {
+            pGnOrder->billInfo[index][0] = pBillMode->totalPrice[index];            // 单价
+            pGnOrder->billInfo[index][1] = pChargeData->rateTotalEnergy[index];     // 电量     
+            pGnOrder->billInfo[index][2] = pChargeData->rateTotalLossEnergy[index]; // 计损电量              
+            pGnOrder->billInfo[index][2] = pChargeData->rateTotalMoney[index];      // 总金额  
+        }
+
+        if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
+        {
+            pOrderData->orderSaveState = eIotGNOrderSaveState_Finish;
+            pGnOrder->stopReason = Iot_ConverStopReason((AswErrorType_Enum)pOrderData->stopReason);
+            MSNvm_InsertNewRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)pOrderData, sizeof(MSNvmOrderInfo_Struct));
+        }
+    }
+
+    MSNvm_WriteParaBlock(eMSNvmBlockID_Gun0OrderInfo, (uint8_t *)pOrderData, sizeof(MSNvmOrderInfo_Struct));
 }
 
 void IotGN_InitMemory(void)

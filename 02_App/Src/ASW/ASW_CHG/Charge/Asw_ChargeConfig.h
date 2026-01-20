@@ -41,7 +41,7 @@
 
 #define ASWCHARGE_CFG_GetOutputCurrent(port)           CddMeterM_GetRmsCurrent(port)
 
-#define ASWCHARGE_CFG_QUIT_FINISH_TIMEOUT              200
+#define ASWCHARGE_CFG_QUIT_FINISH_TIMEOUT              500
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

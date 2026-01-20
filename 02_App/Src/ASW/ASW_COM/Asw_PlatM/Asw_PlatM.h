@@ -35,6 +35,7 @@ typedef enum
     eAswPlatType_Count,
 }AswPlatType_Enum;
 
+
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
@@ -62,8 +63,7 @@ MSNvmPlatParam_Struct * AswPlatM_GetPlatParamPtr(void);
 void AswPlatM_InitMemory(void);
 void AswPlatM_MainFunction(void);
 
-uint8_t AswPlatM_FillChargeRecord(uint8_t port, MSNvmOrderInfo_Union *pOrderData);
-void AswPlatM_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Union *pOrderData, uint8_t orderSaveState);
+void AswPlatM_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason);
 void AswPlatM_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pBillMode);
 #endif
 

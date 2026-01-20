@@ -11,18 +11,16 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 *******************************************************************************/
-#include "Cdd_CP.h"
-#include "Cdd_MeterM.h"
-#include "Cdd_Relay.h"
-#include "Asw_ChargeIf.h"
-#include "Cdd_Sensor.h"
+
+
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-
-
-
-
+#include "MS_Nvm.h"
+#include "Asw_PlatM.h"
+#include "Cdd_NetM.h"
+#include "Asw_PlatMConfig.h"
+#include "FrameQueue.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -41,85 +39,90 @@
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
+typedef struct
+{
+    MSNvmPlatParam_Struct stPlatParam;
 
+}AswPlatMCtx_Struct;
 
 
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-
+static AswPlatMCtx_Struct g_stAswPlatMCtx = { 0 };
 
 
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-
-
-
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-uint8_t AswChargeIf_CheckGunConnected(uint8_t port)
+static AswPlatMProtocolDescriptor_Struct *AswPlatM_GetProtocolDescriptor(void)
 {
-    CddCPVolState_Enum eCpVolState = CddCP_GetVolState(port);
-    uint8_t ret = FALSE;
+    AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = NULL;
+    return pProtocolDescriptor;
+}
 
-    if (eCpVolState == eCddCPVolState_6V || eCpVolState == eCddCPVolState_9V)
+void AswPlatM_DefaultPlatParam(void *param)
+{
+    MSNvmPlatParam_Struct *pPlatParam = (MSNvmPlatParam_Struct *)param;
+
+    memset(pPlatParam, 0x00, sizeof(MSNvmPlatParam_Struct));
+
+    pPlatParam->platMainType = eAswPlatType_GN;
+    strcpy(pPlatParam->platMainIp, "pile.gongniu.cn");
+    pPlatParam->platMainPort = 5455;
+
+    strcpy(pPlatParam->platAuxiliaryIp, "pmgmt.gongniu.cn");
+    pPlatParam->platAuxiliaryPort = 45113;
+}
+
+void AswPlatM_InitMemory(void)
+{
+    AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = NULL;
+    MSNvmPlatParam_Struct *pParam = &g_stAswPlatMCtx.stPlatParam;
+    CddNetMSocketPara_Union stSocketPara = { 0 };
+    FrameQueueType_Enum eFrame;
+
+    if (MSNvm_ReadParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)pParam, sizeof(MSNvmPlatParam_Struct)) != eGlobalRet_OK)
     {
-        ret = TRUE;
+        AswPlatM_DefaultPlatParam(pParam);
     }
 
-    return ret;
-}
+    /* 注册运营平台链接 */
+    pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
 
-uint32_t AswChargeIf_GetOutputVoltage(uint8_t port)
-{
-    uint32_t outputVol = 0;
-
-    if (CddRelay_GetRelayState(port) == eCddRelayState_On)
+    if (pProtocolDescriptor->pFuncInit != NULL)
     {
-        outputVol = CddMeterM_GetRmsVoltage(port);
+        pProtocolDescriptor->pFuncInit();
     }
 
-    return outputVol;
-}
-
-uint32_t AswChargeIf_GetOutputCurrent(uint8_t port)
-{
-    uint32_t outputCurrent = 0;
-
-    if (CddRelay_GetRelayState(port) == eCddRelayState_On)
+    if (pProtocolDescriptor->pFuncFillLinkPara != NULL)
     {
-        outputCurrent = CddMeterM_GetRmsCurrent(port);
+        pProtocolDescriptor->pFuncFillLinkPara(&stSocketPara, &g_stAswPlatMCtx.stPlatParam);
     }
 
-    return outputCurrent;
+    CddNetM_CreatLink(pProtocolDescriptor->eSocketType, stSocketPara, eCddNetMPlatType_O);
 }
 
-uint8_t AswChargeIf_GetChargeState(uint8_t port)
-{
-    return AswCharge_GetWorkState(port);
+void AswPlatM_MainFunction(void)
+{  
+
+
+
+
+
+
+
 }
 
-uint8_t AswChargeIf_GetGunTemperature(uint8_t port)
-{
-    return CddSensor_GetGunTemperature(port);
-}
 
-uint64_t AswChargeIf_GetMeterEnergyVal(uint8_t port)
-{
-    return CddMeterM_GetEnergyVal(port);
-}
 
-void AswChargeIf_ChargeStart(uint8_t port)
-{
-    AswCharge_StartAuth(port);
-}
 
-AswErrorType_Enum AswChargeIf_GetStopReason(uint8_t port)
-{
-    return AswCharge_GetStopReason(port);
-}
+
+
+
 
 
 

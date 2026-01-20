@@ -22,6 +22,7 @@
 #include "FrameQueue.h"
 #include "Asw_ErrorHandle.h"
 #include "Asw_ChargeIf.h"
+#include "Asw_Monitor.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -53,7 +54,11 @@ static uint16_t IotGN_SendLoginReq(uint8_t port, uint8_t *pBuf);
 static uint16_t IotGN_SendHeartBeat(uint8_t port, uint8_t *pBuf);
 static uint16_t IotGN_SendBillModeVerifyReq(uint8_t port, uint8_t *pBuf);
 static uint16_t IotGN_SendBillModeReq(uint8_t port, uint8_t *pBuf);
-static uint16_t IotGN_ReportRealData(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendRealData(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendChargeStartRsp(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendChargeStopRsp(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendMultyOrderRecordReq(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendOrderRecordReq(uint8_t port, uint8_t *pBuf);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -78,8 +83,8 @@ static const IotGNSendCtrl_Struct c_stIotGNSendctrlTable[IOT_GN_CMD_SEND_COUNT] 
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
         .matchCmd = IOT_GN_CMD_HEARTBEAT_RSP,
         .pSendFunc = IotGN_SendHeartBeat,
-        .sendCycle = 60000,
-        .printFlag = TRUE,
+        .sendCycle = 10000,
+        .printFlag = FALSE,
         .cMeaning = "设备心跳"
     },
 
@@ -110,7 +115,7 @@ static const IotGNSendCtrl_Struct c_stIotGNSendctrlTable[IOT_GN_CMD_SEND_COUNT] 
         .cmd = IOT_GN_CMD_REPORT_REALDATA,
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
         .matchCmd = IOT_GN_CMD_NULL,
-        .pSendFunc = IotGN_ReportRealData,
+        .pSendFunc = IotGN_SendRealData,
         .sendCycle = 0,
         .printFlag = TRUE,  
         .cMeaning = "主动上报实时数据"
@@ -119,12 +124,56 @@ static const IotGNSendCtrl_Struct c_stIotGNSendctrlTable[IOT_GN_CMD_SEND_COUNT] 
     [5] = 
     {
         .cmd = IOT_GN_CMD_CALL_REALDATA_ACK,
-        .cmdType = IOT_GN_CMDTYPE_REQUSET,
-        .matchCmd = IOT_GN_CMDTYPE_RESPONSE,
-        .pSendFunc = IotGN_ReportRealData,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_GN_CMD_CALL_REALDATA,
+        .pSendFunc = IotGN_SendRealData,
         .sendCycle = 0,
         .printFlag = TRUE,
         .cMeaning = "实时数据召测应答"
+    },
+
+    [6] = 
+    {
+        .cmd = IOT_GN_CMD_REMOTE_START_CHARGE_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_GN_CMD_REMOTE_START_CHARGE,
+        .pSendFunc = IotGN_SendChargeStartRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "远程启动充电应答"
+    },
+
+    [7] = 
+    {
+        .cmd = IOT_GN_CMD_REMOTE_STOP_CHARGE_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_GN_CMD_REMOTE_STOP_CHARGE,
+        .pSendFunc = IotGN_SendChargeStopRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "远程停止充电应答"
+    },
+
+    [8] = 
+    {
+        .cmd = IOT_GN_CMD_MULTI_ORDER_RECORD_REQ,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .matchCmd = IOT_GN_CMD_ORDER_RECORD_RSP,
+        .pSendFunc = IotGN_SendMultyOrderRecordReq,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "多类电价交易记录"
+    },
+
+    [9] = 
+    {
+        .cmd = IOT_GN_CMD_ORDER_RECORD_REQ,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .matchCmd = IOT_GN_CMD_ORDER_RECORD_RSP,
+        .pSendFunc = IotGN_SendOrderRecordReq,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "四类电价交易记录"
     },
 };
 
@@ -161,12 +210,10 @@ static uint16_t IotGN_SendLoginReq(uint8_t port, uint8_t *pBuf)
 
     srand(Common_GetSystick());
     randomNum = rand();
-
     /* 设备编码 */
     memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
     dataLen += 7;
-
-     /* 设备识别码 */
+    /* 设备识别码 */
 #if (SYSCFG_CFG_GUN_NUM == 1)
     sprintf((char *)&pBuf[dataLen], "%s", SYSCFG_CFG_PRODUCT_CODE);
     dataLen += 16;
@@ -181,37 +228,29 @@ static uint16_t IotGN_SendLoginReq(uint8_t port, uint8_t *pBuf)
     memset(&pBuf[dataLen], 0x00, 16);
     dataLen += 16;
     /* 设备类型 交流桩*/
-    pBuf[dataLen] = 0x01;
-    dataLen += 1;
+    pBuf[dataLen++] = 0x01;
     /* 充电枪数量*/
-    pBuf[dataLen] = SYSCFG_CFG_GUN_NUM;
-    dataLen += 1;
+    pBuf[dataLen++] = SYSCFG_CFG_GUN_NUM;
     /* 程序版本 */
-    pBuf[dataLen] = APP_SW_MAJOR_VERSION;
-    dataLen += 1;
-    pBuf[dataLen] = APP_SW_MINOR_VERSION;
-    dataLen += 1;
-    pBuf[dataLen] = APP_SW_CUSTORM_VERSION;
-    dataLen += 1;
-    pBuf[dataLen] = APP_SW_PATCH_VERSION;
-    dataLen += 1;
+    pBuf[dataLen++] = APP_SW_MAJOR_VERSION;
+    pBuf[dataLen++] = APP_SW_MINOR_VERSION;
+    pBuf[dataLen++] = APP_SW_CUSTORM_VERSION;
+    pBuf[dataLen++] = APP_SW_PATCH_VERSION;
     /* 网络连接类型  sim卡*/
-    pBuf[dataLen] = 0x00;
-    dataLen += 1;
+    pBuf[dataLen++] = 0x00;
     /* ICCID */
     CddNetM_GetIccid(&pBuf[dataLen]);
     dataLen += 20;
     /* 运营商 */
     if (eOperator == eCddNetMOperator_CMCC)
-        pBuf[dataLen] = 0x00;
+        pBuf[dataLen++] = 0x00;
     else if (eOperator == eCddNetMOperator_CTCC)
-        pBuf[dataLen] = 0x01;
+        pBuf[dataLen++] = 0x01;
     else if (eOperator == eCddNetMOperator_CUCC)
-        pBuf[dataLen] = 0x02;
+        pBuf[dataLen++] = 0x02;
     else
-        pBuf[dataLen] = 0xFF;
+        pBuf[dataLen++] = 0xFF;
 
-    dataLen += 1;
     return dataLen;
 }
 
@@ -223,22 +262,11 @@ static uint16_t IotGN_SendHeartBeat(uint8_t port, uint8_t *pBuf)
     /* 设备编码 */
     memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
     dataLen += 7;
-
     /* 终端号 */
-    pBuf[dataLen] = port + 1;
-    dataLen += 1;
+    pBuf[dataLen++] = port + 1;
+    /* 状态 */
+    pBuf[dataLen++] = (AswErrHandle_IsExsistError(port) == TRUE) ? 0x01 : 0x00;
 
-    if (AswErrHandle_IsExsistError(port) == TRUE)
-    {
-        /* 故障 */
-        pBuf[dataLen] = 0x01;
-    }
-    else
-    {
-        pBuf[dataLen] = 0x00;
-    }
-
-    dataLen += 1;
     return dataLen;
 }
 
@@ -267,22 +295,94 @@ static uint16_t IotGN_SendBillModeReq(uint8_t port, uint8_t *pBuf)
     return dataLen;
 }
 
-static uint16_t IotGN_ReportRealData(uint8_t port, uint8_t *pBuf)
+static void IotGN_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
 {
+    uint8_t dataLen = 0;
+
+    Common_SetBitFlag(pBuf, 15);
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_LeakageCurrErr))
+    {
+        Common_SetBitFlag(pBuf, 0);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCalcErr))
+    {
+        Common_SetBitFlag(pBuf, 1);
+    }
+    
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqSynechiaFault))
+    {
+        Common_SetBitFlag(pBuf, 5);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqMaloperation))
+    {
+        Common_SetBitFlag(pBuf, 6);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpVoltAbnor))
+    {
+        Common_SetBitFlag(pBuf, 7);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_OutputOverCurr))
+    {
+        Common_SetBitFlag(pBuf, 8);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_AphaseInputOverVol))
+    {
+        Common_SetBitFlag(pBuf, 9);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_AphaseInputLessVol))
+    {
+        Common_SetBitFlag(pBuf, 10);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpGroundFault))
+    {
+        Common_SetBitFlag(pBuf, 11);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_PEBreakFault))
+    {
+        Common_SetBitFlag(pBuf, 12);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_DiodeStop))
+    {
+        Common_SetBitFlag(pBuf, 13);
+    }
+}
+
+static uint16_t IotGN_SendRealData(uint8_t port, uint8_t *pBuf)
+{
+    AswMonitorChargeData_Struct *pChargeData = AswMonitor_GetChargeDataPtr(port);
+    AswMonitorChargeCtrl_Struct *pstChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
     uint16_t dataLen = 0;
+    uint8_t orderIdleFlag = AswMonitor_IsOrderIdle(port);
 
     /* 设备编码 */
     memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
     dataLen += 7;
-
     /* 枪号 */
     pBuf[dataLen++] = port + 1;
-    /* 交易流水号 todo */
-    memset(&pBuf[dataLen], 0x00, 16);
-    dataLen += 16;
+    /* 交易流水号 */
+    if (orderIdleFlag != TRUE)
+    {
+        memcpy(&pBuf[dataLen], pIotGNCtx->stProtoData[port].curUsedOrderTransactionNum, 16);
+        dataLen += 16;
+    }
+    else
+    {
+        memset(&pBuf[dataLen], 0x00, 16);
+        dataLen += 16;
+    }
+
     /* 状态 */
     pBuf[dataLen++] = IotGN_GetGunState(port);
-
     /* 枪是否归位 */
     pBuf[dataLen++] = 02;
     /* 是否插枪 */
@@ -302,31 +402,280 @@ static uint16_t IotGN_ReportRealData(uint8_t port, uint8_t *pBuf)
     pBuf[dataLen++] = 0x00;
     /* 电池组最高温度 */
     pBuf[dataLen++] = 0x00;
-    /* 累计充电时间 todo */
-    memset(&pBuf[dataLen], 0x00, 2);
-    dataLen += 2;
+
+    /* 累计充电时间 */
+    if (orderIdleFlag != TRUE)
+    {
+        Common_Uint16ToTwoUint8(&pBuf[dataLen], pChargeData->chargeTime / 60);
+        dataLen += 2;
+    }
+    else
+    {
+        memset(&pBuf[dataLen], 0x00, 2);
+        dataLen += 2;
+    }
+
     /* 剩余时间 */
     memset(&pBuf[dataLen], 0x00, 2);
     dataLen += 2;
-    /* 充电度数 todo */
-    memset(&pBuf[dataLen], 0x00, 4);
-    dataLen += 4;
-    /* 计损充电度数 todo */
-    memset(&pBuf[dataLen], 0x00, 4);
-    dataLen += 4;
-    /* 已充金额 todo */
-    memset(&pBuf[dataLen], 0x00, 4);
-    dataLen += 4;
-    /* 硬件故障 todo */
-    memset(&pBuf[dataLen], 0x00, 2);
-    dataLen += 2;
 
-    pIotGNCtx->realDataReportTick[port] = Common_GetSystick();
+    if (orderIdleFlag != TRUE)
+    {
+        /* 充电度数 */
+        memcpy(&pBuf[dataLen], &pChargeData->totalEnergy, 4);
+        dataLen += 4;
+        /* 计损充电度数 */
+        memcpy(&pBuf[dataLen], &pChargeData->totalLossEnergy, 4);
+        dataLen += 4;
+        /* 已充金额 */
+        memcpy(&pBuf[dataLen], &pChargeData->totalMoney, 4);
+        dataLen += 4;
+    }
+    else
+    {
+        /* 充电度数 */
+        memset(&pBuf[dataLen], 0x00, 4);
+        dataLen += 4;
+        /* 计损充电度数 */
+        memset(&pBuf[dataLen], 0x00, 4);
+        dataLen += 4;
+        /* 已充金额 */
+        memset(&pBuf[dataLen], 0x00, 4);
+        dataLen += 4;
+    }
+
+    /* 硬件故障 */
+    memset(&pBuf[dataLen], 0x00, 2);
+    IotGN_SetRealDataErrBit(port, &pBuf[dataLen]);
+    dataLen += 2;
     return dataLen;
 }
 
+static uint16_t IotGN_SendChargeStartRsp(uint8_t port, uint8_t *pBuf)
+{
+    AswMonitorChargeData_Struct *pChargeData = AswMonitor_GetChargeDataPtr(port);
+    AswMonitorChargeCtrl_Struct *pstChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
+    uint16_t dataLen = 0;
 
-static uint16_t IotGNPackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+    /* 枪号 */
+    pBuf[dataLen++] = port + 1;
+    /* 交易流水号 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->stProtoData[port].curUsedOrderTransactionNum, 16);
+    dataLen += 16;
+    /* 远程启动结果 */
+    pBuf[dataLen++] = pIotGNCtx->stProtoData[port].remoteStartResult;
+    pBuf[dataLen++] = pIotGNCtx->stProtoData[port].remoteStartFailReason;
+    return dataLen;
+}
+
+static uint16_t IotGN_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
+{
+    AswMonitorChargeData_Struct *pChargeData = AswMonitor_GetChargeDataPtr(port);
+    AswMonitorChargeCtrl_Struct *pstChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
+    uint16_t dataLen = 0;
+
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+
+    /* 枪号 */
+    pBuf[dataLen++] = port + 1;
+    /* 远程启动结果 */
+    pBuf[dataLen++] = pIotGNCtx->stProtoData[port].remoteStopResult;
+    pBuf[dataLen++] = pIotGNCtx->stProtoData[port].remoteStopFailReason;
+
+    return dataLen;
+}
+
+static uint16_t IotGN_SendMultyOrderRecordReq(uint8_t port, uint8_t *pBuf)
+{
+    MSNvmGNOrderInfo_Struct *pOrderData = &pIotGNCtx->stOrderInfo.platOrderInfo.stGNOrderInfo;
+    uint16_t dataLen = 0;
+    CommonDateTime_Struct dateTime;
+    uint16_t temp = 0;
+
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+    /* 枪号 */
+    pBuf[dataLen++] = port + 1;
+    /* 交易流水号 */
+    memcpy(&pBuf[dataLen], pOrderData->orderTransactionNum, 16);
+    dataLen += 16;
+    /* 开始时间 */
+    Conmon_TimestampToDateTime(pOrderData->startTime, &dateTime);
+    temp = Common_uintBINToBCD(dateTime.year);
+    pBuf[dataLen++] = (temp >> 8) & 0xFF;
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.day, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.hour, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.minute, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.second, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    /* 结束时间 */
+    Conmon_TimestampToDateTime(pOrderData->stopTime, &dateTime);
+    temp = Common_uintBINToBCD(dateTime.year);
+    pBuf[dataLen++] = (temp >> 8) & 0xFF;
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.day, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.hour, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.minute, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.second, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    /* 电表总起值 */
+    Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->startMeterVal);
+    dataLen += 4;
+    /* 电表总止值 */
+    Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->stopMeterVal);
+    dataLen += 4;
+    /* 总电量 */
+    Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->totalEnergy);
+    dataLen += 4;
+    /* 总计损电量 */
+    Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->totalLossEnergy);
+    dataLen += 4;
+    /* 总消费金额 */
+    Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->totalMoney);
+    dataLen += 4;
+    /* 电动汽车唯一标识 */
+    memcpy(&pBuf[dataLen], pOrderData->vin, 17);
+    dataLen += 17;
+    /*  交易标识 */
+    pBuf[dataLen++] = pOrderData->dealFlag;
+    /* 交易日期 */
+    Conmon_TimestampToDateTime(pOrderData->dealDate, &dateTime);
+    temp = Common_uintBINToBCD(dateTime.year);
+    pBuf[dataLen++] = (temp >> 8) & 0xFF;
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.day, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.hour, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.minute, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.second, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    /*  停止原因 */
+    pBuf[dataLen++] = pOrderData->stopReason;
+    /* 逻辑卡号 */
+    memcpy(&pBuf[dataLen], pOrderData->logicCardNum, 8);
+    dataLen += 8;
+    /* 单价、电量、计损电量、金额 */
+    memcpy(&pBuf[dataLen], pOrderData->billInfo, 144);
+    dataLen += 144;
+
+    return dataLen;
+}
+
+static uint16_t IotGN_SendOrderRecordReq(uint8_t port, uint8_t *pBuf)
+{
+    MSNvmGNOrderInfo_Struct *pOrderData = &pIotGNCtx->stOrderInfo.platOrderInfo.stGNOrderInfo;
+    uint16_t dataLen = 0;
+    CommonDateTime_Struct dateTime;
+    uint16_t temp = 0;
+
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+    /* 枪号 */
+    pBuf[dataLen++] = port + 1;
+    /* 交易流水号 */
+    memcpy(&pBuf[dataLen], pOrderData->orderTransactionNum, 16);
+    dataLen += 16;
+    /* 开始时间 */
+    Conmon_TimestampToDateTime(pOrderData->startTime, &dateTime);
+    temp = Common_uintBINToBCD(dateTime.year);
+    pBuf[dataLen++] = (temp >> 8) & 0xFF;
+    pBuf[dataLen++] = (uint8_t)(temp);
+
+
+    Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.day, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.hour, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.minute, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.second, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    /* 结束时间 */
+    Conmon_TimestampToDateTime(pOrderData->stopTime, &dateTime);
+temp = Common_uintBINToBCD(dateTime.year);
+    pBuf[dataLen++] = (temp >> 8) & 0xFF;
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.day, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.hour, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.minute, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.second, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    /* 单价、电量、计损电量、金额 */
+    memcpy(&pBuf[dataLen], pOrderData->billInfo, 64);
+    dataLen += 64;
+    /* 电表总起值 */
+    Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->startMeterVal);
+    dataLen += 4;
+    /* 电表总止值 */
+    Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->stopMeterVal);
+    dataLen += 4;
+    /* 总电量 */
+    Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->totalEnergy);
+    dataLen += 4;
+    /* 总计损电量 */
+    Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->totalLossEnergy);
+    dataLen += 4;
+    /* 总消费金额 */
+    Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->totalMoney);
+    dataLen += 4;
+    /* 电动汽车唯一标识 */
+    memcpy(&pBuf[dataLen], pOrderData->vin, 17);
+    dataLen += 17;
+    /*  交易标识 */
+    pBuf[dataLen++] = pOrderData->dealFlag;
+    /* 交易日期 */
+    Conmon_TimestampToDateTime(pOrderData->dealDate, &dateTime);
+temp = Common_uintBINToBCD(dateTime.year);
+    pBuf[dataLen++] = (temp >> 8) & 0xFF;
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.day, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.hour, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.minute, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.second, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    /*  停止原因 */
+    pBuf[dataLen++] = pOrderData->stopReason;
+    /* 逻辑卡号 */
+    memcpy(&pBuf[dataLen], pOrderData->logicCardNum, 8);
+    dataLen += 8;
+    return dataLen;
+}
+
+static uint16_t IotGN_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
 {
     IotGNFrameHead_Struct *pFrameHead = (IotGNFrameHead_Struct *)pBuf;
     uint16_t totalLen = dataLen + sizeof(IotGNFrameHead_Struct);
@@ -347,7 +696,7 @@ static uint16_t IotGNPackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uint16_
     return totalLen;
 }
 
-void IotLX_UpCtrlSendDeal(void)
+void IotGN_UpCtrlSendDeal(void)
 {
     const IotGNSendCtrl_Struct *pCmdSendCtrl = NULL;
     uint8_t index = 0;
@@ -401,7 +750,7 @@ void IotLX_UpCtrlSendDeal(void)
 
                     if (dataLen > 0)
                     {
-                        dataLen = IotGNPackHead(pCmdSendCtrl->cmd, reqSeq, txBuf, dataLen);
+                        dataLen = IotGN_PackHead(pCmdSendCtrl->cmd, reqSeq, txBuf, dataLen);
 
                         if (eGlobalRet_OK != FrameQueue_PushTx(pIotGNCtx->frameQueueChannelID, NULL, 0, txBuf, dataLen))
                         {

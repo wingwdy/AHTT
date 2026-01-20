@@ -19,13 +19,22 @@
 #include "Asw_IotProtoGNM.h"
 #include "FrameQueue.h"
 #include "Asw_ErrorHandle.h"
+#include "SS_Ucm.h"
+#include "Asw_ChargeIf.h"
 
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
-
-
-
+#define IOT_GN_RecvGunNoTransform(inputPort, outputPort)    do{ \
+                                                                if (inputPort > SYSCFG_CFG_GUN_NUM)\
+                                                                {\
+                                                                    outputPort = 0;\
+                                                                }\
+                                                                else\
+                                                                {\
+                                                                    outputPort = (inputPort - 1);\
+                                                                }\
+                                                            }while(0)
 
 /*******************************************************************************
 *    Enum Definition
@@ -50,6 +59,9 @@ static uint8_t IotGN_RecvBillModeVerifyRsp(uint8_t *port, uint8_t *r_data, uint1
 static uint8_t IotGN_RecvBillMode4RateRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotGN_RecvBillModeMultRateRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotGN_RecvCallRealData(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvRemoteStopCharge(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -78,7 +90,7 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .maxTimeout = 10 * 1000,
         .maxTryCnt = 3,
         .matchCmd = IOT_GN_CMD_HEARTBEAT_REQ,
-        .printFlag = TRUE,
+        .printFlag = FALSE,
         .cMeaning = "心跳应答",
     },
 
@@ -128,6 +140,42 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .matchCmd = IOT_GN_CMD_CALL_REALDATA_ACK,
         .printFlag = TRUE,
         .cMeaning = "召测实时数据",
+    },
+
+    [6] = 
+    {
+        .cmd = IOT_GN_CMD_REMOTE_START_CHARGE,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .pRecvParse = IotGN_RecvRemoteStartCharge,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_GN_CMD_REMOTE_START_CHARGE_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "远程启动充电",
+    },
+
+    [7] = 
+    {
+        .cmd = IOT_GN_CMD_REMOTE_STOP_CHARGE,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .pRecvParse = IotGN_RecvRemoteStopCharge,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_GN_CMD_REMOTE_STOP_CHARGE_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "远程停止充电",
+    },
+
+    [8] = 
+    {
+        .cmd = IOT_GN_CMD_ORDER_RECORD_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .pRecvParse = IotGN_RecvOrderRecordRsp,
+        .maxTimeout = 10 * 1000,
+        .maxTryCnt = 3,
+        .matchCmd = IOT_GN_CMD_MULTI_ORDER_RECORD_REQ,
+        .printFlag = TRUE,
+        .cMeaning = "交易记录应答",
     },
 };
 
@@ -264,6 +312,8 @@ static uint8_t IotGN_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
             Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, gunNo, IOT_GN_CMD_HEARTBEAT_REQ, TRUE);
             Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, gunNo, IOT_GN_CMD_BILLMODE_VERIFY_REQ, TRUE);
         }
+
+        pIotGNCtx->loginSucc = TRUE;
     }
     else
     {
@@ -301,8 +351,12 @@ static uint8_t IotGN_RecvBillModeVerifyRsp(uint8_t *port, uint8_t *r_data, uint1
 
         if (pRecvData[index] == 0x00)
         {
-            verifyRes = TRUE;
-            IOTGN_CFG_LogPrint("计费模型，不需要更新！\r\n");
+            /*  和平台沟通，建议每次都请求，这个标识暂时不使用
+                verifyRes = TRUE;
+                IOTGN_CFG_LogPrint("计费模型，不需要更新！\r\n");
+             */
+            verifyRes = FALSE;
+
         }
     }
 
@@ -335,7 +389,7 @@ static uint8_t IotGN_RecvBillMode4RateRsp(uint8_t *port, uint8_t *r_data, uint16
         index += 4;   
     }
 
-    pBillMode->measure_wastage_rates = pRecvData[index++];
+    pBillMode->elecLossRate = pRecvData[index++];
     memcpy(pBillMode->period_rate, &pRecvData[index], 48);
     index += 48;
 
@@ -354,7 +408,7 @@ static uint8_t IotGN_RecvBillModeMultRateRsp(uint8_t *port, uint8_t *r_data, uin
     memcpy(pBillMode->billModeID, &pRecvData[index], 2);
     index += 2;
 
-    pBillMode->measure_wastage_rates = pRecvData[index++];
+    pBillMode->elecLossRate = pRecvData[index++];
 
     for (temp = 0; temp < 9; temp++)
     {
@@ -375,25 +429,152 @@ static uint8_t IotGN_RecvCallRealData(uint8_t *port, uint8_t *r_data, uint16_t l
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
 
-    if (pRecvData[index] > 0)
-    {
-        port[0] = pRecvData[index] - 1;
-    }
+    IOT_GN_RecvGunNoTransform(pRecvData[index], port[0]);
 
     return TRUE;
 }
 
-
-static void IotGN_CmdTimeoutHandle_3Times(uint8_t port, const IotGNRecvCtrl_Struct *pCmdRecvCtrl)
+static uint8_t IotGN_CheckChargeStart(uint8_t port, uint8_t *pFailReason)
 {
+    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    uint8_t ret = FALSE;
+    uint8_t reason = 0;
 
+    /* 订单未结束 */
+    if (TRUE != AswMonitor_IsOrderIdle(port))
+    {
+        reason = 0x02;
+    }
+    /* 存在故障 */
+    else if (AswErrHandle_IsExsistError(port) == TRUE)
+    {
+        reason = 0x03;
+    }
+    /* 枪未连接 */
+    else if (AswChargeIf_CheckGunConnected(port) != TRUE)
+    {
+        reason = 0x05;
+    }
+    /* 计费异常 */
+    else if (TRUE != AswMonitor_CheckBillModeValid(port))
+    {
+        reason = 0x07; 
+    }
+    /* 升级中 */
+    else if (TRUE == SSUcm_IsUpdating())
+    {
+        reason = 0x08;
+    }
+    /* 设备禁用 */
+    else if (TRUE == AswMonitor_CheckForbidState(port))
+    {
+        reason = 0x09;
+    }
+    else
+    {}
+
+    pFailReason[0] = reason;
+    return (reason == 0);
 }
 
-static void IotGN_CmdTimeoutHandle(uint8_t port, uint16_t cmd)
+static uint8_t IotGN_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
+    AswMonitorChargeCtrl_Struct *pChargeCtrl = NULL;
+    uint8_t index = 7;
+    uint8_t *pRecvData = r_data;
+    uint8_t failReason = 0;
 
+    IOT_GN_RecvGunNoTransform(pRecvData[index], port[0]);
+    index++;
+
+    /* 订单号 */
+    memcpy(pIotGNCtx->stProtoData[port[0]].newRecvOrderTransactionNum, &pRecvData[index], 16);
+    index += 16;
+
+    if (TRUE == IotGN_CheckChargeStart(port[0], &failReason))
+    {
+        pChargeCtrl = AswMonitor_GetChargeCtrlPtr(port[0]);
+
+        memcpy(pIotGNCtx->stProtoData[port[0]].curUsedOrderTransactionNum,
+               pIotGNCtx->stProtoData[port[0]].newRecvOrderTransactionNum,
+               16);
+
+        /* 卡号 */
+        index += 8;
+        /* 账户余额 */
+        pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
+        index += 4;  
+
+        /* 充电控制方式转换 */
+        if (pRecvData[index++] == 1)  /* 按时间 */
+        {
+            pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeTime;
+            pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 60;
+        }
+        else if (pRecvData[index++] == 2)  /* 按金额 */
+        {
+            pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeMoney;
+            pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 100;
+        }
+        else if (pRecvData[index++] == 3)  /* 按电量 */
+        {
+            pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeEnergy;
+            pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 100;
+        }
+        else /* 自动充满 */
+        {
+            pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_AutoCharge;
+        }
+
+        index += 4;
+
+        pIotGNCtx->stProtoData[port[0]].remoteStartResult = 1;
+        pIotGNCtx->stProtoData[port[0]].remoteStartFailReason = 0;
+        AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_APP);
+    }
+    else
+    {
+        pIotGNCtx->stProtoData[port[0]].remoteStartResult = 0;
+        pIotGNCtx->stProtoData[port[0]].remoteStartFailReason = failReason;
+    }
+
+    Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, 0, IOT_GN_CMD_REMOTE_START_CHARGE_RSP, TRUE);
+    return TRUE;
 }
 
+static uint8_t IotGN_RecvRemoteStopCharge(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    uint8_t index = 7;
+    uint8_t *pRecvData = r_data;
+
+    IOT_GN_RecvGunNoTransform(pRecvData[index], port[0]);
+
+    if (AswMonitor_IsOrderIdle(port[0]) == TRUE)
+    {
+        pIotGNCtx->stProtoData[port[0]].remoteStopResult = 0;
+        pIotGNCtx->stProtoData[port[0]].remoteStopFailReason = 0x02;
+    }
+    else
+    {
+        pIotGNCtx->stProtoData[port[0]].remoteStopResult = 0x01;
+        pIotGNCtx->stProtoData[port[0]].remoteStopFailReason = 0x00;
+        AswErrhandle_SetErrExsitCallback(port[0], eSrc_AppStop);
+    }
+
+    Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, 0, IOT_GN_CMD_REMOTE_STOP_CHARGE_RSP, TRUE);
+    return TRUE;
+}
+
+static uint8_t IotGN_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    MSNvmGNOrderInfo_Struct *pOrderData = &pIotGNCtx->stOrderInfo.platOrderInfo.stGNOrderInfo;
+    uint8_t index = 0;
+    uint8_t *pRecvData = r_data;
+
+    MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotGNCtx->time);
+    IOTGN_CFG_LogPrint("[枪：%d]交易记录上报成功!\r\n", port);
+    return TRUE;
+}
 
 void IotGN_UpCtrlRecvDeal(void)
 {
@@ -431,26 +612,28 @@ void IotGN_TimeoutDetect(void)
 
                 IOTGN_CFG_LogPrint("[cmd:%d %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, timeoutCount, pCmdRecvCtrl->maxTimeout);
 
-                if (pCmdRecvCtrl->maxTryCnt == 0xFFFF)
+                if (timeoutCount >= pCmdRecvCtrl->maxTryCnt)
                 {
-                    if (timeoutCount >= 3)
-                    {
-                        IotGN_CmdTimeoutHandle_3Times(port, pCmdRecvCtrl);
-                    }
-                    else
-                    {
-                        Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, TRUE);
-                        Common_SetSendImmdFlag(pIotGNCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, TRUE);
-                        Common_SetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd, FALSE);
-                        Common_SetSendFlag(pIotGNCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, FALSE);
-                        IotGN_CmdTimeoutHandle(port, pCmdRecvCtrl->cmd);
-                    }
+                    IotGN_OfflineHandle();
                 }
                 else
                 {
-                    if (timeoutCount >= pCmdRecvCtrl->maxTryCnt)
+                    if (pCmdRecvCtrl->cmd == IOT_GN_CMD_ORDER_RECORD_RSP)
                     {
-                        IotGN_OfflineHandle();
+                        if (pIotGNCtx->stOrderInfo.platOrderInfo.stGNOrderInfo.billmodeType == IOT_GN_BILLMODE_RATE_TYPE_MULT)
+                        {
+                            Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_MULTI_ORDER_RECORD_REQ, TRUE);
+                            Common_SetSendImmdFlag(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_MULTI_ORDER_RECORD_REQ, TRUE);
+                            Common_SetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, IOT_GN_CMD_MULTI_ORDER_RECORD_REQ, FALSE);
+                            Common_SetSendFlag(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_MULTI_ORDER_RECORD_REQ, FALSE);
+                        }
+                        else
+                        {
+                            Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_ORDER_RECORD_REQ, TRUE);
+                            Common_SetSendImmdFlag(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_ORDER_RECORD_REQ, TRUE);
+                            Common_SetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, IOT_GN_CMD_ORDER_RECORD_REQ, FALSE);
+                            Common_SetSendFlag(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_ORDER_RECORD_REQ, FALSE);
+                        }
                     }
                     else
                     {
@@ -458,7 +641,6 @@ void IotGN_TimeoutDetect(void)
                         Common_SetSendImmdFlag(pIotGNCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, TRUE);
                         Common_SetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd, FALSE);
                         Common_SetSendFlag(pIotGNCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, FALSE);
-                        IotGN_CmdTimeoutHandle(port, pCmdRecvCtrl->cmd);
                     }
                 }
             }

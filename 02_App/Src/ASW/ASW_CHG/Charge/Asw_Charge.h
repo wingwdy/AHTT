@@ -16,8 +16,7 @@
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "Global.h"
-
+#include "Asw_ErrorHandle.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -67,6 +66,8 @@ uint8_t AswCharge_IsAuth(uint8_t port);
 void AswCharge_StartAuth(uint8_t port);
 void AswCharge_StopAuth(uint8_t port);
 uint8_t AswCharge_GetAuthFlag(uint8_t port);
+AswErrorType_Enum AswCharge_GetStopReason(uint8_t port);
+void AswCharge_SetStopReason(uint8_t port, AswErrorType_Enum eReason);
 #endif /* ASW_CHARGE_H_ */
 
 

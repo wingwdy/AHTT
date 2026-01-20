@@ -102,12 +102,44 @@ typedef struct
     uint8_t reverse[64];
 }MSNvmPlatParam_Struct;
 
-/* 订单记录 */
+/*********************************************************************************************** */
+/* 具体各平台订单数据定义 */
+typedef struct 
+{
+    uint8_t billmodeType;                     /* 计费模型类型 四类或者多类 */
+    uint8_t pileDnBCD[7];                     /* 设备编号 */
+    uint8_t port;                             /* 枪号 */
+    uint8_t orderTransactionNum[16];          /* 交易流水号 */
+    uint32_t startTime;                       /* 充电开始时间 */
+    uint32_t stopTime;                        /* 充电结束时间 */
+    uint32_t startMeterVal;                   /* 充电开始电表值 ，小数点后4位*/
+    uint32_t stopMeterVal;                    /* 充电结束电表值 ，小数点后4位*/
+    uint32_t totalEnergy;                     /* 总电能 ，小数点后4位*/
+    uint32_t totalLossEnergy;                 /* 总计损电能 ，小数点后4位*/
+    uint32_t totalMoney;                      /* 总金额 ，小数点后4位*/
+    uint8_t vin[17];                          /* 电动汽车唯一标识 */
+    uint8_t dealFlag;                         /* 交易标识 */
+    uint32_t dealDate;                        /* 交易日期 */
+    uint8_t stopReason;                       /* 停止原因 */
+    uint8_t logicCardNum[8];                  /* 逻辑卡号 */
+    uint32_t billInfo[9][4];                  /* 9个费率对应的 单价(5位小数)、电量(4位小数)、计损电量(4位小数)、金额(4位小数) */
+}MSNvmGNOrderInfo_Struct;
+
+
 typedef union 
 {
-    
+    MSNvmGNOrderInfo_Struct stGNOrderInfo;
     uint8_t userData[MSNVM_ORDER_MAX_LEN];
-}MSNvmOrderInfo_Union;
+}MSNvmPlatOrderInfo_Union;
+
+/* 订单记录 */
+typedef struct 
+{
+    uint8_t chargeStartSrc;                   /* 启动充电发起方 */
+    uint8_t orderSaveState;                   /* 订单保存状态 */
+    uint8_t stopReason;                       /* 原始停止原因（本地定义，未映射到各平台） */
+    MSNvmPlatOrderInfo_Union platOrderInfo;   /* 各平台订单类型数据 */
+}MSNvmOrderInfo_Struct;
 
 /* 故障记录 */
 typedef struct 
@@ -116,18 +148,16 @@ typedef struct
 }MSNvmErrorInfo_Struct;
 
 
-
-
 /*********************************************************************************************** */
 /* 各平台私有参数定义 */
 typedef struct 
 {
     uint8_t billType;                                           /* 4类电价或者多类电价 */
     uint8_t billModeID[2];                                      /* 计费模型编号 */
-    uint8_t measure_wastage_rates;                              /* 计量损耗费率 */         
-    uint32_t elecPriceRate[MSNVM_GN_BILLMODE_MULTRATE_COUNT];
-    uint32_t servePriceRate[MSNVM_GN_BILLMODE_MULTRATE_COUNT];
-    uint8_t period_rate[MSNVM_GN_BILLMIDE_PERIOD_COUNT];
+    uint8_t elecLossRate;                                       /* 计量损耗费率 */         
+    uint32_t elecPriceRate[MSNVM_GN_BILLMODE_MULTRATE_COUNT];   /* 电费费率，小数点后5位 */ 
+    uint32_t servePriceRate[MSNVM_GN_BILLMODE_MULTRATE_COUNT];  /* 服务费费率，小数点后5位 */ 
+    uint8_t period_rate[MSNVM_GN_BILLMIDE_PERIOD_COUNT];        /* 48个30分钟，每个30分钟对应的费率号 */
 }MSNvmGNParamBillMode_Struct;
 
 

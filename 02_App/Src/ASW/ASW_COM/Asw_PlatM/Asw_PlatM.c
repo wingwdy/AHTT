@@ -55,9 +55,26 @@ static AswPlatMCtx_Struct g_stAswPlatMCtx = { 0 };
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
+static const AswPlatMProtocolDescriptor_Struct *AswPlatM_GetProtocolDescriptor(void);
+
+
+
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
+static const AswPlatMProtocolDescriptor_Struct *AswPlatM_GetProtocolDescriptor(void)
+{
+    AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = NULL;
+    AswPlatType_Enum ePlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+
+    if (ePlatType >= eAswPlatType_Count)
+    {
+        ePlatType = eAswPlatType_GN;
+    }
+
+    return &c_stAswPlatMProtocolDescriptorTable[ePlatType];
+}
+
 uint8_t AswPlatM_SetPileDn(char *pPileDn, uint8_t len)
 {
     uint8_t ret = FALSE;
@@ -171,41 +188,16 @@ AswPlatType_Enum AswPlatM_GetPlatType(void)
     return (AswPlatType_Enum)g_stAswPlatMCtx.stPlatParam.platMainType;
 }
 
-static const AswPlatMProtocolDescriptor_Struct *AswPlatM_GetProtocolDescriptor(void)
-{
-    AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = NULL;
-    AswPlatType_Enum ePlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
-
-    if (ePlatType >= eAswPlatType_Count)
-    {
-        ePlatType = eAswPlatType_GN;
-    }
-
-    return &c_stAswPlatMProtocolDescriptorTable[ePlatType];
-}
-
-uint8_t AswPlatM_FillChargeRecord(uint8_t port, MSNvmOrderInfo_Union *pOrderData)
-{
-    const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
-    uint8_t ret = FALSE;
-
-    if (pProtocolDescriptor->pFuncFillChargeRecord != NULL && pOrderData != NULL)
-    {
-        ret = pProtocolDescriptor->pFuncFillChargeRecord(port, pOrderData);
-    }
-    
-    return ret;
-}
-
-void AswPlatM_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Union *pOrderData, uint8_t orderSaveState)
+void AswPlatM_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason)
 {
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
 
     if (pProtocolDescriptor->pFuncPackChargeRecord != NULL && pOrderData != NULL)
     {
-        pProtocolDescriptor->pFuncPackChargeRecord(port, pOrderData, orderSaveState);
+        pProtocolDescriptor->pFuncPackChargeRecord(port, pOrderData, orderSaveReason);
     }
 }
+
 void AswPlatM_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pBillMode)
 {
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
