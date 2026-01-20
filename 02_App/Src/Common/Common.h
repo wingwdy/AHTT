@@ -148,6 +148,8 @@ uint32_t Common_uintBINToBCD(uint32_t bin);
 void Common_SetBitFlag(void *pflag, uint16_t bitPos);
 void Common_ClrBitFlag(void *pflag, uint16_t bitPos);
 uint8_t Common_GetBitFlag(void *pflag, uint16_t bitPos);
+void Common_CvtHex2Ascii(uint8_t hexData, uint8_t* pAsciiData);
+
 #endif /* COMMON_H_ */
 
 

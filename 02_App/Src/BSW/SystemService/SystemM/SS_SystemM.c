@@ -108,6 +108,7 @@ static void SSSystemM_InitThree(void)
     CddCP_InitMemory();
     CddRcd_InitMemory();
     CddPE_InitMemory();
+	CddCardM_InitMemory();
 
     AswPlatM_InitMemory();
     AswMonitor_InitMemory();
