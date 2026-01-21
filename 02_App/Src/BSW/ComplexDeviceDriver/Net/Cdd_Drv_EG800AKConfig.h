@@ -35,16 +35,19 @@
 
 #define CDDDRV_EG800AK_CFG_WriteData(data, len)         McalUart_WriteData(eMcalUartChanel_4G, data, len)
 
-#define CDDDRV_EG800AK_CFG_ReadData(data, len)         do \
-                                                        {\
-                                                           if (eGlobalRet_OK  == McalUart_CheckDataLen(eMcalUartChanel_4G, &len))\
-                                                           {\
-                                                                if (eGlobalRet_OK != McalUart_ReadData(eMcalUartChanel_4G, data, len))\
+#define CDDDRV_EG800AK_CFG_ReadData(data, len, lastReadLen)     do\
                                                                 {\
-                                                                    len = 0;\
-                                                                }\
-                                                           }\
-                                                        } while(0)
+                                                                    if (eGlobalRet_OK  == McalUart_CheckDataLen(eMcalUartChanel_4G, &dataLen))\
+                                                                    {\
+                                                                        if (dataLen != lastReadLen)\
+                                                                        {\
+                                                                            lastReadLen = dataLen;\
+                                                                            return;\
+                                                                        }\
+                                                                        McalUart_ReadData(eMcalUartChanel_4G, recvbuf, dataLen);\
+                                                                    }\
+                                                                    lastReadLen = 0;\
+                                                                } while(0)
 
 #define CDDDRV_EG800AK_CFG_LogPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_4G, fmt, ##__VA_ARGS__)
 

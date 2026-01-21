@@ -190,7 +190,8 @@ static void AswMonitor_OrderOngoingHandle(uint8_t port, AswMonitorData_Struct *p
     if (chargeState == ASWCHARGEIF_WORKSTATE_FINISH || 
         chargeState == ASWCHARGEIF_WORKSTATE_IDLE)
     {
-        pstAswMonitorData->stOrderData.stopReason = AswChargeIf_GetStopReason(port);
+        pstAswMonitorData->stOrderData.orderSaveState = ASWMONITOR_ORDER_SAVE_STOP;
+        pstAswMonitorData->stChargeData.eChargeStopReason = AswChargeIf_GetStopReason(port);
         AswMonitor_SaveChargeRecord(port, pstAswMonitorData, ASWMONITOR_ORDER_SAVE_STOP);
         pstAswMonitorData->orderCtrl = ASWMONITOR_ORDER_CTRL_END;
     }
@@ -297,7 +298,7 @@ void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc)
             pstAswMonitorData->orderDataSaveTick = Common_GetSystick();
             pstAswMonitorData->orderCtrl = ASWMONITOR_ORDER_CTRL_ONGOING;
 
-            pstAswMonitorData->stOrderData.chargeStartSrc = startSrc;
+            pstAswMonitorData->stOrderData.orderSaveState = ASWMONITOR_ORDER_SAVE_START;
             AswMonitor_SaveChargeRecord(port, pstAswMonitorData, ASWMONITOR_ORDER_SAVE_START);
             AswChargeIf_ChargeStart(port);
         }

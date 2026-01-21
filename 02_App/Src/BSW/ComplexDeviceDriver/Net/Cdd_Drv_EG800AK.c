@@ -379,8 +379,9 @@ static void CddDrvEG800AK_ATTaskRecvHandle(uint8_t *recvbuf)
     uint16_t dataLen = 0;
     char *pDest = NULL;
     uint8_t bAnswerOK = FALSE;
+    static uint16_t lastReadLen = 0;
 
-    CDDDRV_EG800AK_CFG_ReadData(recvbuf, dataLen);
+    CDDDRV_EG800AK_CFG_ReadData(recvbuf, dataLen, lastReadLen);
 
     if (dataLen > 0)
     {

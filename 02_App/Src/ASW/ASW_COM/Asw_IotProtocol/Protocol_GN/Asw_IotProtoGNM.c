@@ -481,33 +481,29 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
             memcpy(pGnOrder->logicCardNum, pIotGNCtx->stProtoData[port].authCardID, 8);
         }
 
-        pOrderData->stopReason = eIotGNStopReason_PowerOff;
-        pOrderData->orderSaveState = eIotGNOrderSaveState_Start;
+        pGnOrder->stopReason = eIotGNStopReason_PowerOff;
     }
-    else
+
+    pGnOrder->stopTime = pChargeData->chargeStopTime;
+    pGnOrder->stopMeterVal = pChargeData->stopMeterVal;
+    pGnOrder->totalEnergy = pChargeData->totalEnergy;
+    pGnOrder->totalLossEnergy = pChargeData->totalLossEnergy;
+    pGnOrder->totalMoney = pChargeData->totalMoney;
+
+    for (index = 0; index < 9; index++)
     {
-        pGnOrder->stopTime = pChargeData->chargeStopTime;
-        pGnOrder->stopMeterVal = pChargeData->stopMeterVal;
-        pGnOrder->totalEnergy = pChargeData->totalEnergy;
-        pGnOrder->totalLossEnergy = pChargeData->totalLossEnergy;
-        pGnOrder->totalMoney = pChargeData->totalMoney;
-
-        for (index = 0; index < 9; index++)
-        {
-            pGnOrder->billInfo[index][0] = pBillMode->totalPrice[index];            // 单价
-            pGnOrder->billInfo[index][1] = pChargeData->rateTotalEnergy[index];     // 电量     
-            pGnOrder->billInfo[index][2] = pChargeData->rateTotalLossEnergy[index]; // 计损电量              
-            pGnOrder->billInfo[index][2] = pChargeData->rateTotalMoney[index];      // 总金额  
-        }
-
-        if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
-        {
-            pOrderData->orderSaveState = eIotGNOrderSaveState_Finish;
-            pGnOrder->stopReason = Iot_ConverStopReason((AswErrorType_Enum)pOrderData->stopReason);
-            MSNvm_InsertNewRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)pOrderData, sizeof(MSNvmOrderInfo_Struct));
-        }
+        pGnOrder->billInfo[index][0] = pBillMode->totalPrice[index];            // 单价
+        pGnOrder->billInfo[index][1] = pChargeData->rateTotalEnergy[index];     // 电量     
+        pGnOrder->billInfo[index][2] = pChargeData->rateTotalLossEnergy[index]; // 计损电量              
+        pGnOrder->billInfo[index][2] = pChargeData->rateTotalMoney[index];      // 总金额  
     }
 
+    if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
+    {
+        pGnOrder->stopReason = Iot_ConverStopReason(pChargeData->eChargeStopReason);
+        MSNvm_InsertNewRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)pOrderData, sizeof(MSNvmOrderInfo_Struct));
+    }
+   
     MSNvm_WriteParaBlock(eMSNvmBlockID_Gun0OrderInfo, (uint8_t *)pOrderData, sizeof(MSNvmOrderInfo_Struct));
 }
 

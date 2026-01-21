@@ -135,9 +135,7 @@ typedef union
 /* 订单记录 */
 typedef struct 
 {
-    uint8_t chargeStartSrc;                   /* 启动充电发起方 */
     uint8_t orderSaveState;                   /* 订单保存状态 */
-    uint8_t stopReason;                       /* 原始停止原因（本地定义，未映射到各平台） */
     MSNvmPlatOrderInfo_Union platOrderInfo;   /* 各平台订单类型数据 */
 }MSNvmOrderInfo_Struct;
 

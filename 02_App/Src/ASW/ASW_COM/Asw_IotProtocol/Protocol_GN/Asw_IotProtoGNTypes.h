@@ -84,12 +84,6 @@
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-typedef enum
-{
-    eIotGNOrderSaveState_Null,
-    eIotGNOrderSaveState_Start,
-    eIotGNOrderSaveState_Finish,
-}IotGNOrderSaveState_Enum;
 
 typedef enum
 {
