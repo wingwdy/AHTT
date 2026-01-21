@@ -59,8 +59,8 @@ typedef struct
 	eNfcState_Enum eNfcState;
     uint32_t nfcTick; /*寻卡滴答*/
     uint8_t nfcChipVer;
-    CardType_Enum eCardType;
-    CardEvent_Enum eCardEvent;
+    CddCardType_Enum eCardType;
+    CddCardEvent_Enum eCardEvent;
     uint8_t cardUid[4];     /*卡唯一ID*/
     uint8_t cardUserid[BULLCARD_CARDID_LEN]; /*卡用户ID*/
 }CddCardM_Struct;
@@ -74,7 +74,7 @@ typedef struct
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-CddCardM_Struct gstCddCardM;
+static CddCardM_Struct g_stCddCardM;
 
 /*******************************************************************************
 *    Function Source Code
@@ -290,9 +290,9 @@ uint8_t CddCardM_ReadCardUserId(uint8_t addr, const uint8_t *pUid, uint8_t *pCar
 
 void CddCardM_InitMemory(void)
 {
-    memset(&gstCddCardM, 0, sizeof(gstCddCardM));
-    gstCddCardM.eCardType = eBullCard;
-	gstCddCardM.nfcTick = Common_GetSystick();
+    memset(&g_stCddCardM, 0, sizeof(g_stCddCardM));
+    g_stCddCardM.eCardType = eCddCardType_BullCard;
+	g_stCddCardM.nfcTick = Common_GetSystick();
 }
 
 void CddCardM_NfcInitProcess(CddCardM_Struct *pCardM)
@@ -323,7 +323,7 @@ void CddCardM_NfcInitProcess(CddCardM_Struct *pCardM)
         }
 		else
 		{
-			pCardM->eCardEvent = eCardEvtHardFault;
+			pCardM->eCardEvent = CddCardEvent_HardFault;
 			pCardM->eNfcState = eNfcPause;
 			pCardM->nfcOptStep = eOptStepIdle;
 		}
@@ -350,9 +350,9 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
             if (optStatus == GLOBAL_OPT_STATE_SUCCESS)
             {
                 memcpy(pCardM->cardUid, tempData, 4);
-				if (pCardM->eCardType == eUUIDCard)
+				if (pCardM->eCardType == eCddCardType_UUID)
 				{
-					pCardM->eCardEvent = eCardEvtCardIdOk;
+					pCardM->eCardEvent = CddCardEvent_CardIdOK;
 				}
 				else
 				{
@@ -362,7 +362,7 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
             else if(result == eGlobalRet_Error)
             {
                 /* 读卡号失败 */
-                pCardM->eCardEvent = eCardEvtCardIdError;
+                pCardM->eCardEvent = CddCardEvent_CardIdError;
             }
         }
     }
@@ -371,7 +371,7 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
     {
 		switch((uint8_t)pCardM->eCardType)
 		{
-			case eBullCard:
+			case eCddCardType_BullCard:
 			{
 				optStatus = CddCardM_ReadCardUserId(BULLCARD_CARDID_ADDR, pCardM->cardUid, tempData);
 				break;
@@ -388,13 +388,13 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
             pCardM->nfcOptStep = eOptStepIdle;
             if (optStatus == GLOBAL_OPT_STATE_SUCCESS)
             {
-                pCardM->eCardEvent = eCardEvtCardIdOk;
+                pCardM->eCardEvent = CddCardEvent_CardIdOK;
                 memcpy(pCardM->cardUserid, tempData, BULLCARD_CARDID_LEN);
             }
             else
             {
                 /* 读卡号失败 */
-                pCardM->eCardEvent = eCardEvtCardIdError;
+                pCardM->eCardEvent = CddCardEvent_CardIdError;
             }
         }
     }
@@ -404,7 +404,7 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
         CddDrvLS5120_HardwareResetStart();
         pCardM->eNfcState = eNfcInit;
         pCardM->nfcTick = Common_GetSystick();
-        if (pCardM->eCardEvent == eCardEvtCardIdOk || pCardM->eCardEvent == eCardEvtCardIdError)
+        if (pCardM->eCardEvent == CddCardEvent_CardIdOK || pCardM->eCardEvent == CddCardEvent_CardIdError)
         {/* 读卡成功，读卡失败，暂停一会 */
             pCardM->eNfcState = eNfcPause;
         }
@@ -413,14 +413,14 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
 
 void CddCardM_NfcPauseProcess(CddCardM_Struct *pCardM)
 {
-//    if (pCardM->eCardEvent == eCardEvtNone)
+//    if (pCardM->eCardEvent == CddCardEvent_Null)
 //    {/* 上层读取状态后，立即寻卡 */
 //        pCardM->eNfcState = eNfcInit;
 //    }
-    if ((pCardM->eCardEvent != eCardEvtNone) && (Common_GetSystick() - pCardM->nfcTick >= CDDCARDM_CFG_SWIPECARD_PAUSE_TICK))
+    if ((pCardM->eCardEvent != CddCardEvent_Null) && (Common_GetSystick() - pCardM->nfcTick >= CDDCARDM_CFG_SWIPECARD_PAUSE_TICK))
     {
         pCardM->eNfcState = eNfcInit;
-		pCardM->eCardEvent = eCardEvtNone;
+		pCardM->eCardEvent = CddCardEvent_Null;
     }
     else
     {}
@@ -431,23 +431,23 @@ void CddCardM_NfcPauseProcess(CddCardM_Struct *pCardM)
 */
 void CddCardM_MainFunction(void)
 {
-    CddCardM_Struct *pCardM = &gstCddCardM;
+    CddCardM_Struct *pCardM = &g_stCddCardM;
 		
     switch((int)pCardM->eNfcState)
     {
         case eNfcInit:
         {
-            CddCardM_NfcInitProcess(&gstCddCardM);
+            CddCardM_NfcInitProcess(&g_stCddCardM);
             break;
         }
         case eNfcReady:
         {
-            CddCardM_NfcReadyProcess(&gstCddCardM);
+            CddCardM_NfcReadyProcess(&g_stCddCardM);
             break;
         }
         case eNfcPause:
         {
-            CddCardM_NfcPauseProcess(&gstCddCardM);
+            CddCardM_NfcPauseProcess(&g_stCddCardM);
             break;
         }
         default:
@@ -457,34 +457,34 @@ void CddCardM_MainFunction(void)
     }
 }
 
-GlobalRet_Enum CddCardM_SetCardType(CardType_Enum eType)
+GlobalRet_Enum CddCardM_SetCardType(CddCardType_Enum eType)
 {
 	GlobalRet_Enum ret = eGlobalRet_OK;
 	
-	if (eType >= eCardTypeMax)
+	if (eType >= eCddCardType_Count)
 	{
         ret = eGlobalRet_Error;
 	}
 	else
 	{
-		if (gstCddCardM.eCardType != eType)
+		if (g_stCddCardM.eCardType != eType)
 		{
-			memset(&gstCddCardM, 0, sizeof(gstCddCardM));
-			gstCddCardM.eCardType = eType;
-			gstCddCardM.nfcTick = Common_GetSystick();
+			memset(&g_stCddCardM, 0, sizeof(g_stCddCardM));
+			g_stCddCardM.eCardType = eType;
+			g_stCddCardM.nfcTick = Common_GetSystick();
 		}
 	}
 
 	return ret;
 }
 
-CardEvent_Enum CddCardM_GetCardEvent(void)
+CddCardEvent_Enum CddCardM_GetCardEvent(void)
 {
-    CardEvent_Enum cardEvent = eCardEvtNone;
+    CddCardEvent_Enum cardEvent = CddCardEvent_Null;
 
-    CddCardM_Struct *pCardM = &gstCddCardM;
+    CddCardM_Struct *pCardM = &g_stCddCardM;
     cardEvent = pCardM->eCardEvent;
-    pCardM->eCardEvent = eCardEvtNone;
+    pCardM->eCardEvent = CddCardEvent_Null;
 
     return cardEvent;
 }
@@ -492,7 +492,7 @@ CardEvent_Enum CddCardM_GetCardEvent(void)
 GlobalRet_Enum CddCardM_GetCardUid(uint8_t *pUidOut)
 {
     GlobalRet_Enum ret = eGlobalRet_OK;
-    CddCardM_Struct *pCardM = &gstCddCardM;
+    CddCardM_Struct *pCardM = &g_stCddCardM;
     
     if (pUidOut == NULL)
     {
@@ -509,7 +509,7 @@ GlobalRet_Enum CddCardM_GetCardUid(uint8_t *pUidOut)
 GlobalRet_Enum CddCardM_GetCardUserId(uint8_t *pUidOut)
 {
     GlobalRet_Enum ret = eGlobalRet_OK;
-    CddCardM_Struct *pCardM = &gstCddCardM;
+    CddCardM_Struct *pCardM = &g_stCddCardM;
     
     if (pUidOut == NULL)
     {

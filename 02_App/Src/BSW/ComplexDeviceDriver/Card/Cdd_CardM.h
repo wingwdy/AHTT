@@ -35,18 +35,18 @@
 ******************************************************************************/
 typedef enum
 {
-    eUUIDCard = 0,/*通用卡(只读UID卡)*/
-    eBullCard,/*公牛卡*/
-	eCardTypeMax,
-}CardType_Enum;
+    eCddCardType_UUID = 0,        /* 通用卡(只读UID卡)*/
+    eCddCardType_BullCard,        /* 公牛卡*/
+	eCddCardType_Count,
+}CddCardType_Enum;
 
 typedef enum
 {
-    eCardEvtNone = 0,
-    eCardEvtCardIdOk,
-    eCardEvtCardIdError,
-	eCardEvtHardFault,
-}CardEvent_Enum;
+    CddCardEvent_Null = 0,
+    CddCardEvent_CardIdOK,
+    CddCardEvent_CardIdError,
+	CddCardEvent_HardFault,
+}CddCardEvent_Enum;
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
@@ -65,8 +65,8 @@ typedef enum
 ******************************************************************************/
 extern void CddCardM_InitMemory(void);
 extern void CddCardM_MainFunction(void);
-extern GlobalRet_Enum CddCardM_SetCardType(CardType_Enum eType);
-extern CardEvent_Enum CddCardM_GetCardEvent(void);
+extern GlobalRet_Enum CddCardM_SetCardType(CddCardType_Enum eType);
+extern CddCardEvent_Enum CddCardM_GetCardEvent(void);
 extern GlobalRet_Enum CddCardM_GetCardUid(uint8_t *pUidOut);
 extern GlobalRet_Enum CddCardM_GetCardUserId(uint8_t *pUidOut);
 
