@@ -63,7 +63,7 @@ typedef struct
 	CddCardType_Enum eCardTypeSet;
     CddCardEvent_Enum eCardEvent;
     uint8_t cardUid[4];     /*卡唯一ID*/
-    uint8_t cardUserid[BULLCARD_CARDID_LEN]; /*卡用户ID*/
+    uint8_t cardUserId[BULLCARD_CARDID_LEN]; /*卡用户ID*/
 }CddCardM_Struct;
 
 
@@ -301,7 +301,6 @@ void CddCardM_NfcInitProcess(CddCardM_Struct *pCardM)
     if (Common_GetSystick() - pCardM->nfcTick >= CDDCARDM_CFG_SWIPECARD_INTERVAL_TICK)
     {
         pCardM->nfcTick = Common_GetSystick();
-		pCardM->eCardEvent = CddCardEvent_Null;
         pCardM->initStep = 1;
     }
     if (pCardM->initStep == 1)
@@ -368,6 +367,8 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
             }
             else if(result == eGlobalRet_Error)
             {
+				memset(pCardM->cardUid, 0, 4);
+				memset(pCardM->cardUserId, 0, sizeof(pCardM->cardUserId));
                 pCardM->eCardEvent = CddCardEvent_CardIdError;
                 CDDCARDM_CFG_LogPrint("读卡号失败\r\n"); 
             }
@@ -396,12 +397,14 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
             if (optStatus == GLOBAL_OPT_STATE_SUCCESS)
             {
                 pCardM->eCardEvent = CddCardEvent_CardIdOK;
-                memcpy(pCardM->cardUserid, tempData, BULLCARD_CARDID_LEN);
+                memcpy(pCardM->cardUserId, tempData, sizeof(pCardM->cardUserId));
                 CDDCARDM_CFG_LogPrint("读卡号成功,卡号: %02X%02X%02X%02X%02X%02X%02X%02X\r\n", tempData[0], tempData[1],tempData[2],tempData[3],\
 				                                                                               tempData[4],tempData[5],tempData[6],tempData[7]);
             }
             else
             {
+				memset(pCardM->cardUid, 0, 4);
+				memset(pCardM->cardUserId, 0, sizeof(pCardM->cardUserId));
                 pCardM->eCardEvent = CddCardEvent_CardIdError;
                 CDDCARDM_CFG_LogPrint("读卡号失败\r\n");
             }
@@ -429,7 +432,6 @@ void CddCardM_NfcPauseProcess(CddCardM_Struct *pCardM)
     if ((pCardM->eCardEvent != CddCardEvent_Null) && (Common_GetSystick() - pCardM->nfcTick >= CDDCARDM_CFG_SWIPECARD_PAUSE_TICK))
     {
         pCardM->eNfcState = eNfcInit;
-		pCardM->eCardEvent = CddCardEvent_Null;
     }
     else
     {}
