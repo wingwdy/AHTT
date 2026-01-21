@@ -501,10 +501,7 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
     if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
     {
         pGnOrder->stopReason = Iot_ConverStopReason(pChargeData->eChargeStopReason);
-        MSNvm_InsertNewRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)pOrderData, sizeof(MSNvmOrderInfo_Struct));
     }
-   
-    MSNvm_WriteParaBlock(eMSNvmBlockID_Gun0OrderInfo, (uint8_t *)pOrderData, sizeof(MSNvmOrderInfo_Struct));
 }
 
 void IotGN_InitMemory(void)

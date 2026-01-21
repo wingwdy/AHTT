@@ -25,6 +25,30 @@
 #define ASWMONITOR_CFG_LogPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_Monitor, fmt, ##__VA_ARGS__)
 
 #define ASWMONITOR_CFG_SAVE_CHARGE_RECORD_PERIOD   (60 * 1000U)
+
+
+#define ASWMONITOR_CFG_ReadBlockOrderInfo(port, orderInfo, size, ret)  do \
+                                                            {\
+                                                                if (port == 0) \
+                                                                {\
+                                                                    ret = MSNvm_ReadParaBlock(eMSNvmBlockID_Gun0OrderInfo, orderInfo, size);\
+                                                                }\
+                                                                else\
+                                                                {\
+                                                                    ret = eGlobalRet_Error;\
+                                                                }\
+                                                            }while(0)
+
+#define ASWMONITOR_CFG_WriteBlockOrderInfo(port, orderInfo, size)  do \
+                                                            {\
+                                                                if (port == 0) \
+                                                                {\
+                                                                    MSNvm_WriteParaBlock(eMSNvmBlockID_Gun0OrderInfo, orderInfo, size);\
+                                                                }\
+                                                            }while(0)
+
+
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

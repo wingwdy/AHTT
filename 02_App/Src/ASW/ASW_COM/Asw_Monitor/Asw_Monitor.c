@@ -179,6 +179,12 @@ static void AswMonitor_ProcessCostData(uint8_t port, AswMonitorData_Struct *pstA
 static void AswMonitor_SaveChargeRecord(uint8_t port, AswMonitorData_Struct *pstAswMonitorData, uint8_t orderSaveReason)
 {
     AswPlatM_PackChargeRecord(port, &pstAswMonitorData->stOrderData, orderSaveReason);
+    ASWMONITOR_CFG_WriteBlockOrderInfo(port, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
+
+    if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
+    {
+        MSNvm_InsertNewRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
+    }
 }
 
 static void AswMonitor_OrderOngoingHandle(uint8_t port, AswMonitorData_Struct *pstAswMonitorData)
@@ -358,8 +364,6 @@ uint8_t AswMonitor_IsOrderIdle(uint8_t port)
     return ret;
 }
 
-
-
 void AswMonitor_InitMemory(void)
 {
     AswMonitorData_Struct *pstAswMonitorData = NULL;
@@ -367,16 +371,11 @@ void AswMonitor_InitMemory(void)
     GlobalRet_Enum readResult;
 
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
-    {
+    {  
         pstAswMonitorData = &g_stAswMonitorData[port];
         memset(pstAswMonitorData, 0x00, sizeof(AswMonitorData_Struct));
 
-        readResult = eGlobalRet_UnexpectedError;
-
-        if (port == 0)
-        {
-            readResult = MSNvm_ReadParaBlock(eMSNvmBlockID_Gun0OrderInfo, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
-        }
+        ASWMONITOR_CFG_ReadBlockOrderInfo(port, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct), readResult);
 
         if (eGlobalRet_OK == readResult)
         {
@@ -384,7 +383,7 @@ void AswMonitor_InitMemory(void)
                 pstAswMonitorData->stOrderData.orderSaveState == ASWMONITOR_ORDER_SAVE_PERIOD)
             {
                 pstAswMonitorData->stOrderData.orderSaveState = ASWMONITOR_ORDER_SAVE_STOP;
-                MSNvm_WriteParaBlock(eMSNvmBlockID_Gun0OrderInfo, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
+                ASWMONITOR_CFG_WriteBlockOrderInfo(port, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
                 MSNvm_InsertNewRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
             }
         }
