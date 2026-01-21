@@ -187,7 +187,8 @@ static void AswMonitor_OrderOngoingHandle(uint8_t port, AswMonitorData_Struct *p
 
     AswMonitor_ProcessCostData(port, pstAswMonitorData);
 
-    if (chargeState == ASWCHARGEIF_WORKSTATE_FINISH || 
+    /* 订单结束 */
+    if (chargeState == ASWCHARGEIF_WORKSTATE_FINISH ||
         chargeState == ASWCHARGEIF_WORKSTATE_IDLE)
     {
         pstAswMonitorData->stOrderData.orderSaveState = ASWMONITOR_ORDER_SAVE_STOP;
@@ -197,6 +198,7 @@ static void AswMonitor_OrderOngoingHandle(uint8_t port, AswMonitorData_Struct *p
     }
     else
     {
+        /* 订单周期存储 */
         if (Common_JudgeTimeoutMs(pstAswMonitorData->orderDataSaveTick, ASWMONITOR_CFG_SAVE_CHARGE_RECORD_PERIOD))
         {
             AswMonitor_SaveChargeRecord(port, pstAswMonitorData, ASWMONITOR_ORDER_SAVE_PERIOD);

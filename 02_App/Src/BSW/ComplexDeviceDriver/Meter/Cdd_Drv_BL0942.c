@@ -20,6 +20,8 @@
 #include "SysCfg.h"
 #include "Cdd_Drv_BL0942.h"
 #include "Asw_ErrorHandle.h"
+#include "Filter.h"
+#include "MS_Nvm.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -39,6 +41,7 @@ typedef enum
     eCddDrvBL0942WorkState_Init,
     eCddDrvBL0942WorkState_Cali,
     eCddDrvBL0942WorkState_Normal,
+    eCddDrvBL0942WorkState_FCT,
     eCddDrvBL0942WorkState_Error,
 }CddDrvBL0942WorkState_Enum;
 
@@ -62,6 +65,9 @@ typedef struct
     uint8_t optResult;                      /* 操作结果 */
     uint8_t cacheBuf[32];                   /* 缓存数据 */
     uint8_t failTryCount;                   /* 失败尝试次数 */
+    FilterProfile1_Struct fctPinStatusFilter;
+    uint8_t fctCaliFlag;
+    MSNvmMeterCaliParam_Struct caliParam;
 }CddDrvBL0942_Struct;
 
 
@@ -286,6 +292,30 @@ static uint8_t CddDrvBL0942_CaliBration(uint8_t port, CddDrvBL0942_Struct *pBL09
     return ret;
 }
 
+static uint8_t CddDrvVL0942_CaliVoltageByFCT(uint8_t port, CddDrvBL0942_Struct *pBL0942)
+{
+    uint8_t index = 5;
+    uint8_t data[4] = { 0 };
+    uint64_t tempReg = 0;
+    uint8_t ret = FALSE;
+    uint64_t tempVoltage = 0;
+
+    /* 拷贝 V_RMS --- 电压有效值 */
+    memcpy(data, pBL0942->cacheBuf + index, 3);
+
+    tempReg = (uint64_t)Common_FourUint8ToUint32(data) * 100;
+    tempVoltage = (uint32_t)(tempReg / CDDDRV_BL0942_CFG_VOLTAGE_K);
+
+    if (tempVoltage >= 21500 && tempVoltage <= 22500)
+    {
+        pBL0942->caliParam.VoltageCaliK = tempReg / 22000;
+        ret = TRUE;
+        CDD_BL0942_CFG_WriteBlockCaliParam(port, (uint8_t *)&pBL0942->caliParam, sizeof(MSNvmMeterCaliParam_Struct));
+    }
+
+    return ret;
+}
+
 static void CddDrvVL0942_RefreshData(uint8_t port, CddDrvBL0942_Struct *pBL0942)
 {
     uint8_t index = 2;
@@ -301,7 +331,16 @@ static void CddDrvVL0942_RefreshData(uint8_t port, CddDrvBL0942_Struct *pBL0942)
 
     /* 拷贝 V_RMS --- 电压有效值 */
     memcpy(data, pBL0942->cacheBuf + index, 3);
-    temp = (uint64_t)Common_FourUint8ToUint32(data) * 100 / CDDDRV_BL0942_CFG_VOLTAGE_K;
+
+    if (pBL0942->caliParam.VoltageCaliK != 0)
+    {
+        temp = (uint64_t)Common_FourUint8ToUint32(data) * 100 / pBL0942->caliParam.VoltageCaliK;
+    }
+    else
+    {
+        temp = (uint64_t)Common_FourUint8ToUint32(data) * 100 / CDDDRV_BL0942_CFG_VOLTAGE_K;
+    }
+
     pBL0942->rms_voltage = (uint32_t)temp;
     index += 3; 
 
@@ -345,6 +384,21 @@ static void CddDrvBL0942_ReadAll(uint8_t port, CddDrvBL0942_Struct *pBL0942)
             pBL0942->optResult = GLOBAL_OPT_STATE_FAIL;
         }
     }
+}
+
+static uint8_t CddDrvBL0942_CheckEnterFCTCondition(uint8_t port, CddDrvBL0942_Struct *pBL0942)
+{
+    if (TRUE == CDDDRV_BL0942_CFG_CheckFCTPin())
+    {
+        pBL0942->fctPinStatusFilter.status = TRUE;
+    }
+    else
+    {
+        pBL0942->fctPinStatusFilter.status = FALSE;
+    }
+
+    Filter_Profile1(&pBL0942->fctPinStatusFilter, CDDDRV_BL0942_CFG_FCT_FILTER_POINT);
+    return pBL0942->fctPinStatusFilter.validStatus;
 }
 
 static void CddDrvBL0942_WorkStateManage(uint8_t port, CddDrvBL0942_Struct *pBL0942)
@@ -402,9 +456,55 @@ static void CddDrvBL0942_WorkStateManage(uint8_t port, CddDrvBL0942_Struct *pBL0
         if (GLOBAL_OPT_STATE_SUCCESS == pBL0942->optResult)
         {
             CddDrvVL0942_RefreshData(port, pBL0942);
+
+            if (TRUE == CddDrvBL0942_CheckEnterFCTCondition(port, pBL0942))
+            {
+                if (pBL0942->fctCaliFlag == FALSE)
+                {
+                    pBL0942->eWorkState = eCddDrvBL0942WorkState_FCT;
+                    CDDDRV_BL0942_CFG_LogPrint("[枪：%d]计量芯片0942进入到产线标定模式!\r\n", port);
+                }
+            }
+            else
+            {
+                pBL0942->fctCaliFlag = FALSE;
+            }
         }
         else if (GLOBAL_OPT_STATE_FAIL == pBL0942->optResult)
         { 
+            pBL0942->eWorkState = eCddDrvBL0942WorkState_Error;
+        }
+        else
+        {}
+
+        break;
+    }
+
+    case eCddDrvBL0942WorkState_FCT:
+    {
+        CddDrvBL0942_ReadAll(port, pBL0942);
+
+        if (GLOBAL_OPT_STATE_SUCCESS == pBL0942->optResult)
+        {
+            if (FALSE == CddDrvBL0942_CheckEnterFCTCondition(port, pBL0942))
+            {
+                pBL0942->fctCaliFlag = FALSE;
+                pBL0942->eWorkState = eCddDrvBL0942WorkState_Normal;
+                CDDDRV_BL0942_CFG_LogPrint("[枪：%d]计量芯片0942退出产线标定模式!\r\n", port);
+            }
+            else
+            {
+                if (TRUE == CddDrvVL0942_CaliVoltageByFCT(port, pBL0942))
+                {
+                    pBL0942->fctCaliFlag = TRUE;
+                    pBL0942->eWorkState = eCddDrvBL0942WorkState_Normal;
+                    CDDDRV_BL0942_CFG_LogPrint("[枪：%d]计量芯片0942电压校正完成，退出产线标定模式!\r\n", port);
+                }
+            }
+        }
+        else if (GLOBAL_OPT_STATE_FAIL == pBL0942->optResult)
+        { 
+            pBL0942->fctCaliFlag = FALSE;
             pBL0942->eWorkState = eCddDrvBL0942WorkState_Error;
         }
         else
@@ -451,7 +551,23 @@ static void CddDrvBL0942_CalcEnergy(uint8_t port, CddDrvBL0942_Struct *pBL0942)
 
 void CddDrvBL0942_InitMemory(void)
 {
+    CddDrvBL0942_Struct *pBL0942 = NULL;
+    uint8_t port = 0;
+    GlobalRet_Enum readResult = eGlobalRet_UnexpectedError;
+
     memset(&g_stCddDrvBL0942, 0x00, sizeof(g_stCddDrvBL0942));
+
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+    {
+        pBL0942 = &g_stCddDrvBL0942[port];
+
+        CDD_BL0942_CFG_ReadBlockCaliParam(port, (uint8_t *)&pBL0942->caliParam, sizeof(MSNvmMeterCaliParam_Struct), readResult);
+
+        if (readResult != eGlobalRet_OK || pBL0942->caliParam.VoltageCaliK == 0)
+        {
+            pBL0942->caliParam.VoltageCaliK = CDDDRV_BL0942_CFG_VOLTAGE_K;
+        }
+    }
 }
 
 void CddDrvBL0942_MainFunction(void)

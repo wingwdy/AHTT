@@ -34,7 +34,7 @@ typedef enum
     eMSNvmBlockID_Gun0OrderInfo,
     eMSNvmBlockID_Gun0MeterEnergy,
     eMSNvmBlockID_ModeParam,
-	eMSNvmBlockID_MeterCaliParam,
+	eMSNvmBlockID_Gun0MeterCaliParam,
 	eMSNvmBlockID_PlatParam,
 	eMSNvmBlockID_PlatPrivateParam,
     /* 记录信息 */

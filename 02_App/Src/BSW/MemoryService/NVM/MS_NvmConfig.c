@@ -63,7 +63,7 @@ static uint8_t g_MSNvmQrcodeRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmDrcode_Struct) +
 static uint8_t g_MSNvmOrderInfoRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmOrderInfo_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 static uint8_t g_MSNvmMeterEnergyRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmMeterEnergy_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 static uint8_t g_MSNvmModeParamRam[sizeof(MSNvmModeParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
-static uint8_t g_MSNvmMeterCaliParam[sizeof(MSNvmMeterCaliParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
+static uint8_t g_MSNvmMeterCaliParam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmMeterCaliParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 static uint8_t g_MSNvmPlatParam[sizeof(MSNvmPlatParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN];
 static uint8_t g_MSNvmPlatPrivateParam[sizeof(MSNvmPlatPrivateParam_Union) + MSNVM_CFG_ADDTION_CRC16_LEN];
 
@@ -106,10 +106,10 @@ const MSNvmBlockDescriptor_Struct c_stMSNvmBlockDescriptorTable[eMSNvmBlockID_Co
         .pFuncDefault = MSNvmConfig_DefaultModeParam,
     },
 
-    [eMSNvmBlockID_MeterCaliParam] = 
+    [eMSNvmBlockID_Gun0MeterCaliParam] = 
     {
         .blockSize = sizeof(MSNvmMeterCaliParam_Struct),
-        .ramBlockDataAddr = g_MSNvmMeterCaliParam,
+        .ramBlockDataAddr = g_MSNvmMeterCaliParam[0],
         .deviceID = MSMEMIF_DEVICE_EA_KVDB,
         .memIfID = eKVDBAdaptChannel_MeterCaliParam,
         .pFuncDefault = MSNvmConfig_MeterCaliParam,
