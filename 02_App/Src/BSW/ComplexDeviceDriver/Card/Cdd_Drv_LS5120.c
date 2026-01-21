@@ -492,7 +492,6 @@ uint8_t CddDrvLS5120_PcdSelect(uint8_t *pUid)
         if (optStatus != GLOBAL_OPT_STATE_PROCESS)
         {
             optStep = 1;
-            // optStatus = GLOBAL_OPT_STATE_PROCESS;
             CddDrvLS5120_ClrBitMask(Status2Reg, 0x08);
         }
     }
@@ -565,7 +564,7 @@ uint8_t CddDrvLS5120_PcdReadSector(uint8_t addr, uint8_t *pDataOut)
             optStep = 0;
             if (optStatus == GLOBAL_OPT_STATE_SUCCESS && (outLen == 0x90))
             {
-                #if 0
+                #if 0 /* 是否需要CRC */
                     memcpy(pDataOut, rcvBuffer, 16);
                 #else
                     optStep = 2;

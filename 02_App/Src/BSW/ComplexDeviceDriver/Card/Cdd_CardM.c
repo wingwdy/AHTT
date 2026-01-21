@@ -21,13 +21,11 @@
 #include "Cdd_Drv_LS5120.h"
 #include "SysCfg.h"
 #include "md5.h"
+#include "Asw_ErrorHandle.h"
 
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
-#define CDDCARDM_CFG_SWIPECARD_INTERVAL_TICK    (300u)  /* 刷卡间隔 */
-#define CDDCARDM_CFG_SWIPECARD_PAUSE_TICK       (5000u) /* 刷卡暂停时间 */
-
 #define BULLCARD_USERCARD_SECRET                "bullevse666_user" /* 公牛用户卡秘钥 */
 #define BULLCARD_CARDID_ADDR                    (4u) /* 公牛卡号绝对地址 */
 #define BULLCARD_CARDID_LEN                     8
@@ -40,6 +38,7 @@ typedef enum
     eNfcInit = 0,
     eNfcReady,
     eNfcPause,
+	eNfcFault,
 }eNfcState_Enum;
 
 typedef enum
@@ -57,9 +56,11 @@ typedef struct
     uint8_t initStep;
     eNfcOptStep_Enum nfcOptStep;
 	eNfcState_Enum eNfcState;
-    uint32_t nfcTick; /*寻卡滴答*/
-    uint8_t nfcChipVer;
+    uint32_t nfcTick;
+	uint8_t nfcFaultState;
+    uint16_t nfcHardFaultCnt;
     CddCardType_Enum eCardType;
+	CddCardType_Enum eCardTypeSet;
     CddCardEvent_Enum eCardEvent;
     uint8_t cardUid[4];     /*卡唯一ID*/
     uint8_t cardUserid[BULLCARD_CARDID_LEN]; /*卡用户ID*/
@@ -291,7 +292,7 @@ uint8_t CddCardM_ReadCardUserId(uint8_t addr, const uint8_t *pUid, uint8_t *pCar
 void CddCardM_InitMemory(void)
 {
     memset(&g_stCddCardM, 0, sizeof(g_stCddCardM));
-    g_stCddCardM.eCardType = eCddCardType_BullCard;
+	g_stCddCardM.eCardTypeSet = eCddCardType_BullCard;
 	g_stCddCardM.nfcTick = Common_GetSystick();
 }
 
@@ -300,6 +301,7 @@ void CddCardM_NfcInitProcess(CddCardM_Struct *pCardM)
     if (Common_GetSystick() - pCardM->nfcTick >= CDDCARDM_CFG_SWIPECARD_INTERVAL_TICK)
     {
         pCardM->nfcTick = Common_GetSystick();
+		pCardM->eCardEvent = CddCardEvent_Null;
         pCardM->initStep = 1;
     }
     if (pCardM->initStep == 1)
@@ -315,6 +317,7 @@ void CddCardM_NfcInitProcess(CddCardM_Struct *pCardM)
     else if (pCardM->initStep == 3)
     {
         pCardM->initStep = 0;
+		pCardM->nfcTick = Common_GetSystick();
         if (eGlobalRet_OK == CddDrvLS5120_VersionCheck())
         {
             CddDrvLS5120_Init();
@@ -323,15 +326,19 @@ void CddCardM_NfcInitProcess(CddCardM_Struct *pCardM)
         }
 		else
 		{
-			pCardM->eCardEvent = CddCardEvent_HardFault;
-			pCardM->eNfcState = eNfcPause;
-			pCardM->nfcOptStep = eOptStepIdle;
+			pCardM->eNfcState = eNfcFault;
 		}
     }
     else
     {
         pCardM->initStep = 0;
     }
+	
+	if (pCardM->eCardType != pCardM->eCardTypeSet)
+	{
+		pCardM->eCardType = pCardM->eCardTypeSet;
+        CDDCARDM_CFG_LogPrint("读卡类型 %d\r\n", pCardM->eCardType);
+	}
 }
 
 void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
@@ -361,8 +368,8 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
             }
             else if(result == eGlobalRet_Error)
             {
-                /* 读卡号失败 */
                 pCardM->eCardEvent = CddCardEvent_CardIdError;
+                CDDCARDM_CFG_LogPrint("读卡号失败\r\n"); 
             }
         }
     }
@@ -390,22 +397,24 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
             {
                 pCardM->eCardEvent = CddCardEvent_CardIdOK;
                 memcpy(pCardM->cardUserid, tempData, BULLCARD_CARDID_LEN);
+                CDDCARDM_CFG_LogPrint("读卡号成功,卡号: %02X%02X%02X%02X%02X%02X%02X%02X\r\n", tempData[0], tempData[1],tempData[2],tempData[3],\
+				                                                                               tempData[4],tempData[5],tempData[6],tempData[7]);
             }
             else
             {
-                /* 读卡号失败 */
                 pCardM->eCardEvent = CddCardEvent_CardIdError;
+                CDDCARDM_CFG_LogPrint("读卡号失败\r\n");
             }
         }
     }
 
-    if (pCardM->nfcOptStep == eOptStepIdle && optStatus != GLOBAL_OPT_STATE_PROCESS)
+    if (pCardM->nfcOptStep == eOptStepIdle)
     {
         CddDrvLS5120_HardwareResetStart();
         pCardM->eNfcState = eNfcInit;
         pCardM->nfcTick = Common_GetSystick();
-        if (pCardM->eCardEvent == CddCardEvent_CardIdOK || pCardM->eCardEvent == CddCardEvent_CardIdError)
-        {/* 读卡成功，读卡失败，暂停一会 */
+        if (pCardM->eCardEvent == CddCardEvent_CardIdOK)
+        {/* 读卡成功，暂停一会 */
             pCardM->eNfcState = eNfcPause;
         }
     }
@@ -425,8 +434,38 @@ void CddCardM_NfcPauseProcess(CddCardM_Struct *pCardM)
     else
     {}
 }
+
+void CddCardM_NfcFaultProcess(CddCardM_Struct *pCardM)
+{
+	if (Common_GetSystick() - pCardM->nfcTick >= CDDCARDM_CFG_SWIPECARD_FAULT_TICK)
+	{
+		pCardM->nfcTick = Common_GetSystick();
+		if (eGlobalRet_OK != CddDrvLS5120_VersionCheck())
+		{
+            if (pCardM->nfcHardFaultCnt < CDDCARDM_CFG_SWIPECARD_FAULT_COUNT)
+            {
+                pCardM->nfcHardFaultCnt++;
+            }
+            else
+            {
+                if (pCardM->nfcHardFaultCnt == CDDCARDM_CFG_SWIPECARD_FAULT_COUNT)
+                {
+                    pCardM->nfcHardFaultCnt++;
+                    pCardM->eNfcState = eNfcInit;
+                    AswErrhandle_SetErrExsitCallback(0, eErr_ReaderCommErr);
+                }
+            }
+		}
+		else
+		{
+			pCardM->nfcHardFaultCnt = 0;
+			pCardM->eNfcState = eNfcInit;
+			AswErrhandle_ResetErrExsitCallback(0, eErr_ReaderCommErr);
+		}
+	}
+}
 /*
-1，未检测到卡或获取卡失败，按周期300ms寻卡
+1，未检测到卡或获取卡失败，按周期寻卡
 2，已检测到卡，停止寻卡5秒后，重新寻卡
 */
 void CddCardM_MainFunction(void)
@@ -450,6 +489,11 @@ void CddCardM_MainFunction(void)
             CddCardM_NfcPauseProcess(&g_stCddCardM);
             break;
         }
+		case eNfcFault:
+		{
+			CddCardM_NfcFaultProcess(&g_stCddCardM);
+			break;
+		}
         default:
         {
             break;
@@ -467,12 +511,7 @@ GlobalRet_Enum CddCardM_SetCardType(CddCardType_Enum eType)
 	}
 	else
 	{
-		if (g_stCddCardM.eCardType != eType)
-		{
-			memset(&g_stCddCardM, 0, sizeof(g_stCddCardM));
-			g_stCddCardM.eCardType = eType;
-			g_stCddCardM.nfcTick = Common_GetSystick();
-		}
+		g_stCddCardM.eCardTypeSet = eType;
 	}
 
 	return ret;

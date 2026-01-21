@@ -50,6 +50,7 @@ typedef enum
     DSLogMModule_Meter,
     DSLogMModule_RCD,
     DSLogMModule_RELAY,
+	DSLogMModule_CardM,
 
     /*System Service */
     DSLogMModule_System,
