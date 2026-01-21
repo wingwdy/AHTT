@@ -34,6 +34,7 @@
 #include "Cdd_MeterM.h"
 #include "Cdd_LedM.h"
 #include "Cdd_ModeM.h"
+#include "Cdd_CardM.h"
 
 #include "MS_Nvm.h"
 
@@ -108,6 +109,7 @@ static void SSSystemM_InitThree(void)
     CddCP_InitMemory();
     CddRcd_InitMemory();
     CddPE_InitMemory();
+	CddCardM_InitMemory();
 
     AswPlatM_InitMemory();
     AswMonitor_InitMemory();

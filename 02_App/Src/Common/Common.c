@@ -826,3 +826,46 @@ uint32_t Common_uintBINToBCD(uint32_t bin)
     
     return bcd;
 }
+
+/**
+ * @brief 一个数据值(半个字节：如 0xE->'E')
+ * @param[in] hexHalfByte:转换对象数据(半字节数据)
+ * @return 半字节数据的Ascii码表示
+ * @note
+ * @attention
+ */
+uint8_t Common_CvtHex2AsciiHalfByte(uint8_t hexHalfByte)
+{
+    uint8_t retAscii = 0;
+
+    if (hexHalfByte >= 0x0A && hexHalfByte <= 0x0F)
+    {
+        retAscii = hexHalfByte + 0x37;
+    }
+    else if (hexHalfByte <= 0x09)
+    {
+        retAscii = hexHalfByte + 0x30;
+    }
+    else
+    {}
+
+    return retAscii;
+}
+
+/**
+ * @brief 十六进制数据 =》 Ascii码表示数据（2字节） exp) 0x2D => "2D"
+ * @param[in] hexData:一个字节
+ * @param[out] pAsciiData:转换后的Ascii码数据
+ * @return 无
+ * @note
+ * @attention
+ *   1字节数据，低4位，在右，高4位在左，所以要对调。 如:0(高4位） 2（低4位）
+ */
+void Common_CvtHex2Ascii(uint8_t hexData, uint8_t* pAsciiData)
+{
+    if (pAsciiData)
+    {
+        pAsciiData[1] = Common_CvtHex2AsciiHalfByte(0x0F & hexData);
+        pAsciiData[0] = Common_CvtHex2AsciiHalfByte(hexData >> 4);
+    }
+}

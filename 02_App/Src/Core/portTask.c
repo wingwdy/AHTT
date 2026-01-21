@@ -37,6 +37,7 @@
 #include "Cdd_LedM.h"
 #include "Cdd_NetM.h"
 #include "Cdd_ModeM.h"
+#include "Cdd_CardM.h"
 
 #include "Mcal_If.h"
 
@@ -163,6 +164,7 @@ static void Task_10msB(void *arg)
     {
         CddRcd_MainFunction();
         CddPE_MainFunction();
+        CddCardM_MainFunction();
         vTaskDelay(10);
     }
 }
