@@ -78,6 +78,7 @@ static CommonSendCtrl_Struct* IotGN_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_GN_CMD_REMOTE_STOP_CHARGE_RSP:     pSendCtrl = &pIotGNCtx->stSendCtrl[port][7];   break;
         case IOT_GN_CMD_MULTI_ORDER_RECORD_REQ:     pSendCtrl = &pIotGNCtx->stSendCtrl[port][8];   break;
         case IOT_GN_CMD_ORDER_RECORD_REQ:           pSendCtrl = &pIotGNCtx->stSendCtrl[port][9];   break;
+        case IOT_GN_CMD_PILE_START_CHARGE_REQ:      pSendCtrl = &pIotGNCtx->stSendCtrl[port][10];  break;
         default: break;
     }
     return pSendCtrl;
@@ -98,6 +99,7 @@ static CommonRecvCtrl_Struct* IotGN_GetRecvCtrl(uint8_t port, uint16_t cmd)
         case IOT_GN_CMD_REMOTE_START_CHARGE:        pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][6];   break;
         case IOT_GN_CMD_REMOTE_STOP_CHARGE:         pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][7];   break;
         case IOT_GN_CMD_ORDER_RECORD_RSP:           pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][8];   break;
+        case IOT_GN_CMD_PILE_START_CHARGE_RSP:      pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][9];   break;
         default: break;
     }
 

@@ -49,9 +49,9 @@
 /* 协议CMD 定义 */
 #define IOT_GN_CMDTYPE_REQUSET			        (0x00U)
 #define IOT_GN_CMDTYPE_RESPONSE                 (0x01U)
-
 #define IOT_GN_CMD_NULL                         (0x00U)             /* 无效 */
 
+/* 协议CMD 发送定义 */
 #define IOT_GN_CMD_LOGIN_REQ                    (0x01U)             /* 登陆 */
 #define IOT_GN_CMD_HEARTBEAT_REQ                (0x03U)             /* 心跳请求 */
 #define IOT_GN_CMD_BILLMODE_VERIFY_REQ          (0x05U)             /* 计费模型验证请求 */
@@ -59,14 +59,17 @@
 #define IOT_GN_CMD_REPORT_REALDATA              (0x13U)             /* 上报实时数据 */
 #define IOT_GN_CMD_CALL_REALDATA_ACK            (0xF13U)            /* 召测实时数据应答 */
 
+#define IOT_GN_CMD_PILE_START_CHARGE_REQ        (0x31U)             /* 充电桩主动申请启动充电 */
+
 #define IOT_GN_CMD_REMOTE_STOP_CHARGE_RSP       (0x35U)             /* 远程控制停止充电应答 */
 #define IOT_GN_CMD_REMOTE_START_CHARGE_RSP      (0x33U)             /* 远程控制启动充电应答 */
 
 #define IOT_GN_CMD_MULTI_ORDER_RECORD_REQ       (0x3EU)             /* 多类电价交易记录 */
 #define IOT_GN_CMD_ORDER_RECORD_REQ             (0x3FU)             /* 四类电价交易记录 */
 
-#define IOT_GN_CMD_SEND_COUNT                   (10U)
+#define IOT_GN_CMD_SEND_COUNT                   (11U)
 
+/* 协议CMD 接收定义 */
 #define IOT_GN_CMD_LOGIN_RSP                    (0x02U)             /* 登陆应答 */
 #define IOT_GN_CMD_HEARTBEAT_RSP                (0x04U)             /* 心跳应答 */
 #define IOT_GN_CMD_BILLMODE_VERIFY_RSP          (0x06U)             /* 计费模型验证请求应答 */
@@ -74,12 +77,14 @@
 #define IOT_GN_CMD_BILLMODE_MUTIRATE_RSP        (0x0BU)             /* 多类电价应答 */
 #define IOT_GN_CMD_CALL_REALDATA                (0x12U)             /* 召测实时数据 */
 
+#define IOT_GN_CMD_PILE_START_CHARGE_RSP        (0x32U)             /* 充电桩主动申请启动充电应答 */
+
 #define IOT_GN_CMD_REMOTE_START_CHARGE          (0x34U)             /* 远程控制启动充电 */
 #define IOT_GN_CMD_REMOTE_STOP_CHARGE           (0x36U)             /* 远程控制停止充电 */
 
 #define IOT_GN_CMD_ORDER_RECORD_RSP             (0x40U)             /* 四类/多类电价交易记录应答 */
 
-#define IOT_GN_CMD_RECV_COUNT                   (9U)
+#define IOT_GN_CMD_RECV_COUNT                   (10U)
 
 /******************************************************************************
 *    Enum Definition

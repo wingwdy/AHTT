@@ -55,7 +55,7 @@ typedef struct
 
     MSNvmOrderInfo_Struct stOrderInfo;
 
-    uint8_t authCardID[8];              /* 授权卡号 */
+    uint8_t authCardID[8];              /* 授权卡号 刷卡启动生效后，填充 */
 }IotGNProtoData_Struct;
 
 

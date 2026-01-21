@@ -176,6 +176,104 @@ static void AswMonitor_ProcessCostData(uint8_t port, AswMonitorData_Struct *pstA
     }
 }
 
+static uint8_t AswMonitor_DetectAccountMoney(uint8_t port, AswMonitorChargeCtrl_Struct *pstChargeCtrl, AswMonitorChargeData_Struct *pChargeData)
+{
+    uint32_t totalMoney = pChargeData->totalMoney / 100;
+    uint8_t ret = FALSE;
+    uint32_t diff = 0;
+
+    if (pstChargeCtrl->accountMoney < totalMoney)
+    {
+        ret = TRUE;
+    }
+    else
+    {
+        diff = pstChargeCtrl->accountMoney - totalMoney;
+
+        if (diff < ASWMONITOR_CFG_CHARGE_MIN_ACCOUNT_MONEY)
+        {
+            ret = TRUE;
+        }
+    }
+
+    return ret;
+}
+
+static uint8_t AswMonitor_DetectChargeCtrlMoney(uint8_t port, AswMonitorChargeCtrl_Struct *pstChargeCtrl, AswMonitorChargeData_Struct *pChargeData)
+{
+    uint32_t totalMoney = pChargeData->totalMoney / 100;
+    uint8_t ret = FALSE;
+
+    if (totalMoney >= pstChargeCtrl->chargeCtrlVal)
+    {
+        ret = TRUE;
+    }
+
+    return ret;
+}
+static uint8_t AswMonitor_DetectChargeCtrlTime(uint8_t port, AswMonitorChargeCtrl_Struct *pstChargeCtrl, AswMonitorChargeData_Struct *pChargeData)
+{
+    uint8_t ret = FALSE;
+
+    if (pChargeData->chargeTime > pstChargeCtrl->chargeCtrlVal)
+    {
+        ret = TRUE;
+    }
+
+    return ret;
+}
+static uint8_t AswMonitor_DetectChargeCtrlEnergy(uint8_t port, AswMonitorChargeCtrl_Struct *pstChargeCtrl, AswMonitorChargeData_Struct *pChargeData)
+{
+    uint32_t totalLossEnergy = pChargeData->totalLossEnergy / 100;
+    uint8_t ret = FALSE;
+    
+    if (totalLossEnergy >= pstChargeCtrl->chargeCtrlVal)
+    {
+        ret = TRUE;
+    }
+
+    return ret;
+}
+
+static void AswMonitor_ChargeValDetect(uint8_t port, AswMonitorData_Struct *pstAswMonitorData)
+{ 
+    AswMonitorChargeCtrl_Struct *pstChargeCtrl = &pstAswMonitorData->stChargeCtrl;
+    AswMonitorChargeData_Struct *pChargeData = &pstAswMonitorData->stChargeData;
+
+    /* 余额检测 */
+    if (TRUE == AswMonitor_DetectAccountMoney(port, pstChargeCtrl, pChargeData))
+    {
+        AswErrhandle_SetErrExsitCallback(port, eSrc_InsuffBalance);
+    }
+    else
+    {
+        /* 基于充电方式进行检测 */
+        if (pstChargeCtrl->eChargeCtrlType == eAswMonitorChargeCtrlType_JudgeTime)
+        {
+            if (TRUE == AswMonitor_DetectChargeCtrlTime(port, pstChargeCtrl, pChargeData))
+            {
+                AswErrhandle_SetErrExsitCallback(port, eSrc_StopbyTime);
+            }
+        }
+        else if (pstChargeCtrl->eChargeCtrlType == eAswMonitorChargeCtrlType_JudgeEnergy)
+        {
+            if (TRUE == AswMonitor_DetectChargeCtrlEnergy(port, pstChargeCtrl, pChargeData))
+            {
+                AswErrhandle_SetErrExsitCallback(port, eSrc_StopbyEnergy);
+            }
+        }
+        else if (pstChargeCtrl->eChargeCtrlType == eAswMonitorChargeCtrlType_JudgeMoney)
+        {
+            if (TRUE == AswMonitor_DetectChargeCtrlMoney(port, pstChargeCtrl, pChargeData))
+            {
+                AswErrhandle_SetErrExsitCallback(port, eSrc_StopbyMoney);
+            }
+        }
+        else
+        {}
+    }
+}
+
 static void AswMonitor_SaveChargeRecord(uint8_t port, AswMonitorData_Struct *pstAswMonitorData, uint8_t orderSaveReason)
 {
     AswPlatM_PackChargeRecord(port, &pstAswMonitorData->stOrderData, orderSaveReason);
@@ -204,6 +302,7 @@ static void AswMonitor_OrderOngoingHandle(uint8_t port, AswMonitorData_Struct *p
     }
     else
     {
+        AswMonitor_ChargeValDetect(port, pstAswMonitorData);
         /* 订单周期存储 */
         if (Common_JudgeTimeoutMs(pstAswMonitorData->orderDataSaveTick, ASWMONITOR_CFG_SAVE_CHARGE_RECORD_PERIOD))
         {

@@ -59,6 +59,7 @@ static uint16_t IotGN_SendChargeStartRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotGN_SendChargeStopRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotGN_SendMultyOrderRecordReq(uint8_t port, uint8_t *pBuf);
 static uint16_t IotGN_SendOrderRecordReq(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendPileStartChargeReq(uint8_t port, uint8_t *pBuf);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -174,6 +175,17 @@ static const IotGNSendCtrl_Struct c_stIotGNSendctrlTable[IOT_GN_CMD_SEND_COUNT] 
         .sendCycle = 0,
         .printFlag = TRUE,
         .cMeaning = "四类电价交易记录"
+    },
+
+    [10] = 
+    {
+        .cmd = IOT_GN_CMD_PILE_START_CHARGE_REQ,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .matchCmd = IOT_GN_CMD_PILE_START_CHARGE_RSP,
+        .pSendFunc = IotGN_SendPileStartChargeReq,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "充电桩主动申请启动充电"
     },
 };
 
@@ -602,8 +614,6 @@ static uint16_t IotGN_SendOrderRecordReq(uint8_t port, uint8_t *pBuf)
     temp = Common_uintBINToBCD(dateTime.year);
     pBuf[dataLen++] = (temp >> 8) & 0xFF;
     pBuf[dataLen++] = (uint8_t)(temp);
-
-
     Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
     pBuf[dataLen++] = (uint8_t)(temp);
     Common_BINToBCD(&dateTime.day, (uint8_t *)&temp, 1);
@@ -616,7 +626,7 @@ static uint16_t IotGN_SendOrderRecordReq(uint8_t port, uint8_t *pBuf)
     pBuf[dataLen++] = (uint8_t)(temp);
     /* 结束时间 */
     Conmon_TimestampToDateTime(pOrderData->stopTime, &dateTime);
-temp = Common_uintBINToBCD(dateTime.year);
+    temp = Common_uintBINToBCD(dateTime.year);
     pBuf[dataLen++] = (temp >> 8) & 0xFF;
     pBuf[dataLen++] = (uint8_t)(temp);
     Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
@@ -654,7 +664,7 @@ temp = Common_uintBINToBCD(dateTime.year);
     pBuf[dataLen++] = pOrderData->dealFlag;
     /* 交易日期 */
     Conmon_TimestampToDateTime(pOrderData->dealDate, &dateTime);
-temp = Common_uintBINToBCD(dateTime.year);
+    temp = Common_uintBINToBCD(dateTime.year);
     pBuf[dataLen++] = (temp >> 8) & 0xFF;
     pBuf[dataLen++] = (uint8_t)(temp);
     Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
@@ -674,6 +684,33 @@ temp = Common_uintBINToBCD(dateTime.year);
     dataLen += 8;
     return dataLen;
 }
+
+static uint16_t IotGN_SendPileStartChargeReq(uint8_t port, uint8_t *pBuf)
+{
+    AswMonitorChargeData_Struct *pChargeData = AswMonitor_GetChargeDataPtr(port);
+    AswMonitorChargeCtrl_Struct *pstChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
+    uint16_t dataLen = 0;
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+    /* 枪号 */
+    pBuf[dataLen++] = port + 1;
+    /* 启动方式 01-刷卡*/
+    pBuf[dataLen++] = 0x01;
+    /* 是否需要密码 */
+    pBuf[dataLen++] = 0x00;
+    /* 卡号 */
+    memcpy(&pBuf[dataLen], pstChargeCtrl->authCardID, 8);
+    dataLen += 8;
+    /* 是否输入密码 */
+    memset(&pBuf[dataLen], 0x00, 16);
+    dataLen += 16;
+    /* VIN码 */
+    memset(&pBuf[dataLen], 0x00, 17);
+    dataLen += 17;
+    return dataLen;    
+}
+
 
 static uint16_t IotGN_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
 {
