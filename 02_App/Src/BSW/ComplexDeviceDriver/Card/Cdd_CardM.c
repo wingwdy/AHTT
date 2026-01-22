@@ -367,12 +367,19 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
 					pCardM->nfcOptStep = eOptStepReadUseId;
 				}
             }
-            else if(result == eGlobalRet_Error)
+            else
             {
-				memset(pCardM->cardUid, 0, 4);
-				memset(pCardM->cardUserId, 0, sizeof(pCardM->cardUserId));
-                pCardM->eCardEvent = CddCardEvent_CardIdError;
-                CDDCARDM_CFG_LogPrint("读卡号失败\r\n"); 
+				if (result == eGlobalRet_Error)
+				{
+					memset(pCardM->cardUid, 0, 4);
+					memset(pCardM->cardUserId, 0, sizeof(pCardM->cardUserId));
+					pCardM->eCardEvent = CddCardEvent_CardIdError;
+					CDDCARDM_CFG_LogPrint("读卡号失败\r\n");
+				}
+				else
+				{
+					pCardM->eCardEvent = CddCardEvent_Null;
+				}
             }
         }
     }
@@ -422,7 +429,10 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
         {/* 读卡成功，暂停一会 */
             pCardM->eNfcState = eNfcPause;
         }
-		pCardM->eCardEventOut = pCardM->eCardEvent;
+		if (pCardM->eCardEvent != CddCardEvent_Null)
+		{
+			pCardM->eCardEventOut = pCardM->eCardEvent;
+		}
     }
 }
 
