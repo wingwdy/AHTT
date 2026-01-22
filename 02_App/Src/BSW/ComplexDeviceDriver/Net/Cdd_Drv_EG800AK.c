@@ -326,9 +326,10 @@ static void CddDrvEG800AK_ATTaskSendHandle(uint8_t *txBuf)
 }
 
 
-static void CddDrvEG800AK_ATTaskTimeoutDetect(uint8_t socketIndex, CddNetMSocketType_Enum eSocketType, CddDrvEG800AKATCtrl_Struct *pAtCtrl)
+static void CddDrvEG800AK_ATTaskTimeoutDetect(uint8_t socketIndex, CddNetMSocketType_Enum eSocketType, void *para, CddDrvEG800AKATCtrl_Struct *pAtCtrl)
 {
     const ATCmdDescribtor_Struct *pCmdDescribtor = NULL;
+    uint8_t failHandleRet;
 
     if (pAtCtrl->readyFlag == FALSE && pAtCtrl->atTaskArray[0] != 0)
     {
@@ -352,12 +353,18 @@ static void CddDrvEG800AK_ATTaskTimeoutDetect(uint8_t socketIndex, CddNetMSocket
                     {
                         if (pAtCtrl->atTryCount >= pCmdDescribtor->maxTryCnt)
                         {
+                            failHandleRet = FALSE;
+
                             if (pCmdDescribtor->pFuncFailHandle != NULL)
                             {
-                                pCmdDescribtor->pFuncFailHandle(socketIndex, pAtCtrl, pAtCtrl->atTaskArray[0]);
+                                /* 当返回值为TRUE, 说明错误处理已经进行了cmd清除，并且添加了新的cmd */
+                                failHandleRet = pCmdDescribtor->pFuncFailHandle(socketIndex, para, pAtCtrl->atTaskArray[0]);
                             }
 
-                            CddDrvEG800AK_DeleteCmd(socketIndex);
+                            if (failHandleRet == FALSE)
+                            {
+                                CddDrvEG800AK_DeleteCmd(socketIndex);
+                            }
                         }
                         else
                         {
@@ -489,13 +496,13 @@ static void CddDrvEG800AK_CmdTaskHandle(void)
 
     if (socketIndex == CDDDRV_EG800AK_MODULE_SOCKET)
     {
-        CddDrvEG800AK_ATTaskTimeoutDetect(socketIndex, eCddNetMSocketType_Null, &g_stCddDrvEG800AKCtrl.stModuleAtCtrl);
+        CddDrvEG800AK_ATTaskTimeoutDetect(socketIndex, eCddNetMSocketType_Null, &g_stCddDrvEG800AKCtrl, &g_stCddDrvEG800AKCtrl.stModuleAtCtrl);
     }
 
     for (socketIndex = 0; socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT; socketIndex++)
     {
         pSocketCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex];
-        CddDrvEG800AK_ATTaskTimeoutDetect(socketIndex, pSocketCtrl->eSocketType, &pSocketCtrl->stSocketAtCtrl);
+        CddDrvEG800AK_ATTaskTimeoutDetect(socketIndex, pSocketCtrl->eSocketType, pSocketCtrl, &pSocketCtrl->stSocketAtCtrl);
     }
 
     CddDrvEG800AK_ATTaskSendHandle(cacheBuff);
@@ -869,7 +876,6 @@ uint8_t CddDrvEG800AK_AddCmd(uint8_t socketIndex, uint8_t cmd)
 
 void CddDrvEG800AK_DeleteCmd(uint8_t socketIndex)
 {
-    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex];
     CddDrvEG800AKATCtrl_Struct *pAtCtrl = NULL;
     
     if (socketIndex == CDDDRV_EG800AK_MODULE_SOCKET)
@@ -922,6 +928,9 @@ void CddDrvEG800AK_ClearSocketCmd(uint8_t socketIndex)
     if (pAtCtrl != NULL)
     {
         memset(pAtCtrl->atTaskArray, 0x00, sizeof(uint8_t) * CDDDRV_EG800AK_CFG_AT_TASK_COUNT);
+
+        pAtCtrl->atTryCount = 0;
+        pAtCtrl->readyFlag = FALSE;
 
         if (g_stCddDrvEG800AKCtrl.currentTaskSocketIndex == socketIndex)
         {
@@ -1002,7 +1011,7 @@ void CddDrvEG800AK_MainFunction(void)
         }
         else if (g_stCddDrvEG800AKCtrl.eModuleState == eCddNetMModuleState_Work)
         {
-
+            /* 暂时没考虑好，还需要添加什么处理 */
         }
         else
         {}

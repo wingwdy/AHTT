@@ -67,7 +67,7 @@ static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint
 static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATTCP_RecvWrite(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATTCP_RecvClose(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
-static void ATTCP_FailHandle(uint8_t socketIndex, void * socketPara, uint8_t atTaskID);
+static uint8_t ATTCP_FailHandle(uint8_t socketIndex, void * socketPara, uint8_t atTaskID);
 
 /*******************************************************************************
 *    Global variables Declaration
@@ -246,9 +246,10 @@ static uint8_t ATTCP_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *
     return ret;
 }
 
-static void ATTCP_FailHandle(uint8_t socketIndex, void * socketPara, uint8_t atTaskID)
+static uint8_t ATTCP_FailHandle(uint8_t socketIndex, void * socketPara, uint8_t atTaskID)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
+    uint8_t ret = FALSE;
 
     if (atTaskID == eATTCPCmd_Close)
     {
@@ -257,7 +258,10 @@ static void ATTCP_FailHandle(uint8_t socketIndex, void * socketPara, uint8_t atT
     else
     {
         ATTCP_CloseSocket(pSocketCtrl);
+        ret = TRUE;
     }
+    
+    return ret;
 }
 
 static void ATTCP_SetSocketState(uint8_t socketIndex, void *socketPara, CddNetMSocketState_Enum eSocketState)
@@ -417,14 +421,18 @@ void ATTCP_UrcClose(uint8_t *pData, void * modulePara, uint16_t dataLen)
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = NULL;
     CddDrvEG800AKCtrl_Struct *pModulePara = (CddDrvEG800AKCtrl_Struct *)modulePara;
     int32_t socketIndex = 0;
+    uint8_t *pTemp = NULL;
 
-    if (sscanf((char*)pData, "+QIURC: \"closed\",%d", &socketIndex) == 1)
+    if (NULL != (pTemp = Common_SearchData(pData, dataLen, "+QIURC: \"closed\"", strlen("+QIURC: \"closed\""))))
     {
-        if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
+        if (sscanf((char*)pTemp, "+QIURC: \"closed\",%d", &socketIndex) == 1)
         {
-            pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
-            ATTCP_CloseSocket(pSocketCtrl);
-            CDDDRV_EG800AK_CFG_LogPrint("[socket: %d] 后台主动断开连接!\r\n", socketIndex);
+            if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
+            {
+                pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
+                ATTCP_CloseSocket(pSocketCtrl);
+                CDDDRV_EG800AK_CFG_LogPrint("[socket: %d] 后台主动断开连接!\r\n", socketIndex);
+            }
         }
     }
 }

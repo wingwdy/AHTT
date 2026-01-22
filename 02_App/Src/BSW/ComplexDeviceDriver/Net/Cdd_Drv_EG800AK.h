@@ -48,7 +48,7 @@ typedef enum
 ******************************************************************************/
 typedef struct 
 {
-    uint8_t readyFlag;
+    uint8_t readyFlag;  /* FALSE-表示当前有任务在执行， TRUE-表示可以执行切换到下一个sokcet了*/
     uint8_t  atTryCount;
     uint32_t atWaitTickStart;
     uint8_t atTaskArray[CDDDRV_EG800AK_CFG_AT_TASK_COUNT];

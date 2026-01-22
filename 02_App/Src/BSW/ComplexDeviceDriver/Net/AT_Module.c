@@ -56,7 +56,7 @@ static uint8_t ATModule_RecvCOPS(uint8_t socketID, void * modulePara, uint8_t *p
 static uint8_t ATModule_RecvOKACK(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATModule_RecvPDPState(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen);
 
-static void ATModule_FailHandle(uint8_t socketID, void * modulePara, uint8_t atTaskID);
+static uint8_t ATModule_FailHandle(uint8_t socketID, void * modulePara, uint8_t atTaskID);
 
 static void ATModule_UrcNtp(uint8_t *pData, void * modulePara, uint16_t dataLen);
 /*******************************************************************************
@@ -189,7 +189,7 @@ static uint16_t ATModule_PackConfigAPN(uint8_t socketIndex, void * modulePara, u
 	return nATLen;
 }
 
-static void ATModule_FailHandle(uint8_t socketID, void * modulePara, uint8_t atTaskID)
+static uint8_t ATModule_FailHandle(uint8_t socketID, void * modulePara, uint8_t atTaskID)
 {
     if (atTaskID >= eATModuleCmd_QueryCGREG && atTaskID < eATModuleCmd_QueryCount)
     {
@@ -206,6 +206,8 @@ static void ATModule_FailHandle(uint8_t socketID, void * modulePara, uint8_t atT
     {
         AswErrhandle_SetErrExsitCallback(0, eErr_NetNoSIMErr);
     }
+
+    return FALSE;
 }
 
 static uint8_t ATModule_RecvSimStatus(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen)
