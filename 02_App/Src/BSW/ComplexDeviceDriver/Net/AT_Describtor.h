@@ -42,7 +42,7 @@ typedef struct
 	char *cMeanings;
 	uint16_t (*pFuncPackAT)(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t nATLen);
 	uint8_t (*pFuncRecvHandle)(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
-	void (*pFuncFailHandle)(uint8_t socketIndex, void * socketPara, uint8_t atTaskID);
+	uint8_t (*pFuncFailHandle)(uint8_t socketIndex, void * socketPara, uint8_t atTaskID);
 }ATCmdDescribtor_Struct;
 
 typedef struct

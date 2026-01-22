@@ -23,6 +23,7 @@
 #include "Asw_ChargeIf.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "Mcal_Mcu.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -32,7 +33,13 @@
 /*******************************************************************************
 *    Enum Definition
 *******************************************************************************/
-
+typedef enum
+{
+    eAswMonitorRebootStep_Null,
+    eAswMonitorRebootStep_WaitIdle,
+    eAswMonitorRebootStep_LastDelay,
+    eAswMonitorRebootStep_Finish,    
+}AswMonitorRebootStep_Enum;
 
 
 
@@ -51,18 +58,35 @@ typedef struct
     AswMonitorChargeData_Struct stChargeData;       /* 充电变量 */
 }AswMonitorData_Struct;
 
+typedef struct 
+{
+    uint32_t rebootDelayTick;                        /* 复位延时计时 */
+    AswMonitorRebootType_Enum eAswMonitorRebootType; /* 复位类型 */
+    AswMonitorRebootStep_Enum eAswMonitorRebootStep; /* 复位控制步骤 */
+}AswMonitorCtx_Struct;
+
 
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
 static AswMonitorData_Struct g_stAswMonitorData[SYSCFG_CFG_GUN_NUM] = { 0 };
-
+static AswMonitorCtx_Struct  g_stAswMonitorCtx = { 0 };
 
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-
-
+static uint8_t AswMonitor_GetBillModePeriod(AswMonitorBillMode_Struct *pBillMode);
+static void AswMonitor_ProcessCostData(uint8_t port, AswMonitorData_Struct *pstAswMonitorData);
+static uint8_t AswMonitor_DetectAccountMoney(uint8_t port, AswMonitorChargeCtrl_Struct *pstChargeCtrl, AswMonitorChargeData_Struct *pChargeData);
+static uint8_t AswMonitor_DetectChargeCtrlMoney(uint8_t port, AswMonitorChargeCtrl_Struct *pstChargeCtrl, AswMonitorChargeData_Struct *pChargeData);
+static uint8_t AswMonitor_DetectChargeCtrlTime(uint8_t port, AswMonitorChargeCtrl_Struct *pstChargeCtrl, AswMonitorChargeData_Struct *pChargeData);
+static uint8_t AswMonitor_DetectChargeCtrlEnergy(uint8_t port, AswMonitorChargeCtrl_Struct *pstChargeCtrl, AswMonitorChargeData_Struct *pChargeData);
+static void AswMonitor_ChargeValDetect(uint8_t port, AswMonitorData_Struct *pstAswMonitorData);
+static void AswMonitor_SaveChargeRecord(uint8_t port, AswMonitorData_Struct *pstAswMonitorData, uint8_t orderSaveReason);
+static void AswMonitor_OrderOngoingHandle(uint8_t port, AswMonitorData_Struct *pstAswMonitorData);
+static void AswMonitor_OrderEndHandle(uint8_t port, AswMonitorData_Struct *pstAswMonitorData);
+static void AswMonitor_OrderManage(uint8_t port, AswMonitorData_Struct *pstAswMonitorData);
+static void AswMonitor_RebootManage(void);
 
 /*******************************************************************************
 *    Function Source Code
@@ -92,9 +116,6 @@ static uint8_t AswMonitor_GetBillModePeriod(AswMonitorBillMode_Struct *pBillMode
 
     return periodIndex;
 }
-
-
-
 
 static void AswMonitor_ProcessCostData(uint8_t port, AswMonitorData_Struct *pstAswMonitorData)
 {
@@ -295,6 +316,7 @@ static void AswMonitor_OrderOngoingHandle(uint8_t port, AswMonitorData_Struct *p
     if (chargeState == ASWCHARGEIF_WORKSTATE_FINISH ||
         chargeState == ASWCHARGEIF_WORKSTATE_IDLE)
     {
+        pstAswMonitorData->chargeStart = FALSE;
         pstAswMonitorData->stOrderData.orderSaveState = ASWMONITOR_ORDER_SAVE_STOP;
         pstAswMonitorData->stChargeData.eChargeStopReason = AswChargeIf_GetStopReason(port);
         AswMonitor_SaveChargeRecord(port, pstAswMonitorData, ASWMONITOR_ORDER_SAVE_STOP);
@@ -341,6 +363,60 @@ static void AswMonitor_OrderManage(uint8_t port, AswMonitorData_Struct *pstAswMo
         default:
         {
             break;
+        }
+    }
+}
+
+static void AswMonitor_RebootManage(void)
+{
+    uint8_t port = 0;
+    uint8_t orderIdle = TRUE;
+
+    if (g_stAswMonitorCtx.eAswMonitorRebootType != eAswMonitorRebootType_Null)
+    {
+        switch (g_stAswMonitorCtx.eAswMonitorRebootStep)
+        {
+            case eAswMonitorRebootStep_Null:
+            {
+                break;
+            }
+            case eAswMonitorRebootStep_WaitIdle:
+            {
+                for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+                {
+                    if (AswMonitor_IsOrderIdle(port) != TRUE)
+                    {
+                        orderIdle = FALSE;
+                        break;
+                    }
+                }
+
+                if (orderIdle == TRUE)
+                {
+                    g_stAswMonitorCtx.eAswMonitorRebootStep = eAswMonitorRebootStep_LastDelay;
+                    g_stAswMonitorCtx.rebootDelayTick = Common_GetSystick();
+                }
+
+                break;
+            }
+            case eAswMonitorRebootStep_LastDelay:
+            {
+                if (Common_JudgeTimeoutMs(g_stAswMonitorCtx.rebootDelayTick, ASWMONITOR_CFG_REBOOT_DELAY_TIME))
+                {
+                    g_stAswMonitorCtx.eAswMonitorRebootStep = eAswMonitorRebootStep_Finish;
+                }
+
+                break;
+            }
+            case eAswMonitorRebootStep_Finish:
+            {
+                McalMcu_SystemReset();
+                break;
+            }
+            default:
+            {
+                break;
+            }
         }
     }
 }
@@ -409,6 +485,43 @@ void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc)
             AswMonitor_SaveChargeRecord(port, pstAswMonitorData, ASWMONITOR_ORDER_SAVE_START);
             AswChargeIf_ChargeStart(port);
         }
+    }
+}
+
+void AswMonitor_SetReboot(AswMonitorRebootType_Enum eRebootType)
+{
+    uint8_t changeFlag = FALSE; 
+
+    if (eRebootType != eAswMonitorRebootType_Null && eRebootType != g_stAswMonitorCtx.eAswMonitorRebootType)
+    {
+        if (g_stAswMonitorCtx.eAswMonitorRebootType == eAswMonitorRebootType_Null)
+        {
+            if (eRebootType == eAswMonitorRebootType_Immediate)
+            {
+                g_stAswMonitorCtx.eAswMonitorRebootType = eRebootType;
+                g_stAswMonitorCtx.eAswMonitorRebootStep = eAswMonitorRebootStep_LastDelay;
+                g_stAswMonitorCtx.rebootDelayTick = Common_GetSystick();
+            }
+            else if (eRebootType == eAswMonitorRebootType_WaitIdle)
+            {
+                g_stAswMonitorCtx.eAswMonitorRebootType = eRebootType;
+                g_stAswMonitorCtx.eAswMonitorRebootStep = eAswMonitorRebootStep_WaitIdle;
+                g_stAswMonitorCtx.rebootDelayTick = Common_GetSystick();
+            }
+            else
+            {}
+        }
+        else if (g_stAswMonitorCtx.eAswMonitorRebootType == eAswMonitorRebootType_WaitIdle)
+        { 
+            if (eRebootType == eAswMonitorRebootType_Immediate)
+            {
+                g_stAswMonitorCtx.eAswMonitorRebootType = eRebootType;
+                g_stAswMonitorCtx.eAswMonitorRebootStep = eAswMonitorRebootStep_LastDelay;
+                g_stAswMonitorCtx.rebootDelayTick = Common_GetSystick();
+            }
+        }
+        else
+        {}
     }
 }
 
@@ -497,6 +610,8 @@ void AswMonitor_MainFunction(void)
     {
         AswMonitor_OrderManage(port, &g_stAswMonitorData[port]);
     }
+
+    AswMonitor_RebootManage();
 }
 
 

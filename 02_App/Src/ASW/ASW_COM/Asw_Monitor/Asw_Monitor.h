@@ -53,7 +53,7 @@
 #define ASWMONITOR_BILLMODE_RATE_COUNT            48
 
 #define ASWMONITOR_BILLMODE_TYPE_FOUR             0
-#define ASWMONITOR_BILLMODE_TYPE_MULT             0
+#define ASWMONITOR_BILLMODE_TYPE_MULT             1
 
 /* 启动充电发起方 */
 #define ASWMONITOR_ORDER_START_SRC_NULL           0         /* 无效的方式 */
@@ -102,6 +102,13 @@ typedef struct
     uint32_t accountMoney;                           /* 账户余额 0.01 元 */
     uint8_t authCardID[ASWMONITOR_CARD_ID_LEN];      /* 授权卡号 */
 }AswMonitorChargeCtrl_Struct;
+
+typedef enum
+{
+    eAswMonitorRebootType_Null,
+    eAswMonitorRebootType_Immediate, /* 立即重启 */       
+    eAswMonitorRebootType_WaitIdle,  /* 等待空闲 */ 
+}AswMonitorRebootType_Enum;
 
 
 typedef struct 
@@ -160,6 +167,8 @@ AswMonitorBillMode_Struct *AswMonitor_GetCurUsedBillModePtr(uint8_t port);
 uint8_t AswMonitor_CheckBillModeValid(uint8_t port);
 void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc);
 uint8_t AswMonitor_CheckForbidState(uint8_t port);
+void AswMonitor_SetReboot(AswMonitorRebootType_Enum eRebootType);
+
 #endif
 
 

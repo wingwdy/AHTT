@@ -26,6 +26,9 @@
 
 #define ASWMONITOR_CFG_SAVE_CHARGE_RECORD_PERIOD   (60 * 1000U)
 
+#define ASWMONITOR_CFG_REBOOT_DELAY_TIME           (2 * 1000U)
+
+
 /* 充电最小余额，1元，保留2位小数 */
 #define ASWMONITOR_CFG_CHARGE_MIN_ACCOUNT_MONEY    (100)     
 

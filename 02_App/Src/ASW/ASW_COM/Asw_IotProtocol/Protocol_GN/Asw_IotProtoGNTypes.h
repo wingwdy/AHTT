@@ -58,16 +58,19 @@
 #define IOT_GN_CMD_BILLMODE_REQ                 (0x09U)             /* 计费模型请求 */
 #define IOT_GN_CMD_REPORT_REALDATA              (0x13U)             /* 上报实时数据 */
 #define IOT_GN_CMD_CALL_REALDATA_ACK            (0xF13U)            /* 召测实时数据应答 */
-
 #define IOT_GN_CMD_PILE_START_CHARGE_REQ        (0x31U)             /* 充电桩主动申请启动充电 */
-
 #define IOT_GN_CMD_REMOTE_STOP_CHARGE_RSP       (0x35U)             /* 远程控制停止充电应答 */
 #define IOT_GN_CMD_REMOTE_START_CHARGE_RSP      (0x33U)             /* 远程控制启动充电应答 */
-
 #define IOT_GN_CMD_MULTI_ORDER_RECORD_REQ       (0x3EU)             /* 多类电价交易记录 */
 #define IOT_GN_CMD_ORDER_RECORD_REQ             (0x3FU)             /* 四类电价交易记录 */
+#define IOT_GN_CMD_UPDATE_ACCOUNT_MONEY_RSP     (0x42U)             /* 远程更新账户余额应答 */
+#define IOT_GN_CMD_SYNC_TIME_RSP                (0x55U)             /* 远程对时应答 */
+#define IOT_GN_CMD_SET_BILLMODE_4RATE_RSP       (0xF57U)            /* 设置四类电价计费模型应答 */
+#define IOT_GN_CMD_SET_BILLMODE_MULTIRATE_RSP   (0x57U)             /* 设置多类电价计费模型应答 */
+#define IOT_GN_CMD_SET_QRCODE_RSP               (0x59U)             /* 设置二维码应答 */
+#define IOT_GN_CMD_REBOOT_RSP                   (0x91U)             /* 设置远程重启应答 */
 
-#define IOT_GN_CMD_SEND_COUNT                   (11U)
+#define IOT_GN_CMD_SEND_COUNT                   (17U)
 
 /* 协议CMD 接收定义 */
 #define IOT_GN_CMD_LOGIN_RSP                    (0x02U)             /* 登陆应答 */
@@ -76,16 +79,17 @@
 #define IOT_GN_CMD_BILLMODE_4RATE_RSP           (0x0AU)             /* 4类电价应答 */
 #define IOT_GN_CMD_BILLMODE_MUTIRATE_RSP        (0x0BU)             /* 多类电价应答 */
 #define IOT_GN_CMD_CALL_REALDATA                (0x12U)             /* 召测实时数据 */
-
 #define IOT_GN_CMD_PILE_START_CHARGE_RSP        (0x32U)             /* 充电桩主动申请启动充电应答 */
-
 #define IOT_GN_CMD_REMOTE_START_CHARGE          (0x34U)             /* 远程控制启动充电 */
 #define IOT_GN_CMD_REMOTE_STOP_CHARGE           (0x36U)             /* 远程控制停止充电 */
-
 #define IOT_GN_CMD_ORDER_RECORD_RSP             (0x40U)             /* 四类/多类电价交易记录应答 */
-
-#define IOT_GN_CMD_RECV_COUNT                   (10U)
-
+#define IOT_GN_CMD_UPDATE_ACCOUNT_MONEY         (0x41U)             /* 远程更新账户余额 */
+#define IOT_GN_CMD_SYNC_TIME                    (0x56U)             /* 远程对时 */
+#define IOT_GN_CMD_SET_BILLMODE_4RATE           (0x58U)             /* 四类电价计费模型设置 */
+#define IOT_GN_CMD_SET_BILLMODE_MULTIRATE       (0x54U)             /* 多类电价计费模型设置 */
+#define IOT_GN_CMD_SET_QRCODE                   (0x5AU)             /* 设置二维码 */
+#define IOT_GN_CMD_REBOOT                       (0x92U)             /* 设置远程重启 */
+#define IOT_GN_CMD_RECV_COUNT                   (16U)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

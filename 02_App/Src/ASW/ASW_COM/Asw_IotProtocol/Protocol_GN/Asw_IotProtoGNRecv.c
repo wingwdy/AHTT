@@ -21,6 +21,8 @@
 #include "Asw_ErrorHandle.h"
 #include "SS_Ucm.h"
 #include "Asw_ChargeIf.h"
+#include "SS_Tm.h"
+#include "Asw_Monitor.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -63,6 +65,12 @@ static uint8_t IotGN_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, uint1
 static uint8_t IotGN_RecvRemoteStopCharge(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotGN_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotGN_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvSyncTime(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvSetBillMode4Rate(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvSetBillModeMultiRate(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvSetQRCode(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvSetReboot(uint8_t *port, uint8_t *r_data, uint16_t len);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -191,12 +199,77 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .cMeaning = "充电桩主动启动充电应答",
     },
 
+    [10] = 
+    {
+        .cmd = IOT_GN_CMD_UPDATE_ACCOUNT_MONEY,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .pRecvParse = IotGN_RecvUpdateAccountMoney,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_GN_CMD_UPDATE_ACCOUNT_MONEY_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "远程更新账户余额",
+    },
 
+    [11] = 
+    {
+        .cmd = IOT_GN_CMD_SYNC_TIME,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .pRecvParse = IotGN_RecvSyncTime,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_GN_CMD_SYNC_TIME_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "远程对时",
+    },
 
+    [12] = 
+    {
+        .cmd = IOT_GN_CMD_SET_BILLMODE_4RATE,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .pRecvParse = IotGN_RecvSetBillMode4Rate,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_GN_CMD_SET_BILLMODE_4RATE_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "设置四类电价计费模型",
+    },
 
+    [13] = 
+    {
+        .cmd = IOT_GN_CMD_SET_BILLMODE_MULTIRATE,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .pRecvParse = IotGN_RecvSetBillModeMultiRate,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_GN_CMD_SET_BILLMODE_MULTIRATE_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "设置多类电价计费模型",
+    },
 
+    [14] = 
+    {
+        .cmd = IOT_GN_CMD_SET_QRCODE,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .pRecvParse = IotGN_RecvSetQRCode,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_GN_CMD_SET_QRCODE_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "设置二维码",
+    },
 
-
+    [15] = 
+    {
+        .cmd = IOT_GN_CMD_REBOOT,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .pRecvParse = IotGN_RecvSetReboot,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_GN_CMD_REBOOT_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "远程重启",
+    },
 };
 
 
@@ -423,11 +496,14 @@ static uint8_t IotGN_RecvBillModeMultRateRsp(uint8_t *port, uint8_t *r_data, uin
     uint8_t *pRecvData = r_data;
     uint8_t temp = 0;
 
-    pBillMode->billType = IOT_GN_BILLMODE_RATE_TYPE_4;
+    pBillMode->billType = IOT_GN_BILLMODE_RATE_TYPE_MULT;
     memcpy(pBillMode->billModeID, &pRecvData[index], 2);
     index += 2;
 
     pBillMode->elecLossRate = pRecvData[index++];
+
+    memcpy(pBillMode->period_rate, &pRecvData[index], 48);
+    index += 48;
 
     for (temp = 0; temp < 9; temp++)
     {
@@ -506,14 +582,14 @@ static uint8_t IotGN_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, uint1
     IOT_GN_RecvGunNoTransform(pRecvData[index], port[0]);
     index++;
 
+    pChargeCtrl = AswMonitor_GetChargeCtrlPtr(port[0]);
+
     /* 订单号 */
     memcpy(pIotGNCtx->stProtoData[port[0]].newRecvOrderTransactionNum, &pRecvData[index], 16);
     index += 16;
 
     if (TRUE == IotGN_CheckChargeStart(port[0], &failReason))
     {
-        pChargeCtrl = AswMonitor_GetChargeCtrlPtr(port[0]);
-
         memcpy(pIotGNCtx->stProtoData[port[0]].curUsedOrderTransactionNum,
                pIotGNCtx->stProtoData[port[0]].newRecvOrderTransactionNum,
                16);
@@ -605,6 +681,8 @@ static uint8_t IotGN_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, uint
     IOT_GN_RecvGunNoTransform(pRecvData[index], port[0]);
     index++;
 
+    pChargeCtrl = AswMonitor_GetChargeCtrlPtr(port[0]);
+
     if (TRUE == IotGN_CheckChargeStart(port[0], &failReason))
     { 
         /* 鉴权成功标志 */
@@ -652,10 +730,164 @@ static uint8_t IotGN_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, uint
             IOTGN_CFG_LogPrint("[枪：%d]充电桩申请主动启动充电失败，失败原因：%02X!\r\n", port[0], pRecvData[index]);
         }
     }
-    
+
     return TRUE;
 }
 
+static uint8_t IotGN_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    AswMonitorChargeCtrl_Struct *pChargeCtrl = NULL;
+    uint8_t index = 7;
+    uint8_t *pRecvData = r_data;
+    uint8_t invalidCardID[8] = {0};
+
+    IOT_GN_RecvGunNoTransform(pRecvData[index], port[0]);
+    index++;
+
+    pChargeCtrl = AswMonitor_GetChargeCtrlPtr(port[0]);
+
+    memcpy(pIotGNCtx->stProtoData[port[0]].updateAccountMoneyCardID, &pRecvData[index], 8);
+
+    if (0 == memcmp(&pRecvData[index], invalidCardID, 8) == 0)
+    {
+        index += 8;
+        pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
+        IOTGN_CFG_LogPrint("[枪：%d]更新账户余额成功，余额：%d!\r\n", port[0], pChargeCtrl->accountMoney);
+        pIotGNCtx->stProtoData[port[0]].updateAccountMoneyResult = 0x00;
+    }
+    else
+    {
+        if (pChargeCtrl->startSrc == ASWMONITOR_ORDER_START_SRC_CARD)
+        {
+            if (0 == memcmp(&pRecvData[index], pIotGNCtx->stProtoData[port[0]].authCardID, 8))
+            {
+                index += 8;
+                pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
+                IOTGN_CFG_LogPrint("[枪：%d]更新账户余额成功，余额：%d!\r\n", port[0], pChargeCtrl->accountMoney);
+                pIotGNCtx->stProtoData[port[0]].updateAccountMoneyResult = 0x00;
+            }
+            else
+            {
+                IOTGN_CFG_LogPrint("[枪：%d]更新账户余额失败，卡号不一致!\r\n", port[0]);
+                pIotGNCtx->stProtoData[port[0]].updateAccountMoneyResult = 0x02;
+            }
+        }
+    }
+
+    return TRUE;
+}
+
+static uint8_t IotGN_RecvSyncTime(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    uint8_t index = 7;
+    uint8_t *pRecvData = r_data;
+    uint8_t tempBin1 = 0;
+    uint8_t tempBin2 = 0;
+    CommonDateTime_Struct dataTime;
+
+    Common_BCDToBIN(&pRecvData[index++], &tempBin1, 1);
+    Common_BCDToBIN(&pRecvData[index++], &tempBin2, 1);
+    dataTime.year = tempBin1 * 100 + tempBin2;
+    Common_BCDToBIN(&pRecvData[index++], &dataTime.month, 1);
+    Common_BCDToBIN(&pRecvData[index++], &dataTime.day, 1);
+    Common_BCDToBIN(&pRecvData[index++], &dataTime.hour, 1);
+    Common_BCDToBIN(&pRecvData[index++], &dataTime.minute, 1);
+    Common_BCDToBIN(&pRecvData[index++], &dataTime.second, 1);
+    SSTM_SynTimeByDateTime(&dataTime);
+    return TRUE;
+}
+
+static uint8_t IotGN_RecvSetBillMode4Rate(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    uint8_t index = 7;
+    uint8_t *pRecvData = r_data;
+    uint8_t temp = 0;
+
+    pBillMode->billType = IOT_GN_BILLMODE_RATE_TYPE_4;
+    memcpy(pBillMode->billModeID, &pRecvData[index], 2);
+    index += 2;
+
+    for (temp = 0; temp < 4; temp++)
+    {
+        memcpy(&pBillMode->elecPriceRate[temp], &pRecvData[index], 4);
+        index += 4;
+        memcpy(&pBillMode->servePriceRate[temp], &pRecvData[index], 4);
+        index += 4;   
+    }
+
+    pBillMode->elecLossRate = pRecvData[index++];
+    memcpy(pBillMode->period_rate, &pRecvData[index], 48);
+    index += 48;
+
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotGNCtx->param, sizeof(MSNvmPlatPrivateParam_Union));
+    return TRUE;
+}
+
+static uint8_t IotGN_RecvSetBillModeMultiRate(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    uint8_t index = 7;
+    uint8_t *pRecvData = r_data;
+    uint8_t temp = 0;
+
+    pBillMode->billType = IOT_GN_BILLMODE_RATE_TYPE_MULT;
+    memcpy(pBillMode->billModeID, &pRecvData[index], 2);
+    index += 2;
+
+    pBillMode->elecLossRate = pRecvData[index++];
+
+    memcpy(pBillMode->period_rate, &pRecvData[index], 48);
+    index += 48;
+
+    for (temp = 0; temp < 9; temp++)
+    {
+        memcpy(&pBillMode->elecPriceRate[temp], &pRecvData[index], 4);
+        index += 4;
+        memcpy(&pBillMode->servePriceRate[temp], &pRecvData[index], 4);
+        index += 4;
+    }  
+
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotGNCtx->param, sizeof(MSNvmPlatPrivateParam_Union));
+    return TRUE;
+}
+
+static uint8_t IotGN_RecvSetQRCode(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    uint8_t index = 7;
+    uint8_t *pRecvData = r_data;
+    uint8_t temp = 0;
+    MSNvmDrcode_Struct qrParam = { 0 };
+    
+    IOT_GN_RecvGunNoTransform(pRecvData[index], port[0]);
+    index++;
+
+    if (port[0] == 0)
+    {
+        memcpy(qrParam.qrcode, &pRecvData[index], 100);
+        MSNvm_WriteParaBlock(eMSNvmBlockID_Gun0Qrcode, (uint8_t *)&qrParam, sizeof(MSNvmDrcode_Struct));
+        IOTGN_CFG_LogPrint("[枪：%d]设置的二维码内容：%.100s\r\n", port[0], &pRecvData[index]);
+    }
+
+    return TRUE;
+}
+
+static uint8_t IotGN_RecvSetReboot(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    uint8_t index = 7;
+    uint8_t *pRecvData = r_data;
+
+    if (pRecvData[index] == 0x01)
+    {
+        AswMonitor_SetReboot(eAswMonitorRebootType_Immediate); 
+    }
+    else
+    {
+        AswMonitor_SetReboot(eAswMonitorRebootType_WaitIdle);
+    }
+
+    return TRUE;
+}
 
 void IotGN_UpCtrlRecvDeal(void)
 {

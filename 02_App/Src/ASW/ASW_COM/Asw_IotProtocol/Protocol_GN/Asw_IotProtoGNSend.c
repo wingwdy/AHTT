@@ -23,6 +23,7 @@
 #include "Asw_ErrorHandle.h"
 #include "Asw_ChargeIf.h"
 #include "Asw_Monitor.h"
+#include "SS_Tm.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -60,6 +61,12 @@ static uint16_t IotGN_SendChargeStopRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotGN_SendMultyOrderRecordReq(uint8_t port, uint8_t *pBuf);
 static uint16_t IotGN_SendOrderRecordReq(uint8_t port, uint8_t *pBuf);
 static uint16_t IotGN_SendPileStartChargeReq(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendUpdateAccountMoneyRsp(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendSetBillMode4RateRsp(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendSetBillModeMultiRateRsp(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendSetQrcodeRsp(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendSetRebootRsp(uint8_t port, uint8_t *pBuf);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -186,6 +193,72 @@ static const IotGNSendCtrl_Struct c_stIotGNSendctrlTable[IOT_GN_CMD_SEND_COUNT] 
         .sendCycle = 0,
         .printFlag = TRUE,
         .cMeaning = "充电桩主动申请启动充电"
+    },
+
+    [11] = 
+    {
+        .cmd = IOT_GN_CMD_UPDATE_ACCOUNT_MONEY_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_GN_CMD_UPDATE_ACCOUNT_MONEY,
+        .pSendFunc = IotGN_SendUpdateAccountMoneyRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "远程更新账户余额应答"
+    },
+
+    [12] = 
+    {
+        .cmd = IOT_GN_CMD_SYNC_TIME_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_GN_CMD_SYNC_TIME,
+        .pSendFunc = IotGN_SendSyncTimeRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "远程对时应答"
+    },
+
+    [13] = 
+    {
+        .cmd = IOT_GN_CMD_SET_BILLMODE_4RATE_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_GN_CMD_SET_BILLMODE_4RATE,
+        .pSendFunc = IotGN_SendSetBillMode4RateRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "设置四类电价计费模型应答"
+    },
+
+    [14] = 
+    {
+        .cmd = IOT_GN_CMD_SET_BILLMODE_MULTIRATE_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_GN_CMD_SET_BILLMODE_MULTIRATE,
+        .pSendFunc = IotGN_SendSetBillModeMultiRateRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "设置多类电价计费模型应答"
+    },
+
+    [15] =
+    {
+        .cmd = IOT_GN_CMD_SET_QRCODE_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_GN_CMD_SET_QRCODE,
+        .pSendFunc = IotGN_SendSetQrcodeRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "设置二维码应答"
+    },
+
+    [16] =
+    {
+        .cmd = IOT_GN_CMD_REBOOT_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_GN_CMD_REBOOT,
+        .pSendFunc = IotGN_SendSetRebootRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "设置远程重启应答"
     },
 };
 
@@ -708,7 +781,95 @@ static uint16_t IotGN_SendPileStartChargeReq(uint8_t port, uint8_t *pBuf)
     /* VIN码 */
     memset(&pBuf[dataLen], 0x00, 17);
     dataLen += 17;
-    return dataLen;    
+    return dataLen;
+}
+
+static uint16_t IotGN_SendUpdateAccountMoneyRsp(uint8_t port, uint8_t *pBuf)
+{
+    AswMonitorChargeCtrl_Struct *pstChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
+    uint16_t dataLen = 0;
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+    memcpy(&pBuf[dataLen], pIotGNCtx->stProtoData[port].updateAccountMoneyCardID, 8);
+    dataLen += 8;
+    pBuf[dataLen++] = pIotGNCtx->stProtoData[port].updateAccountMoneyResult;
+    return dataLen;
+}
+
+static uint16_t IotGN_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf)
+{
+    CommonDateTime_Struct dateTime;
+    uint16_t dataLen = 0;
+    uint16_t temp = 0;
+    
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+    SSTM_GetDateTime(&dateTime);
+    temp = Common_uintBINToBCD(dateTime.year);
+    pBuf[dataLen++] = (temp >> 8) & 0xFF;
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.day, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.hour, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.minute, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    Common_BINToBCD(&dateTime.second, (uint8_t *)&temp, 1);
+    pBuf[dataLen++] = (uint8_t)(temp);
+    return dataLen;
+}
+
+static uint16_t IotGN_SendSetBillMode4RateRsp(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+
+    pBuf[dataLen++] = 0x01;
+    return dataLen;
+}
+
+static uint16_t IotGN_SendSetBillModeMultiRateRsp(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+
+    pBuf[dataLen++] = 0x01;
+    return dataLen;
+}
+
+static uint16_t IotGN_SendSetQrcodeRsp(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+    /* 终端号 */
+    pBuf[dataLen++] = port + 1;
+    /* 设置结果 */
+    pBuf[dataLen++] = 0x01;
+    return dataLen;
+}
+
+static uint16_t IotGN_SendSetRebootRsp(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+    /* 设置结果 */
+    pBuf[dataLen++] = 0x01;
+    return dataLen;
 }
 
 
@@ -801,7 +962,7 @@ void IotGN_UpCtrlSendDeal(void)
 
                         if (pCmdSendCtrl->printFlag)
                         {
-                            IOTGN_CFG_LogPrint("[枪：%d]发送[cmd: %02X, %s][%d]: ", port, pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
+                            IOTGN_CFG_LogPrint("[枪：%d]发送[cmd: %02X, %s][%d]: ", port, (uint8_t)pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
                             DSLogM_HexOutput(txBuf, dataLen);
                         }
 
