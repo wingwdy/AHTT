@@ -62,6 +62,7 @@ typedef struct
     CddCardType_Enum eCardType;
 	CddCardType_Enum eCardTypeSet;
     CddCardEvent_Enum eCardEvent;
+	CddCardEvent_Enum eCardEventOut;
     uint8_t cardUid[4];     /*卡唯一ID*/
     uint8_t cardUserId[BULLCARD_CARDID_LEN]; /*卡用户ID*/
 }CddCardM_Struct;
@@ -346,7 +347,7 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
     uint8_t tagType[2] = {0};
     uint8_t tempData[16] = {0};
     uint8_t result = eGlobalRet_OK;
-
+	
     if (pCardM->nfcOptStep == eOptStepReadUID)
     {
         optStatus = CddCardM_ReadCardUid(tagType, tempData, &result);
@@ -359,6 +360,7 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
 				if (pCardM->eCardType == eCddCardType_UUID)
 				{
 					pCardM->eCardEvent = CddCardEvent_CardIdOK;
+					CDDCARDM_CFG_LogPrint("读卡号成功,卡号: %02X%02X%02X%02X\r\n", tempData[0], tempData[1],tempData[2],tempData[3]);
 				}
 				else
 				{
@@ -420,6 +422,7 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
         {/* 读卡成功，暂停一会 */
             pCardM->eNfcState = eNfcPause;
         }
+		pCardM->eCardEventOut = pCardM->eCardEvent;
     }
 }
 
@@ -429,12 +432,10 @@ void CddCardM_NfcPauseProcess(CddCardM_Struct *pCardM)
 //    {/* 上层读取状态后，立即寻卡 */
 //        pCardM->eNfcState = eNfcInit;
 //    }
-    if ((pCardM->eCardEvent != CddCardEvent_Null) && (Common_GetSystick() - pCardM->nfcTick >= CDDCARDM_CFG_SWIPECARD_PAUSE_TICK))
+    if (Common_GetSystick() - pCardM->nfcTick >= CDDCARDM_CFG_SWIPECARD_PAUSE_TICK)
     {
         pCardM->eNfcState = eNfcInit;
     }
-    else
-    {}
 }
 
 void CddCardM_NfcFaultProcess(CddCardM_Struct *pCardM)
@@ -524,8 +525,8 @@ CddCardEvent_Enum CddCardM_GetCardEvent(void)
     CddCardEvent_Enum cardEvent = CddCardEvent_Null;
 
     CddCardM_Struct *pCardM = &g_stCddCardM;
-    cardEvent = pCardM->eCardEvent;
-    pCardM->eCardEvent = CddCardEvent_Null;
+    cardEvent = pCardM->eCardEventOut;
+    pCardM->eCardEventOut = CddCardEvent_Null;
 
     return cardEvent;
 }
