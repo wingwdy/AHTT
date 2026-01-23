@@ -79,6 +79,30 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
     },
 };
 
+const AswPlatCardDescriptor_Struct c_stAswPlatMCardDescriptorTable[eAswPlatCardType_Count] =
+{
+    [eAswPlatCardType_GN] =
+    {
+        .pName = "gn",
+        .cMeaning = "公牛卡",
+        .cardType = eCddCardType_BullCard,
+    },
+
+    [eAswPlatCardType_YKC21] =
+    {
+        .pName = "ykc2.1",
+        .cMeaning = "通用卡",
+        .cardType = eCddCardType_UUID,
+    },
+
+    [eAswPlatCardType_XDT] =
+    {
+        .pName = "lxxdt",
+        .cMeaning = "公牛卡",
+        .cardType = eCddCardType_BullCard,
+    }
+};
+
 
 /*******************************************************************************
 *    Static Local Functions Declaration

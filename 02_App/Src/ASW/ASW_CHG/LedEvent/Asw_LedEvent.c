@@ -44,7 +44,7 @@
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-
+static uint32_t g_startupTick = 0;
 
 
 /*******************************************************************************
@@ -147,11 +147,14 @@ void AswLedEvent_MainFunction(void)
     AswLedConfig_Struct *pLedConfig = NULL;
     uint8_t dev = 0;
 
-    for (dev = 0; dev < ARRAY_SIZE(g_AswLedConfigTable); dev++)
+    if (Common_JudgeTimeoutMs(g_startupTick, 500))
     {
-        pLedConfig = &g_AswLedConfigTable[dev];
-        AswLedEvent_ScanLedDeviceStatusSource(pLedConfig);
-        AswLedEvent_HandleLedDeviceStatusChange(dev, pLedConfig);
+        for (dev = 0; dev < ARRAY_SIZE(g_AswLedConfigTable); dev++)
+        {
+            pLedConfig = &g_AswLedConfigTable[dev];
+            AswLedEvent_ScanLedDeviceStatusSource(pLedConfig);
+            AswLedEvent_HandleLedDeviceStatusChange(dev, pLedConfig);
+        }
     }
 }
 

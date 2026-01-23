@@ -45,7 +45,6 @@ typedef enum
     CddCardEvent_Null = 0,
     CddCardEvent_CardIdOK,
     CddCardEvent_CardIdError,
-	CddCardEvent_HardFault,
 }CddCardEvent_Enum;
 /******************************************************************************
 *    Typedef Definition

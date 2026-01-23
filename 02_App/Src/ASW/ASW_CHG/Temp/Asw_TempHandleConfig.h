@@ -27,10 +27,10 @@
 
 #define ASWTEMP_CFG_CALLCYCLE                           (100u)
 
-#define ASWTEMP_CFG_GUN_OTEMP_60_THR                    (60 + 50)/*枪过温恢复充电阈值*/
-#define ASWTEMP_CFG_GUN_OTEMP_75_THR                    (75 + 50)/*枪过温停止充电阈值*/
-#define ASWTEMP_CFG_GUN_OTEMP_90_THR                    (90 + 50)/*恢复降流充电阈值*/
-#define ASWTEMP_CFG_GUN_OTEMP_105_THR                   (105 + 50)/*开始降流充电阈值*/
+#define ASWTEMP_CFG_GUN_OTEMP_60_THR                    (60 + 50)  /* 枪过温故障恢复，枪温阈值 */
+#define ASWTEMP_CFG_GUN_OTEMP_75_THR                    (75 + 50)  /* 恢复满功率充电，枪温阈值 */
+#define ASWTEMP_CFG_GUN_OTEMP_90_THR                    (90 + 50)  /* 降额充电，枪温阈值*/
+#define ASWTEMP_CFG_GUN_OTEMP_105_THR                   (105 + 50) /* 立即停止充电，枪温阈值 */
 
 #define ASWTEMP_CFG_GUN_ABOVE_90_KEEP_TIME              (5*60*1000u)
 #define ASWTEMP_CFG_GUN_BELOW_75_KEEP_TIME              (5*60*1000u)

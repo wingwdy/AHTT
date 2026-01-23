@@ -75,6 +75,7 @@ const char *g_logMModuleName[DSLogMModule_Count] =
     "Meter",
     "RCD",
     "Relay",
+    "CardM",
 
     "Flash",
     "Console",

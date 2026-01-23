@@ -35,6 +35,14 @@ typedef enum
     eAswPlatType_Count,
 }AswPlatType_Enum;
 
+typedef enum
+{
+    eAswPlatCardType_GN,
+    eAswPlatCardType_YKC21,    
+    eAswPlatCardType_XDT,
+    eAswPlatCardType_Count,
+}AswPlatCardType_Enum;
+
 
 /******************************************************************************
 *    Typedef Definition
@@ -56,6 +64,7 @@ uint8_t AswPlatM_SetFixPileDn(char *pFixPileDn, uint8_t len);
 uint8_t AswPlatM_SetPlatMainIpPort(char *pIp, uint8_t ipLen, uint16_t port);
 uint8_t AswPlatM_SetPlatMainPort(uint16_t port);
 uint8_t AswPlatM_SetPlatType(char *platName);
+uint8_t AswPlatM_SetPlatCardType(char *platCardName);
 AswPlatType_Enum AswPlatM_GetPlatType(void);
 
 void AswPlatM_DefaultPlatParam(void *param);

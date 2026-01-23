@@ -222,6 +222,13 @@ static uint8_t CddDrvWS2812B_CheckUpdateCondition(CddDrvWS2812BCtrl_struct *pCtr
             {
                 isCanOverride = TRUE;
             }
+            else
+            {
+                if (pCtrl->pNextDispTypeConfig->maxDispTimes <= pCtrl->dispTimes)
+                {
+                    isCanOverride = TRUE;
+                }
+            }
         }
     }
 
@@ -271,7 +278,7 @@ static void CddDrvWS2812B_DispModeBlinkCtrl(uint8_t ch, CddDrvWS2812BCtrl_struct
     {
     case CDDDRV_WS2812B_CTRL_STEP_0:
     {
-        CddDrvWS2812B_Controlbrightness(eCh, pCtrl, eCddDrvWS2812BbBightness_Off, 0);
+        CddDrvWS2812B_Controlbrightness(eCh, pCtrl, eCddDrvWS2812BbBightness_On, 0);
         pCtrl->onStartTick = Common_GetSystick();
         pCtrl->ctrlStep = CDDDRV_WS2812B_CTRL_STEP_1;
         break;
@@ -280,7 +287,7 @@ static void CddDrvWS2812B_DispModeBlinkCtrl(uint8_t ch, CddDrvWS2812BCtrl_struct
     {
         if (Common_JudgeTimeoutMs(pCtrl->onStartTick, OnTimeout))
         {
-            CddDrvWS2812B_Controlbrightness(eCh, pCtrl, eCddDrvWS2812BbBightness_On, 0);
+            CddDrvWS2812B_Controlbrightness(eCh, pCtrl, eCddDrvWS2812BbBightness_Off, 0);
             pCtrl->offStartTick = Common_GetSystick();
             pCtrl->ctrlStep = CDDDRV_WS2812B_CTRL_STEP_2;
         }
@@ -291,7 +298,7 @@ static void CddDrvWS2812B_DispModeBlinkCtrl(uint8_t ch, CddDrvWS2812BCtrl_struct
     {
         if (Common_JudgeTimeoutMs(pCtrl->offStartTick, OffTimeout))
         {
-            CddDrvWS2812B_Controlbrightness(eCh, pCtrl, eCddDrvWS2812BbBightness_Off, 0);
+            CddDrvWS2812B_Controlbrightness(eCh, pCtrl, eCddDrvWS2812BbBightness_On, 0);
             pCtrl->onStartTick = Common_GetSystick();
 
             pCtrl->ctrlStep = CDDDRV_WS2812B_CTRL_STEP_1;

@@ -21,6 +21,7 @@
 #include "Cdd_NetM.h"
 #include "Asw_PlatMConfig.h"
 #include "FrameQueue.h"
+#include "Cdd_CardM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -73,6 +74,19 @@ static const AswPlatMProtocolDescriptor_Struct *AswPlatM_GetProtocolDescriptor(v
     }
 
     return &c_stAswPlatMProtocolDescriptorTable[ePlatType];
+}
+
+static const AswPlatCardDescriptor_Struct *AswPlatM_GetCardDescriptor(void)
+{
+    AswPlatCardDescriptor_Struct *pCardDescriptor = NULL;
+    AswPlatCardType_Enum ePlatCardType = g_stAswPlatMCtx.stPlatParam.platMainCardType;
+
+    if (ePlatCardType >= eAswPlatCardType_Count)
+    {
+        ePlatCardType = eAswPlatCardType_GN;
+    }
+
+    return &c_stAswPlatMCardDescriptorTable[ePlatCardType];
 }
 
 uint8_t AswPlatM_SetPileDn(char *pPileDn, uint8_t len)
@@ -183,6 +197,35 @@ uint8_t AswPlatM_SetPlatType(char *platName)
     return ret;
 }
 
+uint8_t AswPlatM_SetPlatCardType(char *platCardName)
+{
+    const AswPlatCardDescriptor_Struct *pPlatCardDescriptor = NULL;
+    uint8_t index = 0;
+    uint8_t currentPlatCardType = g_stAswPlatMCtx.stPlatParam.platMainCardType;
+    uint8_t ret = FALSE;
+
+    for (index = 0; index < eAswPlatCardType_Count; index++)
+    {
+        pPlatCardDescriptor = &c_stAswPlatMCardDescriptorTable[index];
+
+        if (strcmp(platCardName, pPlatCardDescriptor->pName) == 0)
+        {
+            if (index != g_stAswPlatMCtx.stPlatParam.platMainCardType)
+            {
+                ASWPLATM_CFG_LogPrint("卡类型变化：[%s]-->[%s]\r\n", 
+                    c_stAswPlatMCardDescriptorTable[currentPlatCardType].cMeaning, pPlatCardDescriptor->cMeaning);
+                g_stAswPlatMCtx.stPlatParam.platMainCardType = index;
+                MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));
+            }
+
+            ret = TRUE;
+            break;
+        }
+    }
+
+    return ret;
+}
+
 AswPlatType_Enum AswPlatM_GetPlatType(void)
 {
     return (AswPlatType_Enum)g_stAswPlatMCtx.stPlatParam.platMainType;
@@ -229,6 +272,7 @@ void AswPlatM_DefaultPlatParam(void *param)
 
 void AswPlatM_InitMemory(void)
 {
+    const AswPlatCardDescriptor_Struct *pCardDescriptor = NULL;
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = NULL;
     MSNvmPlatParam_Struct *pParam = &g_stAswPlatMCtx.stPlatParam;
     CddNetMSocketPara_Union stSocketPara = { 0 };
@@ -239,9 +283,9 @@ void AswPlatM_InitMemory(void)
         AswPlatM_DefaultPlatParam(pParam);
     }
 
-    /* 注册运营平台链接 */
     pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
 
+    /* 注册运营平台链接 */
     if (pProtocolDescriptor != NULL)
     {
         if (pProtocolDescriptor->pFuncInit != NULL)
@@ -256,6 +300,10 @@ void AswPlatM_InitMemory(void)
 
         CddNetM_CreatLink(pProtocolDescriptor->eSocketType, stSocketPara, eCddNetMPlatType_O);
     }
+
+    /* 设置卡类型 */
+    pCardDescriptor = AswPlatM_GetCardDescriptor();
+    CddCardM_SetCardType(pCardDescriptor->cardType);
 }
 
 void AswPlatM_MainFunction(void)
@@ -267,26 +315,4 @@ void AswPlatM_MainFunction(void)
         pProtocolDescriptor->pMainFunction();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

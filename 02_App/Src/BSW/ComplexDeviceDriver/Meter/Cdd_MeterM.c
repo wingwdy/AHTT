@@ -83,8 +83,8 @@ static void CddMeterM_CyclePrintData(uint8_t port, CddMeterM_Struct *pstMeterM)
             current = CddMeterM_GetRmsCurrent(port);
 
             pstMeterM->cyclePrintTick = Common_GetSystick();
-            CDD_METERM_CFG_LogPrint("[枪：%d]电压：%d.%02d V, 电流：%d.%03d A, 有功功率：%d W, 累计已充电能：%ld.%04ld kwh \r\n", port,
-                voltage / 100, voltage % 100, current / 1000, current % 1000, power, temp1, temp2);
+            // CDD_METERM_CFG_LogPrint("[枪：%d]电压：%d.%02d V, 电流：%d.%03d A, 有功功率：%d W, 累计已充电能：%ld.%04ld kwh \r\n", port,
+            //     voltage / 100, voltage % 100, current / 1000, current % 1000, power, temp1, temp2);
         }
     }
 }

@@ -21,6 +21,7 @@
 #include "Cdd_NetM.h"
 #include "DS_LogM.h"
 #include "Asw_Monitor.h"
+#include "Cdd_CardM.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -48,11 +49,19 @@ typedef struct
 }AswPlatMProtocolDescriptor_Struct;
 
 
+typedef struct Asw_PlatMConfig
+{
+    char *pName;
+    char *cMeaning;
+    CddCardType_Enum cardType;
+}AswPlatCardDescriptor_Struct;
+
+
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
 extern const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAswPlatType_Count];
-
+extern const AswPlatCardDescriptor_Struct c_stAswPlatMCardDescriptorTable[eAswPlatCardType_Count];
 
 /******************************************************************************
 *    Global Function Prototypes

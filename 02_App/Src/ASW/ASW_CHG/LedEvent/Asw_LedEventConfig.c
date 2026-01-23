@@ -20,6 +20,7 @@
 #include "Asw_Charge.h"
 #include "Asw_ErrorHandle.h"
 #include "Cdd_Relay.h"
+#include "Asw_Monitor.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -56,6 +57,8 @@ static uint8_t AswLedEventCfg_GetErrorStateExsit(uint8_t port);
 static uint8_t AswLedEventCfg_GetOfflineExsit(uint8_t port);
 static uint8_t AswLedEventCfg_GetFactoryModeExsit(uint8_t port);
 static uint8_t AswLedEventCfg_GetOTAStatusExsit(uint8_t port);
+static uint8_t AswLedEventCfg_GetCardSuccExsit(uint8_t port);
+static uint8_t AswLedEventCfg_GetCardFailExsit(uint8_t port);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -135,7 +138,7 @@ const AswLedEventConfig_Struct  c_stAswLed_Device0_EventConfigTable[eAswLedDevic
 
     [eAswLedDevice0_DispType_ReadCardSucc] = 
     {
-        .pFuncGetStateExsist = NULL,
+        .pFuncGetStateExsist = AswLedEventCfg_GetCardSuccExsit,
         .eLedEventType = eAswLedEventype_Event,
         .eLedPriority = eAswLedPriority_7,
         .ledDispType = CDD_LEDM_DEVICE0_DISP_TYPE_8,  /* 绿绿绿 快闪 */
@@ -144,7 +147,7 @@ const AswLedEventConfig_Struct  c_stAswLed_Device0_EventConfigTable[eAswLedDevic
 
     [eAswLedDevice0_DispType_InvalidCard] = 
     {
-        .pFuncGetStateExsist = NULL,
+        .pFuncGetStateExsist = AswLedEventCfg_GetCardFailExsit,
         .eLedEventType = eAswLedEventype_Event,
         .eLedPriority = eAswLedPriority_7,
         .ledDispType = CDD_LEDM_DEVICE0_DISP_TYPE_9, /* 红红红 快闪 */
@@ -405,6 +408,16 @@ static uint8_t AswLedEventCfg_GetConnectedUnAuthExsit(uint8_t port)
     }
 
     return ret;
+}
+
+static uint8_t AswLedEventCfg_GetCardSuccExsit(uint8_t port)
+{
+    return AswMonitor_CheckSwipCardSuccEvent();
+}
+
+static uint8_t AswLedEventCfg_GetCardFailExsit(uint8_t port)
+{
+    return AswMonitor_CheckSwipCardFailEvent();
 }
 
 static uint8_t AswLedEventCfg_GetErrorStateExsit(uint8_t port)

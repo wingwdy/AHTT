@@ -168,7 +168,8 @@ uint8_t AswMonitor_CheckBillModeValid(uint8_t port);
 void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc);
 uint8_t AswMonitor_CheckForbidState(uint8_t port);
 void AswMonitor_SetReboot(AswMonitorRebootType_Enum eRebootType);
-
+uint8_t AswMonitor_CheckSwipCardSuccEvent(void);
+uint8_t AswMonitor_CheckSwipCardFailEvent(void);
 #endif
 
 

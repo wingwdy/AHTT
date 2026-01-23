@@ -24,6 +24,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "Mcal_Mcu.h"
+#include "Cdd_CardM.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -63,6 +64,9 @@ typedef struct
     uint32_t rebootDelayTick;                        /* 复位延时计时 */
     AswMonitorRebootType_Enum eAswMonitorRebootType; /* 复位类型 */
     AswMonitorRebootStep_Enum eAswMonitorRebootStep; /* 复位控制步骤 */
+
+    uint8_t swipCardSuccLedFlag; /* 刷卡成功标记 */       
+    uint8_t swipCardFailLedFlag; /* 刷卡失败标记 */  
 }AswMonitorCtx_Struct;
 
 
@@ -421,6 +425,38 @@ static void AswMonitor_RebootManage(void)
     }
 }
 
+static void AswMonitor_SwipCardManage(void)
+{
+    CddCardEvent_Enum eCardEvent = CddCardM_GetCardEvent();
+
+    if (eCardEvent == CddCardEvent_CardIdOK)
+    {
+        g_stAswMonitorCtx.swipCardSuccLedFlag = TRUE;
+    }
+    else if (eCardEvent == CddCardEvent_CardIdError)
+    {
+        g_stAswMonitorCtx.swipCardFailLedFlag = TRUE;
+    }
+    else
+    {}
+}
+
+uint8_t AswMonitor_CheckSwipCardSuccEvent(void)
+{
+    uint8_t ret = g_stAswMonitorCtx.swipCardSuccLedFlag;
+
+    g_stAswMonitorCtx.swipCardSuccLedFlag = FALSE;
+    return ret;
+}
+
+uint8_t AswMonitor_CheckSwipCardFailEvent(void)
+{
+    uint8_t ret = g_stAswMonitorCtx.swipCardFailLedFlag;
+
+    g_stAswMonitorCtx.swipCardFailLedFlag = FALSE;
+    return ret;
+}
+
 uint8_t AswMonitor_CheckBillModeValid(uint8_t port)
 {
     AswMonitorData_Struct *pstAswMonitorData = NULL;
@@ -612,6 +648,8 @@ void AswMonitor_MainFunction(void)
     }
 
     AswMonitor_RebootManage();
+
+    AswMonitor_SwipCardManage();
 }
 
 

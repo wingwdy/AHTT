@@ -199,6 +199,24 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                 DSCONSOLE_CFG_LogPrint("Set plat failed!\r\n");
             } 
         }
+        else if (0 == strcmp(argv[1], "card"))
+        {
+            char platCardName[16 + 1] = {0};
+
+            if (sscanf(argv[2], "%16s", platCardName) == 1)
+            {
+                if (TRUE == AswPlatM_SetPlatCardType(platCardName))
+                {
+                    setResult = TRUE;
+                    DSCONSOLE_CFG_LogPrint("Set card: \"%s\" ok!\r\n", platCardName);
+                }
+            }
+
+            if (setResult == FALSE)
+            {
+                DSCONSOLE_CFG_LogPrint("Set card failed!\r\n");
+            } 
+        }
         /* 设置参数 */
         else if (0 == strcmp(argv[1], "para"))
         {
