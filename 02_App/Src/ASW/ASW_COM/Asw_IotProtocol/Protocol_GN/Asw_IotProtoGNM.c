@@ -453,6 +453,28 @@ void IotGN_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
     }
 }
 
+uint8_t IotGN_SwipCardCharge(uint8_t port)
+{
+    uint8_t ret = FALSE;
+
+    if (pIotGNCtx->loginSucc == TRUE)
+    {
+        if ((TRUE != Common_GetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_PILE_START_CHARGE_REQ)) &&
+            (TRUE != Common_GetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, IOT_GN_CMD_PILE_START_CHARGE_RSP)))
+        {
+            Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_PILE_START_CHARGE_REQ, TRUE);
+            ret = TRUE;
+            IOTGN_CFG_LogPrint("[枪：%d]刷卡成功，请求启动充电!\r\n", port);
+        }
+        else
+        {
+            IOTGN_CFG_LogPrint("[枪：%d]刷卡成功，但是已经有卡在申请启动充电，本次刷卡作废!\r\n", port);
+        }
+    }
+
+    return ret;
+}
+
 void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason)
 { 
     AswMonitorBillMode_Struct *pBillMode = AswMonitor_GetCurUsedBillModePtr(port);
@@ -510,7 +532,7 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
         pGnOrder->billInfo[index][0] = pBillMode->totalPrice[index];            // 单价
         pGnOrder->billInfo[index][1] = pChargeData->rateTotalEnergy[index];     // 电量     
         pGnOrder->billInfo[index][2] = pChargeData->rateTotalLossEnergy[index]; // 计损电量              
-        pGnOrder->billInfo[index][2] = pChargeData->rateTotalMoney[index];      // 总金额  
+        pGnOrder->billInfo[index][3] = pChargeData->rateTotalMoney[index];      // 总金额  
     }
 
     if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)

@@ -46,6 +46,7 @@ typedef struct
     void (*pMainFunction)(void);
     void (*pFuncPackChargeRecord)(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason);
     void (*pFuncTransformBillMode)(uint8_t port, AswMonitorBillMode_Struct *pBillMode);
+    uint8_t (*pFuncSwipCardCharge)(uint8_t port);
 }AswPlatMProtocolDescriptor_Struct;
 
 

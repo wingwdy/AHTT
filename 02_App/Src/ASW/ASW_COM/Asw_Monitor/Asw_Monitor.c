@@ -25,6 +25,7 @@
 #include "task.h"
 #include "Mcal_Mcu.h"
 #include "Cdd_CardM.h"
+#include "Cdd_ModeM.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -65,8 +66,8 @@ typedef struct
     AswMonitorRebootType_Enum eAswMonitorRebootType; /* 复位类型 */
     AswMonitorRebootStep_Enum eAswMonitorRebootStep; /* 复位控制步骤 */
 
-    uint8_t swipCardSuccLedFlag; /* 刷卡成功标记 */       
-    uint8_t swipCardFailLedFlag; /* 刷卡失败标记 */  
+    uint8_t swipCardSuccLedFlag;  /* 刷卡成功标记 */       
+    uint8_t swipCardFailLedFlag;  /* 刷卡失败标记 */  
 }AswMonitorCtx_Struct;
 
 
@@ -150,8 +151,8 @@ static void AswMonitor_ProcessCostData(uint8_t port, AswMonitorData_Struct *pstA
 
     if (incEnergy != 0)
     {
-        rateNum = pBillMode->periodRate[periodNum];
         periodNum = AswMonitor_GetBillModePeriod(pBillMode);
+        rateNum = pBillMode->periodRate[periodNum];
 
         pChargeData->totalEnergy += incEnergy;
         pChargeData->totalLossEnergy = ((uint64_t)pChargeData->totalEnergy * pBillMode->elecLossRate / 100) + pChargeData->totalEnergy;
@@ -425,12 +426,102 @@ static void AswMonitor_RebootManage(void)
     }
 }
 
+void AswMonitor_PrintChargeData(void)
+{
+    AswMonitorChargeData_Struct *pChargeData = NULL;
+    uint8_t port = 0;
+    uint32_t voltage = 0;
+    uint32_t current = 0;
+    uint32_t power = 0;
+    int8_t gunTemp = 0;
+    int8_t envTemp = 0;
+    uint32_t energy = 0;
+    uint32_t chargeTime = 0;
+    uint32_t money = 0;
+    
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+    {
+        pChargeData = &g_stAswMonitorData[port].stChargeData;
+
+        voltage = AswChargeIf_GetInputVoltage(port);
+        current = AswChargeIf_GetOutputCurrent(port);
+        gunTemp = AswChargeIf_GetGunTemperature(port);
+        envTemp = AswChargeIf_GetEnvTemperature();
+        power = AswChargeIf_GetOutputPower(port);
+        energy = pChargeData->totalLossEnergy;
+        chargeTime = pChargeData->chargeTime;
+                                                                 
+        ASWMONITOR_CFG_LogPrint("---------------------------------[枪: %d]信息------------------------------------\r\n");
+        ASWMONITOR_CFG_LogPrint("电压：%d.%02d V,\t电流：%d.%03d A,\t功率：%d.%03d W\r\n",
+                                voltage / 100, voltage % 100, current / 1000, current % 1000, power / 1000, power % 1000);
+        ASWMONITOR_CFG_LogPrint("枪温：%d ℃,\t壳温：%d ℃,\t\t已充时间：%d s\r\n",
+                                (gunTemp - 50), (envTemp - 50), chargeTime);                                
+        ASWMONITOR_CFG_LogPrint("已充电量：%d.%04d kWh,\t\t\t已充金额：%d.%04d 元,\r\n",
+                                energy / 10000, energy % 10000, money / 10000, money % 10000);
+        ASWMONITOR_CFG_LogPrint("--------------------------------------------------------------------------------\r\n");             
+    }
+}
+
+static void AswMonitor_CardAuthHandle(void)
+{
+    /* 目前刷卡分不清到底是A枪刷卡，还是B枪刷卡，暂时所有的刷卡认为是A枪刷卡 */
+    uint8_t port = 0;
+    AswMonitorData_Struct *pstAswMonitorData = &g_stAswMonitorData[port];
+    uint8_t recvUserCardID[ASWMONITOR_CARD_ID_LEN] = {0};
+    uint32_t recvUUID = 0;
+    uint8_t bcdCardID[ASWMONITOR_CARD_ID_LEN] = {0};
+
+    if (CddCardM_GetCardType() == eCddCardType_UUID)
+    {
+        CddCardM_GetCardUid((uint8_t *)&recvUUID);
+        recvUUID = Common_uintBINToBCD(recvUUID);
+        bcdCardID[4] = (recvUUID >> 24) & 0xFF;
+        bcdCardID[5] = (recvUUID >> 16) & 0xFF;
+        bcdCardID[6] = (recvUUID >> 8) & 0xFF;
+        bcdCardID[7] = recvUUID & 0xFF;
+    }
+    else
+    {
+        CddCardM_GetCardUserId(recvUserCardID);
+        Common_BINToBCD(recvUserCardID, bcdCardID, ASWMONITOR_CARD_ID_LEN);
+    }
+
+    if (pstAswMonitorData->orderCtrl == ASWMONITOR_ORDER_CTRL_IDLE)
+    {
+        if (TRUE == AswPlatM_SwipCardCharge(port))
+        {
+            memcpy(pstAswMonitorData->stChargeCtrl.authCardID, bcdCardID, ASWMONITOR_CARD_ID_LEN);
+        }
+    }
+    else if (pstAswMonitorData->orderCtrl == ASWMONITOR_ORDER_CTRL_ONGOING)
+    {
+        if (pstAswMonitorData->stChargeCtrl.startSrc == ASWMONITOR_ORDER_START_SRC_CARD)
+        {
+            if (0 == memcmp(pstAswMonitorData->stChargeCtrl.authCardID, bcdCardID, ASWMONITOR_CARD_ID_LEN))
+            {
+                AswErrhandle_SetErrExsitCallback(port, eSrc_CardStop);
+            }
+        }
+    }
+    else
+    {}
+}
+
 static void AswMonitor_SwipCardManage(void)
 {
     CddCardEvent_Enum eCardEvent = CddCardM_GetCardEvent();
 
     if (eCardEvent == CddCardEvent_CardIdOK)
     {
+        if (CddModeM_IsFactoryMode() == TRUE)
+        {
+            CddModeM_ExsitFactoryMode();
+        }
+        else
+        {
+            AswMonitor_CardAuthHandle();
+        }
+
         g_stAswMonitorCtx.swipCardSuccLedFlag = TRUE;
     }
     else if (eCardEvent == CddCardEvent_CardIdError)
@@ -651,20 +742,3 @@ void AswMonitor_MainFunction(void)
 
     AswMonitor_SwipCardManage();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

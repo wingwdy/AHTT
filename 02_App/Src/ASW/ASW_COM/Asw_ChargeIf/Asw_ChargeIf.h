@@ -54,8 +54,12 @@
 uint8_t AswChargeIf_CheckGunConnected(uint8_t port);
 uint32_t AswChargeIf_GetOutputVoltage(uint8_t port);
 uint32_t AswChargeIf_GetOutputCurrent(uint8_t port);
+uint32_t AswChargeIf_GetOutputPower(uint8_t port);
 uint8_t AswChargeIf_GetChargeState(uint8_t port);
 uint8_t AswChargeIf_GetGunTemperature(uint8_t port);
+uint8_t AswChargeIf_GetEnvTemperature(void);
+uint32_t AswChargeIf_GetInputVoltage(uint8_t port);
+
 uint64_t AswChargeIf_GetMeterEnergyVal(uint8_t port);
 void AswChargeIf_ChargeStart(uint8_t port);
 AswErrorType_Enum AswChargeIf_GetStopReason(uint8_t port);

@@ -64,6 +64,7 @@ static int32_t DSConsoleCfg_EnterFactoryMode(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_ExsistFactoryMode(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_HandleGbMode(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[]);
+static int32_t DSConsoleCfg_GetPara(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_ReadAgingState(int32_t argc, char *argv[]);
 
 /*******************************************************************************
@@ -76,6 +77,7 @@ DSCONSOLE_CFG_ADD_CMD(testmode,      DSConsoleCfg_EnterFactoryMode, "testmode" E
 DSCONSOLE_CFG_ADD_CMD(workmode,      DSConsoleCfg_ExsistFactoryMode, "workmode" Exsist factoryMode);
 DSCONSOLE_CFG_ADD_CMD(gbmode,        DSConsoleCfg_HandleGbMode, "gbmode 1 / 2" EnterGbMode/ExsitGbMode);
 DSCONSOLE_CFG_ADD_CMD(set,           DSConsoleCfg_SetPara, "set xxx" set param);
+DSCONSOLE_CFG_ADD_CMD(get,           DSConsoleCfg_GetPara, "get xxx" get param);
 DSCONSOLE_CFG_ADD_CMD(ReadAgingState,DSConsoleCfg_ReadAgingState, "ReadAgingState" ReadAgingState);
 
 
@@ -144,6 +146,22 @@ static int32_t DSConsoleCfg_HandleGbMode(int32_t argc, char *argv[])
         }
         else
         {}
+    }
+
+    return 0;
+}
+
+static int32_t DSConsoleCfg_GetPara(int32_t argc, char *argv[])
+{
+    uint8_t *pTemp = NULL;
+    uint8_t setResult = FALSE;
+
+    if (argc == 2)
+    { 
+        if (0 == strcmp(argv[1], "chargeInfo"))
+        {
+            AswMonitor_PrintChargeData();
+        }
     }
 
     return 0;

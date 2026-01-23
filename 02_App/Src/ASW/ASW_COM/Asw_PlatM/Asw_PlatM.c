@@ -241,6 +241,20 @@ void AswPlatM_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
     }
 }
 
+uint8_t AswPlatM_SwipCardCharge(uint8_t port)
+{
+    const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
+    uint8_t ret = FALSE;
+
+    if (pProtocolDescriptor->pFuncSwipCardCharge != NULL)
+    {
+        ret = pProtocolDescriptor->pFuncSwipCardCharge(port);
+    }
+
+    return ret;
+}
+
+
 void AswPlatM_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pBillMode)
 {
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();

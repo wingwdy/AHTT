@@ -94,7 +94,7 @@ typedef struct
     uint8_t elecLossRate;                                      /* 计损比率 小数点后两位 */
 }AswMonitorBillMode_Struct;
 
-typedef struct 
+typedef struct
 {
     uint8_t startSrc;                                /* 发起源 */
     eAswMonitorChargeCtrlType_Enum eChargeCtrlType;  /* 充电控制方式 */
@@ -170,6 +170,7 @@ uint8_t AswMonitor_CheckForbidState(uint8_t port);
 void AswMonitor_SetReboot(AswMonitorRebootType_Enum eRebootType);
 uint8_t AswMonitor_CheckSwipCardSuccEvent(void);
 uint8_t AswMonitor_CheckSwipCardFailEvent(void);
+void AswMonitor_PrintChargeData(void);
 #endif
 
 

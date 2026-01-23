@@ -68,7 +68,7 @@ extern GlobalRet_Enum CddCardM_SetCardType(CddCardType_Enum eType);
 extern CddCardEvent_Enum CddCardM_GetCardEvent(void);
 extern GlobalRet_Enum CddCardM_GetCardUid(uint8_t *pUidOut);
 extern GlobalRet_Enum CddCardM_GetCardUserId(uint8_t *pUidOut);
-
+extern CddCardType_Enum CddCardM_GetCardType(void);
 
 #endif /* CDD_CARDM_H_ */
 

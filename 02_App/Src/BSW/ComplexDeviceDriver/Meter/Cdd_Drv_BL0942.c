@@ -566,6 +566,7 @@ void CddDrvBL0942_InitMemory(void)
         if (readResult != eGlobalRet_OK || pBL0942->caliParam.VoltageCaliK == 0)
         {
             pBL0942->caliParam.VoltageCaliK = CDDDRV_BL0942_CFG_VOLTAGE_K;
+            CDD_BL0942_CFG_WriteBlockCaliParam(port, (uint8_t *)&pBL0942->caliParam, sizeof(MSNvmMeterCaliParam_Struct));
         }
     }
 }
@@ -645,8 +646,6 @@ uint8_t CddDrvBL0942_GetReadyFlag(uint8_t port)
     return readyFlag;
 }
 
-
-// 1930
 
 
 

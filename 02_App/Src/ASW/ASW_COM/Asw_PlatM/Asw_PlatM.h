@@ -66,6 +66,7 @@ uint8_t AswPlatM_SetPlatMainPort(uint16_t port);
 uint8_t AswPlatM_SetPlatType(char *platName);
 uint8_t AswPlatM_SetPlatCardType(char *platCardName);
 AswPlatType_Enum AswPlatM_GetPlatType(void);
+uint8_t AswPlatM_SwipCardCharge(uint8_t port);
 
 void AswPlatM_DefaultPlatParam(void *param);
 MSNvmPlatParam_Struct * AswPlatM_GetPlatParamPtr(void);

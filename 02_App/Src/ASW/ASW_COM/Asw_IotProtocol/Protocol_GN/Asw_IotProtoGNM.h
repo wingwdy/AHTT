@@ -108,6 +108,7 @@ void IotGN_InitMemory(void);
 void IotGN_MainFunction(void);
 void IotGN_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardBillMode);
 void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason);
+uint8_t IotGN_SwipCardCharge(uint8_t port);
 /* 内部适用 */
 uint8_t IotGN_GetGunState(uint8_t port);
 void IotGN_OfflineHandle(void);

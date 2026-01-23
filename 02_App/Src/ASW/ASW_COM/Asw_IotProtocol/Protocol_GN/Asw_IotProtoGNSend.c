@@ -473,7 +473,7 @@ static uint16_t IotGN_SendRealData(uint8_t port, uint8_t *pBuf)
     /* 是否插枪 */
     pBuf[dataLen++] = (AswChargeIf_CheckGunConnected(port) == TRUE) ? 0x01 : 0x00;
     /* 输出电压 */
-    Common_Uint16ToTwoUint8(&pBuf[dataLen], AswChargeIf_GetOutputVoltage(port) / 10);
+    Common_Uint16ToTwoUint8(&pBuf[dataLen], AswChargeIf_GetInputVoltage(port) / 10);
     dataLen += 2;
     /* 输出电流 */
     Common_Uint16ToTwoUint8(&pBuf[dataLen], AswChargeIf_GetOutputCurrent(port) / 100);

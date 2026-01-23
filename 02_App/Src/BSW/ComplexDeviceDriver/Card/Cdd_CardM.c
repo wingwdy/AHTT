@@ -530,6 +530,11 @@ GlobalRet_Enum CddCardM_SetCardType(CddCardType_Enum eType)
 	return ret;
 }
 
+CddCardType_Enum CddCardM_GetCardType(void)
+{
+	return g_stCddCardM.eCardTypeSet;
+}
+
 CddCardEvent_Enum CddCardM_GetCardEvent(void)
 {
     CddCardEvent_Enum cardEvent = CddCardEvent_Null;

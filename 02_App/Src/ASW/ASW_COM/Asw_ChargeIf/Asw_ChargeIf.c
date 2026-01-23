@@ -84,6 +84,24 @@ uint32_t AswChargeIf_GetOutputVoltage(uint8_t port)
     return outputVol;
 }
 
+uint32_t AswChargeIf_GetInputVoltage(uint8_t port)
+{
+    return CddMeterM_GetRmsVoltage(port);;
+}
+
+uint32_t AswChargeIf_GetOutputPower(uint8_t port)
+{
+    uint32_t power = 0;
+
+    if (CddRelay_GetRelayState(port) == eCddRelayState_On)
+    {
+        power = CddMeterM_GetPower(port);
+    }
+
+    return power;
+}
+
+
 uint32_t AswChargeIf_GetOutputCurrent(uint8_t port)
 {
     uint32_t outputCurrent = 0;
@@ -104,6 +122,11 @@ uint8_t AswChargeIf_GetChargeState(uint8_t port)
 uint8_t AswChargeIf_GetGunTemperature(uint8_t port)
 {
     return CddSensor_GetGunTemperature(port);
+}
+
+uint8_t AswChargeIf_GetEnvTemperature(void)
+{
+    return CddSensor_GetEnvTemperature();
 }
 
 uint64_t AswChargeIf_GetMeterEnergyVal(uint8_t port)
