@@ -22,6 +22,7 @@
 #include "Asw_PlatMConfig.h"
 #include "FrameQueue.h"
 #include "Cdd_CardM.h"
+#include "Cdd_ModeM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -74,6 +75,11 @@ static const AswPlatMProtocolDescriptor_Struct *AswPlatM_GetProtocolDescriptor(v
     }
 
     return &c_stAswPlatMProtocolDescriptorTable[ePlatType];
+}
+
+static const AswPlatMProtocolDescriptor_Struct *AswPlatM_GetOMProtocolDescriptor(void)
+{
+    return &c_stAswPlatMProtocolDescriptorTable[eAswPlatType_OM];
 }
 
 static const AswPlatCardDescriptor_Struct *AswPlatM_GetCardDescriptor(void)
@@ -323,10 +329,19 @@ void AswPlatM_InitMemory(void)
 void AswPlatM_MainFunction(void)
 {  
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
+    const AswPlatMProtocolDescriptor_Struct *pOMProtocolDescriptor = AswPlatM_GetOMProtocolDescriptor();
 
-    if (pProtocolDescriptor->pMainFunction != NULL)
-    {
-        pProtocolDescriptor->pMainFunction();
+    if (TRUE != CddModeM_IsFactoryMode())
+    { 
+        if (pProtocolDescriptor->pMainFunction != NULL)
+        {
+            pProtocolDescriptor->pMainFunction();
+        }
+
+        if (pOMProtocolDescriptor->pMainFunction != NULL)
+        {
+            pOMProtocolDescriptor->pMainFunction();
+        }
     }
 }
 

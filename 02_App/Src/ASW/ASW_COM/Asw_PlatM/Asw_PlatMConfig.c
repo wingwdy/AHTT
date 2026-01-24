@@ -78,6 +78,16 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncInit = NULL,
         .pMainFunction = NULL,
     },
+
+    [eAswPlatType_OM] =
+    {
+        .pName = "om",
+        .cProtoMeaning = "运维平台",
+        .eSocketType = eCddNetMSocketType_TCP,
+        .pFuncFillLinkPara = NULL,
+        .pFuncInit = NULL,
+        .pMainFunction = NULL,
+    },
 };
 
 const AswPlatCardDescriptor_Struct c_stAswPlatMCardDescriptorTable[eAswPlatCardType_Count] =

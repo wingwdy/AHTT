@@ -150,17 +150,18 @@ static void ATModule_UrcNtp(uint8_t *pData, void * modulePara, uint16_t dataLen)
 
 	if (NULL != pTemp)
 	{
-        sscanf((char*)pTemp,"+QNTP: %d,\"%d/%d/%d,%d:%d:%d+\r\n", &s32Temp, &tmp_year,
-                &time[2],&time[3],&time[4],&time[5],&time[6]);
-
-        dateTime.year = tmp_year;
-        dateTime.month = time[2];
-        dateTime.day = time[3];
-        dateTime.hour = time[4] + 8;
-        dateTime.minute = time[5];
-        dateTime.second = time[6];
-        dateTime.millisecond = 0;
-        SSTM_SynTimeByDateTime(&dateTime);
+        if (7 == sscanf((char*)pTemp,"+QNTP: %d,\"%d/%d/%d,%d:%d:%d+\r\n", &s32Temp, &tmp_year,
+                &time[2],&time[3],&time[4],&time[5],&time[6]))
+        {
+            dateTime.year = tmp_year;
+            dateTime.month = time[2];
+            dateTime.day = time[3];
+            dateTime.hour = time[4] + 8;
+            dateTime.minute = time[5];
+            dateTime.second = time[6];
+            dateTime.millisecond = 0;
+            SSTM_SynTimeByDateTime(&dateTime);
+        }
 	}
 }
 
@@ -216,11 +217,12 @@ static uint8_t ATModule_RecvSimStatus(uint8_t socketID, void * modulePara, uint8
     int32_t status = 0;
     uint8_t ret = FALSE;
 
-    sscanf((char*)pData, ",%d/r", &status);
-
-    if (status == 1)
+    if (1 == sscanf((char*)pData, ",%d/r", &status))
     {
-        ret = TRUE;
+        if (status == 1)
+        {
+            ret = TRUE;
+        }
     }
 
     return ret;
@@ -273,9 +275,11 @@ static uint8_t ATModule_RecvCSQ(uint8_t socketID, void * modulePara, uint8_t *pD
 
         if (pStart != NULL)
         {
-            sscanf((char*)pStart, "+CSQ: %d,", &csq);
-            pModulePara->stModuleInfo.csq = csq;
-            ret = TRUE;
+            if (1 == sscanf((char*)pStart, "+CSQ: %d,", &csq))
+            {
+                pModulePara->stModuleInfo.csq = csq;
+                ret = TRUE;
+            }
         }
     }
 
@@ -289,12 +293,13 @@ static uint8_t ATModule_RecvCGREG(uint8_t socketID, void * modulePara, uint8_t *
     int32_t status = 0;
     uint8_t ret = FALSE;
 
-    sscanf((char*)pData, "+CGREG:%d,%d", &en, &status);
-
-    /* 1: 已注册，归属地网络； 5: 已注册，漫游状态 */
-    if (status == 1 || status == 5)
+    if (2 == sscanf((char*)pData, "+CGREG:%d,%d", &en, &status))
     {
-        ret = TRUE;
+        /* 1: 已注册，归属地网络； 5: 已注册，漫游状态 */
+        if (status == 1 || status == 5)
+        {
+            ret = TRUE;
+        }
     }
 
     return ret;
@@ -358,12 +363,13 @@ static uint8_t ATModule_RecvPDPState(uint8_t socketID, void * modulePara, uint8_
 
     if (pTemp != NULL)
     {
-        sscanf((char*)pTemp, "+QIACT: %d,", &activeState);
-
-        if (activeState == 1)
+        if (1 == sscanf((char*)pTemp, "+QIACT: %d,", &activeState))
         {
-            CddDrvEG800AK_SetModuleState(eCddNetMModuleState_Work);
-            ret = TRUE;
+            if (activeState == 1)
+            {
+                CddDrvEG800AK_SetModuleState(eCddNetMModuleState_Work);
+                ret = TRUE;
+            }
         }
     }
 

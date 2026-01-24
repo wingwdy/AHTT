@@ -32,6 +32,7 @@ typedef enum
     eAswPlatType_GN,
     eAswPlatType_YKC21,    
     eAswPlatType_XDT,
+    eAswPlatType_OM,
     eAswPlatType_Count,
 }AswPlatType_Enum;
 

@@ -22,11 +22,13 @@
 #include "Asw_PlatM.h"
 #include "Asw_ErrorHandle.h"
 
-
+#include "Cdd_ModeM.h"
+#include "Cdd_NetM.h"
 
 #include "Mcal_Mcu.h"
+
 #include "PortTask.h"
-#include "Cdd_ModeM.h"
+
 /************************s*******************************************************
 *    Macro Definition
 *******************************************************************************/

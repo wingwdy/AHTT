@@ -149,7 +149,7 @@
           <Type>0</Type>
           <LineNumber>745</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134289160</Address>
+          <Address>134289356</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -165,7 +165,7 @@
           <Type>0</Type>
           <LineNumber>526</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134239462</Address>
+          <Address>134235934</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -181,7 +181,7 @@
           <Type>0</Type>
           <LineNumber>476</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134235696</Address>
+          <Address>134238058</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -191,6 +191,22 @@
           <Filename>..\Src\ASW\ASW_COM\Asw_Monitor\Asw_Monitor.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_COM/Asw_Monitor/Asw_Monitor.c\476</Expression>
+        </Bp>
+        <Bp>
+          <Number>3</Number>
+          <Type>0</Type>
+          <LineNumber>334</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134239996</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Src\ASW\ASW_COM\Asw_PlatM\Asw_PlatM.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_COM/Asw_PlatM/Asw_PlatM.c\334</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -778,7 +794,7 @@
 
   <Group>
     <GroupName>BSW/ComplexDeviceDriver</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

@@ -26,6 +26,7 @@
 #include "Mcal_Mcu.h"
 #include "Cdd_CardM.h"
 #include "Cdd_ModeM.h"
+#include "SS_Ucm.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -302,12 +303,29 @@ static void AswMonitor_ChargeValDetect(uint8_t port, AswMonitorData_Struct *pstA
 
 static void AswMonitor_SaveChargeRecord(uint8_t port, AswMonitorData_Struct *pstAswMonitorData, uint8_t orderSaveReason)
 {
-    AswPlatM_PackChargeRecord(port, &pstAswMonitorData->stOrderData, orderSaveReason);
-    ASWMONITOR_CFG_WriteBlockOrderInfo(port, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
-
-    if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
+    if (pstAswMonitorData->stChargeCtrl.startSrc != ASWMONITOR_ORDER_START_SRC_PNC)
     {
-        MSNvm_InsertNewRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
+        AswPlatM_PackChargeRecord(port, &pstAswMonitorData->stOrderData, orderSaveReason);
+        ASWMONITOR_CFG_WriteBlockOrderInfo(port, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
+
+        if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
+        {
+            MSNvm_InsertNewRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
+        }
+    }
+}
+
+static void AswMonitor_IdleHandle(uint8_t port, AswMonitorData_Struct *pstAswMonitorData)
+{
+    if (TRUE == CddModeM_IsFactoryMode())
+    {
+        if ((ASWCHARGEIF_WORKSTATE_READY == AswChargeIf_GetChargeState(port)) && (FALSE == SSUcm_IsUpdating()))
+        {  
+            if (eErrChargeCondition_Allow == AswErrHandle_GetChargeCondition(port))
+            {
+                AswMonitor_ChargeStart(port, ASWMONITOR_ORDER_START_SRC_PNC);
+            }
+        }
     }
 }
 
@@ -350,6 +368,7 @@ static void AswMonitor_OrderManage(uint8_t port, AswMonitorData_Struct *pstAswMo
     {
         case ASWMONITOR_ORDER_CTRL_IDLE:
         {
+            AswMonitor_IdleHandle(port, pstAswMonitorData);
             break;
         }
 
@@ -454,7 +473,7 @@ void AswMonitor_PrintChargeData(void)
         ASWMONITOR_CFG_LogPrint("---------------------------------[枪: %d]信息------------------------------------\r\n");
         ASWMONITOR_CFG_LogPrint("电压：%d.%02d V,\t电流：%d.%03d A,\t功率：%d.%03d W\r\n",
                                 voltage / 100, voltage % 100, current / 1000, current % 1000, power / 1000, power % 1000);
-        ASWMONITOR_CFG_LogPrint("枪温：%d ℃,\t\t壳温：%d ℃,\t\t已充时间：%d s\r\n",
+        ASWMONITOR_CFG_LogPrint("枪温：%d ℃,\t壳温：%d ℃,\t\t已充时间：%d s\r\n",
                                 (gunTemp - 50), (envTemp - 50), chargeTime);                                
         ASWMONITOR_CFG_LogPrint("已充电量：%d.%04d kWh,\t\t\t已充金额：%d.%04d 元,\r\n",
                                 energy / 10000, energy % 10000, money / 10000, money % 10000);
@@ -601,6 +620,12 @@ void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc)
             pstAswMonitorData->chargeStart = TRUE;
             pstAswMonitorData->stChargeCtrl.startSrc = startSrc;
 
+            if (pstAswMonitorData->stChargeCtrl.startSrc == ASWMONITOR_ORDER_START_SRC_PNC)
+            {
+                pstAswMonitorData->stChargeCtrl.eChargeCtrlType = eAswMonitorChargeCtrlType_AutoCharge;
+                pstAswMonitorData->stChargeCtrl.accountMoney = 999999;
+            }
+
             pChargeData->lastMeterEnergyVal = AswChargeIf_GetMeterEnergyVal(port);
             pChargeData->startMeterVal = pChargeData->lastMeterEnergyVal;
             pChargeData->stopMeterVal = pChargeData->startMeterVal;
@@ -613,8 +638,8 @@ void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc)
             pstAswMonitorData->orderCtrl = ASWMONITOR_ORDER_CTRL_ONGOING;
 
             pstAswMonitorData->stOrderData.orderSaveState = ASWMONITOR_ORDER_SAVE_START;
-            AswMonitor_SaveChargeRecord(port, pstAswMonitorData, ASWMONITOR_ORDER_SAVE_START);
             AswChargeIf_ChargeStart(port);
+            AswMonitor_SaveChargeRecord(port, pstAswMonitorData, ASWMONITOR_ORDER_SAVE_START);
         }
     }
 }
