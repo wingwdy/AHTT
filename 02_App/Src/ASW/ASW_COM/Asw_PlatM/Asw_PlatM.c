@@ -23,6 +23,7 @@
 #include "FrameQueue.h"
 #include "Cdd_CardM.h"
 #include "Cdd_ModeM.h"
+
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -337,11 +338,11 @@ void AswPlatM_MainFunction(void)
         {
             pProtocolDescriptor->pMainFunction();
         }
+    }
 
-        if (pOMProtocolDescriptor->pMainFunction != NULL)
-        {
-            pOMProtocolDescriptor->pMainFunction();
-        }
+    if (pOMProtocolDescriptor->pMainFunction != NULL)
+    {
+        pOMProtocolDescriptor->pMainFunction();
     }
 }
 

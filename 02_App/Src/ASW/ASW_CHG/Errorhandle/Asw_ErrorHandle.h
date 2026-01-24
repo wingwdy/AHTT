@@ -75,7 +75,7 @@ typedef enum
     eErr_GunDisConn,                         /* 拔枪停止 */
 
     eErr_NetNoSIMErr,                        /* 未检测到SIM卡 */
-    eErr_PlatformOffline,                    /* 平*未正常上线，平台通信异常 */
+    eErr_PlatformOffline,                    /* 平台未正常上线，平台通信异常 */
     eErr_Num,                                /* 故障数(含告警) */
 }AswErrorType_Enum;
 
