@@ -63,7 +63,7 @@
 #define IOT_GN_CMD_REMOTE_START_CHARGE_RSP      (0x33U)             /* 远程控制启动充电应答 */
 #define IOT_GN_CMD_MULTI_ORDER_RECORD_REQ       (0x3EU)             /* 多类电价交易记录 */
 #define IOT_GN_CMD_ORDER_RECORD_REQ             (0x3FU)             /* 四类电价交易记录 */
-#define IOT_GN_CMD_UPDATE_ACCOUNT_MONEY_RSP     (0x42U)             /* 远程更新账户余额应答 */
+#define IOT_GN_CMD_UPDATE_ACCOUNT_MONEY_RSP     (0x41U)             /* 远程更新账户余额应答 */
 #define IOT_GN_CMD_SYNC_TIME_RSP                (0x55U)             /* 远程对时应答 */
 #define IOT_GN_CMD_SET_BILLMODE_4RATE_RSP       (0xF57U)            /* 设置四类电价计费模型应答 */
 #define IOT_GN_CMD_SET_BILLMODE_MULTIRATE_RSP   (0x57U)             /* 设置多类电价计费模型应答 */
@@ -83,7 +83,7 @@
 #define IOT_GN_CMD_REMOTE_START_CHARGE          (0x34U)             /* 远程控制启动充电 */
 #define IOT_GN_CMD_REMOTE_STOP_CHARGE           (0x36U)             /* 远程控制停止充电 */
 #define IOT_GN_CMD_ORDER_RECORD_RSP             (0x40U)             /* 四类/多类电价交易记录应答 */
-#define IOT_GN_CMD_UPDATE_ACCOUNT_MONEY         (0x41U)             /* 远程更新账户余额 */
+#define IOT_GN_CMD_UPDATE_ACCOUNT_MONEY         (0x42U)             /* 远程更新账户余额 */
 #define IOT_GN_CMD_SYNC_TIME                    (0x56U)             /* 远程对时 */
 #define IOT_GN_CMD_SET_BILLMODE_4RATE           (0x58U)             /* 四类电价计费模型设置 */
 #define IOT_GN_CMD_SET_BILLMODE_MULTIRATE       (0x54U)             /* 多类电价计费模型设置 */

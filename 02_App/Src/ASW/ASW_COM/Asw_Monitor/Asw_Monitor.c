@@ -454,7 +454,7 @@ void AswMonitor_PrintChargeData(void)
         ASWMONITOR_CFG_LogPrint("---------------------------------[枪: %d]信息------------------------------------\r\n");
         ASWMONITOR_CFG_LogPrint("电压：%d.%02d V,\t电流：%d.%03d A,\t功率：%d.%03d W\r\n",
                                 voltage / 100, voltage % 100, current / 1000, current % 1000, power / 1000, power % 1000);
-        ASWMONITOR_CFG_LogPrint("枪温：%d ℃,\t壳温：%d ℃,\t\t已充时间：%d s\r\n",
+        ASWMONITOR_CFG_LogPrint("枪温：%d ℃,\t\t壳温：%d ℃,\t\t已充时间：%d s\r\n",
                                 (gunTemp - 50), (envTemp - 50), chargeTime);                                
         ASWMONITOR_CFG_LogPrint("已充电量：%d.%04d kWh,\t\t\t已充金额：%d.%04d 元,\r\n",
                                 energy / 10000, energy % 10000, money / 10000, money % 10000);
@@ -468,13 +468,17 @@ static void AswMonitor_CardAuthHandle(void)
     uint8_t port = 0;
     AswMonitorData_Struct *pstAswMonitorData = &g_stAswMonitorData[port];
     uint8_t recvUserCardID[ASWMONITOR_CARD_ID_LEN] = {0};
-    uint32_t recvUUID = 0;
+    uint64_t recvUUID = 0;
     uint8_t bcdCardID[ASWMONITOR_CARD_ID_LEN] = {0};
 
     if (CddCardM_GetCardType() == eCddCardType_UUID)
     {
         CddCardM_GetCardUid((uint8_t *)&recvUUID);
         recvUUID = Common_uintBINToBCD(recvUUID);
+        bcdCardID[0] = (recvUUID >> 56) & 0xFF;
+        bcdCardID[1] = (recvUUID >> 48) & 0xFF;
+        bcdCardID[2] = (recvUUID >> 40) & 0xFF;
+        bcdCardID[3] = (recvUUID >> 32) & 0xFF;
         bcdCardID[4] = (recvUUID >> 24) & 0xFF;
         bcdCardID[5] = (recvUUID >> 16) & 0xFF;
         bcdCardID[6] = (recvUUID >> 8) & 0xFF;

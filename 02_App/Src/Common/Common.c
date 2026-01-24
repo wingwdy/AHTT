@@ -812,15 +812,17 @@ void Common_ClrBitFlag(void *pflag, uint16_t bitPos)
     p[bitPos >> 3] &= (~(1 << (bitPos & 0x07)));
 }
 
-uint32_t Common_uintBINToBCD(uint32_t bin) 
+uint64_t Common_uintBINToBCD(uint32_t bin) 
 {
-    uint32_t bcd = 0;
-    uint32_t shift = 0;
+    uint64_t bcd = 0;
+    uint64_t recvBin = bin;
+    uint8_t shift = 0;
     
-    while (bin > 0) {
+    while (recvBin > 0) 
+    {
         // 取出最低位的十进制数字，放到对应的4位BCD位置
-        bcd |= (bin % 10) << (shift * 4);
-        bin /= 10;      // 去掉已处理的最低位
+        bcd |= (recvBin % 10) << (shift * 4);
+        recvBin /= 10;      // 去掉已处理的最低位
         shift++;        // 移动到下4个bit位置
     }
     
