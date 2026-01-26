@@ -80,7 +80,7 @@ static const AswPlatMProtocolDescriptor_Struct *AswPlatM_GetProtocolDescriptor(v
 
 static const AswPlatMProtocolDescriptor_Struct *AswPlatM_GetOMProtocolDescriptor(void)
 {
-    return &c_stAswPlatMProtocolDescriptorTable[eAswPlatType_OM];
+    return &c_stAswOMProtocolDescriptor;
 }
 
 static const AswPlatCardDescriptor_Struct *AswPlatM_GetCardDescriptor(void)
@@ -295,6 +295,7 @@ void AswPlatM_InitMemory(void)
 {
     const AswPlatCardDescriptor_Struct *pCardDescriptor = NULL;
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = NULL;
+    const AswPlatMProtocolDescriptor_Struct *pOMProtocolDescriptor = AswPlatM_GetOMProtocolDescriptor();
     MSNvmPlatParam_Struct *pParam = &g_stAswPlatMCtx.stPlatParam;
     CddNetMSocketPara_Union stSocketPara = { 0 };
     FrameQueueType_Enum eFrame;
@@ -322,9 +323,27 @@ void AswPlatM_InitMemory(void)
         CddNetM_CreatLink(pProtocolDescriptor->eSocketType, stSocketPara, eCddNetMPlatType_O);
     }
 
+    /* 注册运维平台链接 */
+    if (pOMProtocolDescriptor != NULL)
+    {
+        if (pOMProtocolDescriptor->pFuncInit != NULL)
+        {
+            pOMProtocolDescriptor->pFuncInit();
+        }
+
+        if (pOMProtocolDescriptor->pFuncFillLinkPara != NULL)
+        {
+            pOMProtocolDescriptor->pFuncFillLinkPara(&stSocketPara);
+        }
+
+        CddNetM_CreatLink(pOMProtocolDescriptor->eSocketType, stSocketPara, eCddNetMPlatType_OM);
+    }
+
     /* 设置卡类型 */
     pCardDescriptor = AswPlatM_GetCardDescriptor();
     CddCardM_SetCardType(pCardDescriptor->cardType);
+
+    AswErrhandle_SetErrExsitCallback(0, eErr_PlatformOffline);
 }
 
 void AswPlatM_MainFunction(void)

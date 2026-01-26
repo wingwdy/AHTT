@@ -62,6 +62,7 @@ typedef struct Asw_PlatMConfig
 *    Global variables Declaration
 ******************************************************************************/
 extern const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAswPlatType_Count];
+extern const AswPlatMProtocolDescriptor_Struct c_stAswOMProtocolDescriptor;
 extern const AswPlatCardDescriptor_Struct c_stAswPlatMCardDescriptorTable[eAswPlatCardType_Count];
 
 /******************************************************************************

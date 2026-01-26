@@ -19,6 +19,7 @@
 #include "Asw_PlatM.h"
 #include "Asw_PlatMConfig.h"
 #include "Asw_IotProtoGNM.h"
+#include "Asw_IotProtoOMM.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -78,16 +79,16 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncInit = NULL,
         .pMainFunction = NULL,
     },
+};
 
-    [eAswPlatType_OM] =
-    {
-        .pName = "om",
-        .cProtoMeaning = "运维平台",
-        .eSocketType = eCddNetMSocketType_TCP,
-        .pFuncFillLinkPara = NULL,
-        .pFuncInit = NULL,
-        .pMainFunction = NULL,
-    },
+const AswPlatMProtocolDescriptor_Struct c_stAswOMProtocolDescriptor = 
+{
+    .pName = "om",
+    .cProtoMeaning = "运维平台",
+    .eSocketType = eCddNetMSocketType_TCP,
+    .pFuncFillLinkPara = IotOM_FillLinkPara,
+    .pFuncInit = IotOM_InitMemory,
+    .pMainFunction = IotOM_MainFunction,
 };
 
 const AswPlatCardDescriptor_Struct c_stAswPlatMCardDescriptorTable[eAswPlatCardType_Count] =
