@@ -342,8 +342,7 @@ static uint16_t IotGN_SendLoginReq(uint8_t port, uint8_t *pBuf)
 static uint16_t IotGN_SendHeartBeat(uint8_t port, uint8_t *pBuf)
 {
     uint16_t dataLen = 0;
-    CddNetMOperator_Enum eOperator = CddNetM_GetOperatorType();
-
+    
     /* 设备编码 */
     memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
     dataLen += 7;
@@ -351,7 +350,6 @@ static uint16_t IotGN_SendHeartBeat(uint8_t port, uint8_t *pBuf)
     pBuf[dataLen++] = port + 1;
     /* 状态 */
     pBuf[dataLen++] = (AswErrHandle_IsExsistError(port) == TRUE) ? 0x01 : 0x00;
-
     return dataLen;
 }
 

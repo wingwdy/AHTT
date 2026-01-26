@@ -410,6 +410,7 @@ static uint8_t IotGN_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
     }
     else
     {
+        index++;
         IOTGN_CFG_LogPrint("登陆失败，失败原因：%d!\r\n", pRecvData[index]);
         IotGN_OfflineHandle();
     }
