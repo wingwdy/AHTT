@@ -45,7 +45,7 @@
 *******************************************************************************/
 static uint8_t IotOM_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
-
+static uint8_t IotOM_RecvCallNetModuleInfo(uint8_t *port, uint8_t *r_data, uint16_t len);
 
 /*******************************************************************************
 *    Global variables Declaration
@@ -76,7 +76,19 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .matchCmd = IOT_OM_CMD_HEARTBEAT_REQ,
         .printFlag = FALSE,
         .cMeaning = "心跳应答",
-    }
+    },
+
+    [2] = 
+    {
+        .cmd = IOT_OM_CMD_CALL_NETMODULE_INFO,
+        .cmdType = IOT_OM_CMDTYPE_REQUSET,
+        .pRecvParse = IotOM_RecvCallNetModuleInfo,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_OM_CMD_CALL_NETMODULE_INFO_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "请求网络模块信息",
+    },
 };
 
 /*******************************************************************************
@@ -84,23 +96,37 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
 *******************************************************************************/
 static uint8_t IotOM_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
+    uint8_t index = 32;
+    uint8_t *pRecvData = r_data;
+    uint8_t gunNo = 0;
 
+    if (pRecvData[index] == 0x00)
+    {
+        Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_HEARTBEAT_REQ, TRUE);
+        Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_SEND_NETMODULE_INFO, TRUE);
 
-
+        pIotOMCtx->loginSucc = TRUE;
+        IOTOM_CFG_LogPrint("[运维平台]登陆成功!\r\n");
+    }
+    else
+    {
+        index++;
+        IOTOM_CFG_LogPrint("[运维平台]登陆失败，失败原因：%d!\r\n", pRecvData[index]);
+        IotOM_OfflineHandle();
+    }
 
     return TRUE;
 }
 
 static uint8_t IotOM_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-
-
-
-
     return TRUE;
 }
 
-
+static uint8_t IotOM_RecvCallNetModuleInfo(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    return TRUE;
+}
 
 
 
@@ -184,7 +210,7 @@ static void IotOM_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTOM_CFG_LogPrint("[枪：%d]接收[cmd: %02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTOM_CFG_LogPrint("[运维平台][枪：%d]接收[cmd: %02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
 
@@ -211,7 +237,7 @@ static void IotOM_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTOM_CFG_LogPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTOM_CFG_LogPrint("[运维平台][枪：%d]接收[cmd: %02X, %s][%d] 处理失败: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
                 }
@@ -220,23 +246,54 @@ static void IotOM_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
     }
 }
 
+void IotOM_UpCtrlRecvDeal(void)
+{
+    FrameQueue_ProcessRxData(pIotOMCtx->frameQueueChannelID, IotOM_DecodeData);
+}
 
+void IotOM_TimeoutDetect(void)
+{
+    const IotOMRecvCtrl_Struct *pCmdRecvCtrl = NULL;
+    uint8_t index = 0;
+    uint8_t port = 0;
+    uint8_t timeoutCount = 0;
 
+    for (index = 0; index < IOT_OM_CMD_RECV_COUNT; index++)
+    {
+        pCmdRecvCtrl = &c_stIotOMRecvctrlTable[index];
 
+        if (pCmdRecvCtrl->cmdType != IOT_OM_CMDTYPE_RESPONSE)
+        {
+            continue;
+        }
 
+        for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+        {
+            if (Common_GetRecvTimerEnable(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd) != TRUE)
+            {
+                 continue;
+            }
 
+            if (Common_JudgeTimeoutMs(Common_GetRecvTick(pIotOMCtx->pFuncRecvCtrl, port, 
+                pCmdRecvCtrl->cmd), pCmdRecvCtrl->maxTimeout) == TRUE)
+            {
+                Common_SetRptCount(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
+                timeoutCount = Common_GetRptCount(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
 
+                IOTOM_CFG_LogPrint("[运维平台][cmd:0x%02X %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, timeoutCount, pCmdRecvCtrl->maxTimeout);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+                if (timeoutCount >= pCmdRecvCtrl->maxTryCnt)
+                {
+                    IotOM_OfflineHandle();
+                }
+                else
+                {
+                    Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, TRUE);
+                    Common_SetSendImmdFlag(pIotOMCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, TRUE);
+                    Common_SetRecvTimerEnable(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd, FALSE);
+                    Common_SetSendFlag(pIotOMCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, FALSE);
+                }
+            }
+        }
+    }
+}

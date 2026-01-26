@@ -43,7 +43,8 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-
+void IotOM_UpCtrlRecvDeal(void);
+void IotOM_TimeoutDetect(void);
 #endif
 
 

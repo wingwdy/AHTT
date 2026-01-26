@@ -50,7 +50,8 @@ typedef struct
     typeFuncSendCtrl pFuncSendCtrl;
     typeFuncRecvCtrl pFuncRecvCtrl;
     uint8_t frameQueueChannelID;
-    uint8_t pileDnAsc[32 + 1];
+    uint8_t platDn[32 + 1];
+    uint8_t pileFixDnAsc[32 + 1];
     IotOMProtoData_Struct stProtoData[SYSCFG_CFG_GUN_NUM];
     MSNvmOrderInfo_Struct stOrderInfo;
     uint32_t time;

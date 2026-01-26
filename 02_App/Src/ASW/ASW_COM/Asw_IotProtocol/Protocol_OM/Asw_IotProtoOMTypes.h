@@ -43,14 +43,17 @@
 /* 协议CMD 发送定义 */
 #define IOT_OM_CMD_LOGIN_REQ                    (0x01U)             /* 登陆 */
 #define IOT_OM_CMD_HEARTBEAT_REQ                (0x03U)             /* 心跳请求 */
+#define IOT_OM_CMD_SEND_NETMODULE_INFO          (0x05U)             /* 主动上报网络模块信息 */
+#define IOT_OM_CMD_CALL_NETMODULE_INFO_RSP      (0xF05U)            /* 网络模块信息应答 */
 
-#define IOT_OM_CMD_SEND_COUNT                   (2U)
+#define IOT_OM_CMD_SEND_COUNT                   (4U)
 
 /* 协议CMD 接收定义 */
 #define IOT_OM_CMD_LOGIN_RSP                    (0x02U)             /* 登陆应答 */
 #define IOT_OM_CMD_HEARTBEAT_RSP                (0x04U)             /* 心跳应答 */
+#define IOT_OM_CMD_CALL_NETMODULE_INFO          (0x06U)             /* 请求网络模块信息 */
 
-#define IOT_OM_CMD_RECV_COUNT                   (2U)
+#define IOT_OM_CMD_RECV_COUNT                   (3U)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

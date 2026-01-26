@@ -19,7 +19,8 @@
 #include "Asw_IotProtoOMM.h"
 #include "Asw_IotProtoOMSend.h"
 #include "FrameQueue.h"
-
+#include "Version.h"
+#include "Asw_Errorhandle.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -49,7 +50,7 @@
 static uint8_t IotOM_ReportCycleCheck(uint8_t port, uint32_t cmd, uint32_t	sendCyc);
 static uint16_t IotOM_SendLoginReq(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendHeartBeat(uint8_t port, uint8_t *pBuf);
-
+static uint16_t IotOM_SendNetModuleInfo(uint8_t port, uint8_t *pBuf);
 
 /*******************************************************************************
 *    Global variables Declaration
@@ -78,6 +79,28 @@ static const IotOMSendCtrl_Struct c_stIotOMSendctrlTable[IOT_OM_CMD_SEND_COUNT] 
         .sendCycle = 10000,
         .printFlag = FALSE,
         .cMeaning = "设备心跳"
+    },
+
+    [2] = 
+    {
+        .cmd = IOT_OM_CMD_SEND_NETMODULE_INFO,
+        .cmdType = IOT_OM_CMDTYPE_REQUSET,
+        .matchCmd = IOT_OM_CMD_NULL,
+        .pSendFunc = IotOM_SendNetModuleInfo,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "主动上报网络模块信息"
+    },
+
+    [3] = 
+    {
+        .cmd = IOT_OM_CMD_CALL_NETMODULE_INFO_RSP,
+        .cmdType = IOT_OM_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_OM_CMD_CALL_NETMODULE_INFO,
+        .pSendFunc = IotOM_SendNetModuleInfo,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "网络模块信息应答"
     },
 };
 
@@ -111,13 +134,89 @@ static uint16_t IotOM_SendLoginReq(uint8_t port, uint8_t *pBuf)
 {
     uint16_t dataLen = 0;
 
+    /* 运维平台桩号 */
+    memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
+    dataLen += 32;
+    /* 运营平台桩号 */
+    memcpy(&pBuf[dataLen], pIotOMCtx->platDn, 32);
+    dataLen += 32;
+    /* 设备类型 */
+    pBuf[dataLen++] = 0x01;
+    /* 终端数量 */
+    pBuf[dataLen++] = SYSCFG_CFG_GUN_NUM;
+    /* 软件版本 */
+    pBuf[dataLen++] = APP_SW_PATCH_VERSION;
+    pBuf[dataLen++] = APP_SW_CUSTORM_VERSION;
+    pBuf[dataLen++] = APP_SW_MINOR_VERSION;
+    pBuf[dataLen++] = APP_SW_MAJOR_VERSION;
+    /* A硬件版本-充电模块 */
+    memset(&pBuf[dataLen], 0x00, 4);
+    dataLen += 4;
+    /* A软件版本-充电模块 */
+    memset(&pBuf[dataLen], 0x00, 4);
+    dataLen += 4;
+    /* B硬件版本-灯板 */
+    memset(&pBuf[dataLen], 0x00, 4);
+    dataLen += 4;
+    /* B软件版本-灯板 */
+    memset(&pBuf[dataLen], 0x00, 4);
+    dataLen += 4;
+    /* C硬件版本-网络模块 */
+    memset(&pBuf[dataLen], 0x00, 4);
+    dataLen += 4;
+    /* C软件版本-网络模块 */
+    memset(&pBuf[dataLen], 0x00, 4);
+    dataLen += 4;
+    /* 签名算法 */
+    memset(&pBuf[dataLen], 0x00, 16);
+    dataLen += 16;
     return dataLen;
 }
 
 static uint16_t IotOM_SendHeartBeat(uint8_t port, uint8_t *pBuf)
 {
     uint16_t dataLen = 0;
+    uint8_t gunNo = 0;
 
+    /* 运维平台桩号 */
+    memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
+    dataLen += 32;
+    /* 终端号 */
+    pBuf[dataLen++] = port + 1;
+    /* 设备状态 */
+    pBuf[dataLen++] = AswErrHandle_IsExsistError(port);
+    return dataLen;
+}
+
+static uint16_t IotOM_SendNetModuleInfo(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+    CddNetMOperator_Enum eOperator = CddNetM_GetOperatorType();
+
+    /* 运维平台桩号 */
+    memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
+    dataLen += 32;
+    /* 网络连接类型 */
+    pBuf[dataLen++] = 0x00;
+    /* 运营商 */
+    if (eOperator == eCddNetMOperator_CMCC)
+        pBuf[dataLen++] = 0x00;
+    else if (eOperator == eCddNetMOperator_CTCC)
+        pBuf[dataLen++] = 0x01;
+    else if (eOperator == eCddNetMOperator_CUCC)
+        pBuf[dataLen++] = 0x02;
+    else
+        pBuf[dataLen++] = 0xFF;
+    /* ICCID */
+    CddNetM_GetIccid(&pBuf[dataLen]);
+    dataLen += 20;
+    /* 获取网络模块类型信息 */
+    memset(&pBuf[dataLen], 0x00, 20);
+    CddNetM_GetModuleTypeInfo((char *)&pBuf[dataLen], 20);
+    dataLen += 20;
+    /* mac地址 */
+    memset(&pBuf[dataLen], 0x00, 20);
+    dataLen += 20;
     return dataLen;
 }
 
@@ -211,7 +310,7 @@ void IotOM_UpCtrlSendDeal(void)
 
                         if (pCmdSendCtrl->printFlag)
                         {
-                            IOTOM_CFG_LogPrint("[枪：%d]发送[cmd: %02X, %s][%d]: ", port, (uint8_t)pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
+                            IOTOM_CFG_LogPrint("[运维平台][枪：%d]发送[cmd: %02X, %s][%d]: ", port, (uint8_t)pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
                             DSLogM_HexOutput(txBuf, dataLen);
                         }
 

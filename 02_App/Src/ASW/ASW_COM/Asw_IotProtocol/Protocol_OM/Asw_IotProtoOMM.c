@@ -72,6 +72,8 @@ static CommonSendCtrl_Struct* IotOM_GetSendCtrl(uint8_t port, uint16_t cmd)
     {
         case IOT_OM_CMD_LOGIN_REQ:                  pSendCtrl = &pIotOMCtx->stSendCtrl[port][0];   break;
         case IOT_OM_CMD_HEARTBEAT_REQ:              pSendCtrl = &pIotOMCtx->stSendCtrl[port][1];   break;
+        case IOT_OM_CMD_SEND_NETMODULE_INFO:        pSendCtrl = &pIotOMCtx->stSendCtrl[port][2];   break;
+        case IOT_OM_CMD_CALL_NETMODULE_INFO_RSP:    pSendCtrl = &pIotOMCtx->stSendCtrl[port][3];   break;
         default: break;
     }
 
@@ -86,6 +88,7 @@ static CommonRecvCtrl_Struct* IotOM_GetRecvCtrl(uint8_t port, uint16_t cmd)
     {
         case IOT_OM_CMD_LOGIN_RSP:                  pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][0];   break;
         case IOT_OM_CMD_HEARTBEAT_RSP:              pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][1];   break;
+        case IOT_OM_CMD_CALL_NETMODULE_INFO:        pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][1];   break;
         default: break;
     }
     return pRecvCtrl;
@@ -93,27 +96,58 @@ static CommonRecvCtrl_Struct* IotOM_GetRecvCtrl(uint8_t port, uint16_t cmd)
 
 static void IotOM_WSInitHandle(void)
 {
-
-
-
+    pIotOMCtx->eWorkState = eIOTOMWorkState_Offline;
 }
 
 static void IotOM_WSOfflineHandle(void)
 {
+    MSNvmPlatParam_Struct * pParam =  AswPlatM_GetPlatParamPtr();
+    uint8_t copyLen = 0;
+    uint8_t offset = 0;
 
-    
+    copyLen = strlen(pParam->fixPileDn);
+    copyLen = copyLen > 32 ? 32 : copyLen;
+    offset = 32 - copyLen;
+    memset(pIotOMCtx->pileFixDnAsc, 0x30, 32);
+    memcpy(pIotOMCtx->pileFixDnAsc + offset, pParam->fixPileDn, copyLen);
+
+    copyLen = strlen(pParam->platPileDn);
+    copyLen = copyLen > 32 ? 32 : copyLen;
+    offset = 32 - copyLen;
+    memset(pIotOMCtx->platDn, 0x30, 32);
+    memcpy(pIotOMCtx->platDn + offset, pParam->platPileDn, copyLen);
+
+    pIotOMCtx->eWorkState = eIOTOMWorkState_Login;
 }
 
 static void IotOM_WSLoginHandle(void)
 {
-
-
+    if (TRUE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_OM))
+    {
+        pIotOMCtx->eWorkState = eIOTOMWorkState_Normal;
+        Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_LOGIN_REQ, TRUE);
+    }
 }
 
 static void IotOM_WSNormalHandle(void)
 {
+    if (FALSE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_O))
+    {
+        IotOM_OfflineHandle();
+    }
+    else
+    {
+        if (pIotOMCtx->loginSucc == TRUE)
+        {
 
+        }
 
+        IotOM_UpCtrlSendDeal();
+
+        IotOM_UpCtrlRecvDeal();
+
+        IotOM_TimeoutDetect();
+    }
 }
 
 void IotOM_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
@@ -124,7 +158,7 @@ void IotOM_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
     {
         strcpy(pLinkPara->stTcpPara.ip, pParam->platAuxiliaryIp);
         pLinkPara->stTcpPara.port = pParam->platAuxiliaryPort;
-        FrameQueue_Creat(eFrameQueueType_TCP, 2048, 2048, &pIotOMCtx->frameQueueChannelID);
+        FrameQueue_Creat(eFrameQueueType_TCP, 1024, 1024, &pIotOMCtx->frameQueueChannelID);
         pLinkPara->stTcpPara.frameQueueChannelID = pIotOMCtx->frameQueueChannelID;
     }
 }

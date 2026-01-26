@@ -120,7 +120,6 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name>?</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -143,72 +142,7 @@
           <Name>UL2V8M(-S0 -C0 -P0 )  -FN1 -FC1000 -FD20000000 -FF0GD32E50x_512 -FL080000 -FS08000000 -FP0($$Device:GD32E503RE$Flash\GD32E50x_512.FLM)</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint>
-        <Bp>
-          <Number>0</Number>
-          <Type>0</Type>
-          <LineNumber>745</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134289356</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_GN\Asw_IotProtoGNRecv.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_COM/Asw_IotProtocol/Protocol_GN/Asw_IotProtoGNRecv.c\745</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>526</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134235934</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Src\ASW\ASW_COM\Asw_Monitor\Asw_Monitor.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_COM/Asw_Monitor/Asw_Monitor.c\526</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>476</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134238058</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Src\ASW\ASW_COM\Asw_Monitor\Asw_Monitor.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_COM/Asw_Monitor/Asw_Monitor.c\476</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>334</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134239996</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Src\ASW\ASW_COM\Asw_PlatM\Asw_PlatM.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_COM/Asw_PlatM/Asw_PlatM.c\334</Expression>
-        </Bp>
-      </Breakpoint>
+      <Breakpoint/>
       <WatchWindow1>
         <Ww>
           <count>0</count>
@@ -370,6 +304,16 @@
           <WinNumber>1</WinNumber>
           <ItemText>bcd</ItemText>
         </Ww>
+        <Ww>
+          <count>32</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>g_arAswGunTempHandle[0].arFilterThr</ItemText>
+        </Ww>
+        <Ww>
+          <count>33</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>stSocketPara</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
@@ -406,8 +350,8 @@
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
-          <SubType>0</SubType>
-          <ItemText>pUidOut</ItemText>
+          <SubType>8</SubType>
+          <ItemText>pIotOMCtx-&gt;platDn</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
@@ -466,7 +410,7 @@
 
   <Group>
     <GroupName>ASW/CHG</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
