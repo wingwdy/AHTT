@@ -67,6 +67,13 @@ typedef struct
     uint64_t meterEnergy;
 }MSNvmMeterEnergy_Struct;
 
+/* 锁机状态 */
+typedef struct
+{
+    uint8_t forbidState;
+    uint8_t forbidReason;
+}MSNvmForbidState_Struct;
+
 /* 校表参数 */
 typedef struct
 {
@@ -139,6 +146,7 @@ typedef struct
     uint16_t orderLen;                        /* 订单数据长度 */
     MSNvmPlatOrderInfo_Union platOrderInfo;   /* 各平台订单类型数据 */
 }MSNvmOrderInfo_Struct;
+
 
 /* 故障记录 */
 typedef struct 

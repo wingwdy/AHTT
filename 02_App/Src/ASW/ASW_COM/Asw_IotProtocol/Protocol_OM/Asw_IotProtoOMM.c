@@ -77,6 +77,10 @@ static CommonSendCtrl_Struct* IotOM_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_OM_CMD_REPORT_REALDATA:            pSendCtrl = &pIotOMCtx->stSendCtrl[port][4];   break;
         case IOT_OM_CMD_CALL_REALDATA_ACK:          pSendCtrl = &pIotOMCtx->stSendCtrl[port][5];   break;
         case IOT_OM_CMD_REPORT_METERVAL:            pSendCtrl = &pIotOMCtx->stSendCtrl[port][6];   break;
+        case IOT_OM_CMD_SET_QRCODE_RSP:             pSendCtrl = &pIotOMCtx->stSendCtrl[port][7];   break;
+        case IOT_OM_CMD_REBOOT_RSP:                 pSendCtrl = &pIotOMCtx->stSendCtrl[port][8];   break;
+        case IOT_OM_CMD_SET_FORBID_RSP:             pSendCtrl = &pIotOMCtx->stSendCtrl[port][9];   break;
+        case IOT_OM_CMD_REPORT_FORBID_STATE:        pSendCtrl = &pIotOMCtx->stSendCtrl[port][10];   break;
         default: break;
     }
 
@@ -93,6 +97,10 @@ static CommonRecvCtrl_Struct* IotOM_GetRecvCtrl(uint8_t port, uint16_t cmd)
         case IOT_OM_CMD_HEARTBEAT_RSP:              pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][1];   break;
         case IOT_OM_CMD_CALL_NETMODULE_INFO:        pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][2];   break;
         case IOT_OM_CMD_CALL_REALDATA:              pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][3];   break;
+        case IOT_OM_CMD_SET_QRCODE:                 pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][4];   break;
+        case IOT_OM_CMD_REBOOT:                     pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][5];   break;
+        case IOT_OM_CMD_SET_FORBID:                 pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][6];   break;
+        case IOT_OM_CMD_REPORT_FORBID_STATE_RSP:    pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][7];   break;
         default: break;
     }
     return pRecvCtrl;
@@ -121,6 +129,24 @@ static void IotOM_WSOfflineHandle(void)
     memset(pIotOMCtx->platDn, 0x30, 32);
     memcpy(pIotOMCtx->platDn + offset, pParam->platPileDn, copyLen);
 
+
+    pIotOMCtx->loginSucc = FALSE;
+    pIotOMCtx->queueBusyFlag = FALSE;
+    pIotOMCtx->waitQueueIdleTick = 0;
+    pIotOMCtx->reportForBidStateTick = 0;
+
+    pIotOMCtx->sendIndex = 0;
+    pIotOMCtx->sendPort = 0;    
+    pIotOMCtx->reqSeq = 0;
+
+    memset(pIotOMCtx->meterValReportTick, 0x00, sizeof(pIotOMCtx->meterValReportTick));
+    memset(pIotOMCtx->realDataReportTick, 0x00, sizeof(pIotOMCtx->realDataReportTick));
+    memset(pIotOMCtx->lastGunState, 0x00, sizeof(pIotOMCtx->lastGunState));
+    memset(pIotOMCtx->lastGunConnectState, 0x00, sizeof(pIotOMCtx->lastGunConnectState));
+
+    memset(pIotOMCtx->stSendCtrl, 0x00, sizeof(pIotOMCtx->stSendCtrl));
+    memset(pIotOMCtx->stRecvCtrl, 0x00, sizeof(pIotOMCtx->stRecvCtrl));
+    FrameQueue_Reset(pIotOMCtx->frameQueueChannelID);
     pIotOMCtx->eWorkState = eIOTOMWorkState_Login;
 }
 
@@ -184,6 +210,31 @@ static void IotOM_CycleDetectUnreporteRecord(void)
 
 }
 
+static void IotOM_CycleDetectReportForbidState(void)
+{
+    if (pIotOMCtx->sendForbidStateFlag == TRUE)
+    {
+        if (pIotOMCtx->sendForbidStateCount >= 10)
+        {
+            pIotOMCtx->sendForbidStateFlag = FALSE;
+        }
+        else
+        {
+            if (Common_JudgeTimeoutMs(pIotOMCtx->reportForBidStateTick, 10000))
+            {
+                pIotOMCtx->reportForBidStateTick = Common_GetSystick();
+                Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_REPORT_FORBID_STATE, TRUE); 
+                Common_SetSendImmdFlag(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_REPORT_FORBID_STATE, TRUE);
+            }
+        }
+    }
+}
+
+
+
+
+
+
 static void IotOM_CycleReportMeterVal(void)
 {
     uint32_t meterValReportCycle;
@@ -208,6 +259,8 @@ static void IotOM_CycleDetect(void)
     IotOM_CycleReportMeterVal();
 
     IotOM_CycleDetectUnreporteRecord();
+
+    IotOM_CycleDetectReportForbidState();
 }
 
 static void IotOM_WSNormalHandle(void)

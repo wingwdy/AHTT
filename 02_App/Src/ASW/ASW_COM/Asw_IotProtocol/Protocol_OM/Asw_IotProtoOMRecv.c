@@ -56,6 +56,10 @@ static uint8_t IotOM_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvCallNetModuleInfo(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvCallRealData(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotOM_RecvSetQrcode(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotOM_RecvSetReboot(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotOM_RecvSetForbid(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotOM_RecvReportForBidStateRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -109,6 +113,54 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .matchCmd = IOT_OM_CMD_CALL_REALDATA_ACK,
         .printFlag = TRUE,
         .cMeaning = "召测实时数据",
+    },
+
+    [4] = 
+    {
+        .cmd = IOT_OM_CMD_SET_QRCODE,
+        .cmdType = IOT_OM_CMDTYPE_REQUSET,
+        .pRecvParse = IotOM_RecvSetQrcode,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_OM_CMD_SET_QRCODE_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "设置二维码",
+    },
+
+    [5] = 
+    {
+        .cmd = IOT_OM_CMD_REBOOT,
+        .cmdType = IOT_OM_CMDTYPE_REQUSET,
+        .pRecvParse = IotOM_RecvSetReboot,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_OM_CMD_REBOOT_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "远程重启",
+    },
+
+    [6] = 
+    {
+        .cmd = IOT_OM_CMD_SET_FORBID,
+        .cmdType = IOT_OM_CMDTYPE_REQUSET,
+        .pRecvParse = IotOM_RecvSetForbid,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_OM_CMD_SET_FORBID_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "远程锁机",
+    },
+
+    [7] = 
+    {
+        .cmd = IOT_OM_CMD_REPORT_FORBID_STATE_RSP,
+        .cmdType = IOT_OM_CMDTYPE_RESPONSE,
+        .pRecvParse = IotOM_RecvReportForBidStateRsp,
+        .maxTimeout = 10 * 1000,
+        .maxTryCnt = 29,
+        .matchCmd = IOT_OM_CMD_REPORT_FORBID_STATE,
+        .printFlag = TRUE,
+        .cMeaning = "远程锁机状态上报应答",
     },
 };
 
@@ -166,6 +218,84 @@ static uint8_t IotOM_RecvCallRealData(uint8_t *port, uint8_t *r_data, uint16_t l
     return TRUE;
 }
 
+static uint8_t IotOM_RecvSetQrcode(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    uint8_t index = 32;
+    uint8_t *pRecvData = r_data;
+    uint8_t temp = 0;
+    MSNvmDrcode_Struct qrParam = { 0 };
+    
+    IOT_OM_RecvGunNoTransform(pRecvData[index], port[0]);
+    index++;
+
+    if (port[0] == 0)
+    {
+        memcpy(qrParam.qrcode, &pRecvData[index], 200);
+        MSNvm_WriteParaBlock(eMSNvmBlockID_Gun0Qrcode, (uint8_t *)&qrParam, sizeof(MSNvmDrcode_Struct));
+        IOTOM_CFG_LogPrint("[枪：%d]设置的二维码内容：%.200s\r\n", port[0], &pRecvData[index]);
+    }
+
+    return TRUE;
+}
+
+static uint8_t IotOM_RecvSetReboot(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    uint8_t index = 32;
+    uint8_t *pRecvData = r_data;
+    uint8_t gunNo = 0;
+
+    if (pRecvData[index] == 0x01)
+    {
+        AswMonitor_SetReboot(eAswMonitorRebootType_Immediate); 
+        pIotOMCtx->stProtoData[0].setRebootResult = 0x01;
+    }
+    else
+    {
+        AswMonitor_SetReboot(eAswMonitorRebootType_WaitIdle);
+
+        pIotOMCtx->stProtoData[0].setRebootResult = 0x01;
+
+        for (gunNo = 0; gunNo < SYSCFG_CFG_GUN_NUM; gunNo++)
+        {
+            if (TRUE != AswMonitor_IsOrderIdle(gunNo))
+            {
+                pIotOMCtx->stProtoData[0].setRebootResult = 0x02;
+                break;
+            }
+        }
+    }
+
+    return TRUE;
+}
+
+static uint8_t IotOM_RecvSetForbid(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    uint8_t index = 32;
+    uint8_t *pRecvData = r_data;
+
+    if (pRecvData[index] == 0x01)
+    {
+        AswMonitor_SetForbidState(TRUE, pRecvData[index + 1]);
+    }
+    else if (pRecvData[index] == 0x02)
+    {
+        AswMonitor_SetForbidState(FALSE, pRecvData[index + 2]);
+    }
+    else
+    {}
+
+    return TRUE;
+}
+
+static uint8_t IotOM_RecvReportForBidStateRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    if (pIotOMCtx->sendForbidStateFlag == TRUE)
+    {
+        pIotOMCtx->sendForbidStateCount++;
+    }
+    
+    return TRUE;
+}
 
 static const IotOMRecvCtrl_Struct* IotOM_GetRecvCtrlPtr(uint16_t cmd)
 {

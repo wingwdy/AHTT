@@ -40,7 +40,7 @@ typedef enum
 ******************************************************************************/
 typedef struct 
 {
-    uint8_t setQrCodeResult;
+    uint8_t setRebootResult;
 }IotOMProtoData_Struct;
 
 typedef struct 
@@ -55,8 +55,11 @@ typedef struct
     IotOMProtoData_Struct stProtoData[SYSCFG_CFG_GUN_NUM];
     MSNvmOrderInfo_Struct stOrderInfo;
     uint32_t time;
+    uint8_t sendForbidStateFlag;
+    uint8_t sendForbidStateCount;
 
     /* 离线后需清除数据 */
+
     uint8_t loginSucc;
     uint8_t queueBusyFlag;
     uint32_t waitQueueIdleTick;
@@ -65,6 +68,7 @@ typedef struct
 	uint8_t sendPort;
     uint16_t reqSeq;
 
+    uint32_t reportForBidStateTick;
     uint32_t meterValReportTick[SYSCFG_CFG_GUN_NUM];
     uint32_t realDataReportTick[SYSCFG_CFG_GUN_NUM];
     uint8_t lastGunState[SYSCFG_CFG_GUN_NUM];            /* 用于变位上送*/

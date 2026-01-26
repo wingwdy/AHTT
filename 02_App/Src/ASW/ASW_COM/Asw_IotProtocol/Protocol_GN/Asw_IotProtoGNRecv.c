@@ -562,7 +562,7 @@ static uint8_t IotGN_CheckChargeStart(uint8_t port, uint8_t *pFailReason)
         reason = 0x08;
     }
     /* 设备禁用 */
-    else if (TRUE == AswMonitor_CheckForbidState(port))
+    else if (TRUE == AswMonitor_CheckForbidState())
     {
         reason = 0x09;
     }

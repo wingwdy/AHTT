@@ -35,6 +35,7 @@ typedef enum
 	eKVDBAdaptChannel_MeterCaliParam,
 	eKVDBAdaptChannel_PlatParam,
 	eKVDBAdaptChannel_PlatPrivateParam,
+	eKVDBAdaptChannel_ForbidState,
 	eKVDBAdaptChannel_Count,
 }KVDBAdaptChannel_Enum;
 

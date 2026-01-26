@@ -54,6 +54,11 @@ static uint16_t IotOM_SendHeartBeat(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendNetModuleInfo(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendRealData(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendMeterVal(uint8_t port, uint8_t *pBuf);
+static uint16_t IotOM_SendSetQrcodeRsp(uint8_t port, uint8_t *pBuf);
+static uint16_t IotOM_SendRebootRsp(uint8_t port, uint8_t *pBuf);
+static uint16_t IotOM_SendSetForbidRsp(uint8_t port, uint8_t *pBuf);
+static uint16_t IotOM_SendSetForbidState(uint8_t port, uint8_t *pBuf);
+
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -137,9 +142,51 @@ static const IotOMSendCtrl_Struct c_stIotOMSendctrlTable[IOT_OM_CMD_SEND_COUNT] 
         .printFlag = TRUE,
         .cMeaning = "上报电表底数"
     },
+
+    [7] = 
+    {
+        .cmd = IOT_OM_CMD_SET_QRCODE_RSP,
+        .cmdType = IOT_OM_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_OM_CMD_SET_QRCODE,
+        .pSendFunc = IotOM_SendSetQrcodeRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "设置二维码应答"
+    },
+
+    [8] = 
+    {
+        .cmd = IOT_OM_CMD_REBOOT_RSP,
+        .cmdType = IOT_OM_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_OM_CMD_REBOOT,
+        .pSendFunc = IotOM_SendRebootRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "远程重启应答"
+    },
+
+    [9] = 
+    {
+        .cmd = IOT_OM_CMD_SET_FORBID_RSP,
+        .cmdType = IOT_OM_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_OM_CMD_SET_FORBID,
+        .pSendFunc = IotOM_SendSetForbidRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "远程锁机应答"
+    },
+
+    [10] = 
+    {
+        .cmd = IOT_OM_CMD_REPORT_FORBID_STATE,
+        .cmdType = IOT_OM_CMDTYPE_REQUSET,
+        .matchCmd = IOT_OM_CMD_REPORT_FORBID_STATE_RSP,
+        .pSendFunc = IotOM_SendSetForbidState,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "远程锁机状态上报"
+    },
 };
-
-
 
 /*******************************************************************************
 *    Function Source Code
@@ -180,10 +227,11 @@ static uint16_t IotOM_SendLoginReq(uint8_t port, uint8_t *pBuf)
     /* 终端数量 */
     pBuf[dataLen++] = SYSCFG_CFG_GUN_NUM;
     /* 软件版本 */
-    pBuf[dataLen++] = APP_SW_PATCH_VERSION;
-    pBuf[dataLen++] = APP_SW_CUSTORM_VERSION;
-    pBuf[dataLen++] = APP_SW_MINOR_VERSION;
     pBuf[dataLen++] = APP_SW_MAJOR_VERSION;
+    pBuf[dataLen++] = APP_SW_MINOR_VERSION;
+    pBuf[dataLen++] = APP_SW_CUSTORM_VERSION;
+    pBuf[dataLen++] = APP_SW_PATCH_VERSION;
+
     /* A硬件版本-充电模块 */
     memset(&pBuf[dataLen], 0x00, 4);
     dataLen += 4;
@@ -383,8 +431,68 @@ static uint16_t IotOM_SendMeterVal(uint8_t port, uint8_t *pBuf)
     return dataLen;
 }
 
+static uint16_t IotOM_SendSetQrcodeRsp(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
+    dataLen += 32;
+    /* 枪号 */
+    pBuf[dataLen++] = port + 1;
+    /* 设置结果 */
+    pBuf[dataLen++] = 0x01;
+    return dataLen;
+}
 
+static uint16_t IotOM_SendRebootRsp(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
+    dataLen += 32;
+    /* 设置结果 */
+    pBuf[dataLen++] = pIotOMCtx->stProtoData[0].setRebootResult;
+    return dataLen;
+}
 
+static uint16_t IotOM_SendSetForbidRsp(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
+    dataLen += 32;
+
+    pIotOMCtx->sendForbidStateFlag = TRUE;
+    pIotOMCtx->sendForbidStateCount = 0;
+    return dataLen;
+}
+static uint16_t IotOM_SendSetForbidState(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+    uint8_t forBidState = 0;
+    uint8_t forBidReason = 0;
+
+    AswMonitor_GetForbidState(&forBidState, &forBidReason);
+
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
+    dataLen += 32;
+
+    if (forBidState == TRUE)
+    {
+        pBuf[dataLen++] = 0x01;
+        pBuf[dataLen++] = forBidReason;
+        pBuf[dataLen++] = 0x00;
+    }
+    else
+    {
+        pBuf[dataLen++] = 0x02;
+        pBuf[dataLen++] = 0x00;
+        pBuf[dataLen++] = forBidReason;
+    }
+
+    return dataLen;
+}
 
 static uint16_t IotOM_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
 {

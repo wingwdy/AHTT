@@ -51,7 +51,6 @@ typedef enum
 *******************************************************************************/
 typedef struct 
 {
-    uint8_t forbidState;                            /* 禁用状态 */
     uint8_t chargeStart;                            /* 启动充电控制 */
     uint8_t orderCtrl;                              /* 订单控制 */
     uint32_t orderDataSaveTick;                     /* 订单周期存储计时 */
@@ -68,7 +67,9 @@ typedef struct
     AswMonitorRebootStep_Enum eAswMonitorRebootStep; /* 复位控制步骤 */
 
     uint8_t swipCardSuccLedFlag;  /* 刷卡成功标记 */       
-    uint8_t swipCardFailLedFlag;  /* 刷卡失败标记 */  
+    uint8_t swipCardFailLedFlag;  /* 刷卡失败标记 */
+
+    MSNvmForbidState_Struct forbidParam;    /* 禁用状态 */
 }AswMonitorCtx_Struct;
 
 
@@ -589,16 +590,29 @@ uint8_t AswMonitor_CheckBillModeValid(uint8_t port)
     return ret;
 }
 
-uint8_t AswMonitor_CheckForbidState(uint8_t port)
+uint8_t AswMonitor_CheckForbidState(void)
 {
-    uint8_t ret = FALSE;
+    return g_stAswMonitorCtx.forbidParam.forbidState;
+}
 
-    if (port < SYSCFG_CFG_GUN_NUM)
+void AswMonitor_SetForbidState(uint8_t lockState, uint8_t lockReason)
+{
+    if (g_stAswMonitorCtx.forbidParam.forbidState != lockState ||
+        g_stAswMonitorCtx.forbidParam.forbidReason != lockReason)
     {
-        ret = g_stAswMonitorData[port].forbidState;
+        ASWMONITOR_CFG_LogPrint("设备禁用状态变化：[%d]--->[%d]\r\n", g_stAswMonitorCtx.forbidParam.forbidState, lockState);
+        g_stAswMonitorCtx.forbidParam.forbidState = lockState;
+        g_stAswMonitorCtx.forbidParam.forbidReason = lockReason;
     }
+}
 
-    return ret;
+void AswMonitor_GetForbidState(uint8_t *pLockState, uint8_t *pLockReason)
+{
+    if (pLockState != NULL && pLockReason != NULL)
+    {
+        pLockState[0] = g_stAswMonitorCtx.forbidParam.forbidState;
+        pLockReason[0] = g_stAswMonitorCtx.forbidParam.forbidReason;
+    }
 }
 
 void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc)
@@ -754,6 +768,11 @@ void AswMonitor_InitMemory(void)
                 MSNvm_InsertNewRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
             }
         }
+    }
+
+    if (eGlobalRet_OK != MSNvm_ReadParaBlock(eMSNvmBlockID_ForbidState, (uint8_t *)&g_stAswMonitorCtx.forbidParam, sizeof(MSNvmForbidState_Struct)))
+    {
+        g_stAswMonitorCtx.forbidParam.forbidState = FALSE;
     }
 }
 

@@ -219,6 +219,7 @@ static void IotGN_WSOfflineHandle(void)
 {
     MSNvmPlatParam_Struct * pParam =  AswPlatM_GetPlatParamPtr();
 
+    pIotGNCtx->loginSucc = FALSE;
     pIotGNCtx->queueBusyFlag = FALSE;
     pIotGNCtx->waitQueueIdleTick = 0;
 
