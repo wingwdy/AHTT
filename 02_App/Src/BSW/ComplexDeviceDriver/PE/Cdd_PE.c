@@ -18,6 +18,7 @@
 *******************************************************************************/
 #include "Cdd_PE.h"
 #include "SysCfg.h"
+#include "Cdd_CP.h"
 #include "Asw_ErrorHandle.h"
 /*******************************************************************************
 *    Macro Definition
@@ -27,6 +28,11 @@
 /*******************************************************************************
 *    Enum Definition
 *******************************************************************************/
+typedef enum
+{
+    eCddPeErrState_NULL = 0, 
+    eCddPeErrState_ERR,
+}CddPeErrState_Enum;
 
 /*******************************************************************************
 *    Typedef Definition
@@ -37,6 +43,7 @@ typedef struct
     CddPEState_Enum ePEState;                   /* PE状态 */
     CddLNState_Enum eTempLNState;               /* 临时LN状态 */
     CddPEState_Enum eTempPEState;               /* 临时PE状态 */
+    CddPeErrState_Enum ePeErrState;             /* PE故障状态 */
     uint8_t lnCheckFinish;                      /* LN检测结束 */
     uint32_t lnCheckTimeout;                    /* LN检测超时定时器 */
     uint32_t peFilterTimer;                     /* PE滤波定时器 */
@@ -123,41 +130,61 @@ static void CddPE_PeDetect(CddPEState_Struct *pPECtrl)
 {
     CddPEState_Enum curPEState = eCddPEState_PEUnkown;
 
-    if (pPECtrl->eLNState == eCddPEState_LNNormal) /* 火零正常 */
-    {
-        if (pPECtrl->peVolt >= CDDPE_CFG_PE_UNCONN_MIN_VOLT && pPECtrl->peVolt <= CDDPE_CFG_PE_UNCONN_MAX_VOLT)
-        {
-            curPEState = eCddPEState_PEUnconn;
-        }
-        else
-        {
-            curPEState = eCddPEState_PEConnect;
-        }
+	if (CDDPE_CFG_IsQBStandardMode() == FALSE) /* 国标模式检测PE */
+	{
+		if (pPECtrl->eLNState == eCddPEState_LNNormal) /* 火零正常 */
+		{
+			if (pPECtrl->peVolt >= CDDPE_CFG_PE_UNCONN_MIN_VOLT && pPECtrl->peVolt <= CDDPE_CFG_PE_UNCONN_MAX_VOLT)
+			{
+				curPEState = eCddPEState_PEUnconn;
+			}
+			else
+			{
+				curPEState = eCddPEState_PEConnect;
+			}
 
-        if (pPECtrl->eTempPEState != curPEState)
-        {
-            pPECtrl->eTempPEState = curPEState;
-            pPECtrl->peFilterTimer = Common_GetSystick();
-        }
-        else
-        {
-            if (Common_JudgeTimeoutMs(pPECtrl->peFilterTimer, CDDPE_CFG_PE_CHECK_FILTER_TIME))
-            {
-                if (curPEState != pPECtrl->ePEState)
-                {
-                    if (curPEState == eCddPEState_PEUnconn)
-                    {
-                        CDDPE_CFG_AswErrHandle_PileSetErrCallback(eErr_PEBreakFault);
-                    }
-                    else
-                    {
-                        CDDPE_CFG_AswErrHandle_PileResetErrCallback(eErr_PEBreakFault);
-                    }
-                }
-                pPECtrl->ePEState = curPEState;
-            }
-        }
-    }
+			if (pPECtrl->eTempPEState != curPEState)
+			{
+				pPECtrl->eTempPEState = curPEState;
+				pPECtrl->peFilterTimer = Common_GetSystick();
+			}
+			else
+			{
+				if (Common_JudgeTimeoutMs(pPECtrl->peFilterTimer, CDDPE_CFG_PE_CHECK_FILTER_TIME))
+				{
+					if (curPEState != pPECtrl->ePEState)
+					{
+						pPECtrl->ePEState = curPEState;
+						if (curPEState == eCddPEState_PEUnconn && pPECtrl->ePeErrState == eCddPeErrState_NULL)
+						{
+							pPECtrl->ePeErrState = eCddPeErrState_ERR;
+							CDDPE_CFG_AswErrHandle_PileSetErrCallback(eErr_PEBreakFault);
+						}
+					}
+					
+					if (curPEState == eCddPEState_PEConnect && pPECtrl->ePeErrState == eCddPeErrState_ERR)
+					{
+						CddCPVolState_Enum eCPState = CddCP_GetVolState(0);
+						if (eCPState == eCddCPVolState_12V)
+						{
+							pPECtrl->ePeErrState = eCddPeErrState_NULL;
+							CDDPE_CFG_AswErrHandle_PileResetErrCallback(eErr_PEBreakFault);
+						}
+					}
+				}
+			}
+		}	
+	}
+	else
+	{
+		if (pPECtrl->ePeErrState == eCddPeErrState_ERR)
+		{
+			pPECtrl->ePeErrState = eCddPeErrState_NULL;
+			pPECtrl->ePEState = eCddPEState_PEUnkown;
+			pPECtrl->eTempPEState = eCddPEState_PEUnkown;
+			CDDPE_CFG_AswErrHandle_PileResetErrCallback(eErr_PEBreakFault);
+		}
+	}
 }
 
 static void CddPE_Detect(void)
@@ -165,17 +192,15 @@ static void CddPE_Detect(void)
     CddPEState_Struct *pPECtrl = &g_stPEState;
 
     pPECtrl->peVolt = (uint16_t)(CddPE_GetPEAdcVolt() * 1000.0);
-    if (CDDPE_CFG_IsQBStandardMode() == FALSE) /* 国标模式检测PE */
+
+    if (pPECtrl->lnCheckFinish == FALSE)
     {
-        if (pPECtrl->lnCheckFinish == FALSE)
-        {
-            CddPE_LnDetect(pPECtrl);
-        }
-        else
-        {
-            CddPE_PeDetect(pPECtrl);
-        }  
+        CddPE_LnDetect(pPECtrl);
     }
+	else
+	{
+		CddPE_PeDetect(pPECtrl);
+	}
 }
 
 

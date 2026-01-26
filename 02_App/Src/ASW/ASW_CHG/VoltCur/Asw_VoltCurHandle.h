@@ -18,11 +18,12 @@
 *    Header File Inclusion
 ******************************************************************************/
 #include "Common.h"
+#include "Asw_Charge.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-#define ASW_VOLTCUR_CFG_ISAuthState()               (FALSE)
+#define ASW_VOLTCUR_CFG_IsAuthState(port)               AswCharge_GetAuthFlag(port)
 
 /******************************************************************************
 *    Enum Definition
