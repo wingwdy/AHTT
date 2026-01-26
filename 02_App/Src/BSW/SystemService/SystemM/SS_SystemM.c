@@ -98,6 +98,7 @@ static void SSSystemM_InitTwo(void)
 {
     MSNvm_InitMemory();
     MSNvm_ReadAll();
+    AswErrHandle_InitMemory();
 }
 
 static void SSSystemM_InitThree(void)
@@ -111,12 +112,11 @@ static void SSSystemM_InitThree(void)
     CddPE_InitMemory();
 	CddCardM_InitMemory();
 
+    AswTempHandle_InitMemory();
     AswPlatM_InitMemory();
     AswMonitor_InitMemory();
     AswEVSE_InitMemory();
     AswCharge_InitMemory();
-    AswErrHandle_InitMemory();
-    AswTempHandle_InitMemory();
     AswVoltCurHandle_InitMemory();
 }
 
