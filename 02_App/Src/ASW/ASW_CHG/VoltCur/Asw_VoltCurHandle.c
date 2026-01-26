@@ -41,6 +41,7 @@
 typedef struct 
 {
     uint32_t maxOutputCurrent;
+	uint32_t prevMaxOutputCurrent;
     uint8_t arFaultStatus[AswVoltCur_EvtCnt];
     FilterProfile1_Struct arfilter[AswVoltCur_EvtCnt];
 }AswVoltCurHandle_Struct;
@@ -146,22 +147,24 @@ void AswVoltCur_ErrorManage(uint8_t port)
 void AswVoltCur_LimitManage(uint8_t port)
 {
     LimitCurrentLevel_Enum Level = AswLimitCurrLevelZero;
-    uint32_t current = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
-    AswVoltCurHandle_Struct *pHandle = &g_arAswVoltCurHandle[port];
+    AswVoltCurHandle_Struct *pHandle = NULL;
+    
+	if (port < SYSCFG_CFG_GUN_NUM)
+	{
+        pHandle = &g_arAswVoltCurHandle[port];
+        pHandle->maxOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
+        Level = AswTempHandle_GetLimitCurrentLevel(port);
+        if ((Level == AswLimitCurrLevelOne) && ASW_VOLTCUR_CFG_IsAuthState(port))
+        {
+            pHandle->maxOutputCurrent = (SYSCFG_CFG_MAX_OUTPUT_CURRENT * 80) / 100;
+        }
 
-    pHandle->maxOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
-
-    Level = AswTempHandle_GetLimitCurrentLevel(port);
-    if ((Level == AswLimitCurrLevelOne) && ASW_VOLTCUR_CFG_ISAuthState())
-    {
-        current = (SYSCFG_CFG_MAX_OUTPUT_CURRENT * 80) / 100;
-    }
-
-    if (pHandle->maxOutputCurrent != current)
-    {
-        pHandle->maxOutputCurrent = current;
-        CddCP_AdjustCurRateCurrent(port, pHandle->maxOutputCurrent);
-    }
+        if (pHandle->maxOutputCurrent != pHandle->prevMaxOutputCurrent)
+        {
+            pHandle->prevMaxOutputCurrent = pHandle->maxOutputCurrent;
+            CddCP_AdjustCurRateCurrent(port, pHandle->maxOutputCurrent);
+        }
+	}
 }
 
 void AswVoltCurHandle_MainFunction(void)

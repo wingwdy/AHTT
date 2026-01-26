@@ -569,7 +569,7 @@ GlobalRet_Enum CddCardM_GetCardUserId(uint8_t *pUidOut)
     }
     else
     {
-        memcpy(pUidOut, pCardM->cardUid, sizeof(pCardM->cardUid));
+        memcpy(pUidOut, pCardM->cardUserId, sizeof(pCardM->cardUserId));
     }
 
     return ret;

@@ -157,7 +157,6 @@ void AswGunTemp_Manage(uint8_t port)
                 { /* 5分钟后温度大于90，进入停充 */
                     pTempHandle->workState = ASWTEMP_WORK_STATE_FAULT;
                     ASWTEMP_CFG_LogPrint("[枪：%d]5分钟后,当前充电枪温度%d℃大于%d℃, [限流A] --> [故障]\r\n", port, pTempHandle->temperatue - 50, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr90] - 50);
-
                 }
                 else
                 {/* 温度小于90，继续限流 */
@@ -241,7 +240,7 @@ void AswEnvTemp_Manage(void)
     pTempHandle->temperatue = ASWTEMP_CFG_GetEnvTemp();
     for (i = 0; i < AswEnvTempThrMax; i++)
     {
-        pTempHandle->arFilterState[i].status = pTempHandle->temperatue >= pTempHandle->arFilterThr[i]? TRUE:FALSE;
+        pTempHandle->arFilterState[i].status = pTempHandle->temperatue > pTempHandle->arFilterThr[i]? TRUE:FALSE;
         Filter_Profile1(&pTempHandle->arFilterState[i], ASWTEMP_CFG_ENV_TEMP_FILTER_COUNT);
     }
 
@@ -320,7 +319,6 @@ void AswEnvTemp_Manage(void)
                 pTempHandle->workState = ASWTEMP_WORK_STATE_NORMAL;
                 ASWTEMP_CFG_LogPrint("当前环境温度%d℃小于%d℃, [故障] --> [正常]\r\n", 
                     pTempHandle->temperatue - 50, pTempHandle->arFilterThr[AswEnvTempThr65] - 50);
-
             }
             break;
         }
