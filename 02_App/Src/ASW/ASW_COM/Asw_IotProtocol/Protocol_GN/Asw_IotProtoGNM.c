@@ -412,7 +412,7 @@ void IotGN_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardB
 
 uint8_t IotGN_GetGunState(uint8_t port)
 {
-    uint8_t gunState = 00;
+    uint8_t gunState = 0;
 
     if (port < SYSCFG_CFG_GUN_NUM)
     {
@@ -518,6 +518,7 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
             memcpy(pGnOrder->logicCardNum, pIotGNCtx->stProtoData[port].authCardID, 8);
         }
 
+        pOrderData->orderLen = sizeof(MSNvmGNOrderInfo_Struct);
         pGnOrder->stopReason = eIotGNStopReason_PowerOff;
     }
 

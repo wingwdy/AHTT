@@ -259,11 +259,11 @@ static void CddDrvEG800AK_ATTaskSendHandle(uint8_t *txBuf)
     const ATCmdDescribtor_Struct * pATCmdDescribtor = g_stCddDrvEG800AKCtrl.currentTaskATDescribtor;
     uint16_t txLen = 0;
 
-    if (g_stCddDrvEG800AKCtrl.transparentMode == TRUE)
+    if (CddDrvEG800AK_CheckTransparentMode() == TRUE)
     {
         if (Common_JudgeTimeoutMs(g_stCddDrvEG800AKCtrl.transparentModeStartTick, CDDDRV_EG800AK_CFG_TRANSPARENT_TIMEOUT))
         {
-            g_stCddDrvEG800AKCtrl.transparentMode = FALSE;
+            CddDrvEG800AK_ExitTransparentMode();
             g_stCddDrvEG800AKCtrl.cmdTaskStep = CDDDRV_EG800AK_CTRL_STEP0;
         }
     }

@@ -505,8 +505,7 @@ static void AswMonitor_CardAuthHandle(void)
     }
     else
     {
-        CddCardM_GetCardUserId(recvUserCardID);
-        Common_BINToBCD(recvUserCardID, bcdCardID, ASWMONITOR_CARD_ID_LEN);
+        CddCardM_GetCardUserId(bcdCardID);
     }
 
     if (pstAswMonitorData->orderCtrl == ASWMONITOR_ORDER_CTRL_IDLE)

@@ -21,7 +21,8 @@
 #include "FrameQueue.h"
 #include "Version.h"
 #include "Asw_Errorhandle.h"
-
+#include "Asw_Monitor.h"
+#include "Asw_ChargeIf.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -51,7 +52,8 @@ static uint8_t IotOM_ReportCycleCheck(uint8_t port, uint32_t cmd, uint32_t	sendC
 static uint16_t IotOM_SendLoginReq(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendHeartBeat(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendNetModuleInfo(uint8_t port, uint8_t *pBuf);
-
+static uint16_t IotOM_SendRealData(uint8_t port, uint8_t *pBuf);
+static uint16_t IotOM_SendMeterVal(uint8_t port, uint8_t *pBuf);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -76,7 +78,7 @@ static const IotOMSendCtrl_Struct c_stIotOMSendctrlTable[IOT_OM_CMD_SEND_COUNT] 
         .cmdType = IOT_OM_CMDTYPE_REQUSET,
         .matchCmd = IOT_OM_CMD_HEARTBEAT_RSP,
         .pSendFunc = IotOM_SendHeartBeat,
-        .sendCycle = 10000,
+        .sendCycle = 30000,
         .printFlag = FALSE,
         .cMeaning = "设备心跳"
     },
@@ -101,6 +103,39 @@ static const IotOMSendCtrl_Struct c_stIotOMSendctrlTable[IOT_OM_CMD_SEND_COUNT] 
         .sendCycle = 0,
         .printFlag = TRUE,
         .cMeaning = "网络模块信息应答"
+    },
+
+    [4] = 
+    {
+        .cmd = IOT_OM_CMD_CALL_REALDATA_ACK,
+        .cmdType = IOT_OM_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_OM_CMD_CALL_REALDATA,
+        .pSendFunc = IotOM_SendRealData,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "召测实时数据应答"
+    },
+
+    [5] = 
+    {
+        .cmd = IOT_OM_CMD_REPORT_REALDATA,
+        .cmdType = IOT_OM_CMDTYPE_REQUSET,
+        .matchCmd = IOT_OM_CMD_NULL,
+        .pSendFunc = IotOM_SendRealData,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "主动上报实时数据"
+    },
+
+    [6] = 
+    {
+        .cmd = IOT_OM_CMD_REPORT_METERVAL,
+        .cmdType = IOT_OM_CMDTYPE_REQUSET,
+        .matchCmd = IOT_OM_CMD_NULL,
+        .pSendFunc = IotOM_SendMeterVal,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "上报电表底数"
     },
 };
 
@@ -220,6 +255,136 @@ static uint16_t IotOM_SendNetModuleInfo(uint8_t port, uint8_t *pBuf)
     return dataLen;
 }
 
+static void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
+{
+    uint8_t dataLen = 0;
+
+    /* 桩温过高故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_EnvOverTempErr))
+    {
+        Common_SetBitFlag(pBuf, 0);
+    }
+
+    /* 急停故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_EmergencyStop))
+    {
+        Common_SetBitFlag(pBuf, 1);
+    }
+    
+    /* 控制导引故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpVoltAbnor))
+    {
+        Common_SetBitFlag(pBuf, 3);
+    }
+
+    /* 电表通信故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCommErr))
+    {
+        Common_SetBitFlag(pBuf, 7);
+    }
+
+    /* 读卡器通信故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ReaderCommErr))
+    {
+        Common_SetBitFlag(pBuf, 8);
+    }
+
+    /* 交流接触器故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqSynechiaFault))
+    {
+        Common_SetBitFlag(pBuf, 11);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqMaloperation))
+    {
+        Common_SetBitFlag(pBuf, 11);
+    }
+
+    /* 枪温过温故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_GunOverTempErr))
+    {
+        Common_SetBitFlag(pBuf, 14);
+    }
+}
+
+static uint16_t IotOM_SendRealData(uint8_t port, uint8_t *pBuf)
+{
+    AswMonitorChargeData_Struct *pChargeData = AswMonitor_GetChargeDataPtr(port);
+    AswMonitorChargeCtrl_Struct *pstChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
+    uint16_t dataLen = 0;
+    uint8_t orderIdleFlag = AswMonitor_IsOrderIdle(port);
+    uint32_t temp = 0;
+
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
+    dataLen += 32;
+    /* 枪号 */
+    pBuf[dataLen++] = port + 1;
+
+    /* 状态 */
+    pBuf[dataLen++] = IotOM_GetGunState(port);
+    /* 是否插枪 */
+    pBuf[dataLen++] = (AswChargeIf_CheckGunConnected(port) == TRUE) ? 0x01 : 0x00;
+    /* 枪线温度 */
+    pBuf[dataLen++] = AswChargeIf_GetGunTemperature(port);
+    
+    if (orderIdleFlag != TRUE)
+    {
+        /* 累计充电时间 */
+        Common_Uint16ToTwoUint8(&pBuf[dataLen], pChargeData->chargeTime / 60);
+        dataLen += 2;
+        /* 充电度数 */
+        Common_Uint32ToFourUint8(&pBuf[dataLen], pChargeData->totalEnergy / 10);
+        dataLen += 4;
+        /* 已充金额 */
+        memcpy(&pBuf[dataLen], &pChargeData->totalMoney, 4);
+        dataLen += 4;
+    }
+    else
+    {
+        /* 累计充电时间 */
+        memset(&pBuf[dataLen], 0x00, 2);
+        dataLen += 2;
+        /* 充电度数 */
+        memset(&pBuf[dataLen], 0x00, 4);
+        dataLen += 4;
+        /* 已充金额 */
+        memset(&pBuf[dataLen], 0x00, 4);
+        dataLen += 4;
+    }
+
+    /* 硬件故障 */
+    memset(&pBuf[dataLen], 0x00, 2);
+    IotOM_SetRealDataErrBit(port, &pBuf[dataLen]);
+    dataLen += 2;
+
+    /* 硬件故障 */
+    memset(&pBuf[dataLen], 0x00, 4);
+    dataLen += 4;
+    return dataLen;
+}
+
+static uint16_t IotOM_SendMeterVal(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
+    dataLen += 32;
+    /* 枪号 */
+    pBuf[dataLen++] = port + 1;
+    /* 有功功率 */
+    Common_Uint32ToFourUint8(&pBuf[dataLen], AswChargeIf_GetOutputPower(port) * 10);
+    dataLen += 4;
+    /* 电表底数 */
+    Common_Uint32ToFourUint8(&pBuf[dataLen], AswChargeIf_GetMeterEnergyVal(port) / 10);
+    dataLen += 4;
+
+    return dataLen;
+}
+
+
+
 
 static uint16_t IotOM_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
 {
@@ -310,7 +475,7 @@ void IotOM_UpCtrlSendDeal(void)
 
                         if (pCmdSendCtrl->printFlag)
                         {
-                            IOTOM_CFG_LogPrint("[运维平台][枪：%d]发送[cmd: %02X, %s][%d]: ", port, (uint8_t)pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
+                            IOTOM_CFG_LogPrint("[枪：%d]发送[cmd: %02X, %s][%d]: ", port, (uint8_t)pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
                             DSLogM_HexOutput(txBuf, dataLen);
                         }
 

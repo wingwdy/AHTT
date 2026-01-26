@@ -18,6 +18,7 @@
 ******************************************************************************/
 #include "Common.h"
 #include "Asw_Charge.h"
+#include "Cdd_Relay.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -32,6 +33,8 @@
 #define ASWCHARGEIF_WORKSTATE_STOPPING       ASWCHARGE_WORKSTATE_STOPPING  /* 停止中状态 */
 #define ASWCHARGEIF_WORKSTATE_FINISH         ASWCHARGE_WORKSTATE_FINISH    /* 停止完成状态 */
 
+#define AswCHARGEIF_RELAYSTATE_OFF           eCddRelayState_Off
+#define AswCHARGEIF_RELAYSTATE_ON            eCddRelayState_On
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -56,6 +59,7 @@ uint32_t AswChargeIf_GetOutputVoltage(uint8_t port);
 uint32_t AswChargeIf_GetOutputCurrent(uint8_t port);
 uint32_t AswChargeIf_GetOutputPower(uint8_t port);
 uint8_t AswChargeIf_GetChargeState(uint8_t port);
+uint8_t AswChargeIf_GetRelayState(uint8_t port);
 uint8_t AswChargeIf_GetGunTemperature(uint8_t port);
 uint8_t AswChargeIf_GetEnvTemperature(void);
 uint32_t AswChargeIf_GetInputVoltage(uint8_t port);

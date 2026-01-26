@@ -342,8 +342,6 @@ void AswPlatM_InitMemory(void)
     /* 设置卡类型 */
     pCardDescriptor = AswPlatM_GetCardDescriptor();
     CddCardM_SetCardType(pCardDescriptor->cardType);
-
-    AswErrhandle_SetErrExsitCallback(0, eErr_PlatformOffline);
 }
 
 void AswPlatM_MainFunction(void)

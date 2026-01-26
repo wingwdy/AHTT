@@ -24,7 +24,16 @@
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
-
+#define IOT_OM_RecvGunNoTransform(inputPort, outputPort)    do{ \
+                                                                if (inputPort > SYSCFG_CFG_GUN_NUM)\
+                                                                {\
+                                                                    outputPort = 0;\
+                                                                }\
+                                                                else\
+                                                                {\
+                                                                    outputPort = (inputPort - 1);\
+                                                                }\
+                                                            }while(0)
 
 
 
@@ -46,7 +55,7 @@
 static uint8_t IotOM_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvCallNetModuleInfo(uint8_t *port, uint8_t *r_data, uint16_t len);
-
+static uint8_t IotOM_RecvCallRealData(uint8_t *port, uint8_t *r_data, uint16_t len);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -89,6 +98,18 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .printFlag = TRUE,
         .cMeaning = "请求网络模块信息",
     },
+
+    [3] = 
+    {
+        .cmd = IOT_OM_CMD_CALL_REALDATA,
+        .cmdType = IOT_OM_CMDTYPE_REQUSET,
+        .pRecvParse = IotOM_RecvCallRealData,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_OM_CMD_CALL_REALDATA_ACK,
+        .printFlag = TRUE,
+        .cMeaning = "召测实时数据",
+    },
 };
 
 /*******************************************************************************
@@ -104,6 +125,14 @@ static uint8_t IotOM_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
     {
         Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_HEARTBEAT_REQ, TRUE);
         Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_SEND_NETMODULE_INFO, TRUE);
+
+        for (gunNo = 0; gunNo < SYSCFG_CFG_GUN_NUM; gunNo++)
+        {
+            Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_REPORT_REALDATA, TRUE);            
+            Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_REPORT_METERVAL, TRUE);
+            pIotOMCtx->realDataReportTick[gunNo] = Common_GetSystick();
+            pIotOMCtx->meterValReportTick[gunNo] = Common_GetSystick();
+        }
 
         pIotOMCtx->loginSucc = TRUE;
         IOTOM_CFG_LogPrint("[运维平台]登陆成功!\r\n");
@@ -128,9 +157,14 @@ static uint8_t IotOM_RecvCallNetModuleInfo(uint8_t *port, uint8_t *r_data, uint1
     return TRUE;
 }
 
+static uint8_t IotOM_RecvCallRealData(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    uint8_t index = 32;
+    uint8_t *pRecvData = r_data;
 
-
-
+    IOT_OM_RecvGunNoTransform(pRecvData[index], port[0]);
+    return TRUE;
+}
 
 
 static const IotOMRecvCtrl_Struct* IotOM_GetRecvCtrlPtr(uint16_t cmd)
@@ -210,7 +244,7 @@ static void IotOM_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTOM_CFG_LogPrint("[运维平台][枪：%d]接收[cmd: %02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTOM_CFG_LogPrint("[枪：%d]接收[cmd: %02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
 
@@ -237,7 +271,7 @@ static void IotOM_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTOM_CFG_LogPrint("[运维平台][枪：%d]接收[cmd: %02X, %s][%d] 处理失败: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTOM_CFG_LogPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
                 }
@@ -280,7 +314,7 @@ void IotOM_TimeoutDetect(void)
                 Common_SetRptCount(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
                 timeoutCount = Common_GetRptCount(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
 
-                IOTOM_CFG_LogPrint("[运维平台][cmd:0x%02X %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, timeoutCount, pCmdRecvCtrl->maxTimeout);
+                IOTOM_CFG_LogPrint("[cmd:0x%02X %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, timeoutCount, pCmdRecvCtrl->maxTimeout);
 
                 if (timeoutCount >= pCmdRecvCtrl->maxTryCnt)
                 {

@@ -35,6 +35,13 @@
 /* 日志接口函数定义 */
 #define IOTOM_CFG_LogPrint(fmt, ...)            DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
 
+/* 实时数据上报周期定义 */
+#define IOTOM_CFG_IDLE_REALDATA_CYCLE           (10 * 60 * 1000)
+#define IOTOM_CFG_CHARGING_REALDATA_CYCLE       (60 * 1000)
+
+#define IOTOM_CFG_IDLE_METERVAL_CYCLE           (10 * 60 * 1000)
+#define IOTOM_CFG_CHARGING_METERVAL_CYCLE       (60 * 1000)
+
 /* 协议CMD 定义 */
 #define IOT_OM_CMDTYPE_REQUSET			        (0x00U)
 #define IOT_OM_CMDTYPE_RESPONSE                 (0x01U)
@@ -45,15 +52,18 @@
 #define IOT_OM_CMD_HEARTBEAT_REQ                (0x03U)             /* 心跳请求 */
 #define IOT_OM_CMD_SEND_NETMODULE_INFO          (0x05U)             /* 主动上报网络模块信息 */
 #define IOT_OM_CMD_CALL_NETMODULE_INFO_RSP      (0xF05U)            /* 网络模块信息应答 */
-
-#define IOT_OM_CMD_SEND_COUNT                   (4U)
+#define IOT_OM_CMD_REPORT_REALDATA              (0x13U)             /* 上报实时数据 */
+#define IOT_OM_CMD_CALL_REALDATA_ACK            (0xF13U)            /* 召测实时数据应答 */
+#define IOT_OM_CMD_REPORT_METERVAL              (0x15U)             /* 上报电表底数 */
+#define IOT_OM_CMD_SEND_COUNT                   (7U)
 
 /* 协议CMD 接收定义 */
 #define IOT_OM_CMD_LOGIN_RSP                    (0x02U)             /* 登陆应答 */
 #define IOT_OM_CMD_HEARTBEAT_RSP                (0x04U)             /* 心跳应答 */
 #define IOT_OM_CMD_CALL_NETMODULE_INFO          (0x06U)             /* 请求网络模块信息 */
+#define IOT_OM_CMD_CALL_REALDATA                (0x12U)             /* 召测实时数据 */
 
-#define IOT_OM_CMD_RECV_COUNT                   (3U)
+#define IOT_OM_CMD_RECV_COUNT                   (4U)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

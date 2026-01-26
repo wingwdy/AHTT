@@ -611,6 +611,7 @@ void AswCharge_StartAuth(uint8_t port)
 
         if (pChargeCtrl->authFlag != TRUE)
         {
+            pChargeCtrl->eStopReason = eErr_none;
             pChargeCtrl->authFlag = TRUE;
             ASWCHARGE_CFG_LogPrint("[枪：%d]充电授权!\r\n", port);
         }

@@ -119,6 +119,11 @@ uint8_t AswChargeIf_GetChargeState(uint8_t port)
     return AswCharge_GetWorkState(port);
 }
 
+uint8_t AswChargeIf_GetRelayState(uint8_t port)
+{
+    return (uint8_t)CddRelay_GetRelayState(port);
+}
+
 uint8_t AswChargeIf_GetGunTemperature(uint8_t port)
 {
     return CddSensor_GetGunTemperature(port);

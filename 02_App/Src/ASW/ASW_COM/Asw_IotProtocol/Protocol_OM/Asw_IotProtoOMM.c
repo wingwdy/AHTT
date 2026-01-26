@@ -74,6 +74,9 @@ static CommonSendCtrl_Struct* IotOM_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_OM_CMD_HEARTBEAT_REQ:              pSendCtrl = &pIotOMCtx->stSendCtrl[port][1];   break;
         case IOT_OM_CMD_SEND_NETMODULE_INFO:        pSendCtrl = &pIotOMCtx->stSendCtrl[port][2];   break;
         case IOT_OM_CMD_CALL_NETMODULE_INFO_RSP:    pSendCtrl = &pIotOMCtx->stSendCtrl[port][3];   break;
+        case IOT_OM_CMD_REPORT_REALDATA:            pSendCtrl = &pIotOMCtx->stSendCtrl[port][4];   break;
+        case IOT_OM_CMD_CALL_REALDATA_ACK:          pSendCtrl = &pIotOMCtx->stSendCtrl[port][5];   break;
+        case IOT_OM_CMD_REPORT_METERVAL:            pSendCtrl = &pIotOMCtx->stSendCtrl[port][6];   break;
         default: break;
     }
 
@@ -88,7 +91,8 @@ static CommonRecvCtrl_Struct* IotOM_GetRecvCtrl(uint8_t port, uint16_t cmd)
     {
         case IOT_OM_CMD_LOGIN_RSP:                  pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][0];   break;
         case IOT_OM_CMD_HEARTBEAT_RSP:              pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][1];   break;
-        case IOT_OM_CMD_CALL_NETMODULE_INFO:        pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][1];   break;
+        case IOT_OM_CMD_CALL_NETMODULE_INFO:        pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][2];   break;
+        case IOT_OM_CMD_CALL_REALDATA:              pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][3];   break;
         default: break;
     }
     return pRecvCtrl;
@@ -129,6 +133,83 @@ static void IotOM_WSLoginHandle(void)
     }
 }
 
+static void IotOM_CycleReportRealData(void)
+{
+    uint32_t realDataReportCycle;
+    uint8_t port;
+    uint8_t curGunState = 0;
+    uint8_t curGunConnectState = 0;
+    uint8_t realDataReportFlag = FALSE;
+
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+    {
+        curGunState = IotOM_GetGunState(port);
+        curGunConnectState = AswChargeIf_CheckGunConnected(port);
+
+        if (pIotOMCtx->lastGunState[port] != curGunState)
+        {
+            realDataReportFlag = TRUE;
+        }
+
+        if (pIotOMCtx->lastGunConnectState[port] != curGunConnectState)
+        {
+            realDataReportFlag = TRUE;
+        }
+
+        realDataReportCycle = (AswMonitor_IsOrderIdle(port) != TRUE) ? IOTOM_CFG_CHARGING_REALDATA_CYCLE : IOTOM_CFG_IDLE_REALDATA_CYCLE;
+       
+        if (Common_JudgeTimeoutMs(pIotOMCtx->realDataReportTick[port], realDataReportCycle) == TRUE)
+        {
+            realDataReportFlag = TRUE;
+        }
+
+        if (realDataReportFlag == TRUE)
+        {
+            pIotOMCtx->lastGunState[port] = curGunState;
+            pIotOMCtx->lastGunConnectState[port] = curGunConnectState;
+            pIotOMCtx->realDataReportTick[port] = Common_GetSystick();
+
+            Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, port, IOT_OM_CMD_REPORT_REALDATA, TRUE);
+        }
+    }
+}
+
+static void IotOM_CycleDetectUnreporteRecord(void)
+{
+
+
+
+
+
+
+}
+
+static void IotOM_CycleReportMeterVal(void)
+{
+    uint32_t meterValReportCycle;
+    uint8_t port;
+
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+    {
+        meterValReportCycle = (AswMonitor_IsOrderIdle(port) != TRUE) ? IOTOM_CFG_CHARGING_REALDATA_CYCLE : IOTOM_CFG_IDLE_REALDATA_CYCLE;
+
+        if (Common_JudgeTimeoutMs(pIotOMCtx->meterValReportTick[port], meterValReportCycle) == TRUE)
+        {
+            pIotOMCtx->meterValReportTick[port] = Common_GetSystick();
+            Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, port, IOT_OM_CMD_REPORT_METERVAL, TRUE);
+        }
+    }
+}
+
+static void IotOM_CycleDetect(void)
+{ 
+    IotOM_CycleReportRealData();
+
+    IotOM_CycleReportMeterVal();
+
+    IotOM_CycleDetectUnreporteRecord();
+}
+
 static void IotOM_WSNormalHandle(void)
 {
     if (FALSE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_O))
@@ -139,7 +220,7 @@ static void IotOM_WSNormalHandle(void)
     {
         if (pIotOMCtx->loginSucc == TRUE)
         {
-
+            IotOM_CycleDetect();
         }
 
         IotOM_UpCtrlSendDeal();
@@ -148,6 +229,53 @@ static void IotOM_WSNormalHandle(void)
 
         IotOM_TimeoutDetect();
     }
+}
+
+uint8_t IotOM_GetGunState(uint8_t port)
+{
+    uint8_t gunState = 0;
+    uint8_t chargeState = 0;
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        chargeState = AswChargeIf_GetChargeState(port);
+
+        if (AswErrHandle_IsExsistError(port) == TRUE)
+        {
+            gunState = 0x04; /* 故障中 */
+        }
+        else if (chargeState == ASWCHARGEIF_WORKSTATE_STARTING || chargeState == ASWCHARGEIF_WORKSTATE_WAKEUP)
+        {
+            gunState = 0x01; /* 启动中 */
+        }
+        else if (chargeState == ASWCHARGEIF_WORKSTATE_CHARGING || 
+                chargeState == ASWCHARGEIF_WORKSTATE_PAUSEA || 
+                chargeState == ASWCHARGEIF_WORKSTATE_PAUSEB)
+        {
+            gunState = 0x02; /* 充电中 */
+        }
+        else if (chargeState == ASWCHARGEIF_WORKSTATE_STOPPING)
+        {
+            if (AswChargeIf_GetRelayState(port) == AswCHARGEIF_RELAYSTATE_ON)
+            {
+                gunState = 0x02; /* 充电中 */
+            }
+            else
+            {
+                gunState = 0x03; /* 充电结束但未拔枪 */
+            }
+        }
+        else if (chargeState == ASWCHARGEIF_WORKSTATE_FINISH)
+        {
+            gunState = 0x03; /* 充电结束但未拔枪 */
+        }
+        else
+        {
+            gunState = 0x00;  /* 未插枪或者插枪未充电 */
+        }
+    }
+
+    return gunState;
 }
 
 void IotOM_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)

@@ -65,6 +65,7 @@ typedef struct
 	uint8_t sendPort;
     uint16_t reqSeq;
 
+    uint32_t meterValReportTick[SYSCFG_CFG_GUN_NUM];
     uint32_t realDataReportTick[SYSCFG_CFG_GUN_NUM];
     uint8_t lastGunState[SYSCFG_CFG_GUN_NUM];            /* 用于变位上送*/
     uint8_t lastGunConnectState[SYSCFG_CFG_GUN_NUM];     /* 用于变位上送*/
@@ -89,5 +90,6 @@ void IotOM_FillLinkPara(CddNetMSocketPara_Union *pLinkPara);
 
 /* 内部适用 */
 void IotOM_OfflineHandle(void);
+uint8_t IotOM_GetGunState(uint8_t port);
 #endif
 

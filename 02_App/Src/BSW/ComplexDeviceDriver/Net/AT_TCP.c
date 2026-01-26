@@ -217,7 +217,7 @@ static uint8_t ATTCP_RecvWrite(uint8_t socketIndex, void * socketPara, uint8_t *
 {  
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
     CddNetMSocketPara_Union *pSocketPara = (CddNetMSocketPara_Union *)pSocketCtrl->specificPara;
-
+    CddDrvEG800AK_EnterTransparentMode(socketIndex);
     FrameQueue_TransmitTxData(pSocketPara->stTcpPara.frameQueueChannelID,  CDDDRVEG800AK_CFG_WriteData, pSocketCtrl);
     return TRUE;
 }
@@ -378,8 +378,13 @@ void ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
     int32_t socketIndex = 0;
     int32_t connectState = 0;
     uint8_t *pTemp = NULL;
+    uint8_t *pEnd = NULL;
+    uint16_t dealLen = 0;
+    uint16_t remainLen = 0;
 
-    if (NULL != (pTemp = Common_SearchData(pData, dataLen, "+QIOPEN: ", strlen("+QIOPEN: "))))
+    pTemp = Common_SearchData(pData, dataLen, "+QIOPEN: ", strlen("+QIOPEN: "));
+
+    while (NULL != pTemp)
     {
         if (2 == sscanf((char*)pTemp, "+QIOPEN: %d,%d\r\n", &socketIndex, &connectState))
         {
@@ -394,11 +399,18 @@ void ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
                     {
                         ATTCP_SetSocketState(socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
 
+                        pSocketCtrl->reconectTimes = 0;
+
                         if (pSocketCtrl->ePlatType == eCddNetMPlatType_O)
                         {
-                            pSocketCtrl->reconectTimes = 0;
                             CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]运营平台建立连接成功!\r\n", socketIndex);
                         }
+                        else if (pSocketCtrl->ePlatType == eCddNetMPlatType_OM)
+                        {
+                            CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]运维平台建立连接成功!\r\n", socketIndex);
+                        }
+                        else
+                        {}
                     }
                 }
                 else
@@ -408,6 +420,25 @@ void ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
                 }
             }
         }
+
+            
+        pTemp += strlen("+QIOPEN: ");
+        dealLen = (uint32_t)pTemp - (uint32_t)pData;
+        remainLen = (dealLen >= dataLen) ? 0 : (dataLen - dealLen);
+
+        if (NULL != (pEnd = Common_SearchData(pTemp, remainLen, "\r\n", strlen("\r\n"))))
+        {
+            pEnd += strlen("\r\n");
+            dealLen = (uint32_t)pEnd - (uint32_t)pData;
+            remainLen = (dealLen >= dataLen) ? 0 : (dataLen - dealLen);
+            pTemp = pEnd;
+        }
+        else
+        {
+            break;
+        }
+
+        pTemp = Common_SearchData(pTemp, remainLen, "+QIOPEN: ", strlen("+QIOPEN: "));
     }
 }
 
@@ -434,7 +465,7 @@ void ATTCP_UrcClose(uint8_t *pData, void * modulePara, uint16_t dataLen)
                 CDDDRV_EG800AK_CFG_LogPrint("[socket: %d] 后台主动断开连接!\r\n", socketIndex);
             }
         }
-    }
+    }  
 }
 
 void ATTCP_UrcRecv(uint8_t *pData, void * modulePara, uint16_t dataLen)
