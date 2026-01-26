@@ -71,6 +71,8 @@
 #define CDDDRV_EG800AK_CFG_RECONECT_TIMEOUT(x)          (10000 * x)
 #define CDDDRV_EG800AK_CFG_RECONECT_MAX_TIMES           5
 
+#define CDDDRV_EG800AK_CFG_MODULE_TYPE                  "EG800AK"
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

@@ -776,6 +776,17 @@ CddNetMOperator_Enum CddDrvEG800AK_GetOperatorType(void)
     return g_stCddDrvEG800AKCtrl.stModuleInfo.eOperatorType;
 }
 
+void CddDrvEG800AK_GetModuleTypeInfo(char *pModuleType, uint16_t readLen)
+{
+    uint16_t copyLen = strlen(CDDDRV_EG800AK_CFG_MODULE_TYPE);
+
+    if (pModuleType != NULL && readLen != 0)
+    {
+        copyLen = copyLen > readLen ? readLen : copyLen;
+        snprintf(pModuleType, copyLen, "%s", CDDDRV_EG800AK_CFG_MODULE_TYPE);
+    }
+}
+
 static void CddDrvEG800AK_SocketDisconnectCallback(void *socketCtrl)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketCtrl;

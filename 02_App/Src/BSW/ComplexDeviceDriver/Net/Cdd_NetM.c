@@ -212,6 +212,17 @@ CddNetMOperator_Enum CddNetM_GetOperatorType(void)
     return eOperator;
 }
 
+void CddNetM_GetModuleTypeInfo(char *ModuleTypeInfo, uint16_t readLen)
+{
+    CddNetMOperator_Enum eOperator = eCddNetMOperator_Null;
+
+    if (c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].getModuleTypeInfo != NULL)
+    {
+        c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].getModuleTypeInfo(ModuleTypeInfo, readLen);
+    }
+}
+
+
 void CddNetM_GetIccid(uint8_t *pICCID)
 {
     if (c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].getIccid != NULL)

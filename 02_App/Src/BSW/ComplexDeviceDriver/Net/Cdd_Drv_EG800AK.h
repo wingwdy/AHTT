@@ -136,7 +136,7 @@ void CddDrvEG800AK_DelSingleSocket(uint8_t socketIndex);
 void CddDrvEG800AK_GetIccid(char *pICCID);
 uint8_t CddDrvEG800AK_GetCsq(void);
 CddNetMOperator_Enum CddDrvEG800AK_GetOperatorType(void);
-
+void CddDrvEG800AK_GetModuleTypeInfo(char *pModuleType, uint16_t readLen);
 /* 模块内使用 */
 void CddDrvEG800AK_SetModuleState(CddNetMModuleState_Enum eModuleState);
 void CddDrvEG800AK_EnterTransparentMode(uint8_t socketIndex);

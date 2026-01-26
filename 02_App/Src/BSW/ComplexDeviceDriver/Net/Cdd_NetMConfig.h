@@ -49,6 +49,7 @@ typedef struct
 	void (*getIccid)(char *pICCID);
 	uint8_t (*getCsq)(void);
 	CddNetMOperator_Enum (*getOperator)(void);
+	void (*getModuleTypeInfo)(char *ModuleType, uint16_t readLen);
 }CddNetMModuleOps_Struct;
 
 

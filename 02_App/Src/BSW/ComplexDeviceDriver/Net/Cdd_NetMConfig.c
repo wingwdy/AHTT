@@ -65,6 +65,7 @@ const CddNetMModuleOps_Struct c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_COUNT] = {
         .getIccid = CddDrvEG800AK_GetIccid,
         .getCsq = CddDrvEG800AK_GetCsq,
         .getOperator = CddDrvEG800AK_GetOperatorType,
+        .getModuleTypeInfo = CddDrvEG800AK_GetModuleTypeInfo,
     },
 };
 

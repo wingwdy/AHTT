@@ -178,6 +178,7 @@ void CddNetM_MainFunction(void);
 uint16_t CddNetM_GetCsq(void);
 void CddNetM_GetIccid(uint8_t *pICCID);
 CddNetMOperator_Enum CddNetM_GetOperatorType(void);
+void CddNetM_GetModuleTypeInfo(char *ModuleTypeInfo, uint16_t readLen);
 #endif /* CDD_NETM_H_ */
 
 
