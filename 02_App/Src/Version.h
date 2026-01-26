@@ -20,10 +20,10 @@
 #define  APP_SW_MAJOR_VERSION                           (1u)
 #define  APP_SW_MINOR_VERSION                           (0u)
 #define  APP_SW_CUSTORM_VERSION                         (0u)
-#define  APP_SW_PATCH_VERSION                           (2u)
+#define  APP_SW_PATCH_VERSION                           (3u)
 
-#define  APP_SW_VERSION_STRING                         "1.0.0.2"
-#define  APP_SW_VERSION_DATE                           "2026/01/13"
+#define  APP_SW_VERSION_STRING                         "1.0.0.3"
+#define  APP_SW_VERSION_DATE                           "2026/01/26"
 
 /******************************************************************************
 *    Macro Definition
