@@ -265,7 +265,7 @@ static void IotOM_CycleDetect(void)
 
 static void IotOM_WSNormalHandle(void)
 {
-    if (FALSE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_O))
+    if (FALSE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_OM))
     {
         IotOM_OfflineHandle();
     }
