@@ -749,11 +749,12 @@ static uint8_t IotGN_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, uint
 
     memcpy(pIotGNCtx->stProtoData[port[0]].updateAccountMoneyCardID, &pRecvData[index], 8);
 
-    if (0 == memcmp(&pRecvData[index], invalidCardID, 8) == 0)
+    if (0 == memcmp(&pRecvData[index], invalidCardID, 8))
     {
         index += 8;
         pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
-        IOTGN_CFG_LogPrint("[枪：%d]更新账户余额成功，余额：%d!\r\n", port[0], pChargeCtrl->accountMoney);
+                IOTGN_CFG_LogPrint("[枪：%d]更新账户余额成功，余额：%d.%02d!\r\n", port[0], pChargeCtrl->accountMoney / 100, 
+                    pChargeCtrl->accountMoney % 100);
         pIotGNCtx->stProtoData[port[0]].updateAccountMoneyResult = 0x00;
     }
     else
@@ -764,7 +765,8 @@ static uint8_t IotGN_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, uint
             {
                 index += 8;
                 pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
-                IOTGN_CFG_LogPrint("[枪：%d]更新账户余额成功，余额：%d!\r\n", port[0], pChargeCtrl->accountMoney);
+                IOTGN_CFG_LogPrint("[枪：%d]更新账户余额成功，余额：%d.%02d!\r\n", port[0], pChargeCtrl->accountMoney / 100, 
+                    pChargeCtrl->accountMoney % 100);
                 pIotGNCtx->stProtoData[port[0]].updateAccountMoneyResult = 0x00;
             }
             else
@@ -772,6 +774,11 @@ static uint8_t IotGN_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, uint
                 IOTGN_CFG_LogPrint("[枪：%d]更新账户余额失败，卡号不一致!\r\n", port[0]);
                 pIotGNCtx->stProtoData[port[0]].updateAccountMoneyResult = 0x02;
             }
+        }
+        else
+        {
+            IOTGN_CFG_LogPrint("[枪：%d]更新账户余额失败，非刷卡启动充电!\r\n", port[0]);
+            pIotGNCtx->stProtoData[port[0]].updateAccountMoneyResult = 0x02;
         }
     }
 
