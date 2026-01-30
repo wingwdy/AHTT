@@ -125,8 +125,6 @@ static void AswCharge_IdleStateHandle(uint8_t port, AswChargeCtrl_Struct *pCharg
 
     if (evseState == ASWEVSE_STATE_2)
     {
-        /* 测试用，到时候删掉 */
-//      pChargeCtrl->authFlag = TRUE;
         AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_READY);
     }
     else
@@ -143,6 +141,7 @@ static void AswCharge_ReadyStateHandle(uint8_t port, AswChargeCtrl_Struct *pChar
 {
     uint8_t evseState = AswEVSE_GetEVSEState(port);
     AswErrChargeCondition_Enum eChargeCondition = AswErrHandle_GetChargeCondition(port);
+    CddCPVolState_Enum eCPState = CddCP_GetVolState(port);
 
     if (pChargeCtrl->authFlag == TRUE)
     {
@@ -174,7 +173,7 @@ static void AswCharge_ReadyStateHandle(uint8_t port, AswChargeCtrl_Struct *pChar
     }
     else
     {
-        if (evseState == ASWEVSE_STATE_1)
+        if (eCPState == eCddCPVolState_12V)
         {
             AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_IDLE);
         }
