@@ -138,16 +138,16 @@ static void AswEVSE_State1Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
 {
     if (eCpState == eCddCPVolState_9V || eCpState == eCddCPVolState_6V)
     {
-        pEVSECtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;
         pEVSECtrl->enterState2DelayTimer = Common_GetSystick();
         AswEVSE_SetEVSEState(port, ASWEVSE_STATE_2);
-
-#if (ASWEVSE_CFG_DIODE_DETECT_ENABLE == TRUE)
-        CddCP_SetReqStartDiodeExsitDetect(port);
-#else
-        pEVSECtrl->diodeDetectResult = GLOBAL_OPT_STATE_SUCCESS;
-#endif
     }
+    else if (eCpState == eCddCPVolState_12V)
+    {
+        pEVSECtrl->shortCutDetectResult = GLOBAL_OPT_STATE_IDLE;
+        pEVSECtrl->diodeDetectResult = GLOBAL_OPT_STATE_IDLE;
+    }
+    else
+    {}
 }
 
 static void AswEVSE_State1DotHanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, CddCPVolState_Enum eCpState)
@@ -171,17 +171,26 @@ static void AswEVSE_State2Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
         if (pEVSECtrl->shortCutDetectResult == GLOBAL_OPT_STATE_IDLE)
         {
             CddRelay_SetReqStartShortCutDetect(port);
-        } 
+        }
 
         pEVSECtrl->shortCutDetectResult = CddRelay_GetShortCutResult(port);
+
+#if (ASWEVSE_CFG_DIODE_DETECT_ENABLE == TRUE)
+        if (pEVSECtrl->diodeDetectResult == GLOBAL_OPT_STATE_IDLE)
+        {
+            CddCP_SetReqStartDiodeExsitDetect(port);
+        }
+
+        pEVSECtrl->diodeDetectResult = CddCP_GetDiodeExsitDetectResult(port);
+#else   
+        pEVSECtrl->diodeDetectResult = GLOBAL_OPT_STATE_SUCCESS;
+#endif
     }
 
     if (eCpState == eCddCPVolState_9V || eCpState == eCddCPVolState_6V)
     {
-#if (ASWEVSE_CFG_DIODE_DETECT_ENABLE == TRUE)
-        pEVSECtrl->diodeDetectResult = CddCP_GetDiodeExsitDetectResult(port);
-#endif
-        if (pEVSECtrl->shortCutDetectResult == GLOBAL_OPT_STATE_SUCCESS && pEVSECtrl->diodeDetectResult == GLOBAL_OPT_STATE_SUCCESS)
+        if (pEVSECtrl->shortCutDetectResult == GLOBAL_OPT_STATE_SUCCESS && 
+            pEVSECtrl->diodeDetectResult == GLOBAL_OPT_STATE_SUCCESS)
         {
             if (pEVSECtrl->startCharge == TRUE)
             {
