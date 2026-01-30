@@ -30,6 +30,8 @@
 
 #define ATTCP_WAIT_IPOPEN_TIMEOUT        60000
 
+#define ATTCP_DECTECT_STATE_PERIOD       3000
+
 /*******************************************************************************
 *    Enum Definition
 *******************************************************************************/
@@ -47,6 +49,7 @@ typedef struct
     uint32_t reconnectInterval;
     uint8_t waitTcpConnectOkFlag;
     uint32_t waitTcpConnectOkTickStart;
+    uint32_t cycleDetectSocketState;
 }ATTcpPrivate_Struct;
 
 
@@ -61,12 +64,15 @@ static uint16_t ATTCP_PackQIPClose(uint8_t socketIndex, void * socketPara, uint8
 static uint16_t ATTCP_PackOpenSocket(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t nATLen);
 static uint16_t ATTCP_PackReadData(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t nATLen);
 static uint16_t ATTCP_PackWriteData(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t nATLen);
+static uint16_t ATTCP_PackQIPQurey(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t nATLen);
 
 static uint8_t ATTCP_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATTCP_RecvWrite(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATTCP_RecvClose(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
+static uint8_t ATTCP_RecvQuery(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
+
 static uint8_t ATTCP_FailHandle(uint8_t socketIndex, void * socketPara, uint8_t atTaskID);
 
 /*******************************************************************************
@@ -89,12 +95,25 @@ const ATCmdDescribtor_Struct c_stTCPATCmdDescribtor[eATTCPCmd_Count] =
     [eATTCPCmd_Close] =
     { "AT+QICLOSE=[ID]\r\n",                                    "+QICLOSE",       3,   5000,      3000,  TRUE, "关闭连接",
     ATTCP_PackQIPClose,                                         ATTCP_RecvClose,                         ATTCP_FailHandle},
+
+    [eATTCPCmd_QueryState] =
+    { "AT+QISTATE=1,[ID]\r\n",                                  "+QISTATE:",      3,   5000,      3000,  TRUE, "查询连接状态",
+    ATTCP_PackQIPQurey,                                         ATTCP_RecvQuery,                         ATTCP_FailHandle},
+
 };
 
 /*************************************************************************
 *    Function Source Code
 *******************************************************************************/
 static uint16_t ATTCP_PackQIPClose(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t nATLen)
+{
+    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
+
+	nATLen = Common_ReplaceNum(pData, nATLen, "[ID]", socketIndex, socketIndex);
+	return nATLen;
+}
+
+static uint16_t ATTCP_PackQIPQurey(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t nATLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
 
@@ -157,6 +176,7 @@ static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint
     {
         pPrivate->waitTcpConnectOkFlag = TRUE;
         pPrivate->waitTcpConnectOkTickStart = Common_GetSystick();
+        pPrivate->cycleDetectSocketState = Common_GetSystick();
         ret = TRUE;
     }
 
@@ -230,6 +250,36 @@ static uint8_t ATTCP_RecvClose(uint8_t socketIndex, void * socketPara, uint8_t *
     return TRUE;
 }
 
+static uint8_t ATTCP_RecvQuery(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
+{
+    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
+    ATTcpPrivate_Struct *pPrivate = (ATTcpPrivate_Struct *)pSocketCtrl->user_data;
+    char service_type[16], ip_address[64];     
+    int32_t connectID, remote_port, local_port, socket_state, contextID, access_mode, serverID;        
+    uint8_t *pTemp = Common_SearchData(pData, dataLen, "+QISTATE:", strlen("+QISTATE:"));
+    uint8_t parseCnt = 0;
+
+    if (pTemp != NULL)
+    {
+        parseCnt = sscanf((char *)pTemp, "+QISTATE: %d,\"%15[^\"]\", \"%63[^\"]\",%d,%d,%d,%d,%d,", &connectID, 
+            service_type, ip_address, &remote_port, &local_port, &socket_state, &contextID, &access_mode);
+
+        if (8 == parseCnt)
+        {
+            /* 状态: 0=初始 1=正在打开 2=已连接 3=监听中 4=正在关闭 */
+            if (socket_state == 2)
+            {
+                if (pPrivate->waitTcpConnectOkFlag == TRUE)
+                {
+                    ATTCP_SetSocketState(socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
+                }
+            }   
+        }
+    }
+
+    return TRUE;
+}
+
 static uint8_t ATTCP_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
@@ -279,6 +329,21 @@ static void ATTCP_SetSocketState(uint8_t socketIndex, void *socketPara, CddNetMS
             {
                 pPrivate->waitTcpConnectOkFlag = FALSE;
             }
+            else if (eSocketState == eCddNetMSocketState_ConnectOK)
+            {
+                pSocketCtrl->reconectTimes = 0;
+
+                if (pSocketCtrl->ePlatType == eCddNetMPlatType_O)
+                {
+                    CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]运营平台建立连接成功!\r\n", socketIndex);
+                }
+                else if (pSocketCtrl->ePlatType == eCddNetMPlatType_OM)
+                {
+                    CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]运维平台建立连接成功!\r\n", socketIndex);
+                }
+                else
+                {}
+            }
             else if (eSocketState == eCddNetMSocketState_WaitReconnect)
             {
                 pPrivate->reconnectInterval = 0;
@@ -311,8 +376,16 @@ static void ATTCP_SocketStateMange(uint8_t socketIndex, CddDrvEG800AKSocketCtrl_
         {
             if (Common_JudgeTimeoutMs(pPrivate->waitTcpConnectOkTickStart, ATTCP_WAIT_IPOPEN_TIMEOUT))
             {
+                pPrivate->waitTcpConnectOkTickStart = Common_GetSystick();
                 ATTCP_CloseSocket(pSocketCtrl);
             }
+            else if (Common_JudgeTimeoutMs(pPrivate->cycleDetectSocketState, ATTCP_DECTECT_STATE_PERIOD))
+            {
+                pPrivate->cycleDetectSocketState = Common_GetSystick();
+                CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATTCPCmd_QueryState);
+            }
+            else
+            {}
         }
     }
     else if (pSocketCtrl->eSocketState == eCddNetMSocketState_ConnectOK)
@@ -398,19 +471,6 @@ void ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
                     if (pPrivate->waitTcpConnectOkFlag == TRUE)
                     {
                         ATTCP_SetSocketState(socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
-
-                        pSocketCtrl->reconectTimes = 0;
-
-                        if (pSocketCtrl->ePlatType == eCddNetMPlatType_O)
-                        {
-                            CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]运营平台建立连接成功!\r\n", socketIndex);
-                        }
-                        else if (pSocketCtrl->ePlatType == eCddNetMPlatType_OM)
-                        {
-                            CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]运维平台建立连接成功!\r\n", socketIndex);
-                        }
-                        else
-                        {}
                     }
                 }
                 else

@@ -23,7 +23,8 @@
 #include "AT_Describtor.h"
 #include "Cdd_NetM.h"
 #include "DS_LogM.h"
-
+#include "FreeRTOS.h"
+#include "task.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -37,14 +38,16 @@
 
 #define CDDDRV_EG800AK_CFG_ReadData(data, len, lastReadLen)     do\
                                                                 {\
-                                                                    if (eGlobalRet_OK  == McalUart_CheckDataLen(eMcalUartChanel_4G, &dataLen))\
+                                                                    while (eGlobalRet_OK  == McalUart_CheckDataLen(eMcalUartChanel_4G, &dataLen))\
                                                                     {\
                                                                         if (dataLen != lastReadLen)\
                                                                         {\
                                                                             lastReadLen = dataLen;\
-                                                                            return;\
+                                                                            vTaskDelay(1);\
+                                                                            continue;\
                                                                         }\
                                                                         McalUart_ReadData(eMcalUartChanel_4G, recvbuf, dataLen);\
+                                                                        break;\
                                                                     }\
                                                                     lastReadLen = 0;\
                                                                 } while(0)

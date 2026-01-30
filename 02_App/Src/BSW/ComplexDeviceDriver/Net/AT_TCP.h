@@ -34,6 +34,7 @@ typedef enum
     eATTCPCmd_Read,
     eATTCPCmd_Write,
     eATTCPCmd_Close,
+    eATTCPCmd_QueryState,
     eATTCPCmd_Count,
 }ATTcpCmd_Enum;
 

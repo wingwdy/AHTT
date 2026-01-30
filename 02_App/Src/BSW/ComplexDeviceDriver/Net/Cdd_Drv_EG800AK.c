@@ -553,7 +553,7 @@ static void CddDrvEG800AK_noCommTimeoutDetect(void)
         g_stCddDrvEG800AKCtrl.noCommTickStart = Common_GetSystick();
         CddDrvEG800AK_SetModuleState(eCddNetMModuleState_AbNormal);
         CddDrvEG800AK_SetAbnormalType(CddDrvEG800AKAbnormalHandle_Reboot);
-        CDDDRV_EG800AK_CFG_LogPrint("4G 模组无数据通信超时 %d ms!", CDDDRV_EG800AK_CFG_NO_COMM_TIMEOUT);    
+        CDDDRV_EG800AK_CFG_LogPrint("4G 模组无数据通信超时 %d ms\r\n!", CDDDRV_EG800AK_CFG_NO_COMM_TIMEOUT);    
     }
 }
 

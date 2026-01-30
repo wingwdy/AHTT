@@ -458,6 +458,7 @@ void AswMonitor_PrintChargeData(void)
     uint32_t energy = 0;
     uint32_t chargeTime = 0;
     uint32_t money = 0;
+    uint16_t cpVol = 0;
     
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
@@ -470,15 +471,16 @@ void AswMonitor_PrintChargeData(void)
         power = AswChargeIf_GetOutputPower(port);
         energy = pChargeData->totalLossEnergy;
         chargeTime = pChargeData->chargeTime;
+        cpVol = AswChargeIf_GetCpVoltage(port);
                                                                  
-        ASWMONITOR_CFG_LogPrint("---------------------------------[枪: %d]信息------------------------------------\r\n");
+        ASWMONITOR_CFG_LogPrint("---------------------------------[枪: %d]信息[CP:%d.%dV]------------------------------------\r\n", port, cpVol / 1000, cpVol % 1000);
         ASWMONITOR_CFG_LogPrint("电压：%d.%02d V,\t电流：%d.%03d A,\t功率：%d.%03d W\r\n",
                                 voltage / 100, voltage % 100, current / 1000, current % 1000, power / 1000, power % 1000);
         ASWMONITOR_CFG_LogPrint("枪温：%d ℃,\t壳温：%d ℃,\t\t已充时间：%d s\r\n",
                                 (gunTemp - 50), (envTemp - 50), chargeTime);                                
         ASWMONITOR_CFG_LogPrint("已充电量：%d.%04d kWh,\t\t\t已充金额：%d.%04d 元,\r\n",
                                 energy / 10000, energy % 10000, money / 10000, money % 10000);
-        ASWMONITOR_CFG_LogPrint("--------------------------------------------------------------------------------\r\n");             
+        ASWMONITOR_CFG_LogPrint("----------------------------------------------------------------------------------------------\r\n");             
     }
 }
 
