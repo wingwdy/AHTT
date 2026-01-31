@@ -82,14 +82,21 @@ static void CddPE_LnDetect(CddPEState_Struct *pPECtrl)
 {
     CddLNState_Enum curLNState = eCddPEState_LNUnkown;
 
-    if (pPECtrl->peVolt >= CDDPE_CFG_LN_REVERSE_MIN_VOLT && pPECtrl->peVolt <= CDDPE_CFG_LN_REVERSE_MAX_VOLT)
+    if (CDDPE_CFG_IsQBStandardMode() == FALSE) /* 国标模式检测LN */
     {
-        curLNState = eCddPEState_LNReverse;
+		if (pPECtrl->peVolt >= CDDPE_CFG_LN_REVERSE_MIN_VOLT && pPECtrl->peVolt <= CDDPE_CFG_LN_REVERSE_MAX_VOLT)
+		{
+			curLNState = eCddPEState_LNReverse;
+		}
+		else
+		{
+			curLNState = eCddPEState_LNNormal;
+		}
     }
-    else
-    {
-        curLNState = eCddPEState_LNNormal;
-    }
+	else
+	{
+		curLNState = eCddPEState_LNNormal;
+	}
 
     if (pPECtrl->eTempLNState != curLNState)
     {
