@@ -196,13 +196,13 @@ void CddModeM_EnterFactoryMode(void)
 { 
     if (g_stCddModeMCtx.modeParam.isFactoryMode == FALSE)
     {
-        CDDMODE_CFG_LogPrint("进入厂内模式!\r\n");
+        CDDMODE_CFG_LogPrint("进入厂内模式 ok!\r\n");
         g_stCddModeMCtx.modeParam.isFactoryMode = TRUE;
         MSNvm_WriteParaBlock(eMSNvmBlockID_ModeParam, (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct));
     }
     else
     {
-        CDDMODE_CFG_LogPrint("已在厂内模式!\r\n");
+        CDDMODE_CFG_LogPrint("已在厂内模式 ok!\r\n");
     }
 }
 
@@ -210,7 +210,7 @@ void CddModeM_ExsitFactoryMode(void)
 { 
     if (g_stCddModeMCtx.modeParam.isFactoryMode == TRUE)
     {
-        CDDMODE_CFG_LogPrint("退出厂内模式!\r\n");
+        CDDMODE_CFG_LogPrint("退出厂内模式 ok!\r\n");
         g_stCddModeMCtx.modeParam.isFactoryMode = FALSE;
         g_stCddModeMCtx.modeParam.isSynTime = FALSE;
         g_stCddModeMCtx.modeParam.sysTimeStamp = 0;
@@ -218,7 +218,7 @@ void CddModeM_ExsitFactoryMode(void)
     }
     else
     {
-        CDDMODE_CFG_LogPrint("已退出厂内模式!\r\n");
+        CDDMODE_CFG_LogPrint("已退出厂内模式 ok!\r\n");
     }
 }
 
@@ -226,13 +226,13 @@ void CddModeM_ExitGBMode(void)
 { 
     if (g_stCddModeMCtx.modeParam.isQBMode == FALSE)
     {
-        CDDMODE_CFG_LogPrint("进入兼容模式!\r\n");
+        CDDMODE_CFG_LogPrint("进入兼容模式 ok!\r\n");
         g_stCddModeMCtx.modeParam.isQBMode = TRUE;
         MSNvm_WriteParaBlock(eMSNvmBlockID_ModeParam, (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct));
     }
     else
     {
-        CDDMODE_CFG_LogPrint("已在兼容模式!\r\n");
+        CDDMODE_CFG_LogPrint("已在兼容模式 ok!\r\n");
     }
 }
 
@@ -240,13 +240,13 @@ void CddModeM_EnterGBMode(void)
 { 
     if (g_stCddModeMCtx.modeParam.isQBMode == TRUE)
     {
-        CDDMODE_CFG_LogPrint("进入国标模式!\r\n");
+        CDDMODE_CFG_LogPrint("进入国标模式 ok!\r\n");
         g_stCddModeMCtx.modeParam.isQBMode = FALSE;
         MSNvm_WriteParaBlock(eMSNvmBlockID_ModeParam, (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct));
     }
     else
     {
-        CDDMODE_CFG_LogPrint("已在国标模式!\r\n");
+        CDDMODE_CFG_LogPrint("已在国标模式 ok!\r\n");
     }
 }
 
