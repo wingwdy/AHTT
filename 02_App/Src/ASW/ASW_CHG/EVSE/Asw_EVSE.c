@@ -18,6 +18,7 @@
 *******************************************************************************/
 #include "Asw_EVSE.h"
 #include "Cdd_CP.h"
+#include "Cdd_ModeM.h"
 #include "Cdd_Relay.h"
 #include "Asw_ErrorHandle.h"
 #include "Asw_EVSEConfig.h"
@@ -168,12 +169,19 @@ static void AswEVSE_State2Hanlde(uint8_t port, AswEVSECtrl_Struct *pEVSECtrl, Cd
 {
     if (Common_JudgeTimeoutMs(pEVSECtrl->enterState2DelayTimer, ASWEVSE_CFG_ENTER_STATE2_DELAY))
     {
-        if (pEVSECtrl->shortCutDetectResult == GLOBAL_OPT_STATE_IDLE)
+        if (CddModeM_IsGBMode() == TRUE)
         {
-            CddRelay_SetReqStartShortCutDetect(port);
-        }
+            if (pEVSECtrl->shortCutDetectResult == GLOBAL_OPT_STATE_IDLE)
+            {
+                CddRelay_SetReqStartShortCutDetect(port);
+            }
 
-        pEVSECtrl->shortCutDetectResult = CddRelay_GetShortCutResult(port);
+            pEVSECtrl->shortCutDetectResult = CddRelay_GetShortCutResult(port);
+        }
+        else
+        {
+            pEVSECtrl->shortCutDetectResult = GLOBAL_OPT_STATE_SUCCESS;
+        }
 
 #if (ASWEVSE_CFG_DIODE_DETECT_ENABLE == TRUE)
         if (pEVSECtrl->diodeDetectResult == GLOBAL_OPT_STATE_IDLE)
