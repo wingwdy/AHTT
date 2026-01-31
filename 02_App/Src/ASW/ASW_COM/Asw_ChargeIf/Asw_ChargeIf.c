@@ -101,6 +101,10 @@ uint32_t AswChargeIf_GetOutputPower(uint8_t port)
     return power;
 }
 
+uint16_t AswChargeIf_GetCpVoltage(uint8_t port)
+{
+    return CddCP_GetVoltage(port);
+}
 
 uint32_t AswChargeIf_GetOutputCurrent(uint8_t port)
 {
@@ -149,6 +153,10 @@ AswErrorType_Enum AswChargeIf_GetStopReason(uint8_t port)
     return AswCharge_GetStopReason(port);
 }
 
+uint8_t AswChargeIf_GetAuthFlag(uint8_t port)
+{
+    return AswCharge_GetAuthFlag(port);
+}
 
 
 

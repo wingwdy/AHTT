@@ -27,6 +27,7 @@
 #include "Cdd_CardM.h"
 #include "Cdd_ModeM.h"
 #include "SS_Ucm.h"
+#include "Cdd_NetM.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -337,8 +338,8 @@ static void AswMonitor_OrderOngoingHandle(uint8_t port, AswMonitorData_Struct *p
     AswMonitor_ProcessCostData(port, pstAswMonitorData);
 
     /* 订单结束 */
-    if (chargeState == ASWCHARGEIF_WORKSTATE_FINISH ||
-        chargeState == ASWCHARGEIF_WORKSTATE_IDLE)
+    if ((chargeState == ASWCHARGEIF_WORKSTATE_FINISH || chargeState == ASWCHARGEIF_WORKSTATE_IDLE) && 
+        FALSE == AswChargeIf_GetAuthFlag(port))
     {
         pstAswMonitorData->chargeStart = FALSE;
         pstAswMonitorData->stOrderData.orderSaveState = ASWMONITOR_ORDER_SAVE_STOP;
@@ -513,19 +514,52 @@ static void AswMonitor_CardAuthHandle(void)
 
     if (pstAswMonitorData->orderCtrl == ASWMONITOR_ORDER_CTRL_IDLE)
     {
-        if (TRUE == AswPlatM_SwipCardCharge(port))
+        if (FALSE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_O))
         {
-            memcpy(pstAswMonitorData->stChargeCtrl.authCardID, bcdCardID, ASWMONITOR_CARD_ID_LEN);
+            ASWMONITOR_CFG_LogPrint("[枪：%d]刷卡成功，设备离线，拒绝充电!!\r\n", port);
+        }
+        else if (AswErrHandle_IsExsistError(port) == TRUE)
+        {
+            ASWMONITOR_CFG_LogPrint("[枪：%d]刷卡成功，设备故障，拒绝充电!!\r\n", port);
+        }
+        else if (AswChargeIf_CheckGunConnected(port) != TRUE)
+        {
+            ASWMONITOR_CFG_LogPrint("[枪：%d]刷卡成功，枪未连接，拒绝充电!!\r\n", port);
+        }
+        else if (AswMonitor_CheckBillModeValid(port) != TRUE)
+        {
+            ASWMONITOR_CFG_LogPrint("[枪：%d]刷卡成功，计费模型无效，拒绝充电!!\r\n", port);
+        }
+        else if (SSUcm_IsUpdating() == TRUE)
+        {
+            ASWMONITOR_CFG_LogPrint("刷卡成功，设备在升级，拒绝充电!!\r\n");
+        }
+        else if (TRUE == AswMonitor_CheckForbidState())
+        {
+            ASWMONITOR_CFG_LogPrint("刷卡成功，设备禁用，拒绝充电!!\r\n");
+        }
+        else
+        {
+            if (TRUE == AswPlatM_SwipCardCharge(port))
+            {
+                memcpy(pstAswMonitorData->stChargeCtrl.authCardID, bcdCardID, ASWMONITOR_CARD_ID_LEN);
+                ASWMONITOR_CFG_LogPrint("[枪：%d]刷卡成功，请求启动充电!\r\n", port);
+            }
+            else
+            {
+                ASWMONITOR_CFG_LogPrint("[枪：%d]刷卡成功，但是已经有卡在申请启动充电，本次刷卡作废!\r\n", port);
+            }
         }
     }
     else if (pstAswMonitorData->orderCtrl == ASWMONITOR_ORDER_CTRL_ONGOING)
     {
-        if (pstAswMonitorData->stChargeCtrl.startSrc == ASWMONITOR_ORDER_START_SRC_CARD)
+        if (0 == memcmp(pstAswMonitorData->stChargeCtrl.authCardID, bcdCardID, ASWMONITOR_CARD_ID_LEN))
         {
-            if (0 == memcmp(pstAswMonitorData->stChargeCtrl.authCardID, bcdCardID, ASWMONITOR_CARD_ID_LEN))
-            {
-                AswErrhandle_SetErrExsitCallback(port, eSrc_CardStop);
-            }
+            AswErrhandle_SetErrExsitCallback(port, eSrc_CardStop);
+        }
+        else
+        {
+            ASWMONITOR_CFG_LogPrint("刷卡成功，卡号不一致，拒绝停止充电!!\r\n");
         }
     }
     else

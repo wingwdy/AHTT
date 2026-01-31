@@ -63,11 +63,11 @@ uint8_t AswChargeIf_GetRelayState(uint8_t port);
 uint8_t AswChargeIf_GetGunTemperature(uint8_t port);
 uint8_t AswChargeIf_GetEnvTemperature(void);
 uint32_t AswChargeIf_GetInputVoltage(uint8_t port);
-
+uint16_t AswChargeIf_GetCpVoltage(uint8_t port);
 uint64_t AswChargeIf_GetMeterEnergyVal(uint8_t port);
 void AswChargeIf_ChargeStart(uint8_t port);
 AswErrorType_Enum AswChargeIf_GetStopReason(uint8_t port);
-
+uint8_t AswChargeIf_GetAuthFlag(uint8_t port);
 #endif /* ASW_CHARGEIF_H_ */
 
 
