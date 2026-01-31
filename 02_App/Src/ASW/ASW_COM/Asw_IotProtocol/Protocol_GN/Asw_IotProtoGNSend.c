@@ -546,7 +546,7 @@ static uint16_t IotGN_SendChargeStartRsp(uint8_t port, uint8_t *pBuf)
     /* 枪号 */
     pBuf[dataLen++] = port + 1;
     /* 交易流水号 */
-    memcpy(&pBuf[dataLen], pIotGNCtx->stProtoData[port].curUsedOrderTransactionNum, 16);
+    memcpy(&pBuf[dataLen], pIotGNCtx->stProtoData[port].newRecvOrderTransactionNum, 16);
     dataLen += 16;
     /* 远程启动结果 */
     pBuf[dataLen++] = pIotGNCtx->stProtoData[port].remoteStartResult;

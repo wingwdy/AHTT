@@ -275,6 +275,7 @@ static IotGNStopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType)
 {
     uint8_t index = 0;
     IotGNStopReason_Enum eStopReason = eIotGNStopReason_NoExpectedErr;
+    uint8_t findFlag = FALSE;
 
     const struct
     {
@@ -327,10 +328,16 @@ static IotGNStopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType)
         if (errType == stopReasonMap[index].errType)
         {
             eStopReason = stopReasonMap[index].stopReason;
+            findFlag = TRUE;
             break;
         }
     }
 
+    if (findFlag == FALSE)
+    {
+        IOTGN_CFG_LogPrint("公牛结束原因转换，未找到对应原因，原始原因为：%d!\r\n", errType);
+    }
+    
     return eStopReason;
 }
 
@@ -465,11 +472,6 @@ uint8_t IotGN_SwipCardCharge(uint8_t port)
         {
             Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_PILE_START_CHARGE_REQ, TRUE);
             ret = TRUE;
-            IOTGN_CFG_LogPrint("[枪：%d]刷卡成功，请求启动充电!\r\n", port);
-        }
-        else
-        {
-            IOTGN_CFG_LogPrint("[枪：%d]刷卡成功，但是已经有卡在申请启动充电，本次刷卡作废!\r\n", port);
         }
     }
 
@@ -500,7 +502,7 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
         memcpy(pGnOrder->pileDnBCD, pIotGNCtx->pileDnBCD, 7);
         pGnOrder->port = port;
         memcpy(pGnOrder->orderTransactionNum, 
-               pIotGNCtx->stProtoData[port].curUsedOrderTransactionNum, 
+               pIotGNCtx->stProtoData[port].curUsedOrderTransactionNum,
                sizeof(pIotGNCtx->stProtoData[port].curUsedOrderTransactionNum));
 
         pGnOrder->startTime = pChargeData->chargeStartTime;

@@ -438,8 +438,7 @@ void IotOM_TimeoutDetect(void)
                  continue;
             }
 
-            if (Common_JudgeTimeoutMs(Common_GetRecvTick(pIotOMCtx->pFuncRecvCtrl, port, 
-                pCmdRecvCtrl->cmd), pCmdRecvCtrl->maxTimeout) == TRUE)
+            if (Common_JudgeTimeoutMs(Common_GetRecvTick(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd), pCmdRecvCtrl->maxTimeout) == TRUE)
             {
                 Common_SetRptCount(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
                 timeoutCount = Common_GetRptCount(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
@@ -448,7 +447,16 @@ void IotOM_TimeoutDetect(void)
 
                 if (timeoutCount >= pCmdRecvCtrl->maxTryCnt)
                 {
-                    IotOM_OfflineHandle();
+                    if (pCmdRecvCtrl->cmd == IOT_OM_CMD_HEARTBEAT_RSP || pCmdRecvCtrl->cmd == IOT_OM_CMD_LOGIN_RSP)
+                    {
+                        IotOM_OfflineHandle();
+                    }
+                    else
+                    {
+                        Common_ClearRptCount(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
+                        Common_SetRecvTimerEnable(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd, FALSE);
+                        Common_SetSendFlag(pIotOMCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, FALSE);
+                    }
                 }
                 else
                 {

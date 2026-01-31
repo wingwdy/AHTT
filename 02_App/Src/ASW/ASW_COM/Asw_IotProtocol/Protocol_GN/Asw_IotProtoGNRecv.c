@@ -579,6 +579,7 @@ static uint8_t IotGN_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, uint1
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t failReason = 0;
+    uint32_t accountMoney = 0;
 
     IOT_GN_RecvGunNoTransform(pRecvData[index], port[0]);
     index++;
@@ -591,42 +592,54 @@ static uint8_t IotGN_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, uint1
 
     if (TRUE == IotGN_CheckChargeStart(port[0], &failReason))
     {
-        memcpy(pIotGNCtx->stProtoData[port[0]].curUsedOrderTransactionNum,
-               pIotGNCtx->stProtoData[port[0]].newRecvOrderTransactionNum,
-               16);
-
         /* 卡号 */
+        memcpy(pChargeCtrl->authCardID, &pRecvData[index], 8);
         index += 8;
         /* 账户余额 */
-        pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
-        index += 4;  
-
-        /* 充电控制方式转换 */
-        if (pRecvData[index++] == 1)  /* 按时间 */
-        {
-            pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeTime;
-            pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 60;
-        }
-        else if (pRecvData[index++] == 2)  /* 按金额 */
-        {
-            pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeMoney;
-            pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 100;
-        }
-        else if (pRecvData[index++] == 3)  /* 按电量 */
-        {
-            pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeEnergy;
-            pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 100;
-        }
-        else /* 自动充满 */
-        {
-            pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_AutoCharge;
-        }
-
+        accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
         index += 4;
 
-        pIotGNCtx->stProtoData[port[0]].remoteStartResult = 1;
-        pIotGNCtx->stProtoData[port[0]].remoteStartFailReason = 0;
-        AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_APP);
+        if (accountMoney <= IOTGN_CFG_CHARGE_MIN_ACCOUNT_MONEY)
+        {
+            IOTGN_CFG_LogPrint("余额不足，拒绝充电！余额：%d.%02d 元!\r\n", accountMoney / 100, accountMoney % 100);
+            pIotGNCtx->stProtoData[port[0]].remoteStartResult = 0;
+            /* 无余额不足的失败响应，暂时填离线*/
+            pIotGNCtx->stProtoData[port[0]].remoteStartFailReason = 0x04;
+        }
+        else
+        {
+            memcpy(pIotGNCtx->stProtoData[port[0]].curUsedOrderTransactionNum,
+                pIotGNCtx->stProtoData[port[0]].newRecvOrderTransactionNum, 16);
+
+            pChargeCtrl->accountMoney = accountMoney;
+
+            /* 充电控制方式转换 */
+            if (pRecvData[index++] == 1)  /* 按时间 */
+            {
+                pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeTime;
+                pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 60;
+            }
+            else if (pRecvData[index++] == 2)  /* 按金额 */
+            {
+                pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeMoney;
+                pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 100;
+            }
+            else if (pRecvData[index++] == 3)  /* 按电量 */
+            {
+                pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeEnergy;
+                pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 100;
+            }
+            else /* 自动充满 */
+            {
+                pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_AutoCharge;
+            }
+
+            index += 4;
+
+            pIotGNCtx->stProtoData[port[0]].remoteStartResult = 1;
+            pIotGNCtx->stProtoData[port[0]].remoteStartFailReason = 0;
+            AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_APP);
+        }
     }
     else
     {
@@ -678,6 +691,7 @@ static uint8_t IotGN_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, uint
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t failReason = 0;
+    uint32_t accountMoney = 0;
 
     IOT_GN_RecvGunNoTransform(pRecvData[index], port[0]);
     index++;
@@ -689,47 +703,60 @@ static uint8_t IotGN_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, uint
         /* 鉴权成功标志 */
         if (pRecvData[index + 28] == 0x01)
         {
-            /* 订单号 */
-            memcpy(pIotGNCtx->stProtoData[port[0]].curUsedOrderTransactionNum, &pRecvData[index], 16);
-            index += 16;
-            /* 卡号 */
-            memcpy(pIotGNCtx->stProtoData[port[0]].authCardID, &pRecvData[index], 8);
-            index += 8;
-            /* 账户余额 */
-            pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
-            index += 4;
-            /* 失败原因 */
-            index += 1;
+            accountMoney = Common_FourUint8ToUint32(&pRecvData[index + 24]);
 
-            /* 充电控制方式转换 */
-            if (pRecvData[index++] == 1)  /* 按时间 */
+            if (accountMoney <= IOTGN_CFG_CHARGE_MIN_ACCOUNT_MONEY)
             {
-                pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeTime;
-                pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 60;
+                IOTGN_CFG_LogPrint("余额不足，拒绝充电！余额：%d.%02d 元!\r\n", accountMoney / 100, accountMoney % 100);
             }
-            else if (pRecvData[index++] == 2)  /* 按金额 */
+            else
             {
-                pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeMoney;
-                pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 100;
-            }
-            else if (pRecvData[index++] == 3)  /* 按电量 */
-            {
-                pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeEnergy;
-                pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 100;
-            }
-            else /* 自动充满 */
-            {
-                pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_AutoCharge;
-            }
+                /* 订单号 */
+                memcpy(pIotGNCtx->stProtoData[port[0]].curUsedOrderTransactionNum, &pRecvData[index], 16);
+                index += 16;
+                /* 卡号 */
+                memcpy(pIotGNCtx->stProtoData[port[0]].authCardID, &pRecvData[index], 8);
+                index += 8;
+                /* 账户余额 */
+                pChargeCtrl->accountMoney = accountMoney;
+                index += 4;
+                /* 失败原因 */
+                index += 1;
 
-            AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_CARD);
-            IOTGN_CFG_LogPrint("[枪：%d]充电桩申请主动启动充电成功!\r\n", port[0]);
+                /* 充电控制方式转换 */
+                if (pRecvData[index++] == 1)  /* 按时间 */
+                {
+                    pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeTime;
+                    pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 60;
+                }
+                else if (pRecvData[index++] == 2)  /* 按金额 */
+                {
+                    pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeMoney;
+                    pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 100;
+                }
+                else if (pRecvData[index++] == 3)  /* 按电量 */
+                {
+                    pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeEnergy;
+                    pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) * 100;
+                }
+                else /* 自动充满 */
+                {
+                    pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_AutoCharge;
+                }
+
+                AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_CARD);
+                IOTGN_CFG_LogPrint("[枪：%d]充电桩申请主动启动充电成功!\r\n", port[0]);
+            }
         }
         else
         {
             index += 29;
             IOTGN_CFG_LogPrint("[枪：%d]充电桩申请主动启动充电失败，失败原因：%02X!\r\n", port[0], pRecvData[index]);
         }
+    }
+    else
+    {
+        IOTGN_CFG_LogPrint("[枪：%d]充电桩申请主动启动充电, 平台应答成功，但设备无法启动充电，失败原因：%d\r\n", port[0], failReason);
     }
 
     return TRUE;
@@ -935,24 +962,51 @@ void IotGN_TimeoutDetect(void)
 
                 if (timeoutCount >= pCmdRecvCtrl->maxTryCnt)
                 {
-                    IotGN_OfflineHandle();
+                    if (pCmdRecvCtrl->cmd == IOT_GN_CMD_HEARTBEAT_RSP || pCmdRecvCtrl->cmd == IOT_GN_CMD_LOGIN_RSP)
+                    {
+                        IotGN_OfflineHandle();
+                    }
+                    else
+                    {
+                        Common_ClearRptCount(pIotGNCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
+                        Common_SetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd, FALSE);
+                        
+                        if (pCmdRecvCtrl->cmd == IOT_GN_CMD_ORDER_RECORD_RSP)
+                        {
+                            if (pIotGNCtx->stOrderInfo.platOrderInfo.stGNOrderInfo.billmodeType == IOT_GN_BILLMODE_RATE_TYPE_MULT)
+                            {
+                                Common_SetSendFlag(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_MULTI_ORDER_RECORD_REQ, FALSE);
+                            }
+                            else
+                            {
+                                Common_SetSendFlag(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_ORDER_RECORD_REQ, FALSE);
+                            }
+
+                            MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotGNCtx->time);
+                            IOTGN_CFG_LogPrint("交易记录上报失败, 强行置为成功!\r\n");
+                        }
+                        else
+                        {
+                            Common_SetSendFlag(pIotGNCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, FALSE);
+                        }
+                    }
                 }
                 else
                 {
+                    Common_SetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd, FALSE);
+
                     if (pCmdRecvCtrl->cmd == IOT_GN_CMD_ORDER_RECORD_RSP)
                     {
                         if (pIotGNCtx->stOrderInfo.platOrderInfo.stGNOrderInfo.billmodeType == IOT_GN_BILLMODE_RATE_TYPE_MULT)
                         {
                             Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_MULTI_ORDER_RECORD_REQ, TRUE);
                             Common_SetSendImmdFlag(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_MULTI_ORDER_RECORD_REQ, TRUE);
-                            Common_SetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, IOT_GN_CMD_MULTI_ORDER_RECORD_REQ, FALSE);
                             Common_SetSendFlag(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_MULTI_ORDER_RECORD_REQ, FALSE);
                         }
                         else
                         {
                             Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_ORDER_RECORD_REQ, TRUE);
                             Common_SetSendImmdFlag(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_ORDER_RECORD_REQ, TRUE);
-                            Common_SetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, IOT_GN_CMD_ORDER_RECORD_REQ, FALSE);
                             Common_SetSendFlag(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_ORDER_RECORD_REQ, FALSE);
                         }
                     }
@@ -960,7 +1014,6 @@ void IotGN_TimeoutDetect(void)
                     {
                         Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, TRUE);
                         Common_SetSendImmdFlag(pIotGNCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, TRUE);
-                        Common_SetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd, FALSE);
                         Common_SetSendFlag(pIotGNCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, FALSE);
                     }
                 }
