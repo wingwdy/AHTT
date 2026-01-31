@@ -12,9 +12,10 @@
 *
 *******************************************************************************/
 #include "Asw_TempHandleConfig.h"
+#include "Asw_ErrorHandle.h"
 #include "SysCfg.h"
 #include "Filter.h"
-#include "Asw_ErrorHandle.h"
+#include "Cdd_CP.h"
 
 /*******************************************************************************
 *    Header File Inclusion
@@ -203,11 +204,11 @@ void AswGunTemp_Manage(uint8_t port)
         }
         case ASWTEMP_WORK_STATE_FAULT:
         {
-            /* 温度小于60度，恢复正常 */
-            if (pTempHandle->arFilterState[AswGunTempThr60].validStatus == FALSE)
-            {
+			CddCPVolState_Enum eCPState = CddCP_GetVolState(port);
+            if (pTempHandle->arFilterState[AswGunTempThr60].validStatus == FALSE && eCPState == eCddCPVolState_12V)
+            {/* 温度小于60度，恢复正常 */
                 pTempHandle->workState = ASWTEMP_WORK_STATE_NORMAL;
-                ASWTEMP_CFG_LogPrint("[枪：%d]当前充电枪温度%d℃小于%d℃, [故障] --> [正常]\r\n", 
+                ASWTEMP_CFG_LogPrint("[枪：%d]拔枪且当前充电枪温度%d℃小于%d℃, [故障] --> [正常]\r\n", 
                     port,pTempHandle->temperatue - 50, g_arAswGunTempHandle[port].arFilterThr[AswGunTempThr60] - 50); 
             }
             break;
@@ -235,6 +236,7 @@ void AswGunTemp_Manage(uint8_t port)
 void AswEnvTemp_Manage(void)
 {
     uint8_t i = 0;
+	uint8_t port = 0;
     AswEnvTempHandle_Struct *pTempHandle = &g_arAswEnvTempHandle;
     
     pTempHandle->temperatue = ASWTEMP_CFG_GetEnvTemp();
@@ -314,10 +316,11 @@ void AswEnvTemp_Manage(void)
         }
         case ASWTEMP_WORK_STATE_FAULT:
         {
-            if (pTempHandle->arFilterState[AswEnvTempThr65].validStatus == FALSE)
+			CddCPVolState_Enum eCPState = CddCP_GetVolState(port); /* 双枪时注意拔哪个枪 或者双枪都要拔*/
+            if (pTempHandle->arFilterState[AswEnvTempThr65].validStatus == FALSE && eCPState == eCddCPVolState_12V)
             {/* 温度小于65度， 恢复正常 */
                 pTempHandle->workState = ASWTEMP_WORK_STATE_NORMAL;
-                ASWTEMP_CFG_LogPrint("当前环境温度%d℃小于%d℃, [故障] --> [正常]\r\n", 
+                ASWTEMP_CFG_LogPrint("拔枪且当前环境温度%d℃小于%d℃, [故障] --> [正常]\r\n", 
                     pTempHandle->temperatue - 50, pTempHandle->arFilterThr[AswEnvTempThr65] - 50);
             }
             break;
@@ -333,11 +336,11 @@ void AswEnvTemp_Manage(void)
         pTempHandle->preWorkState = pTempHandle->workState;
         if (pTempHandle->workState == ASWTEMP_WORK_STATE_FAULT)
         {
-            AswErrhandle_SetErrExsitCallback(0, eErr_EnvOverTempErr);
+            AswErrhandle_SetErrExsitCallback(port, eErr_EnvOverTempErr);
         }
         else
         {
-            AswErrhandle_ResetErrExsitCallback(0, eErr_EnvOverTempErr);
+            AswErrhandle_ResetErrExsitCallback(port, eErr_EnvOverTempErr);
         }
     }
 
