@@ -16,6 +16,8 @@
 #include "AT_Describtor.h"
 #include "AT_Module.h"
 #include "AT_TCP.h"
+#include "AT_FTP.h"
+
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
@@ -64,6 +66,14 @@ const CddDrvEG800AKSocketConfig_Struct c_stCddDrvEG800AKSocketConfigTable[eCddNe
         .pATCmdDescribtorTable = c_stTCPATCmdDescribtor,
         .stateHandle = ATTCP_StateHandle,
         .socketCloseHandle = ATTCP_CloseSocket,
+    },
+
+    [eCddNetMSocketType_FTP] = 
+    {
+        .cmdTaskCount = eATTCPCmd_Count,
+        .pATCmdDescribtorTable = c_stFTPATCmdDescribtor,
+        .stateHandle = ATFTP_StateHandle,
+        .socketCloseHandle = ATFTP_CloseSocket,
     },
 };
 
