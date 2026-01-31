@@ -36,7 +36,7 @@
 #define CDDCP_CFG_IsQBStandardMode()          (CddModeM_IsGBMode() == FALSE)    
 
 #define CDDCP_CFG_GB_FILERCNT                 (50  / CDDCP_CFG_CALL_CYCLE)
-#define CDDCP_CFG_QB_FILERCNT                 (650 / CDDCP_CFG_CALL_CYCLE)
+#define CDDCP_CFG_QB_FILERCNT                 (1000 / CDDCP_CFG_CALL_CYCLE)
 
 #define CDDCP_CFG_DIODE_THREOLD               (10000)
 

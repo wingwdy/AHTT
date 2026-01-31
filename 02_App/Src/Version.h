@@ -25,6 +25,10 @@
 #define  APP_SW_VERSION_STRING                         "1.0.0.3"
 #define  APP_SW_VERSION_DATE                           "2026/01/26"
 
+#define  APP_SW_VERSION_TYPE                           "标品"
+
+#define  HW_VERSION_INFO                                "D3-A32FB-20251117"
+
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/

@@ -103,22 +103,19 @@ static void CddCP_CPVolErrDetect(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
     if (pCPCtrl->eValidCpVolState == eCddCPVolState_Ground)
     {
         AswErrhandle_SetErrExsitCallback(port, eErr_CpGroundFault);
-        AswErrhandle_ResetErrExsitCallback(port, eErr_CpVoltAbnor);
     }
     else if (pCPCtrl->eValidCpVolState == eCddCPVolState_Err)
     {
         AswErrhandle_SetErrExsitCallback(port, eErr_CpVoltAbnor);
-        AswErrhandle_ResetErrExsitCallback(port, eErr_CpGroundFault);
     }
     else
-    {
-        AswErrhandle_ResetErrExsitCallback(port, eErr_CpVoltAbnor);
-        AswErrhandle_ResetErrExsitCallback(port, eErr_CpGroundFault);
-    }
+    {}
 
     if (pCPCtrl->eValidCpVolState == eCddCPVolState_12V)
     {
         AswErrhandle_ResetErrExsitCallback(port, eErr_DiodeStop);
+        AswErrhandle_ResetErrExsitCallback(port, eErr_CpVoltAbnor);
+        AswErrhandle_ResetErrExsitCallback(port, eErr_CpGroundFault);
     }
 }
 
