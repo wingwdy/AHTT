@@ -23,7 +23,7 @@
 #include "FrameQueue.h"
 #include "Cdd_CardM.h"
 #include "Cdd_ModeM.h"
-
+#include "Version.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -94,6 +94,26 @@ static const AswPlatCardDescriptor_Struct *AswPlatM_GetCardDescriptor(void)
     }
 
     return &c_stAswPlatMCardDescriptorTable[ePlatCardType];
+}
+
+void AswPlatM_PrintAllConfigInfo(void)
+{
+    const AswPlatCardDescriptor_Struct * pCardDescriptor = AswPlatM_GetCardDescriptor();
+    const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
+    MSNvmPlatParam_Struct *pParam = &g_stAswPlatMCtx.stPlatParam;
+
+    ASWPLATM_CFG_LogPrint("---------------------------------配置信息------------------------------------\r\n");
+    ASWPLATM_CFG_LogPrint("平台编码：%s\r\n", pParam->platPileDn);
+    ASWPLATM_CFG_LogPrint("资产编码：%s\r\n", pParam->fixPileDn);
+    ASWPLATM_CFG_LogPrint("软件版本：%s(%s)\r\n", APP_SW_VERSION_STRING, APP_SW_VERSION_TYPE);
+    ASWPLATM_CFG_LogPrint("硬件信息：%s\r\n", HW_VERSION_INFO);
+    ASWPLATM_CFG_LogPrint("是否厂内模式：%s\r\n", (TRUE == CddModeM_IsFactoryMode()) ? "是" : "否");
+    ASWPLATM_CFG_LogPrint("是否国标模式：%s\r\n", (TRUE == CddModeM_IsGBMode()) ? "是" : "否");
+    ASWPLATM_CFG_LogPrint("平台类型：%s\r\n", pProtocolDescriptor->pName);
+    ASWPLATM_CFG_LogPrint("卡类型：%s\r\n", pCardDescriptor->pName);
+    ASWPLATM_CFG_LogPrint("运营平台IP端口：%s, %d\r\n", pParam->platMainIp, pParam->platMainPort);
+    ASWPLATM_CFG_LogPrint("运维平台IP端口：%s, %d\r\n", pParam->platAuxiliaryIp, pParam->platAuxiliaryPort);
+    ASWPLATM_CFG_LogPrint("----------------------------------------------------------------------------\r\n");
 }
 
 uint8_t AswPlatM_SetPileDn(char *pPileDn, uint8_t len)
@@ -284,6 +304,8 @@ void AswPlatM_DefaultPlatParam(void *param)
     memset(pPlatParam, 0x00, sizeof(MSNvmPlatParam_Struct));
 
     pPlatParam->platMainType = eAswPlatType_GN;
+    pPlatParam->platMainCardType = eAswPlatCardType_GN;
+
     strcpy(pPlatParam->platMainIp, "pile.gongniu.cn");
     pPlatParam->platMainPort = 5455;
 
@@ -342,12 +364,15 @@ void AswPlatM_InitMemory(void)
     /* 设置卡类型 */
     pCardDescriptor = AswPlatM_GetCardDescriptor();
     CddCardM_SetCardType(pCardDescriptor->cardType);
+
+    AswPlatM_PrintAllConfigInfo();
 }
 
 void AswPlatM_MainFunction(void)
 {  
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
     const AswPlatMProtocolDescriptor_Struct *pOMProtocolDescriptor = AswPlatM_GetOMProtocolDescriptor();
+
 
     if (TRUE != CddModeM_IsFactoryMode())
     { 
@@ -360,6 +385,30 @@ void AswPlatM_MainFunction(void)
     if (pOMProtocolDescriptor->pMainFunction != NULL)
     {
         pOMProtocolDescriptor->pMainFunction();
+    }
+
+    CddNetMSocketPara_Union stSocketPara = { 0 };
+    static uint32_t count = 0;
+    static uint8_t flag = 0;
+    count++;
+
+    if (count == 100)
+    {
+        if (flag == 0)
+        {
+            flag = 1;
+
+            /* 注册升级链接 for test */
+            stSocketPara.stFtpPara.eMode = eCddNetMFtpMode_Upload;
+            strcpy(stSocketPara.stFtpPara.fileName, "D3_A32FB_20260128.log");
+            strcpy(stSocketPara.stFtpPara.user, "gn_ftp_fw_cls");
+            strcpy(stSocketPara.stFtpPara.passwd, "24d79794d8b42ff5");
+            strcpy(stSocketPara.stFtpPara.ip, "fwftp.gongniu.cn");
+            stSocketPara.stFtpPara.port = 21;
+            stSocketPara.stFtpPara.fileType = 0;
+
+            CddNetM_CreatLink(eCddNetMSocketType_FTP, stSocketPara, eCddNetMPlatType_File);
+        }
     }
 }
 

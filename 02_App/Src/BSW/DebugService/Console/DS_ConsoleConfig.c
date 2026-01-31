@@ -164,6 +164,10 @@ static int32_t DSConsoleCfg_GetPara(int32_t argc, char *argv[])
         {
             AswMonitor_PrintChargeData();
         }
+        else if (0 == strcmp(argv[1], "all"))
+        {
+            AswPlatM_PrintAllConfigInfo();
+        }
     }
 
     return 0;
