@@ -382,61 +382,88 @@ static void IotGN_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
 {
     uint8_t dataLen = 0;
 
-    Common_SetBitFlag(pBuf, 15);
-
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_LeakageCurrErr))
     {
         Common_SetBitFlag(pBuf, 0);
+        Common_SetBitFlag(pBuf, 15);
     }
 
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCalcErr))
     {
         Common_SetBitFlag(pBuf, 1);
+        Common_SetBitFlag(pBuf, 15);
     }
     
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqSynechiaFault))
     {
         Common_SetBitFlag(pBuf, 5);
+        Common_SetBitFlag(pBuf, 15);
     }
 
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqMaloperation))
     {
         Common_SetBitFlag(pBuf, 6);
+        Common_SetBitFlag(pBuf, 15);
     }
 
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpVoltAbnor))
     {
         Common_SetBitFlag(pBuf, 7);
+        Common_SetBitFlag(pBuf, 15);
     }
 
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_OutputOverCurr))
     {
         Common_SetBitFlag(pBuf, 8);
+        Common_SetBitFlag(pBuf, 15);
     }
 
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_AphaseInputOverVol))
     {
         Common_SetBitFlag(pBuf, 9);
+        Common_SetBitFlag(pBuf, 15);
     }
 
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_AphaseInputLessVol))
     {
         Common_SetBitFlag(pBuf, 10);
+        Common_SetBitFlag(pBuf, 15);
     }
 
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpGroundFault))
     {
         Common_SetBitFlag(pBuf, 11);
+        Common_SetBitFlag(pBuf, 15);
     }
 
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_PEBreakFault))
     {
         Common_SetBitFlag(pBuf, 12);
+        Common_SetBitFlag(pBuf, 15);
     }
 
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_DiodeStop))
     {
         Common_SetBitFlag(pBuf, 13);
+        Common_SetBitFlag(pBuf, 15);
+    }
+
+    if (TRUE != Common_GetBitFlag(pBuf, 15))
+    {
+        if (TRUE == AswErrHandle_CheckErrExit(port, eErr_EmergencyStop))
+        {
+            Common_SetBitFlag(pBuf, 1);
+        }
+        else if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCommErr))
+        {
+            Common_SetBitFlag(pBuf, 7);
+        }
+        else if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ReaderCommErr))
+        {
+            Common_SetBitFlag(pBuf, 8);
+        }
+        else
+        {}
     }
 }
 

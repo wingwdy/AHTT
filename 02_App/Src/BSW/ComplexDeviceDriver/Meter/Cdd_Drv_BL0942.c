@@ -22,6 +22,7 @@
 #include "Asw_ErrorHandle.h"
 #include "Filter.h"
 #include "MS_Nvm.h"
+#include "Cdd_CP.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -68,6 +69,7 @@ typedef struct
     FilterProfile1_Struct fctPinStatusFilter;
     uint8_t fctCaliFlag;
     MSNvmMeterCaliParam_Struct caliParam;
+    uint8_t comErrorFlag;                   /* 通信错误标记 */
 }CddDrvBL0942_Struct;
 
 
@@ -434,9 +436,9 @@ static void CddDrvBL0942_WorkStateManage(uint8_t port, CddDrvBL0942_Struct *pBL0
 
         if (GLOBAL_OPT_STATE_SUCCESS == ret)
         {
+            pBL0942->comErrorFlag = FALSE;
             pBL0942->eWorkState = eCddDrvBL0942WorkState_Normal;
             CDDDRV_BL0942_CFG_LogPrint("[枪：%d]计量芯片0942配置寄存器成功!\r\n", port);
-            AswErrhandle_ResetErrExsitCallback(port, eErr_MeterCommErr);
         }
         else if (GLOBAL_OPT_STATE_FAIL == ret)
         {
@@ -519,6 +521,7 @@ static void CddDrvBL0942_WorkStateManage(uint8_t port, CddDrvBL0942_Struct *pBL0
         CDDDRV_BL0942_CFG_LogPrint("[枪：%d]计量芯片0942失败 %d 次!\r\n", port, pBL0942->failTryCount);
         if (pBL0942->failTryCount == CDDDRV_BL0942_CFG_MAX_TIMES)
         {
+            pBL0942->comErrorFlag = TRUE;
             pBL0942->failTryCount = 0;
             AswErrhandle_SetErrExsitCallback(port, eErr_MeterCommErr);
         }
@@ -534,6 +537,14 @@ static void CddDrvBL0942_WorkStateManage(uint8_t port, CddDrvBL0942_Struct *pBL0
         pBL0942->eWorkState = eCddDrvBL0942WorkState_Init;
         break;
     }
+    }
+
+    if (eCddCPVolState_12V == CddCP_GetVolState(port))
+    {
+        if (pBL0942->comErrorFlag == FALSE)
+        {
+            AswErrhandle_ResetErrExsitCallback(port, eErr_MeterCommErr);
+        }
     }
 }
 
