@@ -22,6 +22,7 @@
 #include "SysCfg.h"
 #include "Filter.h"
 #include "Common.h"
+#include "Cdd_ModeM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -111,7 +112,14 @@ static void CddRelay_IdleHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
     {
         if (c_stCddRelayOpsConfigTable.pFuncGetRelayAdhesionStatus != NULL)
         {
-            pRelayCtrl->stFilterAdhesionDetect.status = c_stCddRelayOpsConfigTable.pFuncGetRelayAdhesionStatus(port);
+            if (CddModeM_IsGBMode() == TRUE)
+            {
+                pRelayCtrl->stFilterAdhesionDetect.status = c_stCddRelayOpsConfigTable.pFuncGetRelayAdhesionStatus(port);   
+            }
+            else
+            {
+                pRelayCtrl->stFilterAdhesionDetect.status = FALSE;
+            }
         }
         else
         {
