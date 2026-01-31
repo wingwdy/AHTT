@@ -82,7 +82,7 @@ static void CddPE_LnDetect(CddPEState_Struct *pPECtrl)
 {
     CddLNState_Enum curLNState = eCddPEState_LNUnkown;
 
-    if (CDDPE_CFG_IsQBStandardMode() == FALSE) /* 国标模式检测LN */
+    if (CDDPE_CFG_IsQBStandardMode() == FALSE && pPECtrl->lnCheckFinish == FALSE) /* 国标模式检测LN */
     {
 		if (pPECtrl->peVolt >= CDDPE_CFG_LN_REVERSE_MIN_VOLT && pPECtrl->peVolt <= CDDPE_CFG_LN_REVERSE_MAX_VOLT)
 		{
@@ -92,52 +92,56 @@ static void CddPE_LnDetect(CddPEState_Struct *pPECtrl)
 		{
 			curLNState = eCddPEState_LNNormal;
 		}
+		
+		if (pPECtrl->eTempLNState != curLNState)
+		{
+			pPECtrl->eTempLNState = curLNState;
+			pPECtrl->peFilterTimer = Common_GetSystick();
+		}
+		else
+		{
+			if (Common_JudgeTimeoutMs(pPECtrl->peFilterTimer, CDDPE_CFG_LN_REVERSE_FILTER_TIME)) /*火零反接检测滤波时间 */
+			{
+				pPECtrl->eLNState = curLNState;
+			}
+		}
+
+		if (pPECtrl->eLNState != eCddPEState_LNUnkown)
+		{
+			pPECtrl->lnCheckFinish = TRUE;
+			if (pPECtrl->eLNState == eCddPEState_LNReverse)
+			{
+				CDDPE_CFG_AswErrHandle_PileSetErrCallback(eErr_InputLineReversed);
+			}
+		}
+		else
+		{
+			if (pPECtrl->lnCheckTimeout == 0)
+			{
+				pPECtrl->lnCheckTimeout = Common_GetSystick();
+			}
+			if (Common_JudgeTimeoutMs(pPECtrl->lnCheckTimeout, CDDPE_CFG_LN_REVERSE_CHECK_MAXTIME))/* LN反接检测超时 */
+			{
+				pPECtrl->eLNState = eCddPEState_LNNormal;
+				pPECtrl->lnCheckFinish = TRUE;
+			}
+		}
     }
 	else
 	{
-		curLNState = eCddPEState_LNNormal;
+		if (CDDPE_CFG_IsQBStandardMode() == TRUE && pPECtrl->eLNState == eCddPEState_LNReverse)
+		{
+			pPECtrl->eLNState = eCddPEState_LNUnkown;
+			CDDPE_CFG_AswErrHandle_PileSetErrCallback(eErr_InputLineReversed);
+		}
 	}
-
-    if (pPECtrl->eTempLNState != curLNState)
-    {
-        pPECtrl->eTempLNState = curLNState;
-        pPECtrl->peFilterTimer = Common_GetSystick();
-    }
-    else
-    {
-        if (Common_JudgeTimeoutMs(pPECtrl->peFilterTimer, CDDPE_CFG_LN_REVERSE_FILTER_TIME)) /*火零反接检测滤波时间 */
-        {
-            pPECtrl->eLNState = curLNState;
-        }
-    }
-
-    if (pPECtrl->eLNState != eCddPEState_LNUnkown)
-    {
-        pPECtrl->lnCheckFinish = TRUE;
-        if (pPECtrl->eLNState == eCddPEState_LNReverse)
-        {
-            CDDPE_CFG_AswErrHandle_PileSetErrCallback(eErr_InputLineReversed);
-        }
-    }
-    else
-    {
-        if (pPECtrl->lnCheckTimeout == 0)
-        {
-            pPECtrl->lnCheckTimeout = Common_GetSystick();
-        }
-        if (Common_JudgeTimeoutMs(pPECtrl->lnCheckTimeout, CDDPE_CFG_LN_REVERSE_CHECK_MAXTIME))/* LN反接检测超时 */
-        {
-            pPECtrl->eLNState = eCddPEState_LNNormal;
-            pPECtrl->lnCheckFinish = TRUE;
-        }
-    }
 }
 
 static void CddPE_PeDetect(CddPEState_Struct *pPECtrl)
 {
     CddPEState_Enum curPEState = eCddPEState_PEUnkown;
 
-	if (CDDPE_CFG_IsQBStandardMode() == FALSE) /* 国标模式检测PE */
+	if (CDDPE_CFG_IsQBStandardMode() == FALSE && pPECtrl->lnCheckFinish == TRUE) /* 国标模式检测PE */
 	{
 		if (pPECtrl->eLNState == eCddPEState_LNNormal) /* 火零正常 */
 		{
@@ -200,14 +204,8 @@ static void CddPE_Detect(void)
 
     pPECtrl->peVolt = (uint16_t)(CddPE_GetPEAdcVolt() * 1000.0);
 
-    if (pPECtrl->lnCheckFinish == FALSE)
-    {
-        CddPE_LnDetect(pPECtrl);
-    }
-	else
-	{
-		CddPE_PeDetect(pPECtrl);
-	}
+	CddPE_LnDetect(pPECtrl);
+	CddPE_PeDetect(pPECtrl);
 }
 
 
