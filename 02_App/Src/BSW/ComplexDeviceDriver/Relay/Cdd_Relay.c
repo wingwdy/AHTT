@@ -134,6 +134,13 @@ static void CddRelay_IdleHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
             {
                 AswErrhandle_SetErrExsitCallback(port, eErr_JcqSynechiaFault);
             }
+            else
+            {
+                if (CddModeM_IsGBMode() != TRUE)
+                {
+                    AswErrhandle_ResetErrExsitCallback(port, eErr_JcqSynechiaFault);
+                }
+            }
         }
         else if (pRelayCtrl->adhesionDetectValidFlag == FALSE)
         {
@@ -347,7 +354,7 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
 
         case CDDRELAY_SHORTCUT_STEP4:
         {
-            if (TRUE == CDDRELAY_CFG_CheckGunPlugout(port))
+            if (TRUE == CDDRELAY_CFG_CheckGunPlugout(port) || CddModeM_IsGBMode() != TRUE)
             {
                 AswErrhandle_ResetErrExsitCallback(port, eErr_ShortCircleErr);
                 pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP0;
