@@ -474,7 +474,7 @@ void AswMonitor_PrintChargeData(void)
         chargeTime = pChargeData->chargeTime;
         cpVol = AswChargeIf_GetCpVoltage(port);
                                                                  
-        ASWMONITOR_CFG_LogPrint("---------------------------------[枪: %d]信息[CP:%d.%dV]------------------------------------\r\n", port, cpVol / 1000, cpVol % 1000);
+        ASWMONITOR_CFG_LogPrint("---------------------------------[枪: %d]信息[CP:%d.%03dV]------------------------------------\r\n", port, cpVol / 1000, cpVol % 1000);
         ASWMONITOR_CFG_LogPrint("电压：%d.%02d V,\t电流：%d.%03d A,\t功率：%d.%03d W\r\n",
                                 voltage / 100, voltage % 100, current / 1000, current % 1000, power / 1000, power % 1000);
         ASWMONITOR_CFG_LogPrint("枪温：%d ℃,\t壳温：%d ℃,\t\t已充时间：%d s\r\n",

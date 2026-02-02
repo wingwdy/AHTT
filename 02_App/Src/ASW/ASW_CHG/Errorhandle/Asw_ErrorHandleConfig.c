@@ -19,6 +19,7 @@
 #include "Asw_ErrorHandleConfig.h"
 #include "Asw_Charge.h"
 #include "Cdd_CP.h"
+#include "SS_Snapshot.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -109,7 +110,18 @@ void AswErrHandle_NoticeCallBack(uint8_t port, AswErrorType_Enum errType, uint8_
             AswCharge_SetStopReason(port, errType);
         }
     }
+
+    if (errLevel >= 2)
+    {
+        SSSnapshot_InsertErrorItem(port, AswErrHandle_GetErrdesc(errType), flag);
+    }
 }
+
+
+
+
+
+
   
 
 

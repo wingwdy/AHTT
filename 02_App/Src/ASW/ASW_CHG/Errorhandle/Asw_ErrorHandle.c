@@ -126,9 +126,9 @@ static void AswErrHandle_ClearErrHandle(uint8_t port, AswErrorHandle_Struct *pEr
 
         ASWERR_CFG_LogPrint("[枪：%d]故障：[%s] 撤销\r\n", port, pConfig->errDesc);
 
+        ASWERR_CFG_ErrStateChangeNotice(port, errType, FALSE, pErrorHandle->arErrLevel[errType]);
         pErrorHandle->arErrLevel[errType] = eAswErrorLevel_0;
         AswErrHandle_RefreshChargeCondition(pErrorHandle);
-        ASWERR_CFG_ErrStateChangeNotice(port, errType, FALSE, pErrorHandle->arErrLevel[errType]);
     }
 }
 

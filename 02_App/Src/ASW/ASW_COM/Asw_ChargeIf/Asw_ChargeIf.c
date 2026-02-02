@@ -106,6 +106,11 @@ uint16_t AswChargeIf_GetCpVoltage(uint8_t port)
     return CddCP_GetVoltage(port);
 }
 
+uint16_t AswChargeIf_GetCpDuty(uint8_t port)
+{
+    return CddCP_GetCpDuty(port);
+}
+
 uint32_t AswChargeIf_GetOutputCurrent(uint8_t port)
 {
     uint32_t outputCurrent = 0;

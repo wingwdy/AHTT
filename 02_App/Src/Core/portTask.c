@@ -27,6 +27,7 @@
 
 #include "DS_Console.h"
 #include "SS_Tm.h"
+#include "SS_Snapshot.h"
 
 #include "Cdd_CP.h"
 #include "Cdd_Relay.h"
@@ -88,8 +89,8 @@ static void Task_1SecA(void *arg);
 *******************************************************************************/
 static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
 {
-    {"App10msA",        Task_10msA,          NULL,         256,   6 } ,
-    {"App10msB",        Task_10msB,          NULL,         256,   7 } ,
+    {"App10msA",        Task_10msA,          NULL,         384,   6 } ,
+    {"App10msB",        Task_10msB,          NULL,         384,   7 } ,
     {"App20msA",        Task_20msA,          NULL,         256,   4 } ,
     {"App20msB",        Task_20msB,          NULL,         1536,  5 } ,
     {"App100msA",       Task_100msA,         NULL,         512,   5 } ,
@@ -185,6 +186,7 @@ static void Task_20msB(void *arg)
     {
         CddNetM_MainFunction();
         AswPlatM_MainFunction();
+        SSSnapshot_MainFunction();
         DSConsole_MainFunction();
         vTaskDelay(20);
     }

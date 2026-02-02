@@ -115,7 +115,7 @@ static uint8_t SSTM_CheckTimeStampDff(uint32_t newTimeStamp)
         tickDiff = newTimeStamp - g_stTmCtrl.secSysTimestamp;
     }
 
-    if (tickDiff > TM_SYNC_THRESHOLD_SECONDS)
+    if (tickDiff > SSTM_SYNC_THRESHOLD_SECONDS)
     {
         ret = TRUE;
     }
@@ -177,6 +177,7 @@ void SSTM_InitMemory(void)
     g_stTmCtrl.secSysTimestamp = SSTM_BASE_TIMESTAMP_1970_BJT;
     g_stTmCtrl.syncSysTimeFlag = FALSE;
     g_stTmCtrl.mutex = xSemaphoreCreateMutex();
+    SSTM_UpdateSysTimeStamp();
 }
 
 uint32_t SSTM_GetSecTimestamp(void)

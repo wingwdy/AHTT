@@ -44,10 +44,11 @@
 #include "DS_LogM.h"
 #include "DS_Console.h"
 #include "SS_Tm.h"
+#include "SS_Snapshot.h"
 
 #include "Common.h"
 #include "stdio.h"
-
+#include "string.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -98,6 +99,8 @@ static void SSSystemM_InitTwo(void)
 {
     MSNvm_InitMemory();
     MSNvm_ReadAll();
+
+    SSSnapshot_InitMemory();
     AswErrHandle_InitMemory();
 }
 

@@ -55,8 +55,9 @@ typedef enum
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-extern void CddPE_InitMemory(void);
-extern void CddPE_MainFunction(void);
+void CddPE_InitMemory(void);
+void CddPE_MainFunction(void);
+CddPEState_Enum CddPE_GetConnectState(void);
 
 #endif /* CDD_PE_H_ */
 

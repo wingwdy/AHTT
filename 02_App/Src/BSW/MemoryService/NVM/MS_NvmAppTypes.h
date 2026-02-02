@@ -29,7 +29,7 @@
 #define MSNVM_ORDER_MAX_LEN                512
 
 /* 故障信息长度 */
-#define MSNVM_ERROR_INFO_MAX_LEN           32
+#define MSNVM_ERROR_INFO_MAX_LEN           288
 
 /* 桩编码字符串长度 */
 #define MSNVM_PILE_DN_LEN                  40

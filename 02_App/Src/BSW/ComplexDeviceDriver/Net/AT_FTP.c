@@ -96,11 +96,11 @@ static uint16_t ATFTP_PackUfsOpen(uint8_t socketIndex, void * socketPara, uint8_
 
     if (pFTPPara->eMode == eCddNetMFtpMode_Download)
     {
-        nATLen = Common_ReplaceNum(pData, nATLen, "[MODE]", 1, 1);
+        nATLen = Common_ReplaceNum(pData, nATLen, "[MODE]", 2, 2);
     }
     else
     {
-        nATLen = Common_ReplaceNum(pData, nATLen, "[MODE]", 2, 2);
+        nATLen = Common_ReplaceNum(pData, nATLen, "[MODE]", 1, 1);
     }
 
     return nATLen;
@@ -146,6 +146,7 @@ static uint8_t ATFTP_RecvUFSSpace(uint8_t socketIndex, void * socketPara, uint8_
 static uint8_t ATFTP_RecvUFSOpen(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
+    CddNetMFtpPara_Struct *pFTPPara = (CddNetMFtpPara_Struct *)pSocketCtrl->specificPara;
     ATFTPPrivate_Struct *pPrivate = (ATFTPPrivate_Struct *)pSocketCtrl->user_data;
     uint8_t *pTemp = NULL;
     uint8_t ret = FALSE;
@@ -155,10 +156,19 @@ static uint8_t ATFTP_RecvUFSOpen(uint8_t socketIndex, void * socketPara, uint8_t
 
     if (pTemp != NULL)
     { 
-        if (2 == sscanf((char*)pTemp, "+QFOPEN: %d\r\n", &fileHandle))
+        if (1 == sscanf((char*)pTemp, "+QFOPEN: %d\r\n", &fileHandle))
         {
             pPrivate->fileHandle = fileHandle;
             ret = TRUE;
+
+            if (pFTPPara->eMode == eCddNetMFtpMode_Upload)
+            {
+
+            }
+            else
+            {
+                
+            }
         }
     }
 

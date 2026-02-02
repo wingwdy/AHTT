@@ -208,6 +208,11 @@ static void CddPE_Detect(void)
 	CddPE_PeDetect(pPECtrl);
 }
 
+CddPEState_Enum CddPE_GetConnectState(void)
+{
+	return g_stPEState.ePEState;
+}
+
 
 void CddPE_InitMemory(void)
 {

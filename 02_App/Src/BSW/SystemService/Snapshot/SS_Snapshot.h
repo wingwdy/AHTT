@@ -1,6 +1,6 @@
 /******************************************************************************
-* File Name          : Cdd_CP.h
-* Description        : Code for Control Pilot
+* File Name          : template_Config.h
+* Description        : Code for xxxxxxxxxxx
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.
 -------------------------------------------------------------------------------
@@ -11,12 +11,12 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-#ifndef CDD_CP_H_
-#define CDD_CP_H_
+#ifndef SS_SNAPSHOT_H_
+#define SS_SNAPSHOT_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-#include "stdint.h"
+#include "Common.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -28,13 +28,9 @@
 ******************************************************************************/
 typedef enum
 {
-    eCddCPVolState_Ground,          /* 接地态 */
-    eCddCPVolState_6V,              /* 6V态 */
-    eCddCPVolState_9V,              /* 9V态 */
-    eCddCPVolState_12V,             /* 12V态 */
-    eCddCPVolState_Err,             /* 故障态 */
-    eCddCPVolState_Init,            /* 初始态 */
-}CddCPVolState_Enum;
+    eSSSnapshotItemType_RunningLog,
+    eSSSnapshotItemType_ErrorLog,
+}SSSnapshotItemType_Enum;
 
 /******************************************************************************
 *    Typedef Definition
@@ -51,31 +47,12 @@ typedef enum
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-CddCPVolState_Enum CddCP_GetVolState(uint8_t port);
-uint16_t CddCP_GetVoltage(uint8_t port);
-uint16_t CddCP_GetCpDuty(uint8_t port);
-void CddCP_AdjustCurRateCurrent(uint8_t port, uint32_t current);
-void CddCP_StartPWM(uint8_t port);
-void CddCP_StopPWM(uint8_t port);
-void CddCP_SetReqStartWakeup(uint8_t port);
-void CddCP_SetReqStopWakeUp(uint8_t port);
-uint8_t CddCP_GetWakeupStatus(uint8_t port);
-void CddCP_SetReqStartDiodeExsitDetect(uint8_t port);
-void CddCP_SetReqStopDiodeExsitDetect(uint8_t port);
-uint8_t CddCP_GetDiodeExsitDetectResult(uint8_t port);
-void CddCP_MainFunction(void);
-void CddCP_InitMemory(void);
-void CddCP_SetCriticalErrNotice(uint8_t port);
-#endif
- 
-
-
-
-
-
-
-
-
+void SSSnapshot_InitMemory(void);
+void SSSnapshot_MainFunction(void);
+void SSSnapshot_InsertErrorItem(uint8_t port, char *pErrorInfo,  uint8_t flag);
+uint8_t SSSnapshot_ReadItemByTime(SSSnapshotItemType_Enum itemType, uint8_t *buf, uint16_t buffLen, uint32_t time);
+uint32_t SSSnapshot_ReadItemCount(SSSnapshotItemType_Enum itemType);
+#endif /* SS_SNAPSHOT_H_ */
 
 
 

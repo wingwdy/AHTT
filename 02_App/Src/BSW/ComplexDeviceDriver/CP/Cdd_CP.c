@@ -62,7 +62,7 @@ typedef struct
 
     uint8_t criticalErrorState;               /* 严重故障状态发-12V */
 
-    uint16_t curSetCpDuty;                    /* 当前CP设置占空比 */ 
+    uint16_t curSetCpDuty;                    /* 当前CP设置占空比,百分比后保留1位小数*/ 
     uint16_t cpVol;                           /* CP电压，保留3位小数 */ 
     CddCPVolState_Enum eValidCpVolState;      /* CP电压状态 */
     uint16_t curAjustCurrent;                 /* 当前调节电流值，放大1000倍 */
@@ -463,6 +463,19 @@ uint16_t CddCP_GetVoltage(uint8_t port)
     }
 
     return cpVol;
+}
+
+uint16_t CddCP_GetCpDuty(uint8_t port)
+{
+    CddCPCtrl_Struct *pCpCtrl = &g_stCddCPCtrl[port];
+    uint16_t duty = 0;
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        duty = pCpCtrl->curSetCpDuty;
+    }
+
+    return duty;
 }
 
 void CddCP_SetReqStartWakeup(uint8_t port)
