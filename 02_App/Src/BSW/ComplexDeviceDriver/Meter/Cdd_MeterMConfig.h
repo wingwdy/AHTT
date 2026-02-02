@@ -29,7 +29,7 @@
 #define CDD_METERM_CFG_DEVICE_COUNT                 1U
 #define CDD_METERM_CFG_DEVICE_TYPE                  CDD_METERM_CFG_DEVICE_BL0942
 
-#define CDD_METERM_CFG_ERROR_TRY_CNT                (20)
+#define CDD_METERM_CFG_ERROR_TRY_CNT                (10)
 
 #define CDD_METERM_CFG_PRINT_CYCLE                  (5 * 1000)
 
@@ -37,7 +37,7 @@
 
 #define CDD_METERM_CFG_ENERGY_IMMEDIATE_SAVE_VALUE  (400)      /* 0.04度，立即存储 */
 
-#define CDD_METERM_CFG_ENERGY_ABNORMAL_VALUE        (1500)      /* 0.15度，按照7kW充电功率30秒计算 */
+#define CDD_METERM_CFG_ENERGY_ABNORMAL_VALUE        (10000)      /* 1度 */
 
 #define CDD_METERM_CFG_ENERGY_PERIOD                (1000U)
 

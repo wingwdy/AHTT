@@ -639,6 +639,7 @@ void AswMonitor_SetForbidState(uint8_t lockState, uint8_t lockReason)
         ASWMONITOR_CFG_LogPrint("设备禁用状态变化：[%d]--->[%d]\r\n", g_stAswMonitorCtx.forbidParam.forbidState, lockState);
         g_stAswMonitorCtx.forbidParam.forbidState = lockState;
         g_stAswMonitorCtx.forbidParam.forbidReason = lockReason;
+        MSNvm_WriteParaBlock(eMSNvmBlockID_ForbidState, (uint8_t *)&g_stAswMonitorCtx.forbidParam, sizeof(MSNvmForbidState_Struct));
     }
 }
 
@@ -810,6 +811,8 @@ void AswMonitor_InitMemory(void)
     {
         g_stAswMonitorCtx.forbidParam.forbidState = FALSE;
     }
+
+    ASWMONITOR_CFG_LogPrint("设备锁机状态：%d\r\n", g_stAswMonitorCtx.forbidParam.forbidState);
 }
 
 void AswMonitor_MainFunction(void)
