@@ -276,13 +276,27 @@ static uint8_t IotOM_RecvSetForbid(uint8_t *port, uint8_t *r_data, uint16_t len)
     if (pRecvData[index] == 0x01)
     {
         AswMonitor_SetForbidState(TRUE, pRecvData[index + 1]);
+        pIotOMCtx->stProtoData[0].setForbidStateResult = 0x02;
+        pIotOMCtx->stProtoData[0].setForbidStateFailReason = 0x00;
+        pIotOMCtx->stProtoData[0].setUnforbidStateResult = 0x00;
+        pIotOMCtx->stProtoData[0].setUnforbidStateFailReason = 0x00;
+
     }
     else if (pRecvData[index] == 0x02)
     {
         AswMonitor_SetForbidState(FALSE, pRecvData[index + 2]);
+        pIotOMCtx->stProtoData[0].setUnforbidStateResult = 0x02;
+        pIotOMCtx->stProtoData[0].setUnforbidStateFailReason = 0x00;
+        pIotOMCtx->stProtoData[0].setForbidStateResult = 0x00;
+        pIotOMCtx->stProtoData[0].setForbidStateFailReason = 0x00;
     }
     else
-    {}
+    {
+        pIotOMCtx->stProtoData[0].setForbidStateResult = 0x00;
+        pIotOMCtx->stProtoData[0].setForbidStateFailReason = 0x00;
+        pIotOMCtx->stProtoData[0].setUnforbidStateResult = 0x00;
+        pIotOMCtx->stProtoData[0].setUnforbidStateFailReason = 0x00;        
+    }
 
     return TRUE;
 }
@@ -331,7 +345,7 @@ static IotOMFrameHead_Struct *IotOM_FindValidFrameLen(uint8_t *pData, uint16_t d
         { 
             frameLen = Common_TwoUint8ToUint16(pHead->dataLen);
 
-            if (Common_TwoUint8ToUint16(pHead->version) == IOT_OM_PROTOCOL_VERSION &&
+            if (/* Common_TwoUint8ToUint16(pHead->version) == IOT_OM_PROTOCOL_VERSION && */
                 frameLen > (sizeof(IotOMFrameHead_Struct) + 2))
             {
                 calcCrc16 = Common_CalcCRC16((uint8_t *)pHead, frameLen - 2);

@@ -462,6 +462,12 @@ static uint16_t IotOM_SendSetForbidRsp(uint8_t port, uint8_t *pBuf)
     memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
     dataLen += 32;
 
+    /* 设置结果 */
+    pBuf[dataLen++] = pIotOMCtx->stProtoData[0].setForbidStateResult;    
+    pBuf[dataLen++] = pIotOMCtx->stProtoData[0].setUnforbidStateResult;    
+    pBuf[dataLen++] = pIotOMCtx->stProtoData[0].setForbidStateFailReason;    
+    pBuf[dataLen++] = pIotOMCtx->stProtoData[0].setUnforbidStateFailReason;
+
     pIotOMCtx->sendForbidStateFlag = TRUE;
     pIotOMCtx->sendForbidStateCount = 0;
     return dataLen;

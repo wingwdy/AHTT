@@ -41,6 +41,10 @@ typedef enum
 typedef struct 
 {
     uint8_t setRebootResult;
+    uint8_t setForbidStateResult;
+    uint8_t setForbidStateFailReason;
+    uint8_t setUnforbidStateResult;
+    uint8_t setUnforbidStateFailReason;
 }IotOMProtoData_Struct;
 
 typedef struct 

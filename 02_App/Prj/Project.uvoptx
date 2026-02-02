@@ -146,18 +146,50 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>131</LineNumber>
+          <LineNumber>276</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134322210</Address>
+          <Address>134305510</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_OM\Asw_IotProtoOMRecv.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_COM/Asw_IotProtocol/Protocol_OM/Asw_IotProtoOMRecv.c\276</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>90</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
           <Filename>..\Src\BSW\SystemService\Snapshot\SS_Snapshot.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/BSW/SystemService/Snapshot/SS_Snapshot.c\131</Expression>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>131</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>..\Src\BSW\SystemService\Snapshot\SS_Snapshot.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -397,8 +429,8 @@
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
-          <SubType>8</SubType>
-          <ItemText>pErrCache-&gt;errInfoPack</ItemText>
+          <SubType>0</SubType>
+          <ItemText>r_data</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
