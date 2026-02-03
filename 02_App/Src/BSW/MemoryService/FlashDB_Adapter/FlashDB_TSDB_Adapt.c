@@ -399,7 +399,7 @@ GlobalRet_Enum TSDBAdapt_QueryRecordByTime(uint16_t ch, uint8_t *pOutBuf, uint16
 	cb_arg.pOutRecord = pOutBuf;
 	cb_arg.recordSize = dataLen;
 	
-	fdb_tsl_iter_by_time(&pCfg->tsdb, time, time, TSDBAdapt_CB_SetStatusByTime, &cb_arg);
+	fdb_tsl_iter_by_time(&pCfg->tsdb, time, time, TSDBAdapt_CB_QueryRecordByTime, &cb_arg);
 
 	if (cb_arg.result == TRUE)
 	{
