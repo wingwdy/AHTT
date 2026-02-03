@@ -109,11 +109,11 @@ void AswErrHandle_NoticeCallBack(uint8_t port, AswErrorType_Enum errType, uint8_
         {
             AswCharge_SetStopReason(port, errType);
         }
-    }
 
-    if (errLevel >= 2)
-    {
-        SSSnapshot_InsertErrorItem(port, AswErrHandle_GetErrdesc(errType), flag);
+        if (errLevel >= 2)
+        {
+            SSSnapshot_InsertErrorLog(port, AswErrHandle_GetErrdesc(errType), flag);
+        }
     }
 }
 
