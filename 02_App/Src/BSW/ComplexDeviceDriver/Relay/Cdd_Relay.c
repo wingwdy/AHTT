@@ -91,9 +91,16 @@ static void CddRelay_IdleHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
 {    
     if (pRelayCtrl->eRelayCtrlOpt == eCddRelayCtrlState_SwitchOn)
     {
-        if (pRelayCtrl->stRelayState.validStatus == (uint8_t)eCddRelayState_Off)
+        if (CddModeM_IsGBMode() == TRUE)
         {
-            pRelayCtrl->stFilterMaloperationDetect.status = TRUE;
+            if (pRelayCtrl->stRelayState.validStatus == (uint8_t)eCddRelayState_Off)
+            {
+                pRelayCtrl->stFilterMaloperationDetect.status = TRUE;
+            }
+            else
+            {
+                pRelayCtrl->stFilterMaloperationDetect.status = FALSE;
+            }
         }
         else
         {
