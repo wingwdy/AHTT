@@ -25,6 +25,7 @@
 #include "Asw_IotProtoGNRecv.h"
 #include "Asw_ChargeIf.h"
 #include "MS_Nvm.h"
+#include "myMalloc.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -547,7 +548,7 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
 
 void IotGN_InitMemory(void)
 {
-    pIotGNCtx = (IotGNCtx_Struct *)malloc(sizeof(IotGNCtx_Struct));
+    pIotGNCtx = (IotGNCtx_Struct *)myMalloc(sizeof(IotGNCtx_Struct));
     if (pIotGNCtx != NULL)
     {
         memset(pIotGNCtx, 0, sizeof(IotGNCtx_Struct));

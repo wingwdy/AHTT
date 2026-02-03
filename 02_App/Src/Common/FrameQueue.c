@@ -17,7 +17,7 @@
 *    Header File Inclusion
 *******************************************************************************/
 #include "FrameQueue.h"
-
+#include "myMalloc.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -332,11 +332,11 @@ GlobalRet_Enum FrameQueue_Creat(FrameQueueType_Enum eFrame, uint16_t txBufSize, 
 
         pDCB->txLen = 0;
         pDCB->txBufSize = txBufSize;
-        pDCB->pTXBuf = (uint8_t *)calloc(txBufSize, sizeof(uint8_t));
+        pDCB->pTXBuf = (uint8_t *)myCalloc(txBufSize, 1);
 
         pDCB->rxLen = 0;
         pDCB->rxBufSize = rxBufSize;
-        pDCB->pRXBuf = (uint8_t *)calloc(rxBufSize, sizeof(uint8_t));
+        pDCB->pRXBuf = (uint8_t *)myCalloc(rxBufSize, 1);
 
         if (pDCB->pRXBuf != NULL && pDCB->pTXBuf != NULL)
         {
