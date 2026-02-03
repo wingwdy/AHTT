@@ -185,7 +185,7 @@ uint32_t SSTM_GetSecTimestamp(void)
     return g_stTmCtrl.secSysTimestamp;
 }
 
-uint32_t SSTM_GetMsecTimestamp(void)
+uint64_t SSTM_GetMsecTimestamp(void)
 {
     return g_stTmCtrl.msecSysTimeStamp;
 }
