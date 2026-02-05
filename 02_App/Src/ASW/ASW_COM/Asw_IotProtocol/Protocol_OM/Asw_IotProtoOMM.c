@@ -24,7 +24,7 @@
 #include "FrameQueue.h"
 #include "Asw_ChargeIf.h"
 #include "MS_Nvm.h"
-
+#include "myMalloc.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -353,7 +353,7 @@ void IotOM_OfflineHandle(void)
 
 void IotOM_InitMemory(void)
 {
-    pIotOMCtx = (IotOMCtx_Struct *)malloc(sizeof(IotOMCtx_Struct));
+    pIotOMCtx = (IotOMCtx_Struct *)myMalloc(sizeof(IotOMCtx_Struct));
     if (pIotOMCtx != NULL)
     {
         memset(pIotOMCtx, 0, sizeof(IotOMCtx_Struct));

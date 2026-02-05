@@ -61,7 +61,6 @@
 #define ASWMONITOR_ORDER_START_SRC_CARD           2         /* 刷卡授权 */
 #define ASWMONITOR_ORDER_START_SRC_APP            3         /* APP授权 */
 
-
 /******************************************************************************
 *    Enum Definition
 *******************************************************************************/
@@ -166,13 +165,16 @@ AswMonitorBillMode_Struct *AswMonitor_GetCurUsedBillModePtr(uint8_t port);
 
 uint8_t AswMonitor_CheckBillModeValid(uint8_t port);
 void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc);
+void AswMonitor_SetReboot(AswMonitorRebootType_Enum eRebootType);
+void AswMonitor_PrintChargeData(void);
+
+uint8_t AswMonitor_CheckSwipCardSuccEvent(void);
+uint8_t AswMonitor_CheckSwipCardFailEvent(void);
+
 uint8_t AswMonitor_CheckForbidState(void);
 void AswMonitor_SetForbidState(uint8_t lockState, uint8_t lockReason);
 void AswMonitor_GetForbidState(uint8_t *pLockState, uint8_t *pLockReason);
-void AswMonitor_SetReboot(AswMonitorRebootType_Enum eRebootType);
-uint8_t AswMonitor_CheckSwipCardSuccEvent(void);
-uint8_t AswMonitor_CheckSwipCardFailEvent(void);
-void AswMonitor_PrintChargeData(void);
+
 #endif
 
 

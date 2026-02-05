@@ -38,10 +38,11 @@ typedef enum
 	eMSNvmBlockID_PlatParam,
 	eMSNvmBlockID_PlatPrivateParam,
     eMSNvmBlockID_ForbidState,
+    
     /* 记录信息 */
     eMSNvmBlockID_OrderRecord,
     eMSNvmBlockID_ErrorRecord,
-
+    eMSNvmBlockID_RunningLogRecord,
     eMSNvmBlockID_Count,
 }MSNvmBlockID_Enum;
 

@@ -319,7 +319,7 @@ static void AswCharge_ChargingStateHandle(uint8_t port, AswChargeCtrl_Struct *pC
         {
             if (evseState == ASWEVSE_STATE_1 || evseState == ASWEVSE_STATE_1_DOT)
             {
-                AswErrhandle_SetErrExsitCallback(port, eErr_GunDisConn);
+                AswErrhandle_SetErrExsitCallback(port, eErr_CPBreakOff);
             }
             else if (evseState == ASWEVSE_STATE_2_DOT)
             {

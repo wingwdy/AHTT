@@ -454,17 +454,17 @@ void AswMonitor_PrintChargeData(void)
     uint32_t voltage = 0;
     uint32_t current = 0;
     uint32_t power = 0;
-    int8_t gunTemp = 0;
-    int8_t envTemp = 0;
+    uint8_t gunTemp = 0;
+    uint8_t envTemp = 0;
     uint32_t energy = 0;
     uint32_t chargeTime = 0;
     uint32_t money = 0;
     uint16_t cpVol = 0;
+    uint16_t cpDuty = 0;
     
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
         pChargeData = &g_stAswMonitorData[port].stChargeData;
-
         voltage = AswChargeIf_GetInputVoltage(port);
         current = AswChargeIf_GetOutputCurrent(port);
         gunTemp = AswChargeIf_GetGunTemperature(port);
@@ -473,8 +473,10 @@ void AswMonitor_PrintChargeData(void)
         energy = pChargeData->totalLossEnergy;
         chargeTime = pChargeData->chargeTime;
         cpVol = AswChargeIf_GetCpVoltage(port);
+        cpDuty = AswChargeIf_GetCpDuty(port);
                                                                  
-        ASWMONITOR_CFG_LogPrint("---------------------------------[枪: %d]信息[CP:%d.%03dV]------------------------------------\r\n", port, cpVol / 1000, cpVol % 1000);
+        ASWMONITOR_CFG_LogPrint("---------------------------------[枪: %d]信息[CP:%d.%03dV, %d.%01d%%]------------------------------------\r\n", 
+            port, cpVol / 1000, cpVol % 1000, cpDuty / 10, cpDuty % 10);
         ASWMONITOR_CFG_LogPrint("电压：%d.%02d V,\t电流：%d.%03d A,\t功率：%d.%03d W\r\n",
                                 voltage / 100, voltage % 100, current / 1000, current % 1000, power / 1000, power % 1000);
         ASWMONITOR_CFG_LogPrint("枪温：%d ℃,\t壳温：%d ℃,\t\t已充时间：%d s\r\n",
@@ -781,6 +783,9 @@ uint8_t AswMonitor_IsOrderIdle(uint8_t port)
 
     return ret;
 }
+
+
+
 
 void AswMonitor_InitMemory(void)
 {

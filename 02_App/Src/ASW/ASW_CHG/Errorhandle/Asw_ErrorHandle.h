@@ -73,6 +73,7 @@ typedef enum
     eSrc_StopbyTime,                         /* 按时间停止 */
     eSrc_StopbyEnergy,                       /* 按电量停止 */
     eErr_GunDisConn,                         /* 拔枪停止 */
+    eErr_CPBreakOff,                         /* CP断线 */
 
     eErr_NetNoSIMErr,                        /* 未检测到SIM卡 */
     eErr_PlatformOffline,                    /* 平台未正常上线，平台通信异常 */

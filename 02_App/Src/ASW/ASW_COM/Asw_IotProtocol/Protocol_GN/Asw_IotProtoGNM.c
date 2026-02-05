@@ -321,7 +321,8 @@ static IotGNStopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType)
         {eSrc_StopbyMoney,        eIotGNStopReason_StopByMoney},  
         {eSrc_StopbyTime,         eIotGNStopReason_StopByTime},  
         {eSrc_StopbyEnergy,       eIotGNStopReason_StopByEnergy}, 
-        {eErr_GunDisConn,         eIotGNStopReason_GunDisconnect}, 
+        {eErr_GunDisConn,         eIotGNStopReason_ManualStop}, 
+        {eErr_CPBreakOff,         eIotGNStopReason_GunDisconnect}, 
     };  
 
     for (index = 0; index < ARRAY_SIZE(stopReasonMap); index++)

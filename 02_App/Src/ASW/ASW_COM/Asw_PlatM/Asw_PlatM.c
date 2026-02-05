@@ -16,14 +16,13 @@
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
-#include "MS_Nvm.h"
 #include "Asw_PlatM.h"
-#include "Cdd_NetM.h"
 #include "Asw_PlatMConfig.h"
 #include "FrameQueue.h"
 #include "Cdd_CardM.h"
 #include "Cdd_ModeM.h"
 #include "Version.h"
+#include "Cdd_NetM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -37,15 +36,13 @@
 
 
 
-
-
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
+
 typedef struct
 {
     MSNvmPlatParam_Struct stPlatParam;
-
 }AswPlatMCtx_Struct;
 
 
@@ -373,7 +370,6 @@ void AswPlatM_MainFunction(void)
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
     const AswPlatMProtocolDescriptor_Struct *pOMProtocolDescriptor = AswPlatM_GetOMProtocolDescriptor();
 
-
     if (TRUE != CddModeM_IsFactoryMode())
     { 
         if (pProtocolDescriptor->pMainFunction != NULL)
@@ -385,30 +381,6 @@ void AswPlatM_MainFunction(void)
     if (pOMProtocolDescriptor->pMainFunction != NULL)
     {
         pOMProtocolDescriptor->pMainFunction();
-    }
-
-    CddNetMSocketPara_Union stSocketPara = { 0 };
-    static uint32_t count = 0;
-    static uint8_t flag = 0;
-    count++;
-
-    if (count == 100)
-    {
-        if (flag == 0)
-        {
-            flag = 1;
-
-            /* 注册升级链接 for test */
-            stSocketPara.stFtpPara.eMode = eCddNetMFtpMode_Upload;
-            strcpy(stSocketPara.stFtpPara.fileName, "D3_A32FB_20260128.log");
-            strcpy(stSocketPara.stFtpPara.user, "gn_ftp_fw_cls");
-            strcpy(stSocketPara.stFtpPara.passwd, "24d79794d8b42ff5");
-            strcpy(stSocketPara.stFtpPara.ip, "fwftp.gongniu.cn");
-            stSocketPara.stFtpPara.port = 21;
-            stSocketPara.stFtpPara.fileType = 0;
-
-            CddNetM_CreatLink(eCddNetMSocketType_FTP, stSocketPara, eCddNetMPlatType_File);
-        }
     }
 }
 

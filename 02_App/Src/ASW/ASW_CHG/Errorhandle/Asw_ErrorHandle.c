@@ -275,6 +275,7 @@ void AswErrHandle_ClearNormalStopReason(uint8_t port)
         AswErrhandle_ResetErrExsitCallback(port, eSrc_StopbyTime);
         AswErrhandle_ResetErrExsitCallback(port, eSrc_StopbyEnergy);
         AswErrhandle_ResetErrExsitCallback(port, eErr_GunDisConn);
+        AswErrhandle_ResetErrExsitCallback(port, eErr_CPBreakOff);
     }
 }
 

@@ -87,7 +87,8 @@ const AswErrorHandleConfig_Struct c_AswErrorHandleConfigTable[eErr_Num] =
     {eSrc_StopbyMoney,        eAswErrorOwner_Gun,   eAswErrorLevel_1, eAswErrorLevel_1, eAswErrorClear_External,   1,     0,   "按金额停止"},  
     {eSrc_StopbyTime,         eAswErrorOwner_Gun,   eAswErrorLevel_1, eAswErrorLevel_1, eAswErrorClear_External,   1,     0,   "按时间停止"},  
     {eSrc_StopbyEnergy,       eAswErrorOwner_Gun,   eAswErrorLevel_1, eAswErrorLevel_1, eAswErrorClear_External,   1,     0,   "按电量停止"},  
-    {eErr_GunDisConn,         eAswErrorOwner_Gun,   eAswErrorLevel_1, eAswErrorLevel_1, eAswErrorClear_External,   1,     0,   "拔枪停止"},  
+    {eErr_GunDisConn,         eAswErrorOwner_Gun,   eAswErrorLevel_1, eAswErrorLevel_1, eAswErrorClear_External,   1,     0,   "拔枪停止"},
+    {eErr_CPBreakOff,         eAswErrorOwner_Gun,   eAswErrorLevel_1, eAswErrorLevel_1, eAswErrorClear_External,   1,     0,   "CP断线"},
     {eErr_NetNoSIMErr,        eAswErrorOwner_Pile,  eAswErrorLevel_2, eAswErrorLevel_2, eAswErrorClear_External,   1,     0,   "未检测到SIM卡"},  
     {eErr_PlatformOffline,    eAswErrorOwner_Pile,  eAswErrorLevel_2, eAswErrorLevel_2, eAswErrorClear_External,   1,     0,   "运营平台通信异常"}, 
 };

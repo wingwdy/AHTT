@@ -27,7 +27,7 @@
 #define   SYSCFG_CFG_MAX_OUTPUT_CURRENT         (32000U)
 #define   SYSCFG_CFG_MIN_OUTPUT_CURRENT         (6000U)
 
-#define   SYSCFG_CFG_OS_HEAP_SIZE               (35 * 1024U)
+#define   SYSCFG_CFG_OS_HEAP_SIZE               (45 * 1024U)
 
 #define   SYSCFG_CFG_VECT_TAB_OFFSET            (0x0000U)
 
