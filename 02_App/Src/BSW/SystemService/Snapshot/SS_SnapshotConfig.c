@@ -68,8 +68,8 @@ void SSSnapshot_Cfg_PackErrStr(uint8_t port, char *pStr, uint16_t bufLen)
     AswMonitorChargeData_Struct *pChargeData = AswMonitor_GetChargeDataPtr(port);
     uint32_t voltage = AswChargeIf_GetInputVoltage(port);
     uint32_t current = AswChargeIf_GetOutputCurrent(port);
-    int8_t gunTemp = AswChargeIf_GetGunTemperature(port);
-    int8_t envTemp = AswChargeIf_GetEnvTemperature();
+    uint8_t gunTemp = AswChargeIf_GetGunTemperature(port);
+    uint8_t envTemp = AswChargeIf_GetEnvTemperature();
     uint16_t cpVol = AswChargeIf_GetCpVoltage(port);
     uint16_t cpDuty = AswChargeIf_GetCpDuty(port);
     uint32_t chargeTime = pChargeData->chargeTime;
@@ -95,7 +95,7 @@ void SSSnapshot_Cfg_PackErrStr(uint8_t port, char *pStr, uint16_t bufLen)
        (CddModeM_IsGBMode() == TRUE) ? "国标模式" : "企标模式", 
         peInfo, cpVol / 1000, cpVol % 1000,
         cpDuty / 10, cpDuty % 10,
-       gunTemp -50, envTemp -50,
+       gunTemp - 50, envTemp - 50,
        chargeTime,
        AswErrHandle_CheckErrExit(port, eErr_PlatformOffline) ? "离线" : "在线");
 }

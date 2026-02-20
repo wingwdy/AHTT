@@ -112,6 +112,13 @@ typedef enum
     eCddNetMPlatType_File,
 }CddNetMPlatType_Enum;
 
+typedef enum
+{
+    eCddNetMFileType_Null,
+    eCddNetMFileType_BIN,     /* 二进制文件 建议用这个*/
+    eCddNetMFileType_ASCLL,   /* 文本文件，windows系统会进行转义*/
+}CddNetMFileType_Enum;
+
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
@@ -125,7 +132,8 @@ typedef struct
 typedef struct
 {
     CddNetMFtpMode_Enum eMode;
-    uint8_t fileType;
+    CddNetMFileType_Enum eFileFormat;
+    uint8_t fileType;               /* 参考快照模块的文件类型 限上传时生效 */
     uint16_t port;
 	char ip[CDD_NETM_CFG_IP_LEN + 1];
 	char user[CDD_NETM_CFG_FTP_FILENAME_LEN + 1];
@@ -172,10 +180,11 @@ typedef union
 uint8_t CddNetM_CheckLinkConnectOK(CddNetMPlatType_Enum ePlatType);
 void CddNetM_SwitchPhyChannel(uint8_t moduleDev);
 GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSocketPara_Union socketPara, CddNetMPlatType_Enum ePlatType);
-void CddNetM_DelSingleLink(CddNetMPlatType_Enum ePlatType);
+void CddNetM_DeleteFileLink(void);
 void CddNetM_SetLinkDisconnect(CddNetMPlatType_Enum ePlatType);
 void CddNetM_MainFunction(void);
 uint16_t CddNetM_GetCsq(void);
+uint8_t CddNetM_CheckFileLinkExsit(void);
 void CddNetM_GetIccid(uint8_t *pICCID);
 CddNetMOperator_Enum CddNetM_GetOperatorType(void);
 void CddNetM_GetModuleTypeInfo(char *ModuleTypeInfo, uint16_t readLen);

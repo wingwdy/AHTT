@@ -74,7 +74,7 @@ static const char *shellText[] =
     "*  Build:                 "__DATE__" "__TIME__"\t\t\t\t\t *\r\n"
     "*  AppVersion:      "APP_SW_VERSION_STRING"\t\t\t\t\t\t\t\t\t *\r\n"
     "*  ProductCode:    "SYSCFG_CFG_PRODUCT_CODE"\t\t\t\t\t\t\t\t *\r\n"
-    "*  Copyright:         (c) 2099 GENO\t\t\t\t\t\t\t *\r\n"
+    "*  Copyright:         (c) 2099 GONEO\t\t\t\t\t\t *\r\n"
     "****************************************************************",
     [SHELL_TEXT_CMD_TOO_LONG] = 
         "\r\nWarning: Command is too long\r\n",
@@ -532,7 +532,7 @@ void shellListItem(Shell *shell, ShellCommand *item)
     short spaceLength;
     uint8_t tabCount = 0;
 
-    spaceLength = 22 - shellWriteString(shell, shellGetCommandName(item));
+    spaceLength = 23 - shellWriteString(shell, shellGetCommandName(item));
 
     tabCount = (spaceLength / 4) + 1;
 

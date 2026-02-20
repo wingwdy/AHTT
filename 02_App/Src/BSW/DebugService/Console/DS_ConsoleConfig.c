@@ -21,9 +21,12 @@
 #include "Asw_Charge.h"
 #include "Asw_PlatM.h"
 #include "Asw_ErrorHandle.h"
+#include "Asw_Monitor.h"
 
 #include "Cdd_ModeM.h"
 #include "Cdd_NetM.h"
+
+#include "SS_Snapshot.h"
 
 #include "Mcal_Mcu.h"
 
@@ -167,6 +170,14 @@ static int32_t DSConsoleCfg_GetPara(int32_t argc, char *argv[])
         else if (0 == strcmp(argv[1], "all"))
         {
             AswPlatM_PrintAllConfigInfo();
+        }
+        else if (0 == strcmp(argv[1], "errorLog"))
+        {
+            SSSnapshot_LocalReadItem(eSSSnapshotItemType_ErrorLog);
+        }
+        else if (0 == strcmp(argv[1], "runningLog"))
+        {
+            SSSnapshot_LocalReadItem(eSSSnapshotItemType_RunningLog);
         }
     }
 

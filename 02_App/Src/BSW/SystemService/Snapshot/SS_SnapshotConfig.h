@@ -29,6 +29,10 @@
 *    Macro Definition
 ******************************************************************************/
 #define SSSNAPSHOT_CFG_ERROR_INFO_SZIE                  MSNVM_ERROR_INFO_MAX_LEN
+#define SSSNAPSHOT_CGH_RUNNING_LOG_SZIE                 MSNVM_RUNNING_LOG_MAX_LEN
+
+
+
 #define SSSNAPSHOT_CFG_ERROR_ITEM_COUNT                 8
 
 #define CDDDRV_EG800AK_CFG_LogPrint(fmt, ...)           DSLOGM_Debug(DSLogMModule_System, fmt, ##__VA_ARGS__)

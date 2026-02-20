@@ -49,7 +49,7 @@ typedef enum
 typedef struct
 {
     uint8_t usedFlag;                            /* 表示该链路是否使用 */
-    uint8_t validFlag;                          /* 表示该链路是否创建 */
+    uint8_t validFlag;                           /* 表示该链路是否创建 */
     uint8_t socketIndex;
     CddNetMSocketType_Enum eSocketType;
     CddNetMPlatType_Enum ePlatType;  
@@ -233,13 +233,29 @@ void CddNetM_GetIccid(uint8_t *pICCID)
 
 
 
-void CddNetM_DelSingleLink(CddNetMPlatType_Enum ePlatType)
+void CddNetM_DeleteFileLink(void)
 {
+    CddNetMLinkPara_Struct *pLinkPara = NULL;
+    uint8_t index = 0;
+    uint8_t ch = 0;
 
+    for (ch = 0; ch < CDD_NETM_CFG_DEV_COUNT; ch++)
+    {
+        for (index = 0; index < CCDD_NETM_CFG_LINK_COUNT; index++)
+        {
+            pLinkPara = &g_stCddNetMCtx.stLinkPara[ch][index]; 
 
+            if (eCddNetMPlatType_File == pLinkPara->ePlatType)
+            {
+                if (pLinkPara->usedFlag == TRUE && c_NetMModuleOpsTable[ch].delSingleSocket != NULL)
+                {
+                    c_NetMModuleOpsTable[ch].delSingleSocket(pLinkPara->socketIndex);
+                }
 
-    
-
+                memset(pLinkPara, 0, sizeof(CddNetMLinkPara_Struct));
+            }
+        }
+    }
 }
 
 void CddNetM_SetLinkDisconnect(CddNetMPlatType_Enum ePlatType)
@@ -329,7 +345,10 @@ GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSock
     return retVal;
 }
 
-
+uint8_t CddNetM_CheckFileLinkExsit(void)
+{
+    return CddNetM_IsFileLinkExist();
+}
 
 void CddNetM_SwitchPhyChannel(uint8_t moduleDev)
 {

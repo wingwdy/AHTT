@@ -19,6 +19,7 @@
 #include "AT_Module.h"
 #include "Cdd_Drv_EG800AK.h"
 #include "AT_TCP.h"
+#include "AT_FTP.h"
 #include "SS_Tm.h"
 #include "Asw_ErrorHandle.h"
 /*******************************************************************************
@@ -125,13 +126,14 @@ const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
     NULL,                                      NULL,                         ATModule_FailHandle},
 };
 
-const ATUrcDescribtor_Struct c_stATUrcDescribtor[5] =
+const ATUrcDescribtor_Struct c_stATUrcDescribtor[6] =
 {
     [0] = { "+QIOPEN:",             ATTCP_UrcQIPOpen,    TRUE,    "建立连接"},
     [1] = { "SEND OK",              ATTCP_UrcSendOK,     FALSE,   "数据发送成功"},
     [2] = { "+QNTP:",               ATModule_UrcNtp,     TRUE,    "网络时间同步"},
     [3] = { "+QIURC: \"closed\"",   ATTCP_UrcClose,      TRUE,    "断开连接"},
     [4] = { "+QIURC: \"recv\"",     ATTCP_UrcRecv,       FALSE,   "新数据通知"},
+    [5] = { "+QFWRITE:",            ATFTP_UrcRecvWrite,  TRUE,    "写文件应答"},
 };
 
 
@@ -195,12 +197,12 @@ static uint8_t ATModule_FailHandle(uint8_t socketID, void * modulePara, uint8_t 
     if (atTaskID >= eATModuleCmd_QueryCGREG && atTaskID < eATModuleCmd_QueryCount)
     {
         CddDrvEG800AK_SetModuleState(eCddNetMModuleState_AbNormal);
-        CddDrvEG800AK_SetAbnormalType(CddDrvEG800AKAbnormalHandle_CFun);
+        CddDrvEG800AK_SetAbnormalType(eCddDrvEG800AKAbnormalHandle_CFun);
     }
     else
     {
         CddDrvEG800AK_SetModuleState(eCddNetMModuleState_AbNormal);
-        CddDrvEG800AK_SetAbnormalType(CddDrvEG800AKAbnormalHandle_Reboot);
+        CddDrvEG800AK_SetAbnormalType(eCddDrvEG800AKAbnormalHandle_Reboot);
     }
 
     if (eATModuleCmd_QuerySimRecognizeStatus == atTaskID)
