@@ -28,8 +28,16 @@
 ******************************************************************************/
 typedef enum
 {
+    eSnapshotItemReadSrc_Null,
+    eSnapshotItemReadSrc_Remote,
+    eSnapshotItemReadSrc_Local,    
+}SSSnapshotItemReadSrc_Enum;
+
+typedef enum
+{
     eSSSnapshotItemType_RunningLog,
     eSSSnapshotItemType_ErrorLog,
+    eSSSnapshotItemType_Count,
 }SSSnapshotItemType_Enum;
 
 /******************************************************************************
@@ -49,9 +57,13 @@ typedef enum
 ******************************************************************************/
 void SSSnapshot_InitMemory(void);
 void SSSnapshot_MainFunction(void);
-void SSSnapshot_InsertErrorItem(uint8_t port, char *pErrorInfo,  uint8_t flag);
-uint8_t SSSnapshot_ReadItemByTime(SSSnapshotItemType_Enum itemType, uint8_t *buf, uint16_t buffLen, uint32_t time);
-uint32_t SSSnapshot_ReadItemCount(SSSnapshotItemType_Enum itemType);
+void SSSnapshot_InsertRunningLog(void);
+void SSSnapshot_InsertErrorLog(uint8_t port, char *pErrorInfo,  uint8_t flag);
+uint8_t SSSnapshot_ReadItem(uint8_t *pOutbuf, uint16_t bufSize, uint16_t *pOutLen);
+GlobalRet_Enum SSSnapshot_StartReadItem(SSSnapshotItemType_Enum eItemType);
+void SSSnapshot_StopReadItem(void);
+void SSSnapshot_ExportItem(SSSnapshotItemType_Enum itemType, SSSnapshotItemReadSrc_Enum eReadSrc);
+uint8_t SSSnapshot_PreviewReadItem(uint16_t bufSize, uint16_t *pOutLen);
 #endif /* SS_SNAPSHOT_H_ */
 
 

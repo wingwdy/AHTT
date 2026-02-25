@@ -22,34 +22,49 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+#define ATFTP_UPLOAD_SINGLE_PACK_MAX_SIZE       (1024U)
+#define ATFTP_UFS_FILE_MIN_SIZE                 (100 * 1024U)
 
+#define ATFTP_WAIT_IPOPEN_TIMEOUT               (90000U)
+#define ATFTP_UPLOAD_FILE_TIMEOUT               (60000U)
+#define ATFTP_DOWNLOAD_FILE_TIMEOUT             (60000U)
 
+#define ATFTP_DECTECT_STATE_PERIOD              (3000U)
+
+#define ATFTP_DEFAULT_USER_NAME                 "gn_ftp_fw_reader"
+#define ATFTP_DEFAULT_USER_PSW                  "d2aa28ee9a8693db"
+#define ATFTP_DEFAULT_USER_IP                   "fw.ftp.gongniu.cn"
+#define ATFTP_DEFAULT_USER_PORT                 21
+#define ATFTP_DEFAULT_USER_PATH                 "/AC_pile/D3_A32FB/"
+
+#define ATFTP_DEFAULT_USER_FILE                 "D3_A32FB_DEFAULT"
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
 typedef enum
 {
     eATFTPCmd_Null,
+
     eATFTPCmd_UFSDeleteFile,
     eATFTPCmd_UFSQuerySpace,
+    eATFTPCmd_UFSOpen,
+    eATFTPCmd_UFSSeek,
+    eATFTPCmd_UFSRead,
+    eATFTPCmd_UFSWrite,
+    eATFTPCmd_UFSClose,
 
     eATFTPCmd_FTPConfigContext,
     eATFTPCmd_FTPConfigPSW,
     eATFTPCmd_FTPConfigFileType,
+    eATFTPCmd_FTPConfigTransferMode,
     eATFTPCmd_FTPConfigTimeout,
     eATFTPCmd_FTPOpen,
+    eATFTPCmd_FTPState,
     eATFTPCmd_FTPSwithPath,
+    eATFTPCmd_FTPUpload,
     eATFTPCmd_FTPDownload,
     eATFTPCmd_FTPClose,
 
-    eATFTPCmd_UFSOpen,
-    eATFTPCmd_UFSSeek,
-    eATFTPCmd_UFSRead,
-
-    eATFtbCmd_UFSConfigTimeout,
-    eATFTPCmd_UFSWrite,
-
-    eATFTPCmd_UFSClose,
     eATFTPCmd_Count,
 }ATFTPCmd_Enum;
 /******************************************************************************
@@ -69,7 +84,11 @@ extern const ATCmdDescribtor_Struct c_stFTPATCmdDescribtor[eATFTPCmd_Count];
 ******************************************************************************/
 void ATFTP_StateHandle(uint8_t socketIndex, void *socketCtrl);
 void ATFTP_CloseSocket(void *socketCtrl);
-
+void ATFTP_UrcRecvWrite(uint8_t *pData, void * modulePara, uint16_t dataLen);
+void ATFTP_UrcRecvOpen(uint8_t *pData, void * modulePara, uint16_t dataLen);
+void ATFTP_UrcRecvPut(uint8_t *pData, void * modulePara, uint16_t dataLen);
+void ATFTP_UrcRecvGet(uint8_t *pData, void * modulePara, uint16_t dataLen);
+void ATFTP_ReavTransparentData(void *modulePara, uint8_t *pData, uint16_t dataLen);
 #endif
 
 

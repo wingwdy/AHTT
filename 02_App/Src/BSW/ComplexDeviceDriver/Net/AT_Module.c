@@ -126,14 +126,17 @@ const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
     NULL,                                      NULL,                         ATModule_FailHandle},
 };
 
-const ATUrcDescribtor_Struct c_stATUrcDescribtor[6] =
+const ATUrcDescribtor_Struct c_stATUrcDescribtor[9] =
 {
-    [0] = { "+QIOPEN:",             ATTCP_UrcQIPOpen,    TRUE,    "建立连接"},
+    [0] = { "+QIOPEN:",             ATTCP_UrcQIPOpen,    TRUE,    "TCP建立连接"},
     [1] = { "SEND OK",              ATTCP_UrcSendOK,     FALSE,   "数据发送成功"},
     [2] = { "+QNTP:",               ATModule_UrcNtp,     TRUE,    "网络时间同步"},
     [3] = { "+QIURC: \"closed\"",   ATTCP_UrcClose,      TRUE,    "断开连接"},
     [4] = { "+QIURC: \"recv\"",     ATTCP_UrcRecv,       FALSE,   "新数据通知"},
     [5] = { "+QFWRITE:",            ATFTP_UrcRecvWrite,  TRUE,    "写文件应答"},
+    [6] = { "+QFTPOPEN:",           ATFTP_UrcRecvOpen,   TRUE,    "FTP建立连接"},
+    [7] = { "+QFTPPUT:",            ATFTP_UrcRecvPut,    TRUE,    "FTP文件上传通知"},
+    [8] = { "+QFTPGET:",            ATFTP_UrcRecvGet,    TRUE,    "FTP文件下载通知"},
 };
 
 

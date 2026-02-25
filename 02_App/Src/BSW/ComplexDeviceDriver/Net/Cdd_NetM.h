@@ -133,12 +133,11 @@ typedef struct
 {
     CddNetMFtpMode_Enum eMode;
     CddNetMFileType_Enum eFileFormat;
-    uint8_t fileType;               /* 参考快照模块的文件类型 限上传时生效 */
     uint16_t port;
 	char ip[CDD_NETM_CFG_IP_LEN + 1];
-	char user[CDD_NETM_CFG_FTP_FILENAME_LEN + 1];
+	char user[CDD_NETM_CFG_FTP_USERNAME_LEN + 1];
 	char passwd[CDD_NETM_CFG_FTP_PATH_LEN + 1];
-    char fileName[CDD_NETM_CFG_FTP_USERNAME_LEN + 1];
+    char fileName[CDD_NETM_CFG_FTP_FILENAME_LEN + 1];
 	char path[CDD_NETM_CFG_FTP_PASSWD_LEN + 1];
 }CddNetMFtpPara_Struct;
 

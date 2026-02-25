@@ -59,7 +59,7 @@
 #define CDDDRV_EG800AK_CFG_POWERKEY_OFF_HOLD_TIME       2000
 #define CDDDRV_EG800AK_CFG_POWERKEY_ON_HOLD_TIME        3500
 
-#define CDDDRV_EG800AK_CFG_TRANSPARENT_TIMEOUT          3000
+#define CDDDRV_EG800AK_CFG_TRANSPARENT_TIMEOUT          10000
 
 #define CDDDRV_EG800AK_CFG_NO_COMM_TIMEOUT              (3 * 60000)
 
@@ -89,6 +89,7 @@ typedef struct
     const ATCmdDescribtor_Struct *pATCmdDescribtorTable;
  	void (*stateHandle)(uint8_t socketIndex, void *socketCtrl);
     void (*socketCloseHandle)(void *socketCtrl);
+    void (*recvTransparentData)(void *modulePara, uint8_t *pData, uint16_t dataLen);
 }CddDrvEG800AKSocketConfig_Struct;
 
 

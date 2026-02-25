@@ -22,7 +22,13 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+#define ATTCP_CYCLE_READ_PERIOD          3000
 
+#define ATTCP_CYCLE_WRITE_PERIOD         200
+
+#define ATTCP_WAIT_IPOPEN_TIMEOUT        90000
+
+#define ATTCP_DECTECT_STATE_PERIOD       3000
 
 /******************************************************************************
 *    Enum Definition

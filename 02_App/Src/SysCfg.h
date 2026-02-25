@@ -29,7 +29,7 @@
 
 #define   SYSCFG_CFG_OS_HEAP_SIZE               (45 * 1024U)
 
-#define   SYSCFG_CFG_VECT_TAB_OFFSET            (0x0000U)
+#define   SYSCFG_CFG_VECT_TAB_OFFSET            (0x4000U)
 
 #define   SYSTEM_CFG_WATCHDOG_ENABLE            (FALSE)
 

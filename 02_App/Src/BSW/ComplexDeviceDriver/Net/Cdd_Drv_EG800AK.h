@@ -38,10 +38,16 @@
 ******************************************************************************/
 typedef enum
 {
-    CddDrvEG800AKAbnormalHandle_Null,
-    CddDrvEG800AKAbnormalHandle_Reboot,
-    CddDrvEG800AKAbnormalHandle_CFun,
+    eCddDrvEG800AKAbnormalHandle_Null,
+    eCddDrvEG800AKAbnormalHandle_Reboot,
+    eCddDrvEG800AKAbnormalHandle_CFun,
 }CddDrvEG800AKAbnormalHandle_Enum;
+
+typedef enum
+{
+    eCddDrvEG800AKDirection_Send,
+    eCddDrvEG800AKDirection_Recv,
+}CddDrvEG800AKDirection_Enum;
 
 /******************************************************************************
 *    Typedef Definition
@@ -69,11 +75,11 @@ typedef struct
 
     uint32_t periodDetectDataSendTick;
 
-    uint8_t user_data[32];
+    uint8_t user_data[64];
     void *specificPara;
 
  	void (*stateHandle)(uint8_t socketIndex, void *socketCtrl);
-    void (*socketDisconnectCallback)(void *socketCtrl);
+    void (*socketDisconnectCallback)(void);
     void (*socketCloseHandle)(void *socketCtrl);
 } CddDrvEG800AKSocketCtrl_Struct;
 
@@ -97,8 +103,9 @@ typedef struct
     uint8_t abNormalHandleStep;             /*: 异常处理步骤 */
 
     uint8_t transparentMode;                /* TRUE: 透传模式 */
+    CddDrvEG800AKDirection_Enum eTransparentDirection; /* 透传方向 */              
     uint32_t transparentModeStartTick;      /* 透传模式起始时间 */
-    uint8_t transparentSocketIndex;         /* 透传模式Socket */
+    uint8_t transparentSocketIndex;
 
     CddDrvEG800AKInfo_Struct stModuleInfo;  /* 模块信息 */
 
@@ -139,7 +146,7 @@ CddNetMOperator_Enum CddDrvEG800AK_GetOperatorType(void);
 void CddDrvEG800AK_GetModuleTypeInfo(char *pModuleType, uint16_t readLen);
 /* 模块内使用 */
 void CddDrvEG800AK_SetModuleState(CddNetMModuleState_Enum eModuleState);
-void CddDrvEG800AK_EnterTransparentMode(uint8_t socketIndex);
+void CddDrvEG800AK_EnterTransparentMode(uint8_t socketIndex, CddDrvEG800AKDirection_Enum eTransparentDirection);
 void CddDrvEG800AK_ExitTransparentMode(void);
 uint8_t CddDrvEG800AK_CheckTransparentMode(void);
 uint8_t CddDrvEG800AK_AddCmd(uint8_t socketIndex, uint8_t cmd);

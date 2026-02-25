@@ -67,7 +67,7 @@ static void CddDrvEG800AK_StartModuleCfg(void);
 static void CddDrvEG800AK_ClearAllSocketCmd(void);
 static void CddDrvEG800AK_AbnormalHandle(void);
 static uint8_t CddDrvEG800AK_FindFreeSocket(uint8_t *pSocketIndex);
-static void CddDrvEG800AK_SocketDisconnectCallback(void *socketCtrl);
+static void CddDrvEG800AK_SocketDisconnectCallback(void);
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
@@ -300,10 +300,19 @@ static void CddDrvEG800AK_ATTaskSendHandle(uint8_t *txBuf)
                     {
                         CDDDRV_EG800AK_CFG_LogPrint("[4G %s-->Tx]:\n%s\n", pATCmdDescribtor->cMeanings, txBuf);
                     }
+
+                    g_stCddDrvEG800AKCtrl.cmdTaskStep = CDDDRV_EG800AK_CTRL_STEP2;
+                    g_stCddDrvEG800AKCtrl.waitAtAckTickStart = Common_GetSystick();
+                }
+                else
+                {
+                    /* 紧急撤回一个发送 */
+                    CddDrvEG800AK_DeleteCmd(g_stCddDrvEG800AKCtrl.currentTaskSocketIndex);
+                    g_stCddDrvEG800AKCtrl.currentTaskCmd = 0;
+                    g_stCddDrvEG800AKCtrl.currentTaskATDescribtor = NULL;
+                    g_stCddDrvEG800AKCtrl.cmdTaskStep = CDDDRV_EG800AK_CTRL_STEP0;
                 }
 
-                g_stCddDrvEG800AKCtrl.cmdTaskStep = CDDDRV_EG800AK_CTRL_STEP2;
-                g_stCddDrvEG800AKCtrl.waitAtAckTickStart = Common_GetSystick();
                 break;
             }
 
@@ -387,6 +396,9 @@ static void CddDrvEG800AK_ATTaskRecvHandle(uint8_t *recvbuf)
     char *pDest = NULL;
     uint8_t bAnswerOK = FALSE;
     static uint16_t lastReadLen = 0;
+    uint16_t readLen = 0;
+    uint32_t readOffset = 0;
+
 
     CDDDRV_EG800AK_CFG_ReadData(recvbuf, dataLen, lastReadLen);
 
@@ -395,48 +407,64 @@ static void CddDrvEG800AK_ATTaskRecvHandle(uint8_t *recvbuf)
         g_stCddDrvEG800AKCtrl.noCommTickStart = Common_GetSystick();
 
         recvbuf[dataLen] = 0;
-        
-        if (g_stCddDrvEG800AKCtrl.currentTaskCmd != 0)
-        {
-            pDest = (char *)Common_SearchData(recvbuf, dataLen, pATCmdDescribtor->cATAnswer, strlen(pATCmdDescribtor->cATAnswer));
-            
-            if (pDest != NULL)
-            {
-                if (pATCmdDescribtor->printFlag == TRUE)
-                {
-                    CDDDRV_EG800AK_CFG_LogPrint("[4G-->Rx]:\n%s\n", recvbuf);
-                }
 
-                if (NULL != pATCmdDescribtor->pFuncRecvHandle)
+        if (CddDrvEG800AK_CheckTransparentMode() == TRUE &&
+            g_stCddDrvEG800AKCtrl.eTransparentDirection == eCddDrvEG800AKDirection_Recv)
+        {
+            pSocketCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[g_stCddDrvEG800AKCtrl.transparentSocketIndex];
+
+            if (c_stCddDrvEG800AKSocketConfigTable[pSocketCtrl->eSocketType].recvTransparentData != NULL)
+            {
+                c_stCddDrvEG800AKSocketConfigTable[pSocketCtrl->eSocketType].recvTransparentData(&g_stCddDrvEG800AKCtrl, recvbuf, dataLen);
+            }
+
+            CddDrvEG800AK_ExitTransparentMode();
+        }
+        else
+        {
+            if (g_stCddDrvEG800AKCtrl.currentTaskCmd != 0)
+            {
+                pDest = (char *)Common_SearchData(recvbuf, dataLen, pATCmdDescribtor->cATAnswer, strlen(pATCmdDescribtor->cATAnswer));
+                
+                if (pDest != NULL)
                 {
-                    if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
+                    if (pATCmdDescribtor->printFlag == TRUE)
                     {
-                        pSocketCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex];
-                        bAnswerOK = pATCmdDescribtor->pFuncRecvHandle(socketIndex, pSocketCtrl, (uint8_t *)pDest, dataLen - (uint16_t)((uint32_t)pDest - (uint32_t)recvbuf));
+                        CDDDRV_EG800AK_CFG_LogPrint("[4G-->Rx]:\n%s\n", recvbuf);
+                    }
+
+                    if (NULL != pATCmdDescribtor->pFuncRecvHandle)
+                    {
+                        if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
+                        {
+                            pSocketCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex];
+                            bAnswerOK = pATCmdDescribtor->pFuncRecvHandle(socketIndex, pSocketCtrl, (uint8_t *)pDest, dataLen - (uint16_t)((uint32_t)pDest - (uint32_t)recvbuf));
+                        }
+                        else
+                        {
+                            bAnswerOK = pATCmdDescribtor->pFuncRecvHandle(socketIndex, &g_stCddDrvEG800AKCtrl, (uint8_t *)pDest, dataLen - (uint16_t)((uint32_t)pDest - (uint32_t)recvbuf));
+                        }
                     }
                     else
                     {
-                        bAnswerOK = pATCmdDescribtor->pFuncRecvHandle(socketIndex, &g_stCddDrvEG800AKCtrl, (uint8_t *)pDest, dataLen - (uint16_t)((uint32_t)pDest - (uint32_t)recvbuf));
+                        bAnswerOK = TRUE;
+                    }
+
+                    if (bAnswerOK == TRUE)
+                    {
+                        CddDrvEG800AK_DeleteCmd(g_stCddDrvEG800AKCtrl.currentTaskSocketIndex);
                     }
                 }
-                else
-                {
-                    bAnswerOK = TRUE;
-                }
-
-                if (bAnswerOK == TRUE)
-                {
-                    CddDrvEG800AK_DeleteCmd(g_stCddDrvEG800AKCtrl.currentTaskSocketIndex);
-                }
             }
-        }
 
-        if (pDest == NULL)
-        {
-            CddDrvEg800AK_UrcDecode(recvbuf, &g_stCddDrvEG800AKCtrl, dataLen);
+            if (pDest == NULL)
+            {
+                CddDrvEg800AK_UrcDecode(recvbuf, &g_stCddDrvEG800AKCtrl, dataLen);
+            }
         }
     }
 }
+
 
 static void CddDrvEg800AK_UrcDecode(uint8_t *pData, void * modulePara, uint16_t dataLen)
 {
@@ -552,7 +580,7 @@ static void CddDrvEG800AK_noCommTimeoutDetect(void)
     {
         g_stCddDrvEG800AKCtrl.noCommTickStart = Common_GetSystick();
         CddDrvEG800AK_SetModuleState(eCddNetMModuleState_AbNormal);
-        CddDrvEG800AK_SetAbnormalType(CddDrvEG800AKAbnormalHandle_Reboot);
+        CddDrvEG800AK_SetAbnormalType(eCddDrvEG800AKAbnormalHandle_Reboot);
         CDDDRV_EG800AK_CFG_LogPrint("4G 模组无数据通信超时 %d ms\r\n!", CDDDRV_EG800AK_CFG_NO_COMM_TIMEOUT);    
     }
 }
@@ -593,10 +621,11 @@ static uint8_t CddDrvEG800AK_FindFreeSocket(uint8_t *pSocketIndex)
 	return ret;
 }
 
-void CddDrvEG800AK_EnterTransparentMode(uint8_t socketIndex)
+void CddDrvEG800AK_EnterTransparentMode(uint8_t socketIndex, CddDrvEG800AKDirection_Enum eTransparentDirection)
 { 
     g_stCddDrvEG800AKCtrl.transparentMode = TRUE;
     g_stCddDrvEG800AKCtrl.transparentModeStartTick = Common_GetSystick();
+    g_stCddDrvEG800AKCtrl.eTransparentDirection = eTransparentDirection;
     g_stCddDrvEG800AKCtrl.transparentSocketIndex = socketIndex;
 }
 
@@ -674,20 +703,20 @@ void CddDrvEG800AK_SetAbnormalType(CddDrvEG800AKAbnormalHandle_Enum eAbnormalTyp
 {
     CddDrvEG800AKAbnormalHandle_Enum tempAbnormalType;
     
-    if (eAbnormalType == CddDrvEG800AKAbnormalHandle_CFun)
+    if (eAbnormalType == eCddDrvEG800AKAbnormalHandle_CFun)
     {
-        if (g_stCddDrvEG800AKCtrl.eLastAbnormalHandleType == CddDrvEG800AKAbnormalHandle_CFun)
+        if (g_stCddDrvEG800AKCtrl.eLastAbnormalHandleType == eCddDrvEG800AKAbnormalHandle_CFun)
         {
-            tempAbnormalType = CddDrvEG800AKAbnormalHandle_Reboot;
+            tempAbnormalType = eCddDrvEG800AKAbnormalHandle_Reboot;
         }
         else
         {
-            tempAbnormalType = CddDrvEG800AKAbnormalHandle_CFun;
+            tempAbnormalType = eCddDrvEG800AKAbnormalHandle_CFun;
         }
     }
     else
     {
-        tempAbnormalType = CddDrvEG800AKAbnormalHandle_Reboot;
+        tempAbnormalType = eCddDrvEG800AKAbnormalHandle_Reboot;
     }
 
      if (tempAbnormalType != g_stCddDrvEG800AKCtrl.eCurrentAbnormalHandleType)
@@ -714,7 +743,7 @@ static void CddDrvEG800AK_AbnormalHandle(void)
         {
             if (TRUE == CddDrvEG800AK_CheckAllSocketCloseFinish())
             {
-                if (g_stCddDrvEG800AKCtrl.eCurrentAbnormalHandleType == CddDrvEG800AKAbnormalHandle_CFun)
+                if (g_stCddDrvEG800AKCtrl.eCurrentAbnormalHandleType == eCddDrvEG800AKAbnormalHandle_CFun)
                 {
                     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_SetCFUN0);
                     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_SetCFUN1);
@@ -722,7 +751,7 @@ static void CddDrvEG800AK_AbnormalHandle(void)
                 }
                 else
                 {
-                    g_stCddDrvEG800AKCtrl.eCurrentAbnormalHandleType = CddDrvEG800AKAbnormalHandle_Null;
+                    g_stCddDrvEG800AKCtrl.eCurrentAbnormalHandleType = eCddDrvEG800AKAbnormalHandle_Null;
                     CddDrvEG800AK_SetModuleState(eCddNetMModuleState_Init);
                 }
             }
@@ -733,7 +762,7 @@ static void CddDrvEG800AK_AbnormalHandle(void)
         {
             if (g_stCddDrvEG800AKCtrl.stModuleAtCtrl.atTaskArray[0] == 0)
             {
-                g_stCddDrvEG800AKCtrl.eCurrentAbnormalHandleType = CddDrvEG800AKAbnormalHandle_Null;
+                g_stCddDrvEG800AKCtrl.eCurrentAbnormalHandleType = eCddDrvEG800AKAbnormalHandle_Null;
                 CddDrvEG800AK_SetModuleState(eCddNetMModuleState_Cfg);
             }
 
@@ -787,23 +816,12 @@ void CddDrvEG800AK_GetModuleTypeInfo(char *pModuleType, uint16_t readLen)
     }
 }
 
-static void CddDrvEG800AK_SocketDisconnectCallback(void *socketCtrl)
+static void CddDrvEG800AK_SocketDisconnectCallback(void)
 {
-    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketCtrl;
+    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = NULL;
     uint8_t socketIndex = 0;
     uint8_t flag = TRUE;
     uint8_t exsistSocketFlag = FALSE;
-
-    if (pSocketCtrl->ePlatType == eCddNetMPlatType_O)
-    {
-        //chenlstodo: 清掉运营平台相关数据
-    }
-    else if (pSocketCtrl->ePlatType == eCddNetMPlatType_OM)
-    {
-        //chenlstodo: 清掉运维平台相关数据
-    }
-    else
-    {}
 
     for (socketIndex = 0; socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT; socketIndex++)
     {
@@ -829,7 +847,7 @@ static void CddDrvEG800AK_SocketDisconnectCallback(void *socketCtrl)
         }
 
         CddDrvEG800AK_SetModuleState(eCddNetMModuleState_AbNormal);
-        CddDrvEG800AK_SetAbnormalType(CddDrvEG800AKAbnormalHandle_CFun);
+        CddDrvEG800AK_SetAbnormalType(eCddDrvEG800AKAbnormalHandle_CFun);
     }
 }
 
@@ -897,10 +915,7 @@ void CddDrvEG800AK_DeleteCmd(uint8_t socketIndex)
     {
         if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
         {
-            if (g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex].usedFlag == TRUE)
-            {
-                pAtCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex].stSocketAtCtrl;;
-            }
+            pAtCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex].stSocketAtCtrl;
         }
     }
     

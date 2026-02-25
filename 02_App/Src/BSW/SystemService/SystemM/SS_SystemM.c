@@ -45,6 +45,7 @@
 #include "DS_Console.h"
 #include "SS_Tm.h"
 #include "SS_Snapshot.h"
+#include "SS_Ucm.h"
 
 #include "Common.h"
 #include "stdio.h"
@@ -102,6 +103,7 @@ static void SSSystemM_InitTwo(void)
 
     SSSnapshot_InitMemory();
     AswErrHandle_InitMemory();
+    SSUcm_InitMemory();
 }
 
 static void SSSystemM_InitThree(void)

@@ -80,9 +80,9 @@
             <nStopB2X>0</nStopB2X>
           </BeforeMake>
           <AfterMake>
-            <RunUserProg1>0</RunUserProg1>
+            <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name></UserProg1Name>
+            <UserProg1Name>fromelf.exe --bin -o ./gd32e503/bin/D3_A32FB_GD32E503.bin ./gd32e503/build/D3_A32FB_GD32E503.axf</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -275,7 +275,7 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x8000000</StartAddress>
+                <StartAddress>0x8004000</StartAddress>
                 <Size>0x7c000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
@@ -1108,6 +1108,11 @@
               <FileName>md5.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\Common\md5.c</FilePath>
+            </File>
+            <File>
+              <FileName>myMalloc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Common\myMalloc.c</FilePath>
             </File>
           </Files>
         </Group>

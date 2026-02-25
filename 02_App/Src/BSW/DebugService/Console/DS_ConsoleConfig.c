@@ -27,6 +27,7 @@
 #include "Cdd_NetM.h"
 
 #include "SS_Snapshot.h"
+#include "SS_Ucm.h"
 
 #include "Mcal_Mcu.h"
 
@@ -71,6 +72,7 @@ static int32_t DSConsoleCfg_HandleGbMode(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_GetPara(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_ReadAgingState(int32_t argc, char *argv[]);
+static int32_t DSConsoleCfg_TestOTA(int32_t argc, char *argv[]);
 
 /*******************************************************************************
 *    Function Source Code
@@ -84,7 +86,7 @@ DSCONSOLE_CFG_ADD_CMD(gbmode,        DSConsoleCfg_HandleGbMode, "gbmode 1 / 2" E
 DSCONSOLE_CFG_ADD_CMD(set,           DSConsoleCfg_SetPara, "set xxx" set param);
 DSCONSOLE_CFG_ADD_CMD(get,           DSConsoleCfg_GetPara, "get xxx" get param);
 DSCONSOLE_CFG_ADD_CMD(ReadAgingState,DSConsoleCfg_ReadAgingState, "ReadAgingState" ReadAgingState);
-
+DSCONSOLE_CFG_ADD_CMD(testOTA       ,DSConsoleCfg_TestOTA, "testOTA" testOTA);
 
 static int32_t DSConsoleCfg_Reboot(int32_t argc, char *argv[])
 {
@@ -173,11 +175,11 @@ static int32_t DSConsoleCfg_GetPara(int32_t argc, char *argv[])
         }
         else if (0 == strcmp(argv[1], "errorLog"))
         {
-            SSSnapshot_LocalReadItem(eSSSnapshotItemType_ErrorLog);
+            SSSnapshot_ExportItem(eSSSnapshotItemType_ErrorLog, eSnapshotItemReadSrc_Remote);
         }
         else if (0 == strcmp(argv[1], "runningLog"))
         {
-            SSSnapshot_LocalReadItem(eSSSnapshotItemType_RunningLog);
+            SSSnapshot_ExportItem(eSSSnapshotItemType_RunningLog, eSnapshotItemReadSrc_Remote);
         }
     }
 
@@ -334,7 +336,11 @@ static int32_t DSConsoleCfg_ReadAgingState(int32_t argc, char *argv[])
     return 0;
 }
 
-
+static int32_t DSConsoleCfg_TestOTA(int32_t argc, char *argv[])
+{
+    SSUcm_TestOTA();
+    return 0;
+}
 
 
 

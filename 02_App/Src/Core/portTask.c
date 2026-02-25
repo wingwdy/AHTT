@@ -28,6 +28,7 @@
 #include "DS_Console.h"
 #include "SS_Tm.h"
 #include "SS_Snapshot.h"
+#include "SS_Ucm.h"
 
 #include "Cdd_CP.h"
 #include "Cdd_Relay.h"
@@ -188,6 +189,7 @@ static void Task_20msB(void *arg)
         AswPlatM_MainFunction();
         SSSnapshot_MainFunction();
         DSConsole_MainFunction();
+        SSUcm_MainFunction();
         vTaskDelay(20);
     }
 }

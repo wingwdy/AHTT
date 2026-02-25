@@ -39,6 +39,9 @@
 #define FALSE 0U
 #endif
 
+
+#define STRUCT_POS(type, field)    ((uint32_t) &(( type *) 0)-> field)
+
 #define ARRAY_SIZE(x)               sizeof(x) / sizeof(x[0])
 
 #define PARA_ASSERT(x)              do \

@@ -19,7 +19,7 @@
 *    Header File Inclusion
 ******************************************************************************/
 #include "Common.h"
-
+#include "Cdd_NetM.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -28,7 +28,25 @@
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
+typedef enum
+{
+    eSSUcmChannelType_FTP,
+    eSSUcmChannelType_Count,
+}eSSUcmChannelType_Enum;
 
+
+
+typedef enum
+{
+    eSSUcmResult_None,
+    eSSUcmResult_Succ,
+    eSSUcmResult_GetFileErr,             /* 获取文件失败 */
+    eSSUcmResult_HeadErr,                /* 文件头错误 */
+    eSSUcmResult_DataRecvInterrupt,      /* 数据接收中断 */
+    eSSUcmResult_Timeout,                /* 升级超时 */
+    eSSUcmResult_ModuleNoEnoughSpace,    /* 模组空间不足 */
+    eSSUcmResult_UnexpectedError,        /* 未知错误 */
+}SSUcmResult_Enum;
 
 /******************************************************************************
 *    Typedef Definition
@@ -46,7 +64,14 @@
 *    Global Function Prototypes
 ******************************************************************************/
 uint8_t SSUcm_IsUpdating(void);
-
+uint8_t SSUcm_FileDataHandle(uint8_t *data, uint32_t dataLen);
+void SSUcm_ReqStartOTA(CddNetMSocketPara_Union *pNetPara, eSSUcmChannelType_Enum eChannelType);
+void SSUcm_TestOTA(void);
+uint8_t SSUcm_GetPackIndex(uint8_t *pPackIndex);
+uint8_t SSUcm_GetReadLenAndOffSet(uint16_t *pReadLen, uint32_t* pReadOffset);
+void SSUcm_SetResult(SSUcmResult_Enum eResult);
+void SSUcm_InitMemory(void);
+void SSUcm_MainFunction(void);
 #endif /* SS_UCM_H_ */
 
 

@@ -11,17 +11,49 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-
+#ifndef SS_UCM_CONFIG_H_
+#define SS_UCM_CONFIG_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-
+#include "Asw_Monitor.h"
+#include "Asw_Charge.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+#define SSUCM_CONFIG_SINGLE_FRAME_LEN            (1024U)
 
+#define SSUCM_CONFIG_PACK_FRAME_CNT              (64U)
 
+#define SSUCM_CONFIG_CUT_PACK_SIZE               (SSUCM_CONFIG_PACK_FRAME_CNT * SSUCM_CONFIG_SINGLE_FRAME_LEN)	
+
+#define SSUCM_CONFIG_TIMEOUT_MS                  (600000)
+
+#define SSUCM_CONFIG_STABLE_TIMEOUT              (15000U)
+
+#define SSUCM_CFG_LogPrint(fmt, ...)              DSLOGM_Debug(DSLogMModule_System, fmt, ##__VA_ARGS__)
+
+#define SSUCM_CFG_Reboot()                       AswMonitor_SetReboot(eAswMonitorRebootType_Immediate);
+
+#define SSUCM_CFG_CheckUpdateCondition(ret)      do\
+                                                 {\
+                                                    ret = TRUE;\
+                                                    for (uint8_t port = 0; port < SYSCFG_CFG_GUN_NUM; port++)\
+                                                    {\
+                                                        if (AswCharge_GetWorkState(port) != ASWCHARGE_WORKSTATE_IDLE)\
+                                                        {\
+                                                            ret = FALSE;\
+                                                            break;\
+                                                        }\
+                                                    }\
+                                                    \
+                                                    if (ret == TRUE && CddNetM_CheckFileLinkExsit() == TRUE)\
+                                                    {\
+                                                        ret = FALSE;\
+                                                    }\
+                                                 } while (0);
+   
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -44,7 +76,7 @@
 ******************************************************************************/
 
 
-
+#endif /* SS_UCM_CONFIG_H_ */
 
 
 
