@@ -136,9 +136,9 @@ typedef struct
     uint16_t port;
 	char ip[CDD_NETM_CFG_IP_LEN + 1];
 	char user[CDD_NETM_CFG_FTP_USERNAME_LEN + 1];
-	char passwd[CDD_NETM_CFG_FTP_PATH_LEN + 1];
+	char passwd[CDD_NETM_CFG_FTP_PASSWD_LEN + 1];
     char fileName[CDD_NETM_CFG_FTP_FILENAME_LEN + 1];
-	char path[CDD_NETM_CFG_FTP_PASSWD_LEN + 1];
+	char path[CDD_NETM_CFG_FTP_PATH_LEN + 1];
 }CddNetMFtpPara_Struct;
 
 typedef struct
@@ -179,7 +179,7 @@ typedef union
 uint8_t CddNetM_CheckLinkConnectOK(CddNetMPlatType_Enum ePlatType);
 void CddNetM_SwitchPhyChannel(uint8_t moduleDev);
 GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSocketPara_Union socketPara, CddNetMPlatType_Enum ePlatType);
-void CddNetM_DeleteFileLink(void);
+void CddNetM_DeleteLink(CddNetMPlatType_Enum ePlatType);
 void CddNetM_SetLinkDisconnect(CddNetMPlatType_Enum ePlatType);
 void CddNetM_MainFunction(void);
 uint16_t CddNetM_GetCsq(void);

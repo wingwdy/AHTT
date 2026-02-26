@@ -36,24 +36,6 @@
 
 #define SSUCM_CFG_Reboot()                       AswMonitor_SetReboot(eAswMonitorRebootType_Immediate);
 
-#define SSUCM_CFG_CheckUpdateCondition(ret)      do\
-                                                 {\
-                                                    ret = TRUE;\
-                                                    for (uint8_t port = 0; port < SYSCFG_CFG_GUN_NUM; port++)\
-                                                    {\
-                                                        if (AswCharge_GetWorkState(port) != ASWCHARGE_WORKSTATE_IDLE)\
-                                                        {\
-                                                            ret = FALSE;\
-                                                            break;\
-                                                        }\
-                                                    }\
-                                                    \
-                                                    if (ret == TRUE && CddNetM_CheckFileLinkExsit() == TRUE)\
-                                                    {\
-                                                        ret = FALSE;\
-                                                    }\
-                                                 } while (0);
-   
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

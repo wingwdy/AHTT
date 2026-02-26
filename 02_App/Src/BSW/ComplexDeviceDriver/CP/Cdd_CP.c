@@ -34,6 +34,7 @@
 #define CDDCP_WAKEUP_STEP1              1
 #define CDDCP_WAKEUP_STEP2              2
 #define CDDCP_WAKEUP_STEP3              3
+#define CDDCP_WAKEUP_STEP4              4
 /*******************************************************************************
 *    Enum Definition
 *******************************************************************************/
@@ -179,16 +180,16 @@ static void CddCP_WakeupHandle(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
     }
     case CDDCP_WAKEUP_STEP1:
     {
-        CddCP_SetPwmDuty(port, 0);
+        CddCP_SetPwmDuty(port, 1000);
         pCPCtrl->wakeupTick = Common_GetSystick();
         pCPCtrl->wakeupStep = CDDCP_WAKEUP_STEP2;
         break;
     }
     case CDDCP_WAKEUP_STEP2:
     {
-        if (Common_JudgeTimeoutMs(pCPCtrl->wakeupTick, CDDCP_CFG_WAKEUP_LOW_HOLDTIME))
+        if (Common_JudgeTimeoutMs(pCPCtrl->wakeupTick, CDDCP_CFG_WAKEUP_HIGH_HOLDTIME))
         {
-            CddCP_SetPwmDuty(port, 1000);
+            CddCP_SetPwmDuty(port, 0);
             pCPCtrl->wakeupTick = Common_GetSystick();
             pCPCtrl->wakeupStep = CDDCP_WAKEUP_STEP3;
         }
@@ -197,13 +198,24 @@ static void CddCP_WakeupHandle(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
     }
     case CDDCP_WAKEUP_STEP3:
     {
+        if (Common_JudgeTimeoutMs(pCPCtrl->wakeupTick, CDDCP_CFG_WAKEUP_LOW_HOLDTIME))
+        {
+            CddCP_SetPwmDuty(port, 1000);
+            pCPCtrl->wakeupTick = Common_GetSystick();
+            pCPCtrl->wakeupStep = CDDCP_WAKEUP_STEP4;
+        }
+
+        break;
+    }
+    case CDDCP_WAKEUP_STEP4:
+    {
         if (Common_JudgeTimeoutMs(pCPCtrl->wakeupTick, CDDCP_CFG_WAKEUP_HIGH_HOLDTIME))
         {
             CddCP_RecoverPWM(port);
             pCPCtrl->wakeupStatus = GLOBAL_OPT_STATE_SUCCESS;
             pCPCtrl->wakeupStep = CDDCP_WAKEUP_STEP0;
         }
-
+        
         break;
     }
     default:

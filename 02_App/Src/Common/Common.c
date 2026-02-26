@@ -871,3 +871,140 @@ void Common_CvtHex2Ascii(uint8_t hexData, uint8_t* pAsciiData)
         pAsciiData[0] = Common_CvtHex2AsciiHalfByte(hexData >> 4);
     }
 }
+
+/*
+ * @brief 从完整路径中提取目录路径和文件名
+ * 
+ * @param input      输入的完整路径字符串 (如: /AC_PILE/V1.0.0.0.bin)
+ * @param path       输出参数: 目录路径缓冲区 (如: /AC_PILE/)
+ * @param pathSize   path缓冲区的大小（包含结束符）
+ * @param filename   输出参数: 文件名缓冲区 (如: V1.0.0.0.bin)
+ * @param nameSize   filename缓冲区的大小（包含结束符）
+ * 
+ * @return 
+ *   0  - 成功
+ *   -1 - 输入参数为空指针
+ *   -2 - 输入字符串为空
+ *   -3 - path缓冲区太小
+ *   -4 - filename缓冲区太小
+ */
+int32_t Common_ExtractPathAndFileName(const char *input, 
+                                       char *path, uint32_t pathSize,
+                                       char *filename, uint32_t nameSize)
+{
+    int32_t ret = 0;
+    const char *last_sep = NULL;
+    const char *p = NULL;
+    const char *name_start = NULL;
+    size_t path_len = 0;
+    size_t name_len = 0;
+
+    /* 1. 参数有效性检查 */
+    if ((input == NULL) || (path == NULL) || (filename == NULL))
+    {
+        ret = -1;
+    }
+    /* 2. 检查缓冲区大小（至少能容纳空字符） */
+    else if ((pathSize == 0) || (nameSize == 0))
+    {
+        ret = -1;
+    }
+    /* 3. 检查输入字符串是否为空 */
+    else if (input[0] == '\0')
+    {
+        path[0] = '\0';
+        filename[0] = '\0';
+        ret = -2;
+    }
+    else
+    {
+        /* 4. 查找最后一个路径分隔符 '/' 或 '\' */
+        p = input;
+        while (*p != '\0')
+        {
+            if ((*p == '/') || (*p == '\\'))
+            {
+                last_sep = p;
+            }
+            p++;
+        }
+
+        if (last_sep == NULL)
+        {
+            /* 没有分隔符，只有文件名 */
+            /* 路径置为空 */
+            path[0] = '\0';
+            
+            /* 检查文件名长度 */
+            name_len = strlen(input);
+            if (name_len >= nameSize)
+            {
+                /* 缓冲区不够，截断并返回错误 */
+                if (nameSize > 0)
+                {
+                    memcpy(filename, input, nameSize - 1);
+                    filename[nameSize - 1] = '\0';
+                }
+                ret = -4;
+            }
+            else
+            {
+                strcpy(filename, input);
+            }
+        }
+        else
+        {
+            /* 有分隔符 */
+            /* 计算路径长度（包含分隔符） */
+            path_len = (size_t)(last_sep - input) + 1;
+            
+            /* 检查路径缓冲区 */
+            if (path_len >= pathSize)
+            {
+                /* 缓冲区不够，截断并返回错误 */
+                if (pathSize > 0)
+                {
+                    memcpy(path, input, pathSize - 1);
+                    path[pathSize - 1] = '\0';
+                }
+                ret = -3;
+            }
+            else
+            {
+                /* 安全复制路径 */
+                memcpy(path, input, path_len);
+                path[path_len] = '\0';
+                
+                /* 计算文件名长度 */
+                name_start = last_sep + 1;
+                name_len = strlen(name_start);
+                
+                /* 处理特殊情况：路径以分隔符结尾（如 /root/） */
+                if (name_len == 0)
+                {
+                    filename[0] = '\0';
+                }
+                else
+                {
+                    /* 检查文件名缓冲区 */
+                    if (name_len >= nameSize)
+                    {
+                        /* 缓冲区不够，截断并返回错误 */
+                        if (nameSize > 0)
+                        {
+                            memcpy(filename, name_start, nameSize - 1);
+                            filename[nameSize - 1] = '\0';
+                        }
+                        ret = -4;
+                    }
+                    else
+                    {
+                        strcpy(filename, name_start);
+                    }
+                }
+            }
+        }
+    }
+
+    return ret;
+}

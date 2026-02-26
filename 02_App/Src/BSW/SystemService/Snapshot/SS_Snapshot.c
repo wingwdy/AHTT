@@ -481,7 +481,7 @@ void SSSnapshot_ExportTimeoutHandle(void)
 
             if (pReadItemHandle->eReadSrc == eSnapshotItemReadSrc_Remote)
             {
-                CddNetM_DeleteFileLink();
+                CddNetM_DeleteLink(eCddNetMPlatType_File);
             }
 
             SSSnapshot_StopReadItem();

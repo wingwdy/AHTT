@@ -45,6 +45,7 @@ typedef struct
     uint8_t setForbidStateFailReason;
     uint8_t setUnforbidStateResult;
     uint8_t setUnforbidStateFailReason;
+    uint8_t setUpdateResult;
 }IotOMProtoData_Struct;
 
 typedef struct 

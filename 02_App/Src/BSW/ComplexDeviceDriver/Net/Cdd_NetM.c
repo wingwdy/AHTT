@@ -233,7 +233,7 @@ void CddNetM_GetIccid(uint8_t *pICCID)
 
 
 
-void CddNetM_DeleteFileLink(void)
+void CddNetM_DeleteLink(CddNetMPlatType_Enum ePlatType)
 {
     CddNetMLinkPara_Struct *pLinkPara = NULL;
     uint8_t index = 0;
@@ -245,7 +245,7 @@ void CddNetM_DeleteFileLink(void)
         {
             pLinkPara = &g_stCddNetMCtx.stLinkPara[ch][index]; 
 
-            if (eCddNetMPlatType_File == pLinkPara->ePlatType)
+            if (ePlatType == pLinkPara->ePlatType)
             {
                 if (pLinkPara->usedFlag == TRUE && c_NetMModuleOpsTable[ch].delSingleSocket != NULL)
                 {

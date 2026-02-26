@@ -146,18 +146,46 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
+<<<<<<< HEAD
           <LineNumber>340</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>134303644</Address>
+=======
+          <LineNumber>334</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134329238</Address>
+>>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
+<<<<<<< HEAD
           <Filename>..\Src\BSW\DebugService\Console\DS_ConsoleConfig.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\D3_A32FB_GD32E503\../Src/BSW/DebugService/Console/DS_ConsoleConfig.c\340</Expression>
+=======
+          <Filename>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_OM\Asw_IotProtoOMRecv.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_COM/Asw_IotProtocol/Protocol_OM/Asw_IotProtoOMRecv.c\334</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>350</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134329414</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_OM\Asw_IotProtoOMRecv.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_COM/Asw_IotProtocol/Protocol_OM/Asw_IotProtoOMRecv.c\350</Expression>
+>>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -189,11 +217,16 @@
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
+<<<<<<< HEAD
           <ItemText>pPlatInfo,0x0A</ItemText>
+=======
+          <ItemText>stSocketPara.stFtpPara</ItemText>
+>>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
+<<<<<<< HEAD
           <ItemText>dataTime,0x10</ItemText>
         </Ww>
         <Ww>
@@ -210,6 +243,9 @@
           <count>9</count>
           <WinNumber>1</WinNumber>
           <ItemText>argv[1]</ItemText>
+=======
+          <ItemText>timeout,0x0A</ItemText>
+>>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -248,8 +284,13 @@
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>8</SubType>
+<<<<<<< HEAD
           <ItemText>argv</ItemText>
           <AccSizeX>2</AccSizeX>
+=======
+          <ItemText>r_data</ItemText>
+          <AccSizeX>0</AccSizeX>
+>>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
         </Mm>
       </MemoryWindow1>
       <MemoryWindow2>
@@ -1435,6 +1476,37 @@
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
+<<<<<<< HEAD
+=======
+  </Group>
+
+  <Group>
+    <GroupName>ThridParty/CJson</GroupName>
+    <tvExp>0</tvExp>
+    <tvExpOptDlg>0</tvExpOptDlg>
+    <cbSel>0</cbSel>
+    <RteFlg>0</RteFlg>
+  </Group>
+
+  <Group>
+    <GroupName>ThirdParty/FlashDB</GroupName>
+    <tvExp>1</tvExp>
+    <tvExpOptDlg>0</tvExpOptDlg>
+    <cbSel>0</cbSel>
+    <RteFlg>0</RteFlg>
+    <File>
+      <GroupNumber>10</GroupNumber>
+      <FileNumber>88</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\Src\ThirdPartyLib\FlashDB\src\fdb.c</PathWithFileName>
+      <FilenameWithoutPath>fdb.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+>>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
     <File>
       <GroupNumber>8</GroupNumber>
       <FileNumber>90</FileNumber>
@@ -1471,6 +1543,17 @@
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
+<<<<<<< HEAD
+=======
+  </Group>
+
+  <Group>
+    <GroupName>ThirdParty/Fal</GroupName>
+    <tvExp>1</tvExp>
+    <tvExpOptDlg>0</tvExpOptDlg>
+    <cbSel>0</cbSel>
+    <RteFlg>0</RteFlg>
+>>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
     <File>
       <GroupNumber>8</GroupNumber>
       <FileNumber>93</FileNumber>
@@ -1519,6 +1602,17 @@
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
+<<<<<<< HEAD
+=======
+  </Group>
+
+  <Group>
+    <GroupName>ThirdParty/LetterShell</GroupName>
+    <tvExp>1</tvExp>
+    <tvExpOptDlg>0</tvExpOptDlg>
+    <cbSel>0</cbSel>
+    <RteFlg>0</RteFlg>
+>>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
     <File>
       <GroupNumber>8</GroupNumber>
       <FileNumber>97</FileNumber>

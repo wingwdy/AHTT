@@ -72,8 +72,9 @@
 #define IOT_GN_CMD_SET_BILLMODE_MULTIRATE_RSP   (0x57U)             /* 设置多类电价计费模型应答 */
 #define IOT_GN_CMD_SET_QRCODE_RSP               (0x59U)             /* 设置二维码应答 */
 #define IOT_GN_CMD_REBOOT_RSP                   (0x91U)             /* 设置远程重启应答 */
+#define IOT_GN_CMD_UPDATE_RSP                   (0x93U)             /* 设置远程更新应答 */
 
-#define IOT_GN_CMD_SEND_COUNT                   (17U)
+#define IOT_GN_CMD_SEND_COUNT                   (18U)
 
 /* 协议CMD 接收定义 */
 #define IOT_GN_CMD_LOGIN_RSP                    (0x02U)             /* 登陆应答 */
@@ -92,7 +93,9 @@
 #define IOT_GN_CMD_SET_BILLMODE_MULTIRATE       (0x54U)             /* 多类电价计费模型设置 */
 #define IOT_GN_CMD_SET_QRCODE                   (0x5AU)             /* 设置二维码 */
 #define IOT_GN_CMD_REBOOT                       (0x92U)             /* 设置远程重启 */
-#define IOT_GN_CMD_RECV_COUNT                   (16U)
+#define IOT_GN_CMD_UPDATE                       (0x94U)             /* 设置远程更新 */
+
+#define IOT_GN_CMD_RECV_COUNT                   (17U)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

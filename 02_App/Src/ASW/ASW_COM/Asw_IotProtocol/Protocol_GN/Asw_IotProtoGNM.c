@@ -86,6 +86,7 @@ static CommonSendCtrl_Struct* IotGN_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_GN_CMD_SET_BILLMODE_MULTIRATE_RSP: pSendCtrl = &pIotGNCtx->stSendCtrl[port][14];  break;
         case IOT_GN_CMD_SET_QRCODE_RSP:             pSendCtrl = &pIotGNCtx->stSendCtrl[port][15];  break;
         case IOT_GN_CMD_REBOOT_RSP:                 pSendCtrl = &pIotGNCtx->stSendCtrl[port][16];  break;
+        case IOT_GN_CMD_UPDATE_RSP:                 pSendCtrl = &pIotGNCtx->stSendCtrl[port][17];  break;
         default: break;
     }
 
@@ -114,7 +115,7 @@ static CommonRecvCtrl_Struct* IotGN_GetRecvCtrl(uint8_t port, uint16_t cmd)
         case IOT_GN_CMD_SET_BILLMODE_MULTIRATE:     pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][13];  break;
         case IOT_GN_CMD_SET_QRCODE:                 pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][14];  break;
         case IOT_GN_CMD_REBOOT:                     pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][15];  break;
-
+        case IOT_GN_CMD_UPDATE:                     pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][15];  break;
         default: break;
     }
     return pRecvCtrl;

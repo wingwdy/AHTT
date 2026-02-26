@@ -31,8 +31,8 @@
 
 #define ATFTP_DECTECT_STATE_PERIOD              (3000U)
 
-#define ATFTP_DEFAULT_USER_NAME                 "gn_ftp_fw_reader"
-#define ATFTP_DEFAULT_USER_PSW                  "d2aa28ee9a8693db"
+#define ATFTP_DEFAULT_USER_NAME                 "gn_ftp_fw_cls"
+#define ATFTP_DEFAULT_USER_PSW                  "24d79794d8b42ff5"
 #define ATFTP_DEFAULT_USER_IP                   "fw.ftp.gongniu.cn"
 #define ATFTP_DEFAULT_USER_PORT                 21
 #define ATFTP_DEFAULT_USER_PATH                 "/AC_pile/D3_A32FB/"

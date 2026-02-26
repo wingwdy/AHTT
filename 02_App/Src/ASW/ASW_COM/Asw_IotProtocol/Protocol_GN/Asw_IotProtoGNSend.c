@@ -67,6 +67,7 @@ static uint16_t IotGN_SendSetBillMode4RateRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotGN_SendSetBillModeMultiRateRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotGN_SendSetQrcodeRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotGN_SendSetRebootRsp(uint8_t port, uint8_t *pBuf);
+static uint16_t IotGN_SendUpdateRsp(uint8_t port, uint8_t *pBuf);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -259,6 +260,17 @@ static const IotGNSendCtrl_Struct c_stIotGNSendctrlTable[IOT_GN_CMD_SEND_COUNT] 
         .sendCycle = 0,
         .printFlag = TRUE,
         .cMeaning = "设置远程重启应答"
+    },
+
+    [17] =
+    {
+        .cmd = IOT_GN_CMD_UPDATE_RSP,
+        .cmdType = IOT_GN_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_GN_CMD_UPDATE,
+        .pSendFunc = IotGN_SendUpdateRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "远程更新应答"
     },
 };
 
@@ -897,6 +909,16 @@ static uint16_t IotGN_SendSetRebootRsp(uint8_t port, uint8_t *pBuf)
     return dataLen;
 }
 
+static uint16_t IotGN_SendUpdateRsp(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+    dataLen += 7;
+    /* 设置结果 */
+    pBuf[dataLen++] = pIotGNCtx->stProtoData[0].setUpdateResult;
+    return dataLen;
+}
 
 static uint16_t IotGN_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
 {

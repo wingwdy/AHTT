@@ -20,7 +20,7 @@
 #include "Asw_IotProtoOMRecv.h"
 #include "FrameQueue.h"
 #include "Asw_Monitor.h"
-
+#include "SS_Ucm.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -34,7 +34,6 @@
                                                                     outputPort = (inputPort - 1);\
                                                                 }\
                                                             }while(0)
-
 
 
 /*******************************************************************************
@@ -60,6 +59,7 @@ static uint8_t IotOM_RecvSetQrcode(uint8_t *port, uint8_t *r_data, uint16_t len)
 static uint8_t IotOM_RecvSetReboot(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvSetForbid(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvReportForBidStateRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotOM_RecvUpdate(uint8_t *port, uint8_t *r_data, uint16_t len);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -161,6 +161,18 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .matchCmd = IOT_OM_CMD_REPORT_FORBID_STATE,
         .printFlag = TRUE,
         .cMeaning = "远程锁机状态上报应答",
+    },
+
+    [8] = 
+    {
+        .cmd = IOT_OM_CMD_UPDATE,
+        .cmdType = IOT_OM_CMDTYPE_REQUSET,
+        .pRecvParse = IotOM_RecvUpdate,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_OM_CMD_UPDATE_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "远程更新",
     },
 };
 
@@ -308,6 +320,71 @@ static uint8_t IotOM_RecvReportForBidStateRsp(uint8_t *port, uint8_t *r_data, ui
         pIotOMCtx->sendForbidStateCount++;
     }
     
+    return TRUE;
+}
+
+static uint8_t IotOM_RecvUpdate(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    uint8_t index = 32 + 1 + 2;
+    uint8_t *pRecvData = r_data;
+    uint32_t timeout = 0;
+    char path[33] = {0};
+    CddNetMSocketPara_Union stSocketPara = {0};
+
+    stSocketPara.stFtpPara.eFileFormat = eCddNetMFileType_BIN;
+    stSocketPara.stFtpPara.eMode = eCddNetMFtpMode_Download;
+
+    memcpy(stSocketPara.stFtpPara.ip, &pRecvData[index], 16);
+    index += 16;
+    memcpy(&stSocketPara.stFtpPara.port, &pRecvData[index], 2);
+    index += 2;
+
+    memcpy(stSocketPara.stFtpPara.user, &pRecvData[index], 16);
+    index += 16;
+    memcpy(stSocketPara.stFtpPara.passwd, &pRecvData[index], 16);
+    index += 16;
+    memcpy(path, &pRecvData[index], 32);
+    index += 32;
+    Common_ExtractPathAndFileName(path, stSocketPara.stFtpPara.path, sizeof(stSocketPara.stFtpPara.path), 
+    stSocketPara.stFtpPara.fileName, sizeof(stSocketPara.stFtpPara.fileName));   
+
+    /* 运维平台问题，这里清零，net那边会采用默认值*/
+    memset(stSocketPara.stFtpPara.path, 0x00, sizeof(stSocketPara.stFtpPara.path));
+    memset(stSocketPara.stFtpPara.user, 0x00, sizeof(stSocketPara.stFtpPara.user));
+    memset(stSocketPara.stFtpPara.passwd, 0x00, sizeof(stSocketPara.stFtpPara.passwd));
+
+    index += 1;
+
+    timeout = pRecvData[index++] * 60 * 1000;
+
+    /* 立即执行 */
+    if (pRecvData[index] == 0x01)
+    {
+        if (TRUE == SSUcm_CheckUpdateCondition())
+        {
+            pIotOMCtx->stProtoData[0].setUpdateResult = 0x00;
+        }
+        else
+        {
+            pIotOMCtx->stProtoData[0].setUpdateResult = 0x01;
+        }
+    }
+    else /* 空闲执行 */
+    {
+        if (TRUE == SSUcm_CheckUpdateCondition())
+        {
+            if (TRUE == SSUcm_CheckUpdateCondition())
+            {
+                pIotOMCtx->stProtoData[0].setUpdateResult = 0x00;
+            }
+            else
+            {
+                pIotOMCtx->stProtoData[0].setUpdateResult = 0x10;
+            }
+        }
+    }
+
+    SSUcm_ReqStartOTA(&stSocketPara, eSSUcmChannelType_FTP, eSSUcmExcuteMode_WaitIdle, timeout);
     return TRUE;
 }
 
