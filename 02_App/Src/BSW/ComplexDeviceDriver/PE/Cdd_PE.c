@@ -141,7 +141,7 @@ static void CddPE_PeDetect(CddPEState_Struct *pPECtrl)
 {
     CddPEState_Enum curPEState = eCddPEState_PEUnkown;
 
-	if (CDDPE_CFG_IsQBStandardMode() == FALSE && pPECtrl->lnCheckFinish == TRUE) /* 国标模式检测PE */
+	if (pPECtrl->lnCheckFinish == TRUE)
 	{
 		if (pPECtrl->eLNState == eCddPEState_LNNormal) /* 火零正常 */
 		{
@@ -166,9 +166,12 @@ static void CddPE_PeDetect(CddPEState_Struct *pPECtrl)
 					if (curPEState != pPECtrl->ePEState)
 					{
 						pPECtrl->ePEState = curPEState;
-						if (curPEState == eCddPEState_PEUnconn && pPECtrl->ePeErrState == eCddPeErrState_NULL)
+					}
+					if (curPEState == eCddPEState_PEUnconn && pPECtrl->ePeErrState == eCddPeErrState_NULL)
+					{
+						pPECtrl->ePeErrState = eCddPeErrState_ERR;
+						if (CDDPE_CFG_IsQBStandardMode() == FALSE) /* 国标模式 */
 						{
-							pPECtrl->ePeErrState = eCddPeErrState_ERR;
 							CDDPE_CFG_AswErrHandle_PileSetErrCallback(eErr_PEBreakFault);
 						}
 					}
@@ -179,21 +182,23 @@ static void CddPE_PeDetect(CddPEState_Struct *pPECtrl)
 						if (eCPState == eCddCPVolState_12V)
 						{
 							pPECtrl->ePeErrState = eCddPeErrState_NULL;
-							CDDPE_CFG_AswErrHandle_PileResetErrCallback(eErr_PEBreakFault);
+							if (CDDPE_CFG_IsQBStandardMode() == FALSE) /* 国标模式 */
+							{
+								CDDPE_CFG_AswErrHandle_PileResetErrCallback(eErr_PEBreakFault);
+							}
 						}
 					}
 				}
 			}
-		}	
-	}
-	else
-	{
-		if (pPECtrl->ePeErrState == eCddPeErrState_ERR)
+		}
+
+		if (CDDPE_CFG_IsQBStandardMode() == TRUE) /* 兼容模式 */
 		{
-			pPECtrl->ePeErrState = eCddPeErrState_NULL;
-			pPECtrl->ePEState = eCddPEState_PEUnkown;
-			pPECtrl->eTempPEState = eCddPEState_PEUnkown;
-			CDDPE_CFG_AswErrHandle_PileResetErrCallback(eErr_PEBreakFault);
+			if (pPECtrl->ePeErrState == eCddPeErrState_ERR)
+			{
+				pPECtrl->ePeErrState = eCddPeErrState_NULL;
+				CDDPE_CFG_AswErrHandle_PileResetErrCallback(eErr_PEBreakFault);
+			}
 		}
 	}
 }
