@@ -20,7 +20,7 @@
 #include "Asw_PlatMConfig.h"
 #include "Asw_IotProtoGNM.h"
 #include "Asw_IotProtoOMM.h"
-
+#include "Asw_IotProtoYKC21M.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -62,12 +62,15 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
 
     [eAswPlatType_YKC21] =
     {
-        .pName = "ykc2.1",
+       .pName = "ykc2.1",
         .cProtoMeaning = "云快充2.1",
         .eSocketType = eCddNetMSocketType_TCP,
-        .pFuncFillLinkPara = NULL,
-        .pFuncInit = NULL,
-        .pMainFunction = NULL,
+        .pFuncFillLinkPara = IotYKC21_FillLinkPara,
+        .pFuncInit = IotYKC21_InitMemory,
+        .pMainFunction = IotYKC21_MainFunction,
+        .pFuncTransformBillMode = IotYKC21_TransformBillMode,
+        .pFuncPackChargeRecord = IotYKC21_PackChargeRecord,
+        .pFuncSwipCardCharge = IotYKC21_SwipCardCharge,
     },
 
     [eAswPlatType_XDT] =

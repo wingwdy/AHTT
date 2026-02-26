@@ -324,6 +324,30 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
             else
             {}
         }
+        /* 设置YKC21密钥 */
+        else if (0 == strcmp(argv[1], "ykc21key"))
+        {
+            if (TRUE == AswPlatM_Setykc21key(argv[2], strlen(argv[2])))
+            {
+                DSCONSOLE_CFG_LogPrint("Set ykc21key \"%s\" ok!\r\n", argv[2]);
+            }
+            else
+            {
+                DSCONSOLE_CFG_LogPrint("Set ykc21key failed! erroplat or len > 128\r\n");
+            }
+        }
+        /* 设置YKC21token  */
+        else if (0 == strcmp(argv[1], "ykc21token"))
+        {
+            if (TRUE == AswPlatM_Setykc21token(argv[2], strlen(argv[2])))
+            {
+                DSCONSOLE_CFG_LogPrint("Set ykc21token \"%s\" ok!\r\n", argv[2]);
+            }
+            else
+            {
+                DSCONSOLE_CFG_LogPrint("Set ykc21token failed! erroplat or len > 14\r\n");
+            }
+        }
     }
 
     return 0;

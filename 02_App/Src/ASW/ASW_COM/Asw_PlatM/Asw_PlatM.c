@@ -23,6 +23,7 @@
 #include "Cdd_ModeM.h"
 #include "Version.h"
 #include "Cdd_NetM.h"
+#include "Asw_IotProtoYKC21M.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -111,6 +112,14 @@ void AswPlatM_PrintAllConfigInfo(void)
     ASWPLATM_CFG_LogPrint("运营平台IP端口：%s, %d\r\n", pParam->platMainIp, pParam->platMainPort);
     ASWPLATM_CFG_LogPrint("运维平台IP端口：%s, %d\r\n", pParam->platAuxiliaryIp, pParam->platAuxiliaryPort);
     ASWPLATM_CFG_LogPrint("----------------------------------------------------------------------------\r\n");
+    
+    if(0 == strcmp(pProtocolDescriptor->pName, "ykc2.1"))
+    {
+        ASWPLATM_CFG_LogPrint("--------------ykc2.1登录----------------------------------------------------\r\n");
+        IotYKC21_PrintfYKC21KeyAndToken();
+        ASWPLATM_CFG_LogPrint("----------------------------------------------------------------------------\r\n");
+    }
+    
 }
 
 uint8_t AswPlatM_SetPileDn(char *pPileDn, uint8_t len)
@@ -191,7 +200,6 @@ uint8_t AswPlatM_SetPlatMainPort(uint16_t port)
 
     return TRUE;
 }
-
 uint8_t AswPlatM_SetPlatType(char *platName)
 {
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = NULL;
@@ -216,6 +224,45 @@ uint8_t AswPlatM_SetPlatType(char *platName)
             ret = TRUE;
             break;
         }
+    }
+
+    return ret;
+}
+uint8_t AswPlatM_Setykc21key(char *pykc21key, uint8_t len) 
+{
+    //128位密钥
+   uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+   uint8_t ret = FALSE;
+ 
+   if (currentPlatType != eAswPlatType_YKC21)
+    {
+         return ret;
+    }
+
+    if (len <= 128)
+    {
+        IotYKC21_RfreshYKC21key(pykc21key,len);
+        ret = TRUE;
+    }
+
+    return ret;
+}
+
+
+uint8_t AswPlatM_Setykc21token(char *pykc21token, uint8_t len)
+{
+uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+   uint8_t ret = FALSE;
+ 
+   if (currentPlatType != eAswPlatType_YKC21)
+    {
+         return ret;
+    }
+
+    if (len <= 14)
+    {
+        IotYKC21_RfreshYKC21token(pykc21token,len);
+        ret = TRUE;
     }
 
     return ret;

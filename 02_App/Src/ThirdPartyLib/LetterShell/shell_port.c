@@ -54,5 +54,5 @@ void userShellInit(void)
 {
     shell.write = userShellWrite;
     shell.read = userShellRead;
-    shellInit(&shell, shellBuffer, 512);
+    shellInit(&shell, shellBuffer, 896);
 }
