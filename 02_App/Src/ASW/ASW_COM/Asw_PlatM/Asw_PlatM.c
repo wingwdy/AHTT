@@ -166,7 +166,7 @@ uint8_t AswPlatM_SetPlatMainIpPort(char *pIp, uint8_t ipLen, uint16_t port)
     {
         if (strcmp(pIp, g_stAswPlatMCtx.stPlatParam.platMainIp) != 0)
         {
-            ASWPLATM_CFG_LogPrint("平台IP变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platMainIp, pIp);
+            ASWPLATM_CFG_LogPrint("运营平台IP变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platMainIp, pIp);
 
             memset(g_stAswPlatMCtx.stPlatParam.platMainIp, 0x00, CDD_NETM_CFG_IP_LEN);
             memcpy(g_stAswPlatMCtx.stPlatParam.platMainIp, pIp, ipLen);
@@ -184,8 +184,42 @@ uint8_t AswPlatM_SetPlatMainPort(uint16_t port)
 {
     if (g_stAswPlatMCtx.stPlatParam.platMainPort != port)
     {
-        ASWPLATM_CFG_LogPrint("平台port变化：[%d]-->[%d]\r\n", g_stAswPlatMCtx.stPlatParam.platMainPort, port);
+        ASWPLATM_CFG_LogPrint("运营平台port变化：[%d]-->[%d]\r\n", g_stAswPlatMCtx.stPlatParam.platMainPort, port);
         g_stAswPlatMCtx.stPlatParam.platMainPort = port;
+        MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));
+    }
+
+    return TRUE;
+}
+
+uint8_t AswPlatM_SetPlatAuxiliaryIpPort(char *pIp, uint8_t ipLen, uint16_t port)
+{
+    uint8_t ret = FALSE;
+
+    if (ipLen < CDD_NETM_CFG_IP_LEN)
+    {
+        if (strcmp(pIp, g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp) != 0)
+        {
+            ASWPLATM_CFG_LogPrint("运维平台IP变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp, pIp);
+
+            memset(g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp, 0x00, CDD_NETM_CFG_IP_LEN);
+            memcpy(g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp, pIp, ipLen);
+            MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));            
+        }
+
+        AswPlatM_SetPlatAuxiliaryPort(port);
+        ret = TRUE;
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_SetPlatAuxiliaryPort(uint16_t port)
+{
+    if (g_stAswPlatMCtx.stPlatParam.platAuxiliaryPort != port)
+    {
+        ASWPLATM_CFG_LogPrint("运维平台port变化：[%d]-->[%d]\r\n", g_stAswPlatMCtx.stPlatParam.platAuxiliaryPort, port);
+        g_stAswPlatMCtx.stPlatParam.platAuxiliaryPort = port;
         MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));
     }
 

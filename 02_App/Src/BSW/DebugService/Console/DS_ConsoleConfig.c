@@ -72,7 +72,6 @@ static int32_t DSConsoleCfg_HandleGbMode(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_GetPara(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_ReadAgingState(int32_t argc, char *argv[]);
-static int32_t DSConsoleCfg_TestOTA(int32_t argc, char *argv[]);
 
 /*******************************************************************************
 *    Function Source Code
@@ -86,7 +85,6 @@ DSCONSOLE_CFG_ADD_CMD(gbmode,        DSConsoleCfg_HandleGbMode, "gbmode 1 / 2" E
 DSCONSOLE_CFG_ADD_CMD(set,           DSConsoleCfg_SetPara, "set xxx" set param);
 DSCONSOLE_CFG_ADD_CMD(get,           DSConsoleCfg_GetPara, "get xxx" get param);
 DSCONSOLE_CFG_ADD_CMD(ReadAgingState,DSConsoleCfg_ReadAgingState, "ReadAgingState" ReadAgingState);
-DSCONSOLE_CFG_ADD_CMD(testOTA       ,DSConsoleCfg_TestOTA, "testOTA" testOTA);
 
 static int32_t DSConsoleCfg_Reboot(int32_t argc, char *argv[])
 {
@@ -270,7 +268,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                     {
                         if (TRUE == AswPlatM_SetPlatMainIpPort(ip, strlen(ip), (uint16_t)port))
                         {
-                            DSCONSOLE_CFG_LogPrint("Set Pile ip: \"%s\", port= %d ok!\r\n", ip, port);
+                            DSCONSOLE_CFG_LogPrint("Set Plat Main ip port: \"%s\", port= %d ok!\r\n", ip, port);
                             setResult = TRUE;
                         }
                     }
@@ -278,7 +276,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
 
                 if (setResult == FALSE)
                 {
-                    DSCONSOLE_CFG_LogPrint("Set Pile ip port failed!\r\n");
+                    DSCONSOLE_CFG_LogPrint("Set Plat Main ip port failed!\r\n");
                 }
             }
             else if (NULL != (pTemp = Common_SearchData((uint8_t *)argv[2], strlen(argv[2]), "domain:", strlen("domain:"))))
@@ -293,7 +291,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                     {
                         if (TRUE == AswPlatM_SetPlatMainIpPort(ip, strlen(ip), (uint16_t)port))
                         {
-                            DSCONSOLE_CFG_LogPrint("Set Pile ip: \"%s\", port= %d ok!\r\n", ip, port);
+                            DSCONSOLE_CFG_LogPrint("Set Plat Main domain port: \"%s\", port= %d ok!\r\n", ip, port);
                             setResult = TRUE;
                         }
                     }
@@ -301,7 +299,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
 
                 if (setResult == FALSE)
                 {
-                    DSCONSOLE_CFG_LogPrint("Set Pile ip port failed!\r\n");
+                    DSCONSOLE_CFG_LogPrint("Set Plat Main domain port failed!\r\n");
                 }
             }
             else if (NULL != (pTemp = Common_SearchData((uint8_t *)argv[2], strlen(argv[2]), "port:", strlen("port:"))))
@@ -311,24 +309,67 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                 {
                     if (TRUE == AswPlatM_SetPlatMainPort((uint16_t)port))
                     {
-                        DSCONSOLE_CFG_LogPrint("Set Pile port= %d ok!\r\n", port);
+                        DSCONSOLE_CFG_LogPrint("Set Plat Main port= %d ok!\r\n", port);
                         setResult = TRUE;
                     }
                 }
 
                 if (setResult == FALSE)
                 {
-                    DSCONSOLE_CFG_LogPrint("Set Pile port failed!\r\n");
+                    DSCONSOLE_CFG_LogPrint("Set Plat Main port failed!\r\n");
                 }
             }
             else
             {}
         }
+        else if (0 == strcmp(argv[1], "mntr"))
+        {
+            /* 设置IP端口 */
+            if (NULL != (pTemp = Common_SearchData((uint8_t *)argv[2], strlen(argv[2]), "ip:", strlen("ip:"))))
+            {
+                pTemp += strlen("ip:");
+
+                if (strlen((char *)pTemp) < CDD_NETM_CFG_IP_LEN)
+                {
+                    char ip[CDD_NETM_CFG_IP_LEN + 1] = {0};
+
+                    if (sscanf((char *)pTemp, "%72[^,],%d", ip, &port) == 2)
+                    {
+                        if (TRUE == AswPlatM_SetPlatAuxiliaryIpPort(ip, strlen(ip), (uint16_t)port))
+                        {
+                            DSCONSOLE_CFG_LogPrint("Set Plat Auxiliary ip port: \"%s\", port= %d ok!\r\n", ip, port);
+                            setResult = TRUE;
+                        }
+                    }
+                }
+
+                if (setResult == FALSE)
+                {
+                    DSCONSOLE_CFG_LogPrint("Set Plat Auxiliary ip port failed!\r\n");
+                }
+            }
+            else if (NULL != (pTemp = Common_SearchData((uint8_t *)argv[2], strlen(argv[2]), "port:", strlen("port:"))))
+            {
+                pTemp += strlen("port:");
+                if (sscanf((char *)pTemp, "%d", &port) == 1)
+                {
+                    if (TRUE == AswPlatM_SetPlatAuxiliaryPort((uint16_t)port))
+                    {
+                        DSCONSOLE_CFG_LogPrint("Set Plat Auxiliary port= %d ok!\r\n", port);
+                        setResult = TRUE;
+                    }
+                }
+
+                if (setResult == FALSE)
+                {
+                    DSCONSOLE_CFG_LogPrint("Set Plat Auxiliary port failed!\r\n");
+                }
+            }
+        }
     }
 
     return 0;
 }
-
 
 static int32_t DSConsoleCfg_ReadAgingState(int32_t argc, char *argv[])
 {
@@ -336,11 +377,6 @@ static int32_t DSConsoleCfg_ReadAgingState(int32_t argc, char *argv[])
     return 0;
 }
 
-static int32_t DSConsoleCfg_TestOTA(int32_t argc, char *argv[])
-{
-    SSUcm_TestOTA();
-    return 0;
-}
 
 
 

@@ -34,7 +34,11 @@ typedef enum
     eSSUcmChannelType_Count,
 }eSSUcmChannelType_Enum;
 
-
+typedef enum
+{
+    eSSUcmExcuteMode_WaitIdle,
+    eSSUcmExcuteMode_Immediate,
+}eSSUcmExcuteMode_Enum;
 
 typedef enum
 {
@@ -65,11 +69,12 @@ typedef enum
 ******************************************************************************/
 uint8_t SSUcm_IsUpdating(void);
 uint8_t SSUcm_FileDataHandle(uint8_t *data, uint32_t dataLen);
-void SSUcm_ReqStartOTA(CddNetMSocketPara_Union *pNetPara, eSSUcmChannelType_Enum eChannelType);
-void SSUcm_TestOTA(void);
+void SSUcm_ReqStartOTA(CddNetMSocketPara_Union *pNetPara, eSSUcmChannelType_Enum eChannelType, 
+    eSSUcmExcuteMode_Enum eExcuteMode, uint32_t timeout);
 uint8_t SSUcm_GetPackIndex(uint8_t *pPackIndex);
 uint8_t SSUcm_GetReadLenAndOffSet(uint16_t *pReadLen, uint32_t* pReadOffset);
 void SSUcm_SetResult(SSUcmResult_Enum eResult);
+uint8_t SSUcm_CheckUpdateCondition(void);
 void SSUcm_InitMemory(void);
 void SSUcm_MainFunction(void);
 #endif /* SS_UCM_H_ */

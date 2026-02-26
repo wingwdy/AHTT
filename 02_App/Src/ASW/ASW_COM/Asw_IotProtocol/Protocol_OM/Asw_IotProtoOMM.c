@@ -81,6 +81,7 @@ static CommonSendCtrl_Struct* IotOM_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_OM_CMD_REBOOT_RSP:                 pSendCtrl = &pIotOMCtx->stSendCtrl[port][8];   break;
         case IOT_OM_CMD_SET_FORBID_RSP:             pSendCtrl = &pIotOMCtx->stSendCtrl[port][9];   break;
         case IOT_OM_CMD_REPORT_FORBID_STATE:        pSendCtrl = &pIotOMCtx->stSendCtrl[port][10];   break;
+        case IOT_OM_CMD_UPDATE_RSP:                 pSendCtrl = &pIotOMCtx->stSendCtrl[port][11];   break;
         default: break;
     }
 
@@ -101,6 +102,7 @@ static CommonRecvCtrl_Struct* IotOM_GetRecvCtrl(uint8_t port, uint16_t cmd)
         case IOT_OM_CMD_REBOOT:                     pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][5];   break;
         case IOT_OM_CMD_SET_FORBID:                 pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][6];   break;
         case IOT_OM_CMD_REPORT_FORBID_STATE_RSP:    pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][7];   break;
+        case IOT_OM_CMD_UPDATE:                     pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][8];   break;
         default: break;
     }
     return pRecvCtrl;

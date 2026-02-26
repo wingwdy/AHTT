@@ -88,7 +88,9 @@ typedef struct
     
     CddNetMSocketPara_Union strNetPara;
     eSSUcmChannelType_Enum eChannelType;
+    uint32_t    timeoutThresold;
     uint32_t    timeoutTick;
+    uint8_t     delayFlag;                 /* 延时执行标记 */
 
 	uint8_t	    packCnt;                   /* 包数量 */
 	uint8_t	    packIndex;                 /* 包序号 */
@@ -245,7 +247,7 @@ static void SSUcm_LoadUcmPara(void)
 {
     if (TRUE != SSUcm_read_part(FAL_NULL_NAME_UCM_PARA, 0, (uint8_t *)&g_stSSUcmPara, sizeof(SSUcmPara_Struct)))
     {
-        SSUCM_CFG_LogPrint("Ucm Para Load Failed, excute default para!\r\n");
+        SSUCM_CFG_LogPrint("Ucm 参数加载失败, 执行默认参数!\r\n");
         SSUcm_DefaultUcmPara();
     }
 }
@@ -271,7 +273,7 @@ static uint8_t SSUcm_CheckFileHead(uint8_t *headData, uint32_t dataLen)
     }
     else
     {
-        SSUCM_CFG_LogPrint("File head crc error, recvCrc: 0x%04X, calcCrc: 0x%04X!\r\n", recvCrc, calcCrc);
+        SSUCM_CFG_LogPrint("文件头校验CRC错误, recvCrc: 0x%04X, calcCrc: 0x%04X!\r\n", recvCrc, calcCrc);
     }
 
     return ret;
@@ -315,18 +317,18 @@ static void SSUcm_SetWorkState(SSUcmWorkState_Enum eWorkState)
         if (eWorkState == eSSUcmWorkState_Connecting)
         {
             g_stSSUcmCtx.timeoutTick = Common_GetSystick();
-            CddNetM_SetLinkDisconnect(eCddNetMPlatType_O);
-            CddNetM_SetLinkDisconnect(eCddNetMPlatType_OM);
         }
         else if (eWorkState == eSSUcmWorkState_Finish)
         {
             if (ePreWorkState >= eSSUcmWorkState_Connecting && ePreWorkState < eSSUcmWorkState_Finish)
             {
-                CddNetM_DeleteFileLink();
+                CddNetM_DeleteLink(eCddNetMPlatType_File);
             }
 
             if (g_stSSUcmCtx.eResult == eSSUcmResult_Succ)
             {
+                CddNetM_DeleteLink(eCddNetMPlatType_O);
+                CddNetM_DeleteLink(eCddNetMPlatType_OM);
                 g_stSSUcmPara.eBootState = eSSUcmBootState_FileCheck;
                 SSUcm_WriteUcmPara();
                 SSUCM_CFG_Reboot();
@@ -346,7 +348,7 @@ static void SSUcm_TimeoutHandle(void)
     if (g_stSSUcmCtx.eUcmWorkState >= eSSUcmWorkState_Connecting && 
         g_stSSUcmCtx.eUcmWorkState < eSSUcmWorkState_Finish)
     {
-        if (Common_JudgeTimeoutMs(g_stSSUcmCtx.timeoutTick, SSUCM_CONFIG_TIMEOUT_MS) == TRUE)
+        if (Common_JudgeTimeoutMs(g_stSSUcmCtx.timeoutTick, g_stSSUcmCtx.timeoutThresold) == TRUE)
         {
             SSUcm_SetResult(eSSUcmResult_Timeout);
         }
@@ -364,21 +366,6 @@ static void SSUcm_RollbackCheck(void)
             SSUcm_WriteUcmPara();
         }
     }
-}
-
-void SSUcm_TestOTA(void)
-{
-    CddNetMSocketPara_Union stSocketPara;
-
-    stSocketPara.stFtpPara.eMode = eCddNetMFtpMode_Download;
-    strcpy(stSocketPara.stFtpPara.fileName, "D3_A32FB_GD32E503_V1.0.0.4.bin");
-    strcpy(stSocketPara.stFtpPara.user, "gn_ftp_fw_cls");
-    strcpy(stSocketPara.stFtpPara.passwd, "24d79794d8b42ff5");
-    strcpy(stSocketPara.stFtpPara.ip, "fwftp.gongniu.cn");
-    strcpy(stSocketPara.stFtpPara.path, "/AC_pile/D3_A32FB/");
-    stSocketPara.stFtpPara.port = 21;
-    stSocketPara.stFtpPara.eFileFormat = eCddNetMFileType_BIN;
-    SSUcm_ReqStartOTA(&stSocketPara, eSSUcmChannelType_FTP);
 }
 
 uint8_t SSUcm_FileDataHandle(uint8_t *data, uint32_t dataLen)
@@ -404,8 +391,10 @@ uint8_t SSUcm_FileDataHandle(uint8_t *data, uint32_t dataLen)
     {
         if (dataLen == g_stSSUcmCtx.readLen)
         {
-            SSUCM_CFG_LogPrint("file: %d\t%d\t%d\t%d\r\n", g_stSSUcmCtx.currentFrameIndex, g_stSSUcmCtx.totalFrameCnt,
-            g_stSSUcmCtx.readLen, g_stSSUcmCtx.readOffset);
+            SSUCM_CFG_LogPrint("文件下载中[进度：%d%%]: 总包数[%d], 当前包数[%d], 总帧数[%d], 当前帧数[%d]\r\n",
+                g_stSSUcmCtx.currentFrameIndex * 100 / g_stSSUcmCtx.totalFrameCnt,
+                 g_stSSUcmCtx.packCnt, g_stSSUcmCtx.packIndex + 1,
+                g_stSSUcmCtx.totalFrameCnt,g_stSSUcmCtx.currentFrameIndex);
 
             writeAddr = g_stSSUcmCtx.currentFrameIndex * SSUCM_CONFIG_SINGLE_FRAME_LEN;
             SSUcm_program_part(FAL_NULL_NAME_UPDATE_PROGRAM, writeAddr,  data, dataLen);
@@ -448,6 +437,28 @@ uint8_t SSUcm_FileDataHandle(uint8_t *data, uint32_t dataLen)
     return ret;
 }
 
+uint8_t SSUcm_CheckUpdateCondition(void)
+{
+    uint8_t ret = TRUE;
+    uint8_t port = 0;
+    
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+    {
+        if (AswCharge_GetWorkState(port) != ASWCHARGE_WORKSTATE_IDLE)
+        {
+            ret = FALSE;
+            break;
+        }
+    }
+    
+    if (ret == TRUE && CddNetM_CheckFileLinkExsit() == TRUE)
+    {
+        ret = FALSE;
+    }
+
+    return ret;
+}
+
 uint8_t SSUcm_GetReadLenAndOffSet(uint16_t *pReadLen, uint32_t* pReadOffset)
 {
     uint8_t ret = FALSE;
@@ -479,7 +490,7 @@ uint8_t SSUcm_IsUpdating(void)
 {
     uint8_t ret = FALSE;
 
-    if (g_stSSUcmCtx.eUcmWorkState != eSSUcmWorkState_Idle)
+    if (g_stSSUcmCtx.eUcmWorkState > eSSUcmWorkState_Connecting)
     {
         ret = TRUE;
     }
@@ -499,17 +510,38 @@ void SSUcm_SetResult(SSUcmResult_Enum eResult)
     }
 }
 
-void SSUcm_ReqStartOTA(CddNetMSocketPara_Union *pNetPara, eSSUcmChannelType_Enum eChannelType)
+void SSUcm_ReqStartOTA(CddNetMSocketPara_Union *pNetPara, eSSUcmChannelType_Enum eChannelType, 
+    eSSUcmExcuteMode_Enum eExcuteMode, uint32_t timeout)
 {
-    if (g_stSSUcmCtx.eUcmWorkState == eSSUcmWorkState_Idle)
+    if (g_stSSUcmCtx.eUcmWorkState == eSSUcmWorkState_Idle || 
+        g_stSSUcmCtx.eUcmWorkState == eSSUcmWorkState_WaitIdle)
     {
         if (pNetPara != NULL && eChannelType < eSSUcmChannelType_Count)
         {
             memcpy(&g_stSSUcmCtx.strNetPara, pNetPara, sizeof(CddNetMSocketPara_Union));
             g_stSSUcmCtx.eChannelType = eChannelType;
-            SSUcm_SetWorkState(eSSUcmWorkState_WaitIdle);
             g_stSSUcmCtx.readLen = SSUCM_CONFIG_SINGLE_FRAME_LEN;
-            SSUCM_CFG_LogPrint("请求升级成功!\r\n");
+            g_stSSUcmCtx.delayFlag = TRUE;
+
+            if (timeout == 0)
+            {
+                g_stSSUcmCtx.timeoutThresold = SSUCM_CONFIG_TIMEOUT_MS;
+            }
+            else
+            {
+                g_stSSUcmCtx.timeoutThresold = timeout;
+            }
+
+            if (eExcuteMode == eSSUcmExcuteMode_Immediate)
+            {
+                SSUcm_SetWorkState(eSSUcmWorkState_Connecting);
+                SSUCM_CFG_LogPrint("请求升级成功,立即执行!\r\n");
+            }
+            else
+            {
+                SSUcm_SetWorkState(eSSUcmWorkState_WaitIdle);
+                SSUCM_CFG_LogPrint("请求升级成功,等待空闲执行!\r\n");
+            }
         }
     }
 }
@@ -522,21 +554,30 @@ void SSUcm_InitMemory(void)
 
 void SSUcm_MainFunction(void)
 {
-    uint8_t ret = TRUE;
-
     if (g_stSSUcmCtx.eUcmWorkState == eSSUcmWorkState_WaitIdle)
     {
-        SSUCM_CFG_CheckUpdateCondition(ret);
-
-        if (ret == TRUE)
+        if (SSUcm_CheckUpdateCondition() == TRUE)
         {
-            if (eGlobalRet_OK == CddNetM_CreatLink(eCddNetMSocketType_FTP, g_stSSUcmCtx.strNetPara, eCddNetMPlatType_File))
+            SSUcm_SetWorkState(eSSUcmWorkState_Connecting);
+        }
+    }
+    else if (g_stSSUcmCtx.eUcmWorkState == eSSUcmWorkState_Connecting)
+    {
+        if (g_stSSUcmCtx.delayFlag == TRUE)
+        {
+            if (Common_JudgeTimeoutMs(g_stSSUcmCtx.timeoutTick, 2000) == TRUE)
             {
-                SSUcm_SetWorkState(eSSUcmWorkState_Connecting);
-            }
-            else
-            {
-                SSUcm_SetResult(eSSUcmResult_UnexpectedError);
+                g_stSSUcmCtx.delayFlag = FALSE;
+
+                if (eGlobalRet_OK == CddNetM_CreatLink(eCddNetMSocketType_FTP, g_stSSUcmCtx.strNetPara, eCddNetMPlatType_File))
+                {
+                    CddNetM_SetLinkDisconnect(eCddNetMPlatType_O);
+                    CddNetM_SetLinkDisconnect(eCddNetMPlatType_OM);
+                }
+                else
+                {
+                    SSUcm_SetResult(eSSUcmResult_UnexpectedError);
+                }
             }
         }
     }

@@ -150,6 +150,10 @@ void Common_ClrBitFlag(void *pflag, uint16_t bitPos);
 uint8_t Common_GetBitFlag(void *pflag, uint16_t bitPos);
 void Common_CvtHex2Ascii(uint8_t hexData, uint8_t* pAsciiData);
 
+int32_t Common_ExtractPathAndFileName(const char *input, 
+                                       char *path, uint32_t pathSize,
+                                       char *filename, uint32_t nameSize);
+
 #endif /* COMMON_H_ */
 
 

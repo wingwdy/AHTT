@@ -58,6 +58,7 @@ static uint16_t IotOM_SendSetQrcodeRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendRebootRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendSetForbidRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendSetForbidState(uint8_t port, uint8_t *pBuf);
+static uint16_t IotOM_SendUpdateResponse(uint8_t port, uint8_t *pBuf);
 
 /*******************************************************************************
 *    Global variables Declaration
@@ -185,6 +186,17 @@ static const IotOMSendCtrl_Struct c_stIotOMSendctrlTable[IOT_OM_CMD_SEND_COUNT] 
         .sendCycle = 0,
         .printFlag = TRUE,
         .cMeaning = "远程锁机状态上报"
+    },
+
+    [11] = 
+    {
+        .cmd = IOT_OM_CMD_UPDATE_RSP,
+        .cmdType = IOT_OM_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_OM_CMD_UPDATE,
+        .pSendFunc = IotOM_SendUpdateResponse,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "远程更新应答"
     },
 };
 
@@ -497,6 +509,17 @@ static uint16_t IotOM_SendSetForbidState(uint8_t port, uint8_t *pBuf)
         pBuf[dataLen++] = forBidReason;
     }
 
+    return dataLen;
+}
+
+static uint16_t IotOM_SendUpdateResponse(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
+    dataLen += 32;
+
+    pBuf[dataLen++] = pIotOMCtx->stProtoData[0].setUpdateResult;
     return dataLen;
 }
 

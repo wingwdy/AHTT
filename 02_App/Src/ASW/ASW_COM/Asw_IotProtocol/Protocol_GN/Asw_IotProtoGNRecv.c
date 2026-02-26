@@ -71,6 +71,7 @@ static uint8_t IotGN_RecvSetBillMode4Rate(uint8_t *port, uint8_t *r_data, uint16
 static uint8_t IotGN_RecvSetBillModeMultiRate(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotGN_RecvSetQRCode(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotGN_RecvSetReboot(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotGN_RecvSetUpdate(uint8_t *port, uint8_t *r_data, uint16_t len);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -264,11 +265,23 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .cmd = IOT_GN_CMD_REBOOT,
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
         .pRecvParse = IotGN_RecvSetReboot,
-        .maxTimeout = 0,
+        .maxTimeout = 0, 
         .maxTryCnt = 1,
         .matchCmd = IOT_GN_CMD_REBOOT_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程重启",
+    },
+
+    [16] = 
+    {
+        .cmd = IOT_GN_CMD_UPDATE,
+        .cmdType = IOT_GN_CMDTYPE_REQUSET,
+        .pRecvParse = IotGN_RecvSetUpdate,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_GN_CMD_UPDATE_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "远程更新",
     },
 };
 
@@ -919,6 +932,58 @@ static uint8_t IotGN_RecvSetReboot(uint8_t *port, uint8_t *r_data, uint16_t len)
     else
     {
         AswMonitor_SetReboot(eAswMonitorRebootType_WaitIdle);
+    }
+
+    return TRUE;
+}
+
+static uint8_t IotGN_RecvSetUpdate(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    uint8_t index = 7;
+    uint8_t *pRecvData = r_data;
+    char path[33] = {0};
+    uint32_t timeout = 0;
+
+    CddNetMSocketPara_Union stSocketPara = {0};
+
+    if (pRecvData[index] != 0x02)
+    {
+        pIotGNCtx->stProtoData[0].setUpdateResult = 0x02;
+    }
+    else
+    {
+        index += 3;
+        
+        stSocketPara.stFtpPara.eFileFormat = eCddNetMFileType_BIN;
+        stSocketPara.stFtpPara.eMode = eCddNetMFtpMode_Download;
+
+        memcpy(stSocketPara.stFtpPara.ip, &pRecvData[index], 16);
+        index += 16;
+        memcpy(&stSocketPara.stFtpPara.port, &pRecvData[index], 2);
+        index += 2;
+        memcpy(stSocketPara.stFtpPara.user, &pRecvData[index], 16);
+        index += 16;
+        memcpy(stSocketPara.stFtpPara.passwd, &pRecvData[index], 16);
+        index += 16;
+        memcpy(path, &pRecvData[index], 32);
+        index += 32;
+        Common_ExtractPathAndFileName(path, stSocketPara.stFtpPara.path, sizeof(stSocketPara.stFtpPara.path), 
+        stSocketPara.stFtpPara.fileName, sizeof(stSocketPara.stFtpPara.fileName));
+
+        if (pRecvData[index] == 0x01)
+        {
+            index += 1;
+            timeout = pRecvData[index] * 60 * 1000;
+            SSUcm_ReqStartOTA(&stSocketPara, eSSUcmChannelType_FTP, eSSUcmExcuteMode_Immediate, timeout);
+        }
+        else
+        {
+            index += 1;
+            timeout = pRecvData[index] * 60 * 1000;
+            SSUcm_ReqStartOTA(&stSocketPara, eSSUcmChannelType_FTP, eSSUcmExcuteMode_WaitIdle, timeout);
+        }
+
+        pIotGNCtx->stProtoData[0].setUpdateResult = 0x00;
     }
 
     return TRUE;

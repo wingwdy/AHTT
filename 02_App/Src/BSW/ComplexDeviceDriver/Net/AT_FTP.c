@@ -486,7 +486,7 @@ void ATFTP_UrcRecvWrite(uint8_t *pData, void * modulePara, uint16_t dataLen)
     if (flag == FALSE)
     {
         SSSnapshot_StopReadItem();
-        CddNetM_DeleteFileLink();
+        CddNetM_DeleteLink(eCddNetMPlatType_File);
     }
 
     CddDrvEG800AK_ExitTransparentMode();
@@ -543,7 +543,7 @@ void ATFTP_UrcRecvPut(uint8_t *pData, void * modulePara, uint16_t dataLen)
                 if (pPrivate->uploadFileTickStartFlag == TRUE)
                 {
                     pPrivate->uploadFileTickStartFlag = FALSE;
-                    CddNetM_DeleteFileLink();
+                    CddNetM_DeleteLink(eCddNetMPlatType_File);
                     CDDDRV_EG800AK_CFG_LogPrint("FTP上传文件成功, 文件长度： %d !\r\n",transferLen);
                 }
             }
@@ -672,7 +672,7 @@ static uint8_t ATFTP_RecvUFSSpace(uint8_t socketIndex, void * socketPara, uint8_
                     SSUcm_SetResult(eSSUcmResult_ModuleNoEnoughSpace);
                 }
 
-                CddNetM_DeleteFileLink();
+                CddNetM_DeleteLink(eCddNetMPlatType_File);
             }
         }
     }
@@ -744,7 +744,7 @@ static uint8_t ATFTP_RecvUFSWrite(uint8_t socketIndex, void * socketPara, uint8_
     else
     {
         SSSnapshot_StopReadItem();
-        CddNetM_DeleteFileLink();
+        CddNetM_DeleteLink(eCddNetMPlatType_File);
     }
 
     CddDrvEG800AK_EnterTransparentMode(socketIndex, eCddDrvEG800AKDirection_Send);
@@ -953,7 +953,7 @@ static void ATFTP_SocketStateMange(uint8_t socketIndex, CddDrvEG800AKSocketCtrl_
 
                 if (pSocketCtrl->reconectTimes >= CDDDRV_EG800AK_CFG_RECONECT_MAX_TIMES)
                 {
-                    CddNetM_DeleteFileLink();
+                    CddNetM_DeleteLink(eCddNetMPlatType_File);
 
                     if (pFTPPara->eMode == eCddNetMFtpMode_Upload)
                     {
