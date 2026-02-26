@@ -28,7 +28,12 @@
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-
+typedef enum
+{
+    eAswVoltCurAdjustMode_PowerAbsolute,             /* 功率绝对值 */
+    eAswVoltCurAdjustMode_PowerPercentum,            /* 功率百分比 */
+    eAswVoltCurAdjustMode_Count,                     /* 功率调节模式个数 */
+}AswVoltCurAdjustMode_Enum;
 
 /******************************************************************************
 *    Typedef Definition
@@ -47,7 +52,8 @@
 ******************************************************************************/
 extern void AswVoltCurHandle_InitMemory(void);
 extern void AswVoltCurHandle_MainFunction(void);
-
+void AswVoltCur_AdjustOutputCurrent(uint8_t port, AswVoltCurAdjustMode_Enum eMode, uint32_t val);
+uint32_t AswVoltCurHandle_GetMaxOutputCurrent(uint8_t port);
 
 
 #endif /* ASW_VOLTCURHANDLE_H_ */
