@@ -787,9 +787,8 @@ uint8_t IotYKC21_RfreshYKC21key(char *YKC21key, uint16_t YKC21key_len)
     pPlatInfo->Rsa_Keylength = YKC21key_len;
     memset(pPlatInfo->Rsa_Key,0,128);
     memcpy(pPlatInfo->Rsa_Key,YKC21key,pPlatInfo->Rsa_Keylength);
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
 
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
-   
     return TRUE;
 }
 
@@ -799,14 +798,11 @@ uint8_t IotYKC21_RfreshYKC21token(char *YKC21token,uint16_t YKC21token_len)
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
    
-
     IOTYKC21_CFG_LogPrint("ykc2.1平台token变化：[\"%s\"]-->[\"%s\"]\r\n", pPlatInfo->Token, YKC21token);
-    memset(pPlatInfo->Token, 0, 7);
-    memcpy(pPlatInfo->Token, YKC21token, YKC21token_len);
-     
-
+    memset(pPlatInfo->Token, 0, 14);
+    memcpy(pPlatInfo->Token, YKC21token, YKC21token_len); 
     MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
-   
+ 
     return TRUE;
 }
 
@@ -816,7 +812,7 @@ void IotYKC21_PrintfYKC21KeyAndToken(void)
     MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
    
     IOTYKC21_CFG_LogPrint("ykc2.1平台RSA密钥长度[%d]：密钥字符串：[\"%.128s\"]\r\n",pPlatInfo->Rsa_Keylength,pPlatInfo->Rsa_Key);
-    IOTYKC21_CFG_LogPrint("ykc2.1平台token：[\"%s\"]\r\n", pPlatInfo->Token);
+    IOTYKC21_CFG_LogPrint("ykc2.1平台token：[\"%.14s\"]\r\n", pPlatInfo->Token);
    
     return;
 }
@@ -881,25 +877,13 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
  
     Common_Uint32ToFourUint8(&pYkcOrder->totalMoney[0],pChargeData->totalMoney);
 
-#if (20100 == IOT_YKC21_PROTOCOL_VERSION)
-    pYkcOrder->fee_num = pBillMode->rateCount;
 
-    for (index = 0; index < 48; index++)
-    {
-//        pYkcOrder->billInfo[index][0] = pBillMode->totalPrice[index];            // 单价
-//        pYkcOrder->billInfo[index][1] = pChargeData->rateTotalEnergy[index];     // 电量
-//        pYkcOrder->billInfo[index][2] = pChargeData->rateTotalLossEnergy[index]; // 计损电量
-//        pYkcOrder->billInfo[index][3] = pChargeData->rateTotalMoney[index];      // 总金额
-
-        pYkcOrder->time_power[index] = pChargeData->periodElePower[index]; // 48时段电量
-    }
-#else
     pYkcOrder->fee_num = 48;
     for (index = 0; index < 48; index++)
     {
         pYkcOrder->time_power[index] = pChargeData->periodElePower[index]; // 48时段电量
     }
-#endif
+
 
     if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
     {
