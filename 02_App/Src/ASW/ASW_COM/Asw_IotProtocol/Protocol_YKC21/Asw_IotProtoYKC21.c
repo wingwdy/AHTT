@@ -220,10 +220,18 @@ static void IotYKC21_CycleDetectUnreporteRecord(void)
             if (eGlobalRet_OK == MSNvm_QueryLatestUnreportedRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pIotYKC21Ctx->stOrderInfo, 
                 sizeof(MSNvmOrderInfo_Struct), &pIotYKC21Ctx->time))
             {
-                port = pIotYKC21Ctx->stOrderInfo.platOrderInfo.stYKC21OrderInfo.port;
+                port = pIotYKC21Ctx->stOrderInfo.port;
 
-                Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_MULTI_ORDER_RECORD_REQ, TRUE);
-
+               if (port >= SYSCFG_CFG_GUN_NUM || 
+                    pIotYKC21Ctx->stOrderInfo.protocolType != eAswPlatCardType_YKC21 ||
+                    pIotYKC21Ctx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)
+                {
+                    MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotYKC21Ctx->time);
+                }
+                else
+                {
+                    Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_MULTI_ORDER_RECORD_REQ, TRUE);
+                }
             }
         }
     }

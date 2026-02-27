@@ -229,7 +229,18 @@ static void IotOM_CycleDetectUnreporteRecord(void)
             if (eGlobalRet_OK == MSNvm_QueryLatestUnreportedRecord(eMSNvmBlockID_OmOrderRecord, (uint8_t *)&pIotOMCtx->stOrderInfo, 
                 sizeof(MSNvmOrderInfo_Struct), &pIotOMCtx->time))
             {
-                Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, pIotOMCtx->stOrderInfo.port, IOT_OM_CMD_ORDER_RECORD, TRUE);
+                port = pIotOMCtx->stOrderInfo.port;
+
+               if (port >= SYSCFG_CFG_GUN_NUM || 
+                    pIotOMCtx->stOrderInfo.protocolType >= eAswPlatCardType_Count ||
+                    pIotOMCtx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)
+                {
+                    MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotOMCtx->time);
+                }
+                else
+                {
+                    Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, pIotOMCtx->stOrderInfo.port, IOT_OM_CMD_ORDER_RECORD, TRUE);
+                }
             }
         }
     }

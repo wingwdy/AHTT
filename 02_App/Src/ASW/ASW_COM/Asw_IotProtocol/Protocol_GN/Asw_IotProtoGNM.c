@@ -185,15 +185,24 @@ static void IotGN_CycleDetectUnreporteRecord(void)
             if (eGlobalRet_OK == MSNvm_QueryLatestUnreportedRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pIotGNCtx->stOrderInfo, 
                 sizeof(MSNvmOrderInfo_Struct), &pIotGNCtx->time))
             {
-                port = pIotGNCtx->stOrderInfo.platOrderInfo.stGNOrderInfo.port;
+                port = pIotGNCtx->stOrderInfo.port;
 
-                if (pIotGNCtx->stOrderInfo.platOrderInfo.stGNOrderInfo.billmodeType == IOT_GN_BILLMODE_RATE_TYPE_MULT)
+                if (port >= SYSCFG_CFG_GUN_NUM || 
+                    pIotGNCtx->stOrderInfo.protocolType != eAswPlatCardType_GN ||
+                    pIotGNCtx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)
                 {
-                    Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_MULTI_ORDER_RECORD_REQ, TRUE);
+                    MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotGNCtx->time);
                 }
                 else
                 {
-                    Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_ORDER_RECORD_REQ, TRUE);
+                    if (pIotGNCtx->stOrderInfo.platOrderInfo.stGNOrderInfo.billmodeType == IOT_GN_BILLMODE_RATE_TYPE_MULT)
+                    {
+                        Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_MULTI_ORDER_RECORD_REQ, TRUE);
+                    }
+                    else
+                    {
+                        Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_ORDER_RECORD_REQ, TRUE);
+                    }
                 }
             }
         }
