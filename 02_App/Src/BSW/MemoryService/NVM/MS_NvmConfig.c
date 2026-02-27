@@ -160,6 +160,22 @@ const MSNvmBlockDescriptor_Struct c_stMSNvmBlockDescriptorTable[eMSNvmBlockID_Co
         .deviceID = MSMEMIF_DEVICE_EA_TSDB,
         .memIfID = eTSDBAdaptChannel_ErrorRecord,
     },
+
+    [eMSNvmBlockID_RunningLogRecord] = 
+    {
+        .blockSize = sizeof(MSNvmRunningLog_Struct),
+        .ramBlockDataAddr = NULL,
+        .deviceID = MSMEMIF_DEVICE_EA_TSDB,
+        .memIfID = eTSDBAdaptChannel_RunningLog,
+    },
+
+    [eMSNvmBlockID_OmOrderRecord] = 
+    {
+        .blockSize = sizeof(MSNvmOrderInfo_Struct),
+        .ramBlockDataAddr = NULL,
+        .deviceID = MSMEMIF_DEVICE_EA_TSDB,
+        .memIfID = eTSDBAdaptChannel_OmChargeRecord,
+    },
 };
 
 

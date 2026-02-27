@@ -156,6 +156,12 @@ typedef struct
     uint8_t userData[MSNVM_ERROR_INFO_MAX_LEN];
 }MSNvmErrorInfo_Struct;
 
+/* 运行日志记录 */
+typedef struct 
+{
+    uint8_t userData[MSNVM_RUNNING_LOG_MAX_LEN];
+}MSNvmRunningLog_Struct;
+
 
 /*********************************************************************************************** */
 /* 各平台私有参数定义 */

@@ -672,6 +672,7 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
             memcpy(pGnOrder->logicCardNum, pIotGNCtx->stProtoData[port].authCardID, 8);
         }
 
+        pOrderData->protocolType = eAswPlatCardType_GN;
         pOrderData->orderLen = sizeof(MSNvmGNOrderInfo_Struct);
         pGnOrder->stopReason = eIotGNStopReason_PowerOff;
     }

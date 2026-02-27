@@ -80,7 +80,37 @@ TSDBAdaptConfig_Struct g_stTSDBAdaptConfigTable[eTSDBAdaptChannel_Count] =
         .flashPartName = FAL_TSDB_NAME_ERROR_RECORD,
 	    .maxLen = sizeof(MSNvmErrorInfo_Struct),
         .staticInfo = { 0 },
-    },    
+    },  
+    
+    [eTSDBAdaptChannel_RunningLog] = 
+    {
+        .eCh = eTSDBAdaptChannel_RunningLog,
+        .tsdb = {
+            .user_data = &g_stTSDBAdaptConfigTable[eTSDBAdaptChannel_RunningLog],
+        },
+        .pFuncCreatLock = TSDBAdaptConfig_CreatLock,
+        .pFuncSetLock = TSDBAdaptConfig_SetLock,
+        .pFuncSetUnlock = TSDBAdaptConfig_SetUnlock,
+        .dbName = "running_log",
+        .flashPartName = FAL_TSDB_NAME_RUNNING_LOG,
+	    .maxLen = sizeof(MSNvmRunningLog_Struct),
+        .staticInfo = { 0 },
+    },
+
+    [eTSDBAdaptChannel_OmChargeRecord] = 
+    {
+        .eCh = eTSDBAdaptChannel_OmChargeRecord,
+        .tsdb = {
+            .user_data = &g_stTSDBAdaptConfigTable[eTSDBAdaptChannel_OmChargeRecord],
+        },
+        .pFuncCreatLock = TSDBAdaptConfig_CreatLock,
+        .pFuncSetLock = TSDBAdaptConfig_SetLock,
+        .pFuncSetUnlock = TSDBAdaptConfig_SetUnlock,
+        .dbName = "om_charge_record",
+        .flashPartName = FAL_TSDB_NAME_OM_CHARGE_RECORD,
+	    .maxLen = sizeof(MSNvmOrderInfo_Struct),
+        .staticInfo = { 0 },
+    },
 };
 
 
