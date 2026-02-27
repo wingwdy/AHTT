@@ -317,53 +317,114 @@ static uint16_t IotOM_SendNetModuleInfo(uint8_t port, uint8_t *pBuf)
 
 static void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
 {
-    uint8_t dataLen = 0;
-
-    /* 桩温过高故障 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_EnvOverTempErr))
-    {
-        Common_SetBitFlag(pBuf, 0);
-    }
-
-    /* 急停故障 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_EmergencyStop))
+    /* CP电压异常 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpVoltAbnor))
     {
         Common_SetBitFlag(pBuf, 1);
     }
-    
-    /* 控制导引故障 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpVoltAbnor))
+
+    /* CP接地 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpGroundFault))
+    {
+        Common_SetBitFlag(pBuf, 2);
+    }
+
+    /* PE故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_PEBreakFault))
     {
         Common_SetBitFlag(pBuf, 3);
     }
 
-    /* 电表通信故障 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCommErr))
+    /* 缺相 */
+    /* 急停 */
+
+    /* 火零反接 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_InputLineReversed))
+    {
+        Common_SetBitFlag(pBuf, 6);
+    }
+
+    /* 漏电故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_LeakageCurrErr))
     {
         Common_SetBitFlag(pBuf, 7);
     }
 
-    /* 读卡器通信故障 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ReaderCommErr))
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_RCDSelfcheckErr))
+    {
+        Common_SetBitFlag(pBuf, 7);
+    }
+
+    /* 二极管不存在故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_DiodeStop))
     {
         Common_SetBitFlag(pBuf, 8);
     }
 
-    /* 交流接触器故障 */
+    /* 短路故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ShortCircleErr))
+    {
+        Common_SetBitFlag(pBuf, 9);
+    }
+
+    /* 过压 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_AphaseInputOverVol))
+    {
+        Common_SetBitFlag(pBuf, 10);
+    }    
+
+    /* 欠压 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_AphaseInputLessVol))
+    {
+        Common_SetBitFlag(pBuf, 11);
+    } 
+
+    /* 过流 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_OutputOverCurr))
+    {
+        Common_SetBitFlag(pBuf, 12);
+    }
+
+    /* 继电器粘连 */
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqSynechiaFault))
     {
-        Common_SetBitFlag(pBuf, 11);
+        Common_SetBitFlag(pBuf, 13);
     }
-
+    
+    /* 继电器拒动 */
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqMaloperation))
     {
-        Common_SetBitFlag(pBuf, 11);
+        Common_SetBitFlag(pBuf, 14);
     }
 
-    /* 枪温过温故障 */
+    /* 环境过温 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_EnvOverTempErr))
+    {
+        Common_SetBitFlag(pBuf, 15);
+    }
+
+    /* 枪过温 */
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_GunOverTempErr))
     {
-        Common_SetBitFlag(pBuf, 14);
+        Common_SetBitFlag(pBuf, 16);
+    }
+
+    /* 插头过温故障 */
+    /* 电表通信异常故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCommErr))
+    {
+        Common_SetBitFlag(pBuf, 24);
+    }
+    /* 读卡器通信异常 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ReaderCommErr))
+    {
+        Common_SetBitFlag(pBuf, 25);
+    }
+    /* CCU通信异常 */
+    /* 存储异常 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_DatabaseErr))
+    {
+        Common_SetBitFlag(pBuf, 27);
     }
 }
 
@@ -380,7 +441,6 @@ static uint16_t IotOM_SendRealData(uint8_t port, uint8_t *pBuf)
     dataLen += 32;
     /* 枪号 */
     pBuf[dataLen++] = port + 1;
-
     /* 状态 */
     pBuf[dataLen++] = IotOM_GetGunState(port);
     /* 是否插枪 */
@@ -396,6 +456,8 @@ static uint16_t IotOM_SendRealData(uint8_t port, uint8_t *pBuf)
         /* 充电度数 */
         Common_Uint32ToFourUint8(&pBuf[dataLen], pChargeData->totalEnergy / 10);
         dataLen += 4;
+        /* SOC */
+        pBuf[dataLen++] = 0xFF;
         /* 已充金额 */
         memcpy(&pBuf[dataLen], &pChargeData->totalMoney, 4);
         dataLen += 4;
@@ -408,19 +470,25 @@ static uint16_t IotOM_SendRealData(uint8_t port, uint8_t *pBuf)
         /* 充电度数 */
         memset(&pBuf[dataLen], 0x00, 4);
         dataLen += 4;
+        /* SOC */
+        pBuf[dataLen++] = 0xFF;
         /* 已充金额 */
         memset(&pBuf[dataLen], 0x00, 4);
         dataLen += 4;
     }
 
-    /* 硬件故障 */
+    /* 桩硬件故障 */
     memset(&pBuf[dataLen], 0x00, 2);
-    IotOM_SetRealDataErrBit(port, &pBuf[dataLen]);
     dataLen += 2;
 
     /* 硬件故障 */
     memset(&pBuf[dataLen], 0x00, 4);
     dataLen += 4;
+
+    /* 故障码 */
+    memset(&pBuf[dataLen], 0x00, 32);
+    IotOM_SetRealDataErrBit(port, &pBuf[dataLen]);
+    dataLen += 32;
     return dataLen;
 }
 

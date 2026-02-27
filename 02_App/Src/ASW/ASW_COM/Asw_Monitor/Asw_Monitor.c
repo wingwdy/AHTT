@@ -471,6 +471,7 @@ void AswMonitor_PrintChargeData(void)
         envTemp = AswChargeIf_GetEnvTemperature();
         power = AswChargeIf_GetOutputPower(port);
         energy = pChargeData->totalLossEnergy;
+        money = pChargeData->totalMoney;
         chargeTime = pChargeData->chargeTime;
         cpVol = AswChargeIf_GetCpVoltage(port);
         cpDuty = AswChargeIf_GetCpDuty(port);

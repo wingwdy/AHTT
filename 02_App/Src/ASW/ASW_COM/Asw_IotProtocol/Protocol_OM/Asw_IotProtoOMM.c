@@ -169,6 +169,7 @@ static void IotOM_CycleReportRealData(void)
     uint8_t curGunConnectState = 0;
     uint8_t realDataReportFlag = FALSE;
 
+
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
         curGunState = IotOM_GetGunState(port);
@@ -200,16 +201,40 @@ static void IotOM_CycleReportRealData(void)
             Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, port, IOT_OM_CMD_REPORT_REALDATA, TRUE);
         }
     }
+
+
 }
 
 static void IotOM_CycleDetectUnreporteRecord(void)
 {
 
+}
 
+static void IotOM_CycleDetectUnreportedUcmResult(void)
+{
+    SSUcmResult_Enum UcmResult = SSUcm_GetResult();
 
+    if (pIotOMCtx->stProtoData[0].recvUpdateFlag == TRUE)
+    {
+        if (UcmResult != eSSUcmResult_None && UcmResult != eSSUcmResult_Succ)
+        {
+            if (TRUE != Common_GetSendEnable(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_UPDATE_RSP))
+            {
+                Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_UPDATE_RSP, TRUE);
+            }
 
+            if (UcmResult == eSSUcmResult_HeadErr)
+            {
+                pIotOMCtx->stProtoData[0].setUpdateResult = 0x02;
+            }
+            else
+            {
+                pIotOMCtx->stProtoData[0].setUpdateResult = 0x03;
+            }
+        }
 
-
+        pIotOMCtx->stProtoData[0].recvUpdateFlag = FALSE;
+    }
 }
 
 static void IotOM_CycleDetectReportForbidState(void)
@@ -263,6 +288,8 @@ static void IotOM_CycleDetect(void)
     IotOM_CycleDetectUnreporteRecord();
 
     IotOM_CycleDetectReportForbidState();
+
+    IotOM_CycleDetectUnreportedUcmResult();
 }
 
 static void IotOM_WSNormalHandle(void)
@@ -303,11 +330,13 @@ uint8_t IotOM_GetGunState(uint8_t port)
         {
             gunState = 0x01; /* 启动中 */
         }
-        else if (chargeState == ASWCHARGEIF_WORKSTATE_CHARGING || 
-                chargeState == ASWCHARGEIF_WORKSTATE_PAUSEA || 
-                chargeState == ASWCHARGEIF_WORKSTATE_PAUSEB)
+        else if (chargeState == ASWCHARGEIF_WORKSTATE_CHARGING)
         {
             gunState = 0x02; /* 充电中 */
+        }
+        else if (chargeState == ASWCHARGEIF_WORKSTATE_PAUSEA || chargeState == ASWCHARGEIF_WORKSTATE_PAUSEB)
+        {
+            gunState = 0x06; /* 充电暂停 */
         }
         else if (chargeState == ASWCHARGEIF_WORKSTATE_STOPPING)
         {
