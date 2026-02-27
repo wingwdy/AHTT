@@ -70,7 +70,13 @@ uint8_t AswPlatM_SetPlatCardType(char *platCardName);
 AswPlatType_Enum AswPlatM_GetPlatType(void);
 uint8_t AswPlatM_SwipCardCharge(uint8_t port);
 void AswPlatM_PrintAllConfigInfo(void);
+
+ 
+
+
+
 uint16_t AswPlatM_TransformRecord(MSNvmOrderInfo_Struct *pNvmOrderInfo, uint8_t *pOutRecord);
+
 void AswPlatM_DefaultPlatParam(void *param);
 MSNvmPlatParam_Struct * AswPlatM_GetPlatParamPtr(void);
 void AswPlatM_InitMemory(void);
@@ -78,6 +84,9 @@ void AswPlatM_MainFunction(void);
 
 void AswPlatM_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason);
 void AswPlatM_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pBillMode);
+
+uint8_t AswPlatM_Setykc21key(char *pykc21key, uint8_t len);
+uint8_t AswPlatM_Setykc21token(char *pykc21key, uint8_t len);
 #endif
 
 
