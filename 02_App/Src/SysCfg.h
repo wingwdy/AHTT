@@ -32,7 +32,7 @@
 
 #define   SYSCFG_CFG_VECT_TAB_OFFSET            (0x4000U)
 
-#define   SYSTEM_CFG_WATCHDOG_ENABLE            (FALSE)
+#define   SYSTEM_CFG_WATCHDOG_ENABLE            (TRUE)
 
 #define   SYSCFG_CFG_GUN_NUM                    (1U)
 

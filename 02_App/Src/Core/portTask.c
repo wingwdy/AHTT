@@ -204,6 +204,7 @@ static void Task_100msA(void *arg)
         AswMonitor_MainFunction();
         AswVoltCurHandle_MainFunction();
         AswTempHandle_MainFunction();
+        McalIWDG_FeedWatchDog();
         vTaskDelay(100);
     }
 }
