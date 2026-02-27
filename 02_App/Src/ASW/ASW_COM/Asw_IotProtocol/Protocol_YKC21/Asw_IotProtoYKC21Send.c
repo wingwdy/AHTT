@@ -414,7 +414,8 @@ static uint8_t IotYKC21_ReportCycleCheck(uint8_t port, uint32_t cmd, uint32_t	se
 
 static uint16_t IotYKC21_SendLoginReq(uint8_t port, uint8_t *pBuf)
 {
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pIotYKC21Ctx->param.stYKC21Param.platinfo;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
 
     uint16_t dataLen = 0;
    
@@ -527,7 +528,8 @@ static uint16_t IotYKC21_SendHeartBeat(uint8_t port, uint8_t *pBuf)
 }
  static uint16_t IotYKC21_SendBillModeVerifyReq(uint8_t port, uint8_t *pBuf)
  {
-    MSNvmYKC21ParamBillMode_Struct *pBillMode = &pIotYKC21Ctx->param.stYKC21Param.stBillMode;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21ParamBillMode_Struct *pBillMode = &pPrivateParam->stYKC21Param.stBillMode;
     uint16_t dataLen = 0;
 
     /* 设备编码 */

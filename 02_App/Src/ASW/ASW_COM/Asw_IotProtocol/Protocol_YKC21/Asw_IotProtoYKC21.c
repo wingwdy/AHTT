@@ -315,7 +315,7 @@ static void IotYKC21_UpError(void)
                 if (ErrSts[port][i] == TRUE) // error happen
                 {
                     uint32_t SecTimestamp = SSTM_GetSecTimestamp();
-
+  
                     Common_TimestampToCp56Time2a(SecTimestamp, &ykc21ErrorSwap->StartTime[0]);
 
                     memset(&ykc21ErrorSwap->StopTime, 0, 7);
@@ -425,32 +425,26 @@ static void IotYKC21_CycleDetect(void)
 		
 static void IotYKC21_WSInitHandle(void)
 {
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pIotYKC21Ctx->param.stYKC21Param.platinfo;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
 
-    if (MSNvm_ReadParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotYKC21Ctx->param, sizeof(MSNvmPlatPrivateParam_Union)) != eGlobalRet_OK)
+    // 检测长度超过128，默认数值
+    if (pPlatInfo->Rsa_Keylength > 128)
     {
-        memset(&pIotYKC21Ctx->param, 0x00, sizeof(MSNvmPlatPrivateParam_Union));
-    }
-    else
-    {
-        // 检测长度超过128，默认数值
-        if (pPlatInfo->Rsa_Keylength > 128)
-        {
-            pPlatInfo->Rsa_Keylength = 128;
-            memcpy(pPlatInfo->Rsa_Key, Test_Rsa_Key, 128);
-            memcpy(pPlatInfo->Token, Test_TokenStr, 14);
-        }
-
-        // 更新存储的最大默认功率
-        for (uint8_t i = 0; i < SYSCFG_CFG_GUN_NUM; i++)
-        {
-            IotYKC21_PowerChange_Struct *pPowerChange = &IotYKC21_PowerChangeConfig[i];
-            pPowerChange->DefaultPower_max = pPlatInfo->DefaultMAX_power[i];
-            pPowerChange->DeaultMaxPowerStartTimess = pPlatInfo->DeaultMaxPowerStartTimess[i];
-            pPowerChange->DeaultMaxPowerEndTimess = pPlatInfo->DeaultMaxPowerEndTimess[i];
-        }
+        pPlatInfo->Rsa_Keylength = 128;
+        memcpy(pPlatInfo->Rsa_Key, Test_Rsa_Key, 128);
+        memcpy(pPlatInfo->Token, Test_TokenStr, 14);
     }
 
+    // 更新存储的最大默认功率
+    for (uint8_t i = 0; i < SYSCFG_CFG_GUN_NUM; i++)
+    {
+        IotYKC21_PowerChange_Struct *pPowerChange = &IotYKC21_PowerChangeConfig[i];
+        pPowerChange->DefaultPower_max = pPlatInfo->DefaultMAX_power[i];
+        pPowerChange->DeaultMaxPowerStartTimess = pPlatInfo->DeaultMaxPowerStartTimess[i];
+        pPowerChange->DeaultMaxPowerEndTimess = pPlatInfo->DeaultMaxPowerEndTimess[i];
+    }
+    
     pIotYKC21Ctx->eWorkState = eIOTYKC21WorkState_Offline;
 }
 
@@ -581,7 +575,8 @@ static IotYKC21StopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType)
 
 void IotYKC21_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardBillMode)
 {
-    MSNvmYKC21ParamBillMode_Struct *pYKC21BillMode = &pIotYKC21Ctx->param.stYKC21Param.stBillMode;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21ParamBillMode_Struct *pYKC21BillMode = &pPrivateParam->stYKC21Param.stBillMode;
     uint8_t periodCount = 0;
     uint8_t index = 0;
     uint16_t startIndex = 0;
@@ -776,15 +771,16 @@ uint8_t IotYKC21_SwipCardCharge(uint8_t port)
  /*更新密钥或token*/
 uint8_t IotYKC21_RfreshYKC21key(char *YKC21key, uint16_t YKC21key_len)
 {
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pIotYKC21Ctx->param.stYKC21Param.platinfo;
-    
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+
     IOTYKC21_CFG_LogPrint("ykc2.1平台RSA密钥长度变化：[\"%d\"]-->[\"%d\"]\r\n", pPlatInfo->Rsa_Keylength, YKC21key_len);
     IOTYKC21_CFG_LogPrint("ykc2.1平台RSA密钥变化：[\"%.128s\"]-->[\"%s\"]\r\n", pPlatInfo->Rsa_Key, YKC21key);
     pPlatInfo->Rsa_Keylength = YKC21key_len;
     memset(pPlatInfo->Rsa_Key,0,128);
     memcpy(pPlatInfo->Rsa_Key,YKC21key,pPlatInfo->Rsa_Keylength);
 
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotYKC21Ctx->param, sizeof(MSNvmPlatPrivateParam_Union));
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
    
     return TRUE;
 }
@@ -792,7 +788,8 @@ uint8_t IotYKC21_RfreshYKC21key(char *YKC21key, uint16_t YKC21key_len)
 
 uint8_t IotYKC21_RfreshYKC21token(char *YKC21token,uint16_t YKC21token_len)
 {
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pIotYKC21Ctx->param.stYKC21Param.platinfo;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
    
 
     IOTYKC21_CFG_LogPrint("ykc2.1平台token变化：[\"%s\"]-->[\"%s\"]\r\n", pPlatInfo->Token, YKC21token);
@@ -800,14 +797,15 @@ uint8_t IotYKC21_RfreshYKC21token(char *YKC21token,uint16_t YKC21token_len)
     memcpy(pPlatInfo->Token, YKC21token, YKC21token_len);
      
 
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotYKC21Ctx->param, sizeof(MSNvmPlatPrivateParam_Union));
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
    
     return TRUE;
 }
 
 void IotYKC21_PrintfYKC21KeyAndToken(void)
 {
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pIotYKC21Ctx->param.stYKC21Param.platinfo;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
    
     IOTYKC21_CFG_LogPrint("ykc2.1平台RSA密钥长度[%d]：密钥字符串：[\"%.128s\"]\r\n",pPlatInfo->Rsa_Keylength,pPlatInfo->Rsa_Key);
     IOTYKC21_CFG_LogPrint("ykc2.1平台token：[\"%s\"]\r\n", pPlatInfo->Token);

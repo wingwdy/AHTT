@@ -28,6 +28,7 @@
 #include "Common.h"
 #include "Asw_IotProtoYKC21Recv.h"
 #include "Asw_IotProtoYKC21Send.h"
+#include "Asw_PlatM.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -508,8 +509,8 @@ static void IotYKC21_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
 
 static uint8_t IotYKC21_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-   
-     MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pIotYKC21Ctx->param.stYKC21Param.platinfo;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
 
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
@@ -542,7 +543,7 @@ static uint8_t IotYKC21_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t le
         IotYKC21_OfflineHandle();
     }
 
-  MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotYKC21Ctx->param, sizeof(MSNvmPlatPrivateParam_Union));
+  MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
 
     return TRUE;
 
@@ -566,7 +567,8 @@ static uint8_t IotYKC21_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_
 
 static uint8_t IotYKC21_RecvBillModeVerifyRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-     MSNvmYKC21ParamBillMode_Struct *pBillMode = &pIotYKC21Ctx->param.stYKC21Param.stBillMode;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21ParamBillMode_Struct *pBillMode = &pPrivateParam->stYKC21Param.stBillMode;
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t verifyRes = FALSE;
@@ -599,8 +601,8 @@ static uint8_t IotYKC21_RecvBillModeVerifyRsp(uint8_t *port, uint8_t *r_data, ui
 }
 static uint8_t IotYKC21_RecvBillModeMultRateRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-
-    MSNvmYKC21ParamBillMode_Struct *pBillMode = &pIotYKC21Ctx->param.stYKC21Param.stBillMode;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21ParamBillMode_Struct *pBillMode = &pPrivateParam->stYKC21Param.stBillMode;
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t temp = 0;
@@ -625,7 +627,7 @@ static uint8_t IotYKC21_RecvBillModeMultRateRsp(uint8_t *port, uint8_t *r_data, 
     memcpy(pBillMode->period_rate, &pRecvData[index], 48);
     index += 48;
 
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotYKC21Ctx->param, sizeof(MSNvmPlatPrivateParam_Union));
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
     return TRUE;
 
 
@@ -815,7 +817,8 @@ static uint8_t IotYKC21_RecvSyncTime(uint8_t *port, uint8_t *r_data, uint16_t le
 }
 static uint8_t IotYKC21_RecvSetBillModeMultiRate(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-     MSNvmYKC21ParamBillMode_Struct *pBillMode = &pIotYKC21Ctx->param.stYKC21Param.stBillMode;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21ParamBillMode_Struct *pBillMode = &pPrivateParam->stYKC21Param.stBillMode;
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t temp = 0;
@@ -841,7 +844,7 @@ static uint8_t IotYKC21_RecvSetBillModeMultiRate(uint8_t *port, uint8_t *r_data,
     memcpy(pBillMode->period_rate, &pRecvData[index], 48);
     index += 48;
 
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotYKC21Ctx->param, sizeof(MSNvmPlatPrivateParam_Union));
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
     
     return TRUE;
 
@@ -896,12 +899,11 @@ static uint8_t IotYKC21_RecvSetPowerDefaultMax(uint8_t *port, uint8_t *r_data, u
 {
     uint8_t index = 7;
  
-
-
     YKC21_Recv_Data_Decrypt(r_data,len);
     IOT_YKC21_RecvGunNoTransform(r_data[index], port[0]);
     IotYKC21_PowerChange_Struct *pPowerChange = &IotYKC21_PowerChangeConfig[port[0]];
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pIotYKC21Ctx->param.stYKC21Param.platinfo;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
 
    
     pPowerChange->DefaultPower_max = (r_data[index+2]<<8|r_data[index+1]);
@@ -921,12 +923,10 @@ static uint8_t IotYKC21_RecvSetPowerDefaultMax(uint8_t *port, uint8_t *r_data, u
     pPlatInfo->DeaultMaxPowerStartTimess[port[0]] = pPowerChange->DeaultMaxPowerStartTimess;
     pPlatInfo->DeaultMaxPowerStartTimess[port[0]] = pPowerChange->DeaultMaxPowerEndTimess;
     
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotYKC21Ctx->param, sizeof(MSNvmPlatPrivateParam_Union));
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
  
-	
     Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, 0, IOT_YKC21_CMD_POWERDEFAULT_MAX_RSP, TRUE);
-
-     return TRUE;
+    return TRUE;
 }
 static uint8_t IotYKC21_RecvSetReboot(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
@@ -949,7 +949,6 @@ static uint8_t IotYKC21_RecvSetReboot(uint8_t *port, uint8_t *r_data, uint16_t l
 
 static uint8_t IotYKC21_CheckChargeStart(uint8_t port, uint8_t *pFailReason)
 {
-    MSNvmGNParamBillMode_Struct *pBillMode = &pIotYKC21Ctx->param.stGNParam.stBillMode;
     uint8_t ret = FALSE;
     uint8_t reason = 0;
 
@@ -1114,11 +1113,11 @@ static uint8_t IotYKC21_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, u
 
 static uint8_t IotYKC21_RecvSetKey(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t refreshglg = TRUE;
-
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pIotYKC21Ctx->param.stYKC21Param.platinfo;
 
     YKC21_Recv_Data_Decrypt(r_data, len);
     IotYKC21_CmdControl.receive_newRSAflg = FALSE;
@@ -1138,7 +1137,7 @@ static uint8_t IotYKC21_RecvSetKey(uint8_t *port, uint8_t *r_data, uint16_t len)
         memset(pPlatInfo->Rsa_Key, 0, 128);
         memcpy(pPlatInfo->Rsa_Key, &pRecvData[index + 1], pPlatInfo->Rsa_Keylength);
         IotYKC21_PrintfYKC21KeyAndToken();
-        MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotYKC21Ctx->param, sizeof(MSNvmPlatPrivateParam_Union));
+        MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
         IotYKC21_CmdControl.receive_newRSAflg =TRUE;
     }
     
