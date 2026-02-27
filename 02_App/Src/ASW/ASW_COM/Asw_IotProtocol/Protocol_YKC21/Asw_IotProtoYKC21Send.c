@@ -189,12 +189,12 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [8] = 
     {
         .cmd = IOT_YKC21_CMD_MULTI_ORDER_RECORD_ACK,
-        .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
-        .matchCmd = IOT_YKC21_CMD_RECORD_RSP,
+        .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
+        .matchCmd = IOT_YKC21_CMD_ORDER_RECORD_RSP,
         .pSendFunc = IotYKC21_SendMultyOrderRecordack,
         .sendCycle = 0,
         .printFlag = TRUE,
-        .cMeaning = "召唤交易记录"
+        .cMeaning = "应答召唤交易记录数据"
     },
 
     [9] = 
@@ -809,55 +809,45 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
     uint16_t dataLen = 0;
     CommonDateTime_Struct dateTime;
     uint16_t temp = 0;
+    uint8_t upReportFlag = FALSE;
 
-    
    /* 交易流水号 */
-    memcpy(&pBuf[dataLen], &IotYKC21_CmdControl.Call_orderTransactionNum[0], 16);
+    memcpy(&pBuf[dataLen], IotYKC21_CmdControl.Call_orderTransactionNum, 16);
     dataLen += 16;
    /* 设备编码 */
     memcpy(&pBuf[dataLen], pIotYKC21Ctx->pileDnBCD, 7);
     dataLen += 7;
     /* 枪号 */
     pBuf[dataLen++] = port + 1;
-   
-
-    
-    uint8_t uprebortflag = FALSE;
 
     if (0x03 == IotYKC21_GetGunState(port))
     {
-        pBuf[dataLen] = 1;
-        if (0 == memcmp(&IotYKC21_CmdControl.Call_orderTransactionNum[0], &pOrderData->orderTransactionNum[0], 16))
-            pBuf[dataLen + 1] = 2;
-        else
-            pBuf[dataLen + 1] = 1;
+        pBuf[dataLen++] = 1;
+        pBuf[dataLen++] = 1;
     }
     else
     {
-        if (eGlobalRet_OK == MSNvm_QueryLatestUnreportedRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pIotYKC21Ctx->stOrderInfo,
-                                                               sizeof(MSNvmOrderInfo_Struct), &pIotYKC21Ctx->time))
+        if (eGlobalRet_OK == MSNvm_QueryRecordByExternal(eMSNvmBlockID_OrderRecord, IotYKC21_CmdControl.Call_orderTransactionNum, 
+            sizeof(IotYKC21_CmdControl.Call_orderTransactionNum), IotYKC21_CompareRecordOrderNum, 
+            (uint8_t *)&pIotYKC21Ctx->stOrderInfo, sizeof(MSNvmOrderInfo_Struct)))
         {
-            if (0 == memcmp(&IotYKC21_CmdControl.Call_orderTransactionNum[0], &pOrderData->orderTransactionNum[0], 16))
-            {
-                pBuf[dataLen] = 0;
-                pBuf[dataLen + 1] = 0;
-                uprebortflag = TRUE;
-            }
-            else
-            {
-                pBuf[dataLen] = 1;
-                pBuf[dataLen + 1] = 1;
-            }
+            pBuf[dataLen++] = 0;
+            pBuf[dataLen++] = 0;
+            uprebortflag = TRUE; 
+        }
+        else
+        {
+            pBuf[dataLen++] = 1;
+            pBuf[dataLen++] = 1;
         }
     }
 
-     dataLen += 2;
-
-    if(uprebortflag == TRUE)
-      Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_MULTI_ORDER_RECORD_ACK, TRUE);
-
-     return dataLen;
-
+    if(upReportFlag == TRUE)
+    {
+        Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_MULTI_ORDER_RECORD_ACK, TRUE);
+    }
+      
+    return dataLen;
  }
 
 static uint16_t IotYKC21_SendFaultReq(uint8_t port, uint8_t *pBuf)

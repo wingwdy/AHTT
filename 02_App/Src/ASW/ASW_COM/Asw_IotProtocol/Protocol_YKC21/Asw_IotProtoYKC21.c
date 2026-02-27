@@ -141,8 +141,19 @@ static CommonRecvCtrl_Struct* IotYKC21_GetRecvCtrl(uint8_t port, uint16_t cmd)
     return pRecvCtrl;
 }
 
+uint8_t IotYKC21_CompareRecordOrderNum(uint8_t *record, uint8_t *pCompara, uint16_t paraSize)
+{
+    MSNvmOrderInfo_Struct *pOrderInfo = (MSNvmOrderInfo_Struct *)record;
+    MSNvmYKC21OrderInfo_Struct *pYKC21OrderInfo = &pOrderInfo->platOrderInfo.stYKC21OrderInfo;
+    uint8_t ret = FALSE;
 
+    if(0 == memcmp(pYKC21OrderInfo->orderTransactionNum, pCompara, paraSize))
+    {
+        ret = TRUE;
+    }
 
+    return ret;
+}
 
 static void IotYKC21_CycleReportRealData(void)
 {
@@ -409,8 +420,6 @@ static void IotYKC21_CycleDetect(void)
     IotYKC21_UpError();			//故障上报处理
 
     IotYkc21_PowerLimit();	
-
- 
 }
 
 		
@@ -647,7 +656,7 @@ void IotYKC21_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint
     memcpy(&pBuf[dataLen], pOrderData->pileDnBCD, 7);
     dataLen += 7;
     /* 枪号 */
-    pBuf[dataLen++] = pOrderData ->port;
+    pBuf[dataLen++] = pOrderData ->port + 1;
    
      /* 开始时间 */
 	  memcpy(&pBuf[dataLen], pOrderData->startTime, 7);
@@ -818,36 +827,23 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
     if (orderSaveReason == ASWMONITOR_ORDER_SAVE_START)
     {
         memset(pYkcOrder, 0x00, sizeof(MSNvmYKC21OrderInfo_Struct));
-
-      
-
         memcpy(pYkcOrder->pileDnBCD, pIotYKC21Ctx->pileDnBCD, 7);
         pYkcOrder->port = port;
         memcpy(pYkcOrder->orderTransactionNum, 
                pIotYKC21Ctx->stProtoData[port].curUsedOrderTransactionNum, 
                sizeof(pIotYKC21Ctx->stProtoData[port].curUsedOrderTransactionNum));
-      
-      
-
+    
         //时间戳转换成 CP56Time2a 格式
         Common_TimestampToCp56Time2a(pChargeData->chargeStartTime, &pYkcOrder->startTime[0]);
         Common_TimestampToCp56Time2a(pChargeData->chargeStopTime, &pYkcOrder->stopTime[0]);
-       
-         
-
+    
         memset(& pYkcOrder->startMeterVal[0],0,5);
         Common_Uint32ToFourUint8(&pYkcOrder->startMeterVal[0],pChargeData->startMeterVal);
- 
+
         memset(& pYkcOrder->stopMeterVal[0],0,5);
         Common_Uint32ToFourUint8(&pYkcOrder->stopMeterVal[0],pChargeData->stopMeterVal);
-        
-  
-      
-        
-       
+    
         memcpy(pYkcOrder->dealDate, pYkcOrder->startTime, 7);
-
-
 
         if (pstChargeCtrl->startSrc == ASWMONITOR_ORDER_START_SRC_APP)
         {
@@ -860,17 +856,12 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
         }
 
         pOrderData->orderLen = sizeof(MSNvmYKC21OrderInfo_Struct);
-       
-
-
-        pOrderData->port = port+1;
+    
+        pOrderData->port = port;
         pOrderData->protocolType = eAswPlatCardType_YKC21;
         pOrderData->orderLen = sizeof(MSNvmYKC21OrderInfo_Struct);
         pYkcOrder->stopReason = eIotYKC21StopReason_PowerOff;
-
     }
- 
-
  
     Common_TimestampToCp56Time2a(pChargeData->chargeStopTime, &pYkcOrder->stopTime[0]);
  

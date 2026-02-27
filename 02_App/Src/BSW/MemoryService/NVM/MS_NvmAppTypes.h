@@ -174,8 +174,6 @@ typedef struct
     //                                          */
 
     uint32_t time_power[48];                /* 48时段电量 小数点后四位 */
-	
- 
 }MSNvmYKC21OrderInfo_Struct;
 
 
