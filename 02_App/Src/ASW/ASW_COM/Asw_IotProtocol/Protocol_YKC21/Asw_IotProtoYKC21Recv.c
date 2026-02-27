@@ -231,7 +231,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .pRecvParse = IotYKC21_RecvCallRecord,
         .maxTimeout = 0,
         .maxTryCnt = 1,
-        .matchCmd = IOT_YKC21_CMD_MULTI_ORDER_RECORD_ACK,
+        .matchCmd = IOT_YKC21_CMD_RECORD_RSP,
         .printFlag = TRUE,
         .cMeaning = "交易记录召唤",
     },
@@ -468,7 +468,7 @@ static void IotYKC21_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
                     if (pCmdRecvCtrl->printFlag)
                     {
                         IOTYKC21_CFG_LogPrint("[枪：%d]接收[cmd: 0x%02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
-                        DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
+                       // DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
 
                     if (pCmdRecvCtrl->cmdType == IOT_YKC21_CMDTYPE_RESPONSE)
@@ -1025,8 +1025,12 @@ static uint8_t IotYKC21_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, ui
         index += 4;
 
         /* 本次充电当前允许的最大功率*/
-        
+        uint16_t powerChange = Common_TwoUint8ToUint16(&pRecvData[index]);
+        if(powerChange != 0)
+         IotYkc21_powercontrol(powerChange*1000, port[0]);
         index += 2;
+        /* SOC限制 */
+        index += 1;
         /* 充电电量限制 */
         if (0 != Common_FourUint8ToUint32(&pRecvData[index]))
         {

@@ -750,24 +750,24 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
     /* 逻辑卡号 */
     memcpy(&pBuf[dataLen], pOrderData->logicCardNum, 8);
     dataLen += 8;
+
+#if (210 == ASW_IOT_PROTO_YKC21_VERINF)
     /* 费率时段数量 */
     pBuf[dataLen++] = pOrderData->fee_num;
     /* 单价、电量、计损电量、金额 */
+    memcpy(&pBuf[dataLen], pOrderData->billInfo, (pOrderData->fee_num) * 4 * 4);
 
-    memcpy(&pBuf[dataLen], pOrderData->billInfo, (pOrderData->fee_num)*4*4);
+    dataLen += (pOrderData->fee_num) * 4 * 4;
+#else
+    pBuf[dataLen++] = 48;
+#endif
 
+    /* 48h 分段电量 */
+    memcpy(&pBuf[dataLen], pOrderData->time_power, 48 * 4);
 
-    dataLen += (pOrderData->fee_num)*4*4;
-
-   
-   /* 48h 分段电量 */
-    memcpy(&pBuf[dataLen], pOrderData->time_power, 48*4);
-
-    dataLen += (4*48);
+    dataLen += (4 * 48);
 
     return dataLen;
-
-
  }
 
 /* 空闲状态下的召唤记录上传 */
@@ -894,7 +894,6 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
         if (eGlobalRet_OK == MSNvm_QueryLatestUnreportedRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pIotYKC21Ctx->stOrderInfo,
                                                                sizeof(MSNvmOrderInfo_Struct), &pIotYKC21Ctx->time))
         {
-
             if (0 == memcmp(&IotYKC21_CmdControl.Call_orderTransactionNum[0], &pOrderData->orderTransactionNum[0], 16))
             {
                 pBuf[dataLen] = 0;
@@ -1124,7 +1123,7 @@ static uint16_t IotYKC21_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf)
      AswMonitorChargeCtrl_Struct *pstChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
      uint16_t dataLen = 0;
      /* 交易流水号 */
-     memcpy(&pBuf[dataLen], pIotYKC21Ctx->stProtoData[port].curUsedOrderTransactionNum, 16);
+     memcpy(&pBuf[dataLen], pIotYKC21Ctx->stProtoData[port].newRecvOrderTransactionNum, 16);
      dataLen += 16;
 
      /* 设备编码 */
@@ -1189,7 +1188,37 @@ static uint16_t IotYKC21_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf)
  }
 
 
- 
+ static void IotYKC21printf_unenecryptinformation(uint8_t cmd, uint8_t *pBuf,uint16_t dataLen)
+ {
+    if (cmd == 0x3D)
+    {
+        IOTYKC21_CFG_LogPrint("YKC21发送未加密账单消息体数据[cmd: 0x%02X][%d]: ", cmd, dataLen);
+        DSLogM_HexOutput(&pBuf[0], (dataLen));
+    }
+        
+    // if (cmd != 0x3D)
+    //     DSLogM_HexOutput(&pBuf[0], (dataLen));
+    // else
+    // {
+    //     uint8_t lineNum = 0;
+    //     if ((dataLen) >= 100)
+    //         lineNum = (dataLen) / 100;
+
+    //     if (lineNum == 0)
+    //         DSLogM_HexOutput(&pBuf[0], (dataLen));
+    //     else
+    //     {
+    //         for (uint8_t m = 0; m < lineNum; m++)
+    //         {
+    //             DSLogM_HexOutput(&pBuf[100*m], 100);
+    //         }
+    //         if (0 != ((dataLen) % 100))
+    //          DSLogM_HexOutput(&pBuf[100*lineNum], (dataLen) % 100);
+      
+    //     }
+    // }
+
+ }
 
 
 static uint16_t IotYKC21_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
@@ -1215,20 +1244,24 @@ static uint16_t IotYKC21_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uin
          pFrameHead->seq[0] = seq>>8;
          pFrameHead->seq[1] = seq&0xFF;
          //Common_Uint16ToTwoUint8(pFrameHead->seq, seq);
+        
 
-           SecTimestamp=SSTM_GetSecTimestamp();
+         SecTimestamp=SSTM_GetSecTimestamp();
          Common_TimestampToCp56Time2a(SecTimestamp, &pFrameHead->sendcp56time[0]);
         
          pFrameHead->encryptFlag = 0;
-
+       
          pFrameHead->cmd = cmd;
          crc16totalLen = (2+7+1+1+encryptionMessageLen) ;
+        
+       // IotYKC21printf_unenecryptinformation(cmd,&pBuf[1 + 2 + 2 + 7 + 1],(1+dataLen));
      }
      else
      {
          pFrameHead->encryptFlag = 1;
-
-         encryptionMessageLen = YKC21_Send_Data_enecrypt(&pBuf[1 + 2 + 2 + 7 + 1 + 1], dataLen);
+         pFrameHead->cmd = cmd;
+         IotYKC21printf_unenecryptinformation(cmd,&pBuf[1 + 2 + 2 + 7 + 1 ],(1+dataLen));
+         encryptionMessageLen = YKC21_Send_Data_enecrypt(&pBuf[1 + 2 + 2 + 7 + 1 + 1], dataLen); //加密
 
          pFrameHead->dataLen[0] =  (2 + 7 + 1 + 1 + encryptionMessageLen)>>8;
          pFrameHead->dataLen[1] =  (2 + 7 + 1 + 1 + encryptionMessageLen)&0xFF;   // “序列号域+发送时间+加密标志+帧类型标志+消息体”字节数之和
@@ -1238,15 +1271,13 @@ static uint16_t IotYKC21_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uin
           SecTimestamp=SSTM_GetSecTimestamp();
          Common_TimestampToCp56Time2a(SecTimestamp, &pFrameHead->sendcp56time[0]);
 
-         pFrameHead->encryptFlag = 1;
-
-         pFrameHead->cmd = cmd;
+         
          crc16totalLen = (2 + 7 + 1 + 1 + encryptionMessageLen);
      }
 
-    
- 
+
    
+
     crc16 = Common_CalcCRC16(&pBuf[3], crc16totalLen);
     pBuf[1+2+crc16totalLen] = (crc16 >> 8) & 0xFF;
     pBuf[1+2+crc16totalLen+1] = (crc16) & 0xFF;

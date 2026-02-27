@@ -498,16 +498,8 @@ static void AswMonitor_CardAuthHandle(void)
 
     if (CddCardM_GetCardType() == eCddCardType_UUID)
     {
-        CddCardM_GetCardUid((uint8_t *)&recvUUID);
-        recvUUID = Common_uintBINToBCD(recvUUID);
-        bcdCardID[0] = (recvUUID >> 56) & 0xFF;
-        bcdCardID[1] = (recvUUID >> 48) & 0xFF;
-        bcdCardID[2] = (recvUUID >> 40) & 0xFF;
-        bcdCardID[3] = (recvUUID >> 32) & 0xFF;
-        bcdCardID[4] = (recvUUID >> 24) & 0xFF;
-        bcdCardID[5] = (recvUUID >> 16) & 0xFF;
-        bcdCardID[6] = (recvUUID >> 8) & 0xFF;
-        bcdCardID[7] = recvUUID & 0xFF;
+        CddCardM_GetCardUid((uint8_t *)&bcdCardID);
+      
     }
     else
     {

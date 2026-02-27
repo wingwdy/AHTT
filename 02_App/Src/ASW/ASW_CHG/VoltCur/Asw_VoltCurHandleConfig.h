@@ -19,11 +19,11 @@
 #include "Asw_VoltCurHandle.h"
 #include "Asw_ErrorHandle.h"
 #include "stdint.h"
+#include "DS_LogM.h"
 
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
-
 #define ASWVOLTCUR_CFG_CALLCYCLE                            (100u)
 
 #define ASWVOLTCUR_CFG_SET_OV_THR                           (26400u)/*产生过压故障阈值*/

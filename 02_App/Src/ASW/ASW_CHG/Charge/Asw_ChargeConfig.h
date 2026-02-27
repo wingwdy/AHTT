@@ -18,6 +18,7 @@
 ******************************************************************************/
 #include "DS_LogM.h"
 #include "Cdd_MeterM.h"
+#include "Asw_VoltCurHandle.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -35,7 +36,7 @@
 
 #define ASWCHARGE_CFG_LITTLE_CURRENT_THRESHOLD         1000
 
-#define ASWCHARGE_CFG_GetCurRateCurrent(port)          32000
+#define ASWCHARGE_CFG_GetCurRateCurrent(port)          AswVoltCurHandle_GetMaxOutputCurrent(port)
 
 #define ASWCHARGE_CFG_LogPrint(fmt, ...)               DSLOGM_Debug(DSLogMModule_Charge, fmt, ##__VA_ARGS__)
 

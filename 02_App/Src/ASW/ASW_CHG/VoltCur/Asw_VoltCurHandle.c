@@ -40,6 +40,13 @@
 *******************************************************************************/
 typedef struct 
 {
+    uint8_t  lastAuthStatus;
+
+    uint8_t  setCurrentValid;
+    uint32_t setOutputCurrent;
+
+    uint32_t limitOutputCurrent;
+
     uint32_t maxOutputCurrent;
 	uint32_t prevMaxOutputCurrent;
     uint8_t arFaultStatus[AswVoltCur_EvtCnt];
@@ -59,12 +66,7 @@ static AswVoltCurHandle_Struct g_arAswVoltCurHandle[SYSCFG_CFG_GUN_NUM] = {0};
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-void AswVoltCurHandle_InitMemory(void)
-{
-    memset(g_arAswVoltCurHandle, 0, sizeof(g_arAswVoltCurHandle));
-}
-
-void AswVoltCur_ErrorManage(uint8_t port)
+static void AswVoltCur_ErrorManage(uint8_t port)
 {
     uint8_t i = 0;
     uint8_t result = FALSE;
@@ -140,31 +142,157 @@ void AswVoltCur_ErrorManage(uint8_t port)
 		{
 			pHandle->arFaultStatus[i] = FALSE;
 		}	
-		
     }
 }
 
-void AswVoltCur_LimitManage(uint8_t port)
+static void AswVoltCur_LimitManage(uint8_t port)
 {
-    LimitCurrentLevel_Enum Level = AswLimitCurrLevelZero;
+    LimitCurrentLevel_Enum level = AswLimitCurrLevelZero;
+    uint8_t authStatus = 0;
     AswVoltCurHandle_Struct *pHandle = NULL;
-    
+
 	if (port < SYSCFG_CFG_GUN_NUM)
 	{
         pHandle = &g_arAswVoltCurHandle[port];
-        pHandle->maxOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
-        Level = AswTempHandle_GetLimitCurrentLevel(port);
-        if ((Level == AswLimitCurrLevelOne) && ASW_VOLTCUR_CFG_IsAuthState(port))
-        {
-            pHandle->maxOutputCurrent = (SYSCFG_CFG_MAX_OUTPUT_CURRENT * 80) / 100;
-        }
+        authStatus = ASW_VOLTCUR_CFG_IsAuthState(port);
+        level = AswTempHandle_GetLimitCurrentLevel(port);
 
         if (pHandle->maxOutputCurrent != pHandle->prevMaxOutputCurrent)
         {
+            ASWVOLTCUR_CFG_LogPrint("当前额定电流发生变化：%d.%03d --->%d.%03d A\r\n", pHandle->prevMaxOutputCurrent / 1000, 
+            pHandle->prevMaxOutputCurrent % 1000, pHandle->maxOutputCurrent / 1000, pHandle->maxOutputCurrent % 1000);
             pHandle->prevMaxOutputCurrent = pHandle->maxOutputCurrent;
             CddCP_AdjustCurRateCurrent(port, pHandle->maxOutputCurrent);
         }
+
+        if (authStatus != pHandle->lastAuthStatus)
+        {
+            if (authStatus == FALSE)
+            {
+                pHandle->maxOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
+                pHandle->setCurrentValid = FALSE;
+            }
+
+            pHandle->lastAuthStatus = authStatus;
+        }
+        else
+        {
+            if (level != AswLimitCurrLevelOne)
+            {
+                pHandle->limitOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
+            }
+            else
+            {
+                pHandle->limitOutputCurrent = (SYSCFG_CFG_MAX_OUTPUT_CURRENT * 80) / 100;
+            }
+
+            if (pHandle->setCurrentValid == TRUE)
+            {
+                if (pHandle->setOutputCurrent <= pHandle->limitOutputCurrent)
+                {
+                    pHandle->maxOutputCurrent = pHandle->setOutputCurrent;
+                }
+                else
+                {
+                    pHandle->maxOutputCurrent = pHandle->limitOutputCurrent;
+                }
+            }
+            else
+            {
+                pHandle->maxOutputCurrent = pHandle->limitOutputCurrent;
+            }
+        }
 	}
+}
+
+/* 
+    当eMode = eAswVoltCurAdjustMode_PowerAbsolute时， val为绝对值，单位为W
+    当eMode = eAswVoltCurAdjustMode_PowerPercentum时，val为百分比 保留1位小数
+*/
+void AswVoltCur_AdjustOutputCurrent(uint8_t port, AswVoltCurAdjustMode_Enum eMode, uint32_t val)
+{
+    AswVoltCurHandle_Struct *pHandle = &g_arAswVoltCurHandle[port];
+
+    switch (eMode)
+    {
+        case eAswVoltCurAdjustMode_PowerAbsolute:
+        {
+            ASWVOLTCUR_CFG_LogPrint("远程调节功率，调节模式：绝对值调节，调节功率为：%dW\r\n", val);
+
+            if (val == SYSCFG_CFG_MAX_OUTPUT_POWER)
+            {
+                pHandle->setOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
+                pHandle->setCurrentValid = TRUE;
+            }
+            else if (val < SYSCFG_CFG_MAX_OUTPUT_POWER)
+            {
+                pHandle->setOutputCurrent = val * 1000 / 220;
+                pHandle->setCurrentValid = TRUE;
+
+                if (pHandle->setOutputCurrent < SYSCFG_CFG_MIN_OUTPUT_CURRENT)
+                {
+                    pHandle->setOutputCurrent = 0;
+                }
+            }
+            else
+            {}
+
+            break;
+        }
+        case eAswVoltCurAdjustMode_PowerPercentum:
+        {
+            ASWVOLTCUR_CFG_LogPrint("远程调节功率，调节模式：百分比调节，调节百分比为：%d.%d%%\r\n", val / 10, val % 10);
+            if (val == 1000)
+            {
+                pHandle->setOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
+                pHandle->setCurrentValid = TRUE;
+            }
+            else if (val < 1000)
+            {
+                pHandle->setOutputCurrent = val * SYSCFG_CFG_MAX_OUTPUT_POWER / 220;
+                pHandle->setCurrentValid = TRUE;
+
+                if (pHandle->setOutputCurrent < SYSCFG_CFG_MIN_OUTPUT_CURRENT)
+                {
+                    pHandle->setOutputCurrent = 0;
+                }
+            }
+            else
+            {}
+
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+}
+
+uint32_t AswVoltCurHandle_GetMaxOutputCurrent(uint8_t port)
+{
+    AswVoltCurHandle_Struct *pHandle = &g_arAswVoltCurHandle[port];
+    uint32_t maxOutputCurrent = 0;
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        maxOutputCurrent = pHandle->maxOutputCurrent;
+    }
+
+    return maxOutputCurrent;
+}
+
+void AswVoltCurHandle_InitMemory(void)
+{
+    memset(g_arAswVoltCurHandle, 0, sizeof(g_arAswVoltCurHandle));
+
+    uint8_t port = 0;
+
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+    {
+        g_arAswVoltCurHandle[port].prevMaxOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
+        g_arAswVoltCurHandle[port].maxOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
+    }
 }
 
 void AswVoltCurHandle_MainFunction(void)

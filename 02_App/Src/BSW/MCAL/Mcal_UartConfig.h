@@ -24,7 +24,7 @@
 ******************************************************************************/
 /* Uart for debug */
 #define   MCALUART_CFG_UART5_RECVBUF_SIZE               (320U)
-#define   MCALUART_CFG_UART5_SENDBUF_SIZE               (1024 + 512)
+#define   MCALUART_CFG_UART5_SENDBUF_SIZE               (1024 + 2048)
 
 /* Uart for 4G */
 #define   MCALUART_CFG_UART0_RECVBUF_SIZE               (3096U)

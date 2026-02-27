@@ -142,7 +142,7 @@ typedef struct
 
 typedef struct 
 {
-    //若根据协议全部存储有 1098 字节
+    //若根据协议2.1.0全部存储有 1098 字节; 根据协议2.1.1全部存储有 330 字节
     uint8_t orderTransactionNum[16];          /* 交易流水号 */
     uint8_t pileDnBCD[7];                     /* 设备编号 */
     uint8_t port;                             /* 枪号 */

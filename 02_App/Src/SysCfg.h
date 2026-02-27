@@ -24,6 +24,7 @@
 
 #define   SYSCFG_CFG_PRODUCT_CODE               "D3_A32FB"
 
+#define   SYSCFG_CFG_MAX_OUTPUT_POWER           (7000U)
 #define   SYSCFG_CFG_MAX_OUTPUT_CURRENT         (32000U)
 #define   SYSCFG_CFG_MIN_OUTPUT_CURRENT         (6000U)
 

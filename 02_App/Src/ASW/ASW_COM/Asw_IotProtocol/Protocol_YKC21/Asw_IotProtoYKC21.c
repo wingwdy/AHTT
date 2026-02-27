@@ -28,8 +28,8 @@
 #include "Global.h"
 #include "Cdd_CP.h"
 #include "SS_Tm.h"
+#include "Asw_VoltCurHandle.h"
 
- 
 
 /*******************************************************************************
 *    Macro Definition
@@ -347,7 +347,7 @@ static void IotYKC21_UpError(void)
 
 
 }
- static void IotYkc21_powercontrol(uint16_t power,uint8_t port)
+void IotYkc21_powercontrol(uint16_t power,uint8_t port)
  {
     //功率调节
     static uint16_t power_running_NOW[SYSCFG_CFG_GUN_NUM] = {0};
@@ -355,9 +355,9 @@ static void IotYKC21_UpError(void)
     if(power != power_running_NOW[port])
        {
 
-      
+        AswVoltCur_AdjustOutputCurrent(port,eAswVoltCurAdjustMode_PowerAbsolute,power*1000);
         power_running_NOW[port] = power;
-        IOTYKC21_CFG_LogPrint("[枪：%d]功率调整为[%d]kw\r\n", port, power);
+        IOTYKC21_CFG_LogPrint("云快充2.1协议[枪：%d]功率调整为[%d]kw\r\n", port, power);
        }
  }
 static void IotYkc21_PowerLimit(void)
@@ -554,7 +554,7 @@ static IotYKC21StopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType)
         {eSrc_InsuffBalance,      eIotYKC21StopReason_SumNoEnough},  
         {eSrc_StopbyMoney,        eIotYKC21StopReason_StopByMoney},  
         {eSrc_StopbyTime,         eIotYKC21StopReason_StopByTime},  
-        {eSrc_StopbyEnergy,       eIotYKC21StopReason_StopByEnergy}, 
+        {eSrc_StopbyEnergy,       eIotYKC21StopReason_RechargEnergy}, 
         {eErr_GunDisConn,         eIotYKC21StopReason_GunDisconnect}, 
     };  
 
@@ -763,8 +763,8 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
 
         //时间戳转换成 CP56Time2a 格式
         Common_TimestampToCp56Time2a(pChargeData->chargeStartTime, &pYkcOrder->startTime[0]);
-        memcpy( pYkcOrder->stopTime, pYkcOrder->startTime, 7);
-
+        Common_TimestampToCp56Time2a(pChargeData->chargeStopTime, &pYkcOrder->stopTime[0]);
+       
          
 
         memset(& pYkcOrder->startMeterVal[0],0,5);
@@ -811,7 +811,7 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
   
 
 
-
+     pYkcOrder->fee_num =  pBillMode->rateCount;
  
     for (index = 0; index < 48; index++)
     {

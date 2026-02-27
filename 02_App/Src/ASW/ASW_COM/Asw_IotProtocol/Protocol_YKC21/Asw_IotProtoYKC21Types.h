@@ -244,6 +244,8 @@ extern uint8_t random_key_A[16];            	// 随机密钥A
 *    Global Function Prototypes
 ******************************************************************************/
 
+#define ASW_IOT_PROTO_YKC21_VERINF 211 
+
 #endif /* ASW_IOT_PROTO_YKC21_TYPES_H_ */
 
 

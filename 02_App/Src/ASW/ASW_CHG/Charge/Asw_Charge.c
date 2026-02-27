@@ -195,6 +195,7 @@ static void AswCharge_StartingStateHandle(uint8_t port, AswChargeCtrl_Struct *pC
         else if (eChargeCondition == eErrChargeCondition_Suspend || ASWCHARGE_CFG_GetCurRateCurrent(port) == 0)
         {
             AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_PAUSEB);
+            AswEVSE_StopCharge(port);
         }
         else
         {
@@ -271,6 +272,7 @@ static void AswCharge_WakeupStateHandle(uint8_t port, AswChargeCtrl_Struct *pCha
         {
             CddCP_SetReqStopWakeUp(port);
             AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_PAUSEB);
+            AswEVSE_StopCharge(port);
         }
         else
         {
@@ -314,6 +316,7 @@ static void AswCharge_ChargingStateHandle(uint8_t port, AswChargeCtrl_Struct *pC
         else if (eChargeCondition == eErrChargeCondition_Suspend || ASWCHARGE_CFG_GetCurRateCurrent(port) == 0)
         {
             AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_PAUSEB);
+            AswEVSE_StopCharge(port);
         }
         else 
         {
@@ -370,6 +373,7 @@ static void AswCharge_PauseAStateHandle(uint8_t port, AswChargeCtrl_Struct *pCha
         else if (eChargeCondition == eErrChargeCondition_Suspend || ASWCHARGE_CFG_GetCurRateCurrent(port) == 0)
         {
             AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_PAUSEB);
+            AswEVSE_StopCharge(port);
         }
         else 
         {
@@ -423,6 +427,7 @@ static void AswCharge_PauseBStateHandle(uint8_t port, AswChargeCtrl_Struct *pCha
                 if (ASWCHARGE_CFG_GetCurRateCurrent(port) > 0)
                 {
                     AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STARTING);
+                    AswEVSE_StartCharge(port);
                     pChargeCtrl->startTimer = Common_GetSystick();
                     pChargeCtrl->pwmStartTimer = 0;
                     pChargeCtrl->tryWakeupFlag = FALSE;

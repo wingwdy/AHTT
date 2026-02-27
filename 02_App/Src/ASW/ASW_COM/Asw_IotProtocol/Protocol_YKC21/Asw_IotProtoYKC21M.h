@@ -113,6 +113,7 @@ uint8_t IotYKC21_SwipCardCharge(uint8_t port);
 extern uint8_t IotYKC21_RfreshYKC21key(char *YKC21key, uint16_t YKC21key_len);
 extern uint8_t IotYKC21_RfreshYKC21token(char *YKC21token,uint16_t YKC21token_len);
 extern void IotYKC21_PrintfYKC21KeyAndToken(void);
+extern void IotYkc21_powercontrol(uint16_t power,uint8_t port);
 /* 内部适用 */
 uint8_t IotYKC21_GetGunState(uint8_t port);
 void IotYKC21_OfflineHandle(void);
