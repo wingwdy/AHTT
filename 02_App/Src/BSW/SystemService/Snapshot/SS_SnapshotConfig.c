@@ -92,7 +92,7 @@ void SSSnapshot_Cfg_PackErrStr(uint8_t port, char *pStr, uint16_t bufLen)
     snprintf(pStr, bufLen, "电压:%d.%02d V, 电流:%d.%03d A, %s, %s, CP电压:%d.%03d V, CP占空比:%d.%01d%%, 枪温:%d ℃, 壳温:%d ℃, 充电时长:%d 秒, 网络状态:%s\r\n", 
         voltage / 100, voltage % 100, 
         current / 1000, current % 1000,
-       (CddModeM_IsGBMode() == TRUE) ? "国标模式" : "企标模式", 
+       (CddModeM_IsGBMode() == TRUE) ? "国标模式" : "兼容模式", 
         peInfo, cpVol / 1000, cpVol % 1000,
         cpDuty / 10, cpDuty % 10,
        gunTemp - 50, envTemp - 50,

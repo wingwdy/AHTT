@@ -26,7 +26,7 @@
 #define MSNVM_QRCODE_LEN                   256
 
 /* 订单长度 */
-#define MSNVM_ORDER_MAX_LEN                512
+#define MSNVM_ORDER_MAX_LEN                1024
 
 /* 故障信息长度 */
 #define MSNVM_ERROR_INFO_MAX_LEN           288
@@ -135,7 +135,6 @@ typedef struct
     uint32_t billInfo[9][4];                  /* 9个费率对应的 单价(5位小数)、电量(4位小数)、计损电量(4位小数)、金额(4位小数) */
 }MSNvmGNOrderInfo_Struct;
 
-
 typedef union 
 {
     MSNvmGNOrderInfo_Struct stGNOrderInfo;
@@ -147,9 +146,9 @@ typedef struct
 {
     uint8_t orderSaveState;                   /* 订单保存状态 */
     uint16_t orderLen;                        /* 订单数据长度 */
+    uint8_t protocolType;                     /* 协议类型 */
     MSNvmPlatOrderInfo_Union platOrderInfo;   /* 各平台订单类型数据 */
 }MSNvmOrderInfo_Struct;
-
 
 /* 故障记录 */
 typedef struct 

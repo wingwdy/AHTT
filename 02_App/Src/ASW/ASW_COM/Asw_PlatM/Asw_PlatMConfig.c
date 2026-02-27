@@ -58,6 +58,7 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncTransformBillMode = IotGN_TransformBillMode,
         .pFuncPackChargeRecord = IotGN_PackChargeRecord,
         .pFuncSwipCardCharge = IotGN_SwipCardCharge,
+        .pFuncTransformChargeRecord = IotGN_TransformChargeRecord,
     },
 
     [eAswPlatType_YKC21] =
