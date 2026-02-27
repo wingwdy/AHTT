@@ -15,7 +15,7 @@
 
 
 Shell shell;
-char shellBuffer[512];
+char shellBuffer[1024];
 
 /**
  * @brief 用户shell写
@@ -54,5 +54,5 @@ void userShellInit(void)
 {
     shell.write = userShellWrite;
     shell.read = userShellRead;
-    shellInit(&shell, shellBuffer, 896);
+    shellInit(&shell, shellBuffer, 1024);
 }
