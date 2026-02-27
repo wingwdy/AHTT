@@ -833,7 +833,7 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
         {
             pBuf[dataLen++] = 0;
             pBuf[dataLen++] = 0;
-            uprebortflag = TRUE; 
+            upReportFlag = TRUE; 
         }
         else
         {

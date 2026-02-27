@@ -68,7 +68,6 @@ typedef struct
 typedef struct 
 {
     IotGNWorkState_Enum eWorkState;
-    MSNvmPlatPrivateParam_Union param;
     typeFuncSendCtrl pFuncSendCtrl;
     typeFuncRecvCtrl pFuncRecvCtrl;
     uint8_t frameQueueChannelID;

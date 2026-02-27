@@ -367,7 +367,8 @@ static uint16_t IotGN_SendHeartBeat(uint8_t port, uint8_t *pBuf)
 
 static uint16_t IotGN_SendBillModeVerifyReq(uint8_t port, uint8_t *pBuf)
 {
-    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmGNParamBillMode_Struct *pBillMode = &pPrivateParam->stGNParam.stBillMode;
     uint16_t dataLen = 0;
 
     /* 设备编码 */

@@ -209,11 +209,6 @@ static void IotGN_CycleDetect(void)
 
 static void IotGN_WSInitHandle(void)
 {
-    if (MSNvm_ReadParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotGNCtx->param, sizeof(MSNvmPlatPrivateParam_Union)) != eGlobalRet_OK)
-    {
-        memset(&pIotGNCtx->param, 0x00, sizeof(MSNvmPlatPrivateParam_Union));
-    }
-
     pIotGNCtx->eWorkState = eIOTGNWorkState_Offline;
 }
 
@@ -346,7 +341,8 @@ static IotGNStopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType)
 
 void IotGN_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardBillMode)
 {
-    MSNvmGNParamBillMode_Struct *pGnBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmGNParamBillMode_Struct *pGnBillMode = &pPrivateParam->stGNParam.stBillMode;
     uint8_t periodCount = 0;
     uint8_t index = 0;
     uint16_t startIndex = 0;

@@ -43,6 +43,7 @@
 
 typedef struct
 {
+    MSNvmPlatPrivateParam_Union stPrivateParam;
     MSNvmPlatParam_Struct stPlatParam;
 }AswPlatMCtx_Struct;
 
@@ -397,6 +398,11 @@ MSNvmPlatParam_Struct * AswPlatM_GetPlatParamPtr(void)
     return &g_stAswPlatMCtx.stPlatParam;
 }
 
+MSNvmPlatPrivateParam_Union *AswPlatM_GetPlatPrivateParamPtr(void)
+{
+    return &g_stAswPlatMCtx.stPrivateParam;
+}
+
 void AswPlatM_DefaultPlatParam(void *param)
 {
     MSNvmPlatParam_Struct *pPlatParam = (MSNvmPlatParam_Struct *)param;
@@ -413,18 +419,31 @@ void AswPlatM_DefaultPlatParam(void *param)
     pPlatParam->platAuxiliaryPort = 45113;
 }
 
+void AswPlatM_DefaultPlatPrivateParam(void *param)
+{
+    MSNvmPlatPrivateParam_Union *pPrivateParam = (MSNvmPlatPrivateParam_Union *)param;
+
+    memset(pPrivateParam, 0x00, sizeof(MSNvmPlatPrivateParam_Union));
+}
+
 void AswPlatM_InitMemory(void)
 {
     const AswPlatCardDescriptor_Struct *pCardDescriptor = NULL;
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = NULL;
     const AswPlatMProtocolDescriptor_Struct *pOMProtocolDescriptor = AswPlatM_GetOMProtocolDescriptor();
     MSNvmPlatParam_Struct *pParam = &g_stAswPlatMCtx.stPlatParam;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = &g_stAswPlatMCtx.stPrivateParam;
     CddNetMSocketPara_Union stSocketPara = { 0 };
     FrameQueueType_Enum eFrame;
 
     if (MSNvm_ReadParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)pParam, sizeof(MSNvmPlatParam_Struct)) != eGlobalRet_OK)
     {
         AswPlatM_DefaultPlatParam(pParam);
+    }
+
+    if (MSNvm_ReadParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union)) != eGlobalRet_OK)
+    {
+        AswPlatM_DefaultPlatPrivateParam(pPrivateParam);
     }
 
     pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();

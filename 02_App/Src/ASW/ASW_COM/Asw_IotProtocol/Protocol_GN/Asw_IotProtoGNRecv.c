@@ -23,6 +23,7 @@
 #include "Asw_ChargeIf.h"
 #include "SS_Tm.h"
 #include "Asw_Monitor.h"
+#include "Asw_PlatM.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -447,7 +448,8 @@ static uint8_t IotGN_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_t l
 
 static uint8_t IotGN_RecvBillModeVerifyRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmGNParamBillMode_Struct *pBillMode = &pPrivateParam->stGNParam.stBillMode;
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t verifyRes = FALSE;
@@ -478,7 +480,8 @@ static uint8_t IotGN_RecvBillModeVerifyRsp(uint8_t *port, uint8_t *r_data, uint1
 
 static uint8_t IotGN_RecvBillMode4RateRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmGNParamBillMode_Struct *pBillMode = &pPrivateParam->stGNParam.stBillMode;
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t temp = 0;
@@ -499,13 +502,14 @@ static uint8_t IotGN_RecvBillMode4RateRsp(uint8_t *port, uint8_t *r_data, uint16
     memcpy(pBillMode->period_rate, &pRecvData[index], 48);
     index += 48;
 
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotGNCtx->param, sizeof(MSNvmPlatPrivateParam_Union));
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
     return TRUE;
 }
 
 static uint8_t IotGN_RecvBillModeMultRateRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmGNParamBillMode_Struct *pBillMode = &pPrivateParam->stGNParam.stBillMode;
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t temp = 0;
@@ -529,7 +533,7 @@ static uint8_t IotGN_RecvBillModeMultRateRsp(uint8_t *port, uint8_t *r_data, uin
 
     Common_SetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, 0, IOT_GN_CMD_BILLMODE_4RATE_RSP, FALSE);
     Common_ClearRptCount(pIotGNCtx->pFuncRecvCtrl, 0, IOT_GN_CMD_BILLMODE_4RATE_RSP);
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotGNCtx->param, sizeof(MSNvmPlatPrivateParam_Union));
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pBillMode, sizeof(MSNvmPlatPrivateParam_Union));
     return TRUE;
 }
 
@@ -545,7 +549,6 @@ static uint8_t IotGN_RecvCallRealData(uint8_t *port, uint8_t *r_data, uint16_t l
 
 static uint8_t IotGN_CheckChargeStart(uint8_t port, uint8_t *pFailReason)
 {
-    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
     uint8_t ret = FALSE;
     uint8_t reason = 0;
 
@@ -843,7 +846,8 @@ static uint8_t IotGN_RecvSyncTime(uint8_t *port, uint8_t *r_data, uint16_t len)
 
 static uint8_t IotGN_RecvSetBillMode4Rate(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmGNParamBillMode_Struct *pBillMode = &pPrivateParam->stGNParam.stBillMode;
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t temp = 0;
@@ -864,13 +868,14 @@ static uint8_t IotGN_RecvSetBillMode4Rate(uint8_t *port, uint8_t *r_data, uint16
     memcpy(pBillMode->period_rate, &pRecvData[index], 48);
     index += 48;
 
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotGNCtx->param, sizeof(MSNvmPlatPrivateParam_Union));
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
     return TRUE;
 }
 
 static uint8_t IotGN_RecvSetBillModeMultiRate(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-    MSNvmGNParamBillMode_Struct *pBillMode = &pIotGNCtx->param.stGNParam.stBillMode;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmGNParamBillMode_Struct *pBillMode = &pPrivateParam->stGNParam.stBillMode;
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t temp = 0;
@@ -892,7 +897,7 @@ static uint8_t IotGN_RecvSetBillModeMultiRate(uint8_t *port, uint8_t *r_data, ui
         index += 4;
     }  
 
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotGNCtx->param, sizeof(MSNvmPlatPrivateParam_Union));
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
     return TRUE;
 }
 
