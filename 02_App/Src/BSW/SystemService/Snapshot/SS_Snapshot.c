@@ -208,7 +208,7 @@ void SSSnapshot_ExportItem(SSSnapshotItemType_Enum itemType, SSSnapshotItemReadS
             CddNetMSocketPara_Union stSocketPara = { 0 };
 
             stSocketPara.stFtpPara.eMode = eCddNetMFtpMode_Upload;
-            strcpy(stSocketPara.stFtpPara.fileName, "D3_A32FB_20260128.log");
+            strcpy(stSocketPara.stFtpPara.fileName, "D3_A32FB_ErrSnapshot.txt");
             strcpy(stSocketPara.stFtpPara.user, "gn_ftp_fw_cls");
             strcpy(stSocketPara.stFtpPara.passwd, "24d79794d8b42ff5");
             strcpy(stSocketPara.stFtpPara.ip, "fwftp.gongniu.cn");
