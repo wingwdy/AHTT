@@ -284,6 +284,25 @@ uint8_t AswPlatM_SetPlatCardType(char *platCardName)
     return ret;
 }
 
+uint16_t AswPlatM_TransformRecord(MSNvmOrderInfo_Struct *pNvmOrderInfo, uint8_t *pOutRecord)
+{
+    uint16_t dataLen = 0;
+
+    if (pNvmOrderInfo != NULL && pOutRecord != NULL)
+    {
+        if (pNvmOrderInfo->protocolType < eAswPlatType_Count)
+        {
+            if (NULL != c_stAswPlatMProtocolDescriptorTable[pNvmOrderInfo->protocolType].pFuncTransformChargeRecord)
+            {
+                c_stAswPlatMProtocolDescriptorTable[pNvmOrderInfo->protocolType].pFuncTransformChargeRecord(
+                    &pNvmOrderInfo->platOrderInfo, pOutRecord, &dataLen);
+            }
+        }
+    }
+
+    return dataLen;
+}
+
 AswPlatType_Enum AswPlatM_GetPlatType(void)
 {
     return (AswPlatType_Enum)g_stAswPlatMCtx.stPlatParam.platMainType;

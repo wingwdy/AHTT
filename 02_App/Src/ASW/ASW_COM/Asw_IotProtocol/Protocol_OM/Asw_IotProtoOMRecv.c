@@ -60,6 +60,8 @@ static uint8_t IotOM_RecvSetReboot(uint8_t *port, uint8_t *r_data, uint16_t len)
 static uint8_t IotOM_RecvSetForbid(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvReportForBidStateRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvUpdate(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotOM_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
+
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -173,6 +175,18 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .matchCmd = IOT_OM_CMD_UPDATE_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程更新",
+    },
+
+    [9] = 
+    {
+        .cmd = IOT_OM_CMD_ORDER_RECORD_RSP,
+        .cmdType = IOT_OM_CMDTYPE_RESPONSE,
+        .pRecvParse = IotOM_RecvOrderRecordRsp,
+        .maxTimeout = 10 * 1000,
+        .maxTryCnt = 10,
+        .matchCmd = IOT_OM_CMD_ORDER_RECORD,
+        .printFlag = TRUE,
+        .cMeaning = "订单上报应答",
     },
 };
 
@@ -378,6 +392,13 @@ static uint8_t IotOM_RecvUpdate(uint8_t *port, uint8_t *r_data, uint16_t len)
     return TRUE;
 }
 
+static uint8_t IotOM_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OmOrderRecord, pIotOMCtx->time);
+    IOTOM_CFG_LogPrint("订单上报成功!\r\n");
+    return TRUE;
+}
+
 static const IotOMRecvCtrl_Struct* IotOM_GetRecvCtrlPtr(uint16_t cmd)
 {
     const IotOMRecvCtrl_Struct* pCtrl = NULL;
@@ -533,6 +554,12 @@ void IotOM_TimeoutDetect(void)
                     }
                     else
                     {
+                        if (pCmdRecvCtrl->cmd == IOT_OM_CMD_ORDER_RECORD_RSP)
+                        {
+                            IOTOM_CFG_LogPrint("订单上报失败，删除记录!\r\n");
+                            MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OmOrderRecord, pIotOMCtx->time);
+                        }
+
                         Common_ClearRptCount(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
                         Common_SetRecvTimerEnable(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd, FALSE);
                         Common_SetSendFlag(pIotOMCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, FALSE);

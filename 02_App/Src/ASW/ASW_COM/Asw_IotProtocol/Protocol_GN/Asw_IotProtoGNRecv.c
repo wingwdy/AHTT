@@ -689,10 +689,6 @@ static uint8_t IotGN_RecvRemoteStopCharge(uint8_t *port, uint8_t *r_data, uint16
 
 static uint8_t IotGN_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-    MSNvmGNOrderInfo_Struct *pOrderData = &pIotGNCtx->stOrderInfo.platOrderInfo.stGNOrderInfo;
-    uint8_t index = 0;
-    uint8_t *pRecvData = r_data;
-
     MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotGNCtx->time);
     IOTGN_CFG_LogPrint("交易记录上报成功!\r\n");
     return TRUE;

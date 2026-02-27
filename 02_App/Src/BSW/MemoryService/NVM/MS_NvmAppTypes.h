@@ -146,6 +146,7 @@ typedef struct
 {
     uint8_t orderSaveState;                   /* 订单保存状态 */
     uint16_t orderLen;                        /* 订单数据长度 */
+    uint8_t port;                             /* 枪号 */
     uint8_t protocolType;                     /* 协议类型 */
     MSNvmPlatOrderInfo_Union platOrderInfo;   /* 各平台订单类型数据 */
 }MSNvmOrderInfo_Struct;

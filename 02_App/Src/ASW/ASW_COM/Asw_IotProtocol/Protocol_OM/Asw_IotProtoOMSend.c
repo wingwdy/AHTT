@@ -23,6 +23,7 @@
 #include "Asw_Errorhandle.h"
 #include "Asw_Monitor.h"
 #include "Asw_ChargeIf.h"
+#include "Asw_PlatM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -59,7 +60,7 @@ static uint16_t IotOM_SendRebootRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendSetForbidRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendSetForbidState(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendUpdateResponse(uint8_t port, uint8_t *pBuf);
-
+static uint16_t IotOM_SendOrderRecord(uint8_t port, uint8_t *pBuf);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -197,6 +198,17 @@ static const IotOMSendCtrl_Struct c_stIotOMSendctrlTable[IOT_OM_CMD_SEND_COUNT] 
         .sendCycle = 0,
         .printFlag = TRUE,
         .cMeaning = "远程更新应答"
+    },
+
+    [12] = 
+    {
+        .cmd = IOT_OM_CMD_ORDER_RECORD,
+        .cmdType = IOT_OM_CMDTYPE_REQUSET,
+        .matchCmd = IOT_OM_CMD_ORDER_RECORD_RSP,
+        .pSendFunc = IotOM_SendOrderRecord,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "订单数据上报"
     },
 };
 
@@ -588,6 +600,25 @@ static uint16_t IotOM_SendUpdateResponse(uint8_t port, uint8_t *pBuf)
     dataLen += 32;
 
     pBuf[dataLen++] = pIotOMCtx->stProtoData[0].setUpdateResult;
+    return dataLen;
+}
+
+static uint16_t IotOM_SendOrderRecord(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+    uint32_t orderLen = 0;
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
+    dataLen += 32;
+    /* 枪号 */
+    pBuf[dataLen++] = port + 1;
+
+    /* 订单数据长度 */
+    orderLen = AswPlatM_TransformRecord(&pIotOMCtx->stOrderInfo, &pBuf[dataLen + 4]);
+    /* 订单数据内容 */
+    Common_Uint32ToFourUint8(&pBuf[dataLen], orderLen);
+    dataLen += 4;
+    dataLen += orderLen;
     return dataLen;
 }
 

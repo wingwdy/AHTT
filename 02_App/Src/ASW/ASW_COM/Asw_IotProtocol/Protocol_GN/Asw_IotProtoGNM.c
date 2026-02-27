@@ -471,7 +471,7 @@ void IotGN_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t
         Common_BINToBCD(&dateTime.second, (uint8_t *)&temp, 1);
         pBuf[dataLen++] = (uint8_t)(temp);
 
-        if (pFlashRecord->stGNOrderInfo.billmodeType == ASWMONITOR_BILLMODE_TYPE_MULT)
+        if (pFlashRecord->stGNOrderInfo.billmodeType == IOT_GN_BILLMODE_RATE_TYPE_MULT)
         {
             /* 电表总起值 */
             Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->startMeterVal);
@@ -672,6 +672,7 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
             memcpy(pGnOrder->logicCardNum, pIotGNCtx->stProtoData[port].authCardID, 8);
         }
 
+        pOrderData->port = port;
         pOrderData->protocolType = eAswPlatCardType_GN;
         pOrderData->orderLen = sizeof(MSNvmGNOrderInfo_Struct);
         pGnOrder->stopReason = eIotGNStopReason_PowerOff;
