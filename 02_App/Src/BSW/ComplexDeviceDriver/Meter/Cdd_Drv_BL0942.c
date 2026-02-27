@@ -365,6 +365,10 @@ static void CddDrvVL0942_RefreshData(uint8_t port, CddDrvBL0942_Struct *pBL0942)
     /* 拷贝 CF_CNT */
     memcpy(data, pBL0942->cacheBuf + index, 3); 
     pBL0942->tempCount = Common_FourUint8ToUint32(data);
+
+    pBL0942->tempCount = 12;//JJUNTEST
+
+
     pBL0942->totalCount += pBL0942->tempCount;
 }
 

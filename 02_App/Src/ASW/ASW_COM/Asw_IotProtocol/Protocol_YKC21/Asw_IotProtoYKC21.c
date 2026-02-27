@@ -347,61 +347,55 @@ static void IotYKC21_UpError(void)
 
 
 }
+ static void IotYkc21_powercontrol(uint16_t power,uint8_t port)
+ {
+    //功率调节
+    static uint16_t power_running_NOW[SYSCFG_CFG_GUN_NUM] = {0};
+  
+    if(power != power_running_NOW[port])
+       {
 
+      
+        power_running_NOW[port] = power;
+        IOTYKC21_CFG_LogPrint("[枪：%d]功率调整为[%d]kw\r\n", port, power);
+       }
+ }
 static void IotYkc21_PowerLimit(void)
 {
     for (uint8_t port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
         IotYKC21_PowerChange_Struct *pPowerChange = &IotYKC21_PowerChangeConfig[port];
         uint32_t NowTime = SSTM_GetSecTimestamp();
-        //动态控制功率
-        if (pPowerChange->Limittimess != 0 && NowTime <= pPowerChange->LimitEndtimess && pPowerChange->PowerHaveChangedflg == FALSE)
+
+        if (0x03 != IotYKC21_GetGunState(port)) // 充电中
         {
-            pPowerChange->PowerHaveChangedflg = TRUE;
-            CddCP_AdjustCurRateCurrent(port, pPowerChange->powerCurrent_max);
-            IOTYKC21_CFG_LogPrint("[枪：%d]功率电流调整为[%d]*0.001A，持续时间[%d]s!\r\n", port, pPowerChange->powerCurrent_max, pPowerChange->Limittimess);
+            break;
         }
-        else if (NowTime > pPowerChange->LimitEndtimess && TRUE == pPowerChange->PowerHaveChangedflg)
+        // 动态控制功率
+        if (pPowerChange->Limittimess != 0)
         {
-            pPowerChange->PowerHaveChangedflg = FALSE;
-            pPowerChange->instruct_rsp_priority = 0;
-            pPowerChange->powerCurrent_max = 0;
-            pPowerChange->Limittimess = 0;
-            pPowerChange->LimitEndtimess = 0;
-
-            if (pPowerChange->CurDeaultMaxCurrent == 0)
-            {
-                CddCP_AdjustCurRateCurrent(port, 32000);
-                IOTYKC21_CFG_LogPrint("[枪：%d]功率电流恢复为[32000]*0.001A!\r\n", port);
-            }
-        }
-
-        // 默认功率
-        if (FALSE == pPowerChange->PowerHaveChangedflg && pPowerChange->CurDeaultMaxCurrent != 0)
-        {
-
-            if (NowTime >= pPowerChange->DeaultMaxPowerStartTimess && NowTime <= pPowerChange->DeaultMaxPowerEndTimess)
-            {
-                if (FALSE == pPowerChange->DeaultMaxPowerdflg)
-                {
-                 pPowerChange->DeaultMaxPowerdflg = TRUE;
-
-                CddCP_AdjustCurRateCurrent(port, pPowerChange->CurDeaultMaxCurrent);
-                IOTYKC21_CFG_LogPrint("[枪：%d]功率电流恢复为[%d]*0.001A!\r\n", port, pPowerChange->CurDeaultMaxCurrent);
-
-                }
-               
-            }
+            if (NowTime <= pPowerChange->LimitEndtimess)
+                IotYkc21_powercontrol(pPowerChange->power_running, port);
             else
             {
-                pPowerChange->DeaultMaxPowerdflg = FALSE;
-                pPowerChange->CurDeaultMaxCurrent = 0;
-                pPowerChange->DeaultMaxPowerStartTimess = 0;
-                pPowerChange->DeaultMaxPowerEndTimess = 0;
-
-                CddCP_AdjustCurRateCurrent(port, 32000);
-                IOTYKC21_CFG_LogPrint("[枪：%d]功率电流恢复为[32000]*0.001A!\r\n", port);
+                pPowerChange->instruct_rsp_priority = 0;
+                pPowerChange->power_running = 0;
+                pPowerChange->Limittimess = 0;
+                pPowerChange->LimitEndtimess = 0;
             }
+        }
+        else
+        {
+            // 默认最大功率
+            if (pPowerChange->DeaultMaxPowerEndTimess != 0)
+            {
+                if (NowTime >= pPowerChange->DeaultMaxPowerStartTimess && NowTime <= pPowerChange->DeaultMaxPowerEndTimess)
+                    IotYkc21_powercontrol(pPowerChange->DefaultPower_max, port);
+                else
+                    IotYkc21_powercontrol(7, port);
+            }
+            else
+                IotYkc21_powercontrol(7, port);
         }
     }
 }
@@ -422,22 +416,33 @@ static void IotYKC21_CycleDetect(void)
 		
 static void IotYKC21_WSInitHandle(void)
 {
-     MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pIotYKC21Ctx->param.stYKC21Param.platinfo;
+    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pIotYKC21Ctx->param.stYKC21Param.platinfo;
 
     if (MSNvm_ReadParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotYKC21Ctx->param, sizeof(MSNvmPlatPrivateParam_Union)) != eGlobalRet_OK)
     {
         memset(&pIotYKC21Ctx->param, 0x00, sizeof(MSNvmPlatPrivateParam_Union));
     }
+    else
+    {
+        // 检测长度超过128，默认数值
+        if (pPlatInfo->Rsa_Keylength > 128)
+        {
+            pPlatInfo->Rsa_Keylength = 128;
+            memcpy(pPlatInfo->Rsa_Key, Test_Rsa_Key, 128);
+            memcpy(pPlatInfo->Token, Test_TokenStr, 14);
+        }
+
+        // 更新存储的最大默认功率
+        for (uint8_t i = 0; i < SYSCFG_CFG_GUN_NUM; i++)
+        {
+            IotYKC21_PowerChange_Struct *pPowerChange = &IotYKC21_PowerChangeConfig[i];
+            pPowerChange->DefaultPower_max = pPlatInfo->DefaultMAX_power[i];
+            pPowerChange->DeaultMaxPowerStartTimess = pPlatInfo->DeaultMaxPowerStartTimess[i];
+            pPowerChange->DeaultMaxPowerEndTimess = pPlatInfo->DeaultMaxPowerEndTimess[i];
+        }
+    }
 
     pIotYKC21Ctx->eWorkState = eIOTYKC21WorkState_Offline;
-
-    // 检测长度超过128，默认数值
-    if (pPlatInfo->Rsa_Keylength > 128)
-    {
-        pPlatInfo->Rsa_Keylength = 128;
-        memcpy(pPlatInfo->Rsa_Key, Test_Rsa_Key, 128);
-        memcpy(pPlatInfo->Token, Test_TokenStr, 14);
-    }
 }
 
 
@@ -603,16 +608,18 @@ void IotYKC21_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStanda
             for (startIndex = 0; startIndex < MSNVM_YKC21_BILLMIDE_PERIOD_COUNT;startIndex++)
             {
 
-             pStandardBillMode->periodRate[periodCount] = pYKC21BillMode->period_rate[startIndex];
-             pStandardBillMode->startTime[periodCount][0] = startIndex / 2;
-             pStandardBillMode->startTime[periodCount][1] = (startIndex % 2) * 30;
+             pStandardBillMode->periodRate[startIndex] = pYKC21BillMode->period_rate[startIndex]-1;
+             pStandardBillMode->startTime[startIndex][0] = startIndex / 2;
+             pStandardBillMode->startTime[startIndex][1] = (startIndex % 2) * 30;
 
              stopIndex = startIndex + 1;
 
-             pStandardBillMode->stopTime[periodCount][0] = stopIndex / 2;
-             pStandardBillMode->stopTime[periodCount][1] = (stopIndex % 2) * 30;
+             pStandardBillMode->stopTime[startIndex][0] = stopIndex / 2;
+             pStandardBillMode->stopTime[startIndex][1] = (stopIndex % 2) * 30;
 
             }
+
+    
 
 
             pStandardBillMode->periodCount = 48;

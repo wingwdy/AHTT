@@ -200,8 +200,7 @@ uint8_t AswPlatM_SetPlatMainPort(uint16_t port)
 
     return TRUE;
 }
-<<<<<<< HEAD
-=======
+
 
 uint8_t AswPlatM_SetPlatAuxiliaryIpPort(char *pIp, uint8_t ipLen, uint16_t port)
 {
@@ -237,7 +236,7 @@ uint8_t AswPlatM_SetPlatAuxiliaryPort(uint16_t port)
     return TRUE;
 }
 
->>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
+
 uint8_t AswPlatM_SetPlatType(char *platName)
 {
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = NULL;

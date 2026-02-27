@@ -981,23 +981,19 @@ static uint16_t IotYKC21_SendFaultReq(uint8_t port, uint8_t *pBuf)
     /* 枪号 */
     pBuf[dataLen++] = port + 1;
 
-    if (0x03 == IotYKC21_GetGunState(port) && pPowerChange->powerCurrent_max > 0 && pPowerChange->powerCurrent_max <= 32000 )
+    if (0x03 == IotYKC21_GetGunState(port) && pPowerChange->power_running <=7 )
     {
-
         pBuf[dataLen++] = 1;
-        pPowerChange->PowerHaveChangedflg = FALSE;
+      
 
     }  
     else
     {
         pBuf[dataLen++] = 0; //失败
     
-        // pPowerChange->CurDeaultMaxCurrent = 0;
-        // pPowerChange->DeaultMaxPowerStartTimess = 0;
-        // pPowerChange->DeaultMaxPowerEndTimess = 0;
-        pPowerChange->PowerHaveChangedflg = FALSE;
+     
         pPowerChange->instruct_rsp_priority = 0;
-        pPowerChange->powerCurrent_max = 0;
+        pPowerChange->power_running = 7;
         pPowerChange->Limittimess = 0;
         pPowerChange->LimitEndtimess = 0;
  
@@ -1050,27 +1046,16 @@ static uint16_t IotYKC21_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf)
     /* 枪号 */
     pBuf[dataLen++] = port + 1;
 
-    if ( pPowerChange->CurDeaultMaxCurrent > 0 && pPowerChange->CurDeaultMaxCurrent <= 32000 )
+    if ( pPowerChange->DeaultMaxPowerStartTimess !=0 &&  pPowerChange->DeaultMaxPowerEndTimess !=0)
     {
-
+        //时间有更新
         pBuf[dataLen++] = 1;
-        pPowerChange->DeaultMaxPowerdflg = FALSE;
-
     }  
     else
     {
         pBuf[dataLen++] = 0; //失败
-    
-        pPowerChange->DeaultMaxPowerdflg = FALSE;
-        pPowerChange->CurDeaultMaxCurrent = 0;
-        pPowerChange->DeaultMaxPowerStartTimess = 0;
-        pPowerChange->DeaultMaxPowerEndTimess = 0;
-         
- 
-    
     }
         
-
     return dataLen;
 
  }
@@ -1122,12 +1107,15 @@ static uint16_t IotYKC21_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf)
  }
  static uint16_t IotYKC21_SendSetFTPRsp (uint8_t port, uint8_t *pBuf)
  {
-    //JJUN
      uint16_t dataLen = 0;
- 
- 
-  
-    return dataLen;
+     /* 设备编码 */
+     memcpy(&pBuf[dataLen], pIotYKC21Ctx->pileDnBCD, 7);
+     dataLen += 7;
+     /* 设置结果 */
+     pBuf[dataLen++] = pIotYKC21Ctx->stProtoData[0].setUpdateResult;
+     return dataLen;
+
+    
  }
 
   static uint16_t IotYKC21_SendChargeStartRsp(uint8_t port, uint8_t *pBuf)

@@ -322,7 +322,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
             else
             {}
         }
-<<<<<<< HEAD
+
         /* 设置YKC21密钥 */
         else if (0 == strcmp(argv[1], "ykc21key"))
         {
@@ -345,7 +345,8 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
             else
             {
                 DSCONSOLE_CFG_LogPrint("Set ykc21token failed! erroplat or len > 14\r\n");
-=======
+            }
+        }
         else if (0 == strcmp(argv[1], "mntr"))
         {
             /* 设置IP端口 */
@@ -388,7 +389,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                 {
                     DSCONSOLE_CFG_LogPrint("Set Plat Auxiliary port failed!\r\n");
                 }
->>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
+
             }
         }
     }

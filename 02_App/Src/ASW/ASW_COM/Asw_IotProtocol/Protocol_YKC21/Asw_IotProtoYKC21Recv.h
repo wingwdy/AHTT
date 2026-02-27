@@ -46,14 +46,14 @@ typedef struct
 
 typedef struct
 {  
-    uint8_t  DeaultMaxPowerdflg;        //是否已经执行默认最大功率调整
-    uint16_t CurDeaultMaxCurrent;       //当前默认最大电流0.001A 32000
+ 
+    uint16_t DefaultPower_max;          //当前默认最大功率 kw
     uint32_t DeaultMaxPowerStartTimess; //到达此时间后按配置最大功率执行时间戳
     uint32_t DeaultMaxPowerEndTimess;   //到达此时间后解除最大功率执行时间戳
 
-    uint8_t  PowerHaveChangedflg;       //是否已经执行动态功率调整
+ 
     uint8_t  instruct_rsp_priority;     //指令响应优先级
-    uint16_t powerCurrent_max;          //运行中功率电流 0.001A 32000
+    uint16_t power_running;             //运行中功率 kw
     uint16_t Limittimess;               //运行中功率执行时间
     uint32_t LimitEndtimess;            //运行中功率结束时间戳
 }IotYKC21_PowerChange_Struct;

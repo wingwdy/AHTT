@@ -26,7 +26,7 @@
     <ToolsetNumber>0x4</ToolsetNumber>
     <ToolsetName>ARM-ADS</ToolsetName>
     <TargetOption>
-      <CLKADS>180000000</CLKADS>
+      <CLKADS>12000000</CLKADS>
       <OPTTT>
         <gFlags>1</gFlags>
         <BeepAtEnd>1</BeepAtEnd>
@@ -77,7 +77,7 @@
         <tvExpOptDlg>0</tvExpOptDlg>
         <IsCurrentTarget>1</IsCurrentTarget>
       </OPTFL>
-      <CpuCode>255</CpuCode>
+      <CpuCode>0</CpuCode>
       <DebugOpt>
         <uSim>0</uSim>
         <uTrg>1</uTrg>
@@ -119,10 +119,6 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
-          <Key>DLGUARM</Key>
-        </SetRegEntry>
-        <SetRegEntry>
-          <Number>0</Number>
           <Key>DLGTARM</Key>
           <Name>(6010=-1,-1,-1,-1,0)(6018=-1,-1,-1,-1,0)(6019=-1,-1,-1,-1,0)(6008=-1,-1,-1,-1,0)(6009=-1,-1,-1,-1,0)(6014=-1,-1,-1,-1,0)(6015=-1,-1,-1,-1,0)(6003=-1,-1,-1,-1,0)(6000=-1,-1,-1,-1,0)</Name>
         </SetRegEntry>
@@ -133,180 +129,78 @@
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
+          <Key>DLGUARM</Key>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
           <Key>JL2CM3</Key>
-          <Name>-U601012534 -O78 -S5 -ZTIFSpeedSel1000 -A0 -C0 -JU1 -JI127.0.0.1 -JP0 -RST0 -N00("ARM CoreSight SW-DP") -D00(0BE12477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8001 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -TB1 -TFE0 -FO15 -FD20000000 -FC1000 -FN1 -FF0GD32E50x_512.FLM -FS08000000 -FL07E000 -FP0($$Device:GD32E503RE$Flash\GD32E50x_512.FLM)</Name>
+          <Name>-U4294967295 -O78 -S2 -ZTIFSpeedSel5000 -A0 -C0 -JU1 -JI127.0.0.1 -JP0 -RST0 -N00("ARM CoreSight SW-DP") -D00(0BE12477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -TB1 -TFE0 -FO15 -FD20000000 -FC1000 -FN1 -FF0GD32E50x_512.FLM -FS08000000 -FL080000 -FP0($$Device:GD32E503RE$Flash\GD32E50x_512.FLM)</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
           <Key>UL2V8M</Key>
-          <Name>UL2V8M(-S0 -C0 -P0 )  -FN1 -FC1000 -FD20000000 -FF0GD32E50x_512 -FL080000 -FS08000000 -FP0($$Device:GD32E503RE$Flash\GD32E50x_512.FLM)</Name>
+          <Name>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0GD32E50x_512 -FS08000000 -FL080000 -FP0($$Device:GD32E503RE$Flash\GD32E50x_512.FLM))</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint>
-        <Bp>
-          <Number>0</Number>
-          <Type>0</Type>
-<<<<<<< HEAD
-          <LineNumber>340</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134303644</Address>
-=======
-          <LineNumber>334</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134329238</Address>
->>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-<<<<<<< HEAD
-          <Filename>..\Src\BSW\DebugService\Console\DS_ConsoleConfig.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/BSW/DebugService/Console/DS_ConsoleConfig.c\340</Expression>
-=======
-          <Filename>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_OM\Asw_IotProtoOMRecv.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_COM/Asw_IotProtocol/Protocol_OM/Asw_IotProtoOMRecv.c\334</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>350</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134329414</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_OM\Asw_IotProtoOMRecv.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_COM/Asw_IotProtocol/Protocol_OM/Asw_IotProtoOMRecv.c\350</Expression>
->>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
-        </Bp>
-      </Breakpoint>
+      <Breakpoint/>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pFTPPara</ItemText>
+          <ItemText>pBillMode,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>stSocketPara.stFtpPara</ItemText>
+          <ItemText>rateNum,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>g_stCddDrvEG800AKCtrl</ItemText>
+          <ItemText>periodNum</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>g_stSSUcmCtx.stUcmPara</ItemText>
+          <ItemText>rateNum</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pInBuf</ItemText>
+          <ItemText>periodNum,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-<<<<<<< HEAD
-          <ItemText>pPlatInfo,0x0A</ItemText>
-=======
-          <ItemText>stSocketPara.stFtpPara</ItemText>
->>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
+          <ItemText>pBillMode-&gt;periodRate</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-<<<<<<< HEAD
-          <ItemText>dataTime,0x10</ItemText>
+          <ItemText>pBillMode-&gt;rateElecPrice,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pBillMode,0x0A</ItemText>
+          <ItemText>temp2,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>argv[2]</ItemText>
+          <ItemText>pChargeData-&gt;periodTotalMoney</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>argv[1]</ItemText>
-=======
-          <ItemText>timeout,0x0A</ItemText>
->>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
+          <ItemText>pChargeData-&gt;totalMoney,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
-      <WatchWindow2>
-        <Ww>
-          <count>0</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>calcCheckSum</ItemText>
-        </Ww>
-        <Ww>
-          <count>1</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>ptr[temp]</ItemText>
-        </Ww>
-        <Ww>
-          <count>2</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>pBL0942-&gt;cacheBuf</ItemText>
-        </Ww>
-        <Ww>
-          <count>3</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>pBL0942-&gt;rms_Voltage</ItemText>
-        </Ww>
-        <Ww>
-          <count>4</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>ptr[temp]</ItemText>
-        </Ww>
-        <Ww>
-          <count>5</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>pModulePara-&gt;stModuleInfo.iccid</ItemText>
-        </Ww>
-      </WatchWindow2>
-      <MemoryWindow1>
-        <Mm>
-          <WinNumber>1</WinNumber>
-          <SubType>8</SubType>
-<<<<<<< HEAD
-          <ItemText>argv</ItemText>
-          <AccSizeX>2</AccSizeX>
-=======
-          <ItemText>r_data</ItemText>
-          <AccSizeX>0</AccSizeX>
->>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
-        </Mm>
-      </MemoryWindow1>
-      <MemoryWindow2>
-        <Mm>
-          <WinNumber>2</WinNumber>
-          <SubType>0</SubType>
-          <ItemText>argv</ItemText>
-          <AccSizeX>0</AccSizeX>
-        </Mm>
-      </MemoryWindow2>
       <Tracepoint>
         <THDelay>0</THDelay>
       </Tracepoint>
       <DebugFlag>
         <trace>0</trace>
-        <periodic>1</periodic>
+        <periodic>0</periodic>
         <aLwin>1</aLwin>
         <aCover>0</aCover>
         <aSer1>0</aSer1>
@@ -325,7 +219,7 @@
         <aPa1>0</aPa1>
         <AscS4>0</AscS4>
         <aSer4>0</aSer4>
-        <StkLoc>1</StkLoc>
+        <StkLoc>0</StkLoc>
         <TrcWin>0</TrcWin>
         <newCpu>0</newCpu>
         <uProt>0</uProt>
@@ -348,7 +242,7 @@
 
   <Group>
     <GroupName>ASW/CHG</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -700,7 +594,7 @@
 
   <Group>
     <GroupName>BSW/ComplexDeviceDriver</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1184,7 +1078,7 @@
 
   <Group>
     <GroupName>BSW/MCAL</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1404,7 +1298,7 @@
 
   <Group>
     <GroupName>BSW/SystemService</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1476,37 +1370,6 @@
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
-<<<<<<< HEAD
-=======
-  </Group>
-
-  <Group>
-    <GroupName>ThridParty/CJson</GroupName>
-    <tvExp>0</tvExp>
-    <tvExpOptDlg>0</tvExpOptDlg>
-    <cbSel>0</cbSel>
-    <RteFlg>0</RteFlg>
-  </Group>
-
-  <Group>
-    <GroupName>ThirdParty/FlashDB</GroupName>
-    <tvExp>1</tvExp>
-    <tvExpOptDlg>0</tvExpOptDlg>
-    <cbSel>0</cbSel>
-    <RteFlg>0</RteFlg>
-    <File>
-      <GroupNumber>10</GroupNumber>
-      <FileNumber>88</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\ThirdPartyLib\FlashDB\src\fdb.c</PathWithFileName>
-      <FilenameWithoutPath>fdb.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
->>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
     <File>
       <GroupNumber>8</GroupNumber>
       <FileNumber>90</FileNumber>
@@ -1543,17 +1406,6 @@
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
-<<<<<<< HEAD
-=======
-  </Group>
-
-  <Group>
-    <GroupName>ThirdParty/Fal</GroupName>
-    <tvExp>1</tvExp>
-    <tvExpOptDlg>0</tvExpOptDlg>
-    <cbSel>0</cbSel>
-    <RteFlg>0</RteFlg>
->>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
     <File>
       <GroupNumber>8</GroupNumber>
       <FileNumber>93</FileNumber>
@@ -1602,17 +1454,6 @@
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
-<<<<<<< HEAD
-=======
-  </Group>
-
-  <Group>
-    <GroupName>ThirdParty/LetterShell</GroupName>
-    <tvExp>1</tvExp>
-    <tvExpOptDlg>0</tvExpOptDlg>
-    <cbSel>0</cbSel>
-    <RteFlg>0</RteFlg>
->>>>>>> b2afb2aa1413468d90b95e77a943dcbb2c3bc250
     <File>
       <GroupNumber>8</GroupNumber>
       <FileNumber>97</FileNumber>
@@ -3217,7 +3058,7 @@
 
   <Group>
     <GroupName>Common</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -3297,7 +3138,7 @@
 
   <Group>
     <GroupName>Core</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

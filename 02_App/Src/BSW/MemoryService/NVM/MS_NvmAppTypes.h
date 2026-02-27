@@ -223,6 +223,9 @@ typedef struct
 
 typedef struct YKC21platinfo
 {
+    uint16_t   DefaultMAX_power[SYSCFG_CFG_GUN_NUM];                /* 默认最大功率 kw*/
+    uint32_t  DeaultMaxPowerStartTimess[SYSCFG_CFG_GUN_NUM];       /* 默认最大功率开始时间戳*/
+    uint32_t  DeaultMaxPowerEndTimess[SYSCFG_CFG_GUN_NUM];         /* 默认最大功率结束时间戳 kw*/
 	uint8_t  Rsa_Keylength;	                                       /* 云快充2.1 rsa公钥长度 */
     uint8_t  Rsa_Key[128];	                                       /* 云快充2.1 rsa公钥 */
     uint8_t  Token[14];	                                           /* 云快充2.1 token */

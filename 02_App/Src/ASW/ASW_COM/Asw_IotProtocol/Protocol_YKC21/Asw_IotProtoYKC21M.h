@@ -60,6 +60,7 @@ typedef struct
     uint8_t updateAccountMoneyResult;
 
     uint8_t setQrCodeResult;
+    uint8_t setUpdateResult;
 }IotYKC21ProtoData_Struct;
 
 

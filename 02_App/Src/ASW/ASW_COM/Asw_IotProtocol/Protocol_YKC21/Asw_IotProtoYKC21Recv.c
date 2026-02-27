@@ -774,22 +774,15 @@ static uint8_t IotYKC21_RecvSetPowerCharge(uint8_t *port, uint8_t *r_data, uint1
 {
     uint8_t index = 7;
  
-    uint16_t power_max = 0 ;
+    YKC21_Recv_Data_Decrypt(r_data,len);
+
     IOT_YKC21_RecvGunNoTransform(r_data[index], port[0]);
     IotYKC21_PowerChange_Struct *pPowerChange = &IotYKC21_PowerChangeConfig[port[0]];
 
-    YKC21_Recv_Data_Decrypt(r_data,len);
-
-    
-    power_max = (r_data[index+2]<<8|r_data[index+1]);
-
-    pPowerChange->instruct_rsp_priority = (r_data[index+3]);
-    
+    pPowerChange->power_running = (r_data[index+2]<<8|r_data[index+1]);
+    pPowerChange->instruct_rsp_priority = (r_data[index+3]); 
     pPowerChange->Limittimess =(r_data[index+5]<<8|r_data[index+4])*60 ;
     pPowerChange->LimitEndtimess = pPowerChange->Limittimess + SSTM_GetSecTimestamp();
-    
-    pPowerChange->powerCurrent_max = (power_max*1000+50)/220*1000;
-    
     
 
    
@@ -903,22 +896,35 @@ static uint8_t IotYKC21_RecvSetPowerDefaultMax(uint8_t *port, uint8_t *r_data, u
 {
     uint8_t index = 7;
  
-    uint16_t DefaultPower_max = 0 ;
+
+
+    YKC21_Recv_Data_Decrypt(r_data,len);
     IOT_YKC21_RecvGunNoTransform(r_data[index], port[0]);
     IotYKC21_PowerChange_Struct *pPowerChange = &IotYKC21_PowerChangeConfig[port[0]];
-    
-    YKC21_Recv_Data_Decrypt(r_data,len);
+    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pIotYKC21Ctx->param.stYKC21Param.platinfo;
 
-    
-    DefaultPower_max = (r_data[index+2]<<8|r_data[index+1]);
-    pPowerChange->CurDeaultMaxCurrent = (DefaultPower_max*1000+50)/220*1000;
-
-    
+   
+    pPowerChange->DefaultPower_max = (r_data[index+2]<<8|r_data[index+1]);
     pPowerChange->DeaultMaxPowerStartTimess = Common_Cp56Time2aToTimestamp(&r_data[index+3]);
     pPowerChange->DeaultMaxPowerEndTimess = Common_Cp56Time2aToTimestamp(&r_data[index+3+7]);
 
+    //判断数值正确性
+    if ( pPowerChange->DefaultPower_max > 7 )
+    {  
+        pPowerChange->DefaultPower_max = 0;
+        pPowerChange->DeaultMaxPowerStartTimess = 0;
+        pPowerChange->DeaultMaxPowerEndTimess = 0;
+    }
+    
+    //存储
+    pPlatInfo->DefaultMAX_power[port[0]] =  pPowerChange->DefaultPower_max; 
+    pPlatInfo->DeaultMaxPowerStartTimess[port[0]] = pPowerChange->DeaultMaxPowerStartTimess;
+    pPlatInfo->DeaultMaxPowerStartTimess[port[0]] = pPowerChange->DeaultMaxPowerEndTimess;
+    
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)&pIotYKC21Ctx->param, sizeof(MSNvmPlatPrivateParam_Union));
+ 
 	
-     Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, 0, IOT_YKC21_CMD_POWERDEFAULT_MAX_RSP, TRUE);
+    Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, 0, IOT_YKC21_CMD_POWERDEFAULT_MAX_RSP, TRUE);
 
      return TRUE;
 }
@@ -1137,12 +1143,59 @@ static uint8_t IotYKC21_RecvSetKey(uint8_t *port, uint8_t *r_data, uint16_t len)
 
 static uint8_t IotYKC21_RecvSetFTP(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
+
+
+    uint8_t index = 7;
     uint8_t *pRecvData = r_data;
-    
+   
+    uint32_t timeout = 0;
+
+     
     YKC21_Recv_Data_Decrypt(r_data,len);
 
-    //JJUN
-     return FALSE;
+    CddNetMSocketPara_Union stSocketPara = {0};
+
+    if (pRecvData[index] != 0x02)
+    {
+        pIotYKC21Ctx->stProtoData[0].setUpdateResult = 0x02;
+    }
+    else
+    {
+        index += 3;
+        
+        stSocketPara.stFtpPara.eFileFormat = eCddNetMFileType_BIN;
+        stSocketPara.stFtpPara.eMode = eCddNetMFtpMode_Download;
+
+        memcpy(stSocketPara.stFtpPara.ip, &pRecvData[index], 16);
+        index += 16;
+        memcpy(&stSocketPara.stFtpPara.port, &pRecvData[index], 2);
+        index += 2;
+        memcpy(stSocketPara.stFtpPara.user, &pRecvData[index], 16);
+        index += 16;
+        memcpy(stSocketPara.stFtpPara.passwd, &pRecvData[index], 16);
+        index += 16;
+        memcpy(stSocketPara.stFtpPara.path, &pRecvData[index], 32);
+        index += 32;
+        memcpy(stSocketPara.stFtpPara.fileName, &pRecvData[index], 32);
+        index += 32;
+      
+        if (pRecvData[index] == 0x01)
+        {
+            index += 1;
+            timeout = pRecvData[index] * 60 * 1000;
+            SSUcm_ReqStartOTA(&stSocketPara, eSSUcmChannelType_FTP, eSSUcmExcuteMode_Immediate, timeout);
+        }
+        else
+        {
+            index += 1;
+            timeout = pRecvData[index] * 60 * 1000;
+            SSUcm_ReqStartOTA(&stSocketPara, eSSUcmChannelType_FTP, eSSUcmExcuteMode_WaitIdle, timeout);
+        }
+
+        pIotYKC21Ctx->stProtoData[0].setUpdateResult = 0x00;
+    }
+
+    return TRUE;
 
 }
 
