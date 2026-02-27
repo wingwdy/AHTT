@@ -115,7 +115,7 @@ static CommonRecvCtrl_Struct* IotGN_GetRecvCtrl(uint8_t port, uint16_t cmd)
         case IOT_GN_CMD_SET_BILLMODE_MULTIRATE:     pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][13];  break;
         case IOT_GN_CMD_SET_QRCODE:                 pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][14];  break;
         case IOT_GN_CMD_REBOOT:                     pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][15];  break;
-        case IOT_GN_CMD_UPDATE:                     pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][15];  break;
+        case IOT_GN_CMD_UPDATE:                     pRecvCtrl = &pIotGNCtx->stRecvCtrl[port][16];  break;
         default: break;
     }
     return pRecvCtrl;
@@ -421,6 +421,154 @@ void IotGN_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardB
     }
 }
 
+void IotGN_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t *pProtocolRecord, uint16_t *pRecordLen)
+{
+    MSNvmGNOrderInfo_Struct *pOrderData = &pFlashRecord->stGNOrderInfo;
+    uint8_t *pBuf = pProtocolRecord;
+    uint16_t dataLen = 0;
+    uint8_t index = 0;
+    CommonDateTime_Struct dateTime;
+    uint16_t temp = 0;
+
+    if (pFlashRecord != NULL && pProtocolRecord != NULL && pRecordLen != NULL)
+    {
+        /* 设备编码 */
+        memcpy(&pBuf[dataLen], pIotGNCtx->pileDnBCD, 7);
+        dataLen += 7;
+        /* 枪号 */
+        pBuf[dataLen++] = pOrderData->port + 1;
+        /* 交易流水号 */
+        memcpy(&pBuf[dataLen], pOrderData->orderTransactionNum, 16);
+        dataLen += 16;
+        /* 开始时间 */
+        Conmon_TimestampToDateTime(pOrderData->startTime, &dateTime);
+        temp = Common_uintBINToBCD(dateTime.year);
+        pBuf[dataLen++] = (temp >> 8) & 0xFF;
+        pBuf[dataLen++] = (uint8_t)(temp);
+        Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
+        pBuf[dataLen++] = (uint8_t)(temp);
+        Common_BINToBCD(&dateTime.day, (uint8_t *)&temp, 1);
+        pBuf[dataLen++] = (uint8_t)(temp);
+        Common_BINToBCD(&dateTime.hour, (uint8_t *)&temp, 1);
+        pBuf[dataLen++] = (uint8_t)(temp);
+        Common_BINToBCD(&dateTime.minute, (uint8_t *)&temp, 1);
+        pBuf[dataLen++] = (uint8_t)(temp);
+        Common_BINToBCD(&dateTime.second, (uint8_t *)&temp, 1);
+        pBuf[dataLen++] = (uint8_t)(temp);
+        /* 结束时间 */
+        Conmon_TimestampToDateTime(pOrderData->stopTime, &dateTime);
+        temp = Common_uintBINToBCD(dateTime.year);
+        pBuf[dataLen++] = (temp >> 8) & 0xFF;
+        pBuf[dataLen++] = (uint8_t)(temp);
+        Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
+        pBuf[dataLen++] = (uint8_t)(temp);
+        Common_BINToBCD(&dateTime.day, (uint8_t *)&temp, 1);
+        pBuf[dataLen++] = (uint8_t)(temp);
+        Common_BINToBCD(&dateTime.hour, (uint8_t *)&temp, 1);
+        pBuf[dataLen++] = (uint8_t)(temp);
+        Common_BINToBCD(&dateTime.minute, (uint8_t *)&temp, 1);
+        pBuf[dataLen++] = (uint8_t)(temp);
+        Common_BINToBCD(&dateTime.second, (uint8_t *)&temp, 1);
+        pBuf[dataLen++] = (uint8_t)(temp);
+
+        if (pFlashRecord->stGNOrderInfo.billmodeType == IOT_GN_BILLMODE_RATE_TYPE_MULT)
+        {
+            /* 电表总起值 */
+            Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->startMeterVal);
+            dataLen += 4;
+            /* 电表总止值 */
+            Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->stopMeterVal);
+            dataLen += 4;
+            /* 总电量 */
+            Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->totalEnergy);
+            dataLen += 4;
+            /* 总计损电量 */
+            Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->totalLossEnergy);
+            dataLen += 4;
+            /* 总消费金额 */
+            Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->totalMoney);
+            dataLen += 4;
+            /* 电动汽车唯一标识 */
+            memcpy(&pBuf[dataLen], pOrderData->vin, 17);
+            dataLen += 17;
+            /*  交易标识 */
+            pBuf[dataLen++] = pOrderData->dealFlag;
+            /* 交易日期 */
+            Conmon_TimestampToDateTime(pOrderData->dealDate, &dateTime);
+            temp = Common_uintBINToBCD(dateTime.year);
+            pBuf[dataLen++] = (temp >> 8) & 0xFF;
+            pBuf[dataLen++] = (uint8_t)(temp);
+            Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
+            pBuf[dataLen++] = (uint8_t)(temp);
+            Common_BINToBCD(&dateTime.day, (uint8_t *)&temp, 1);
+            pBuf[dataLen++] = (uint8_t)(temp);
+            Common_BINToBCD(&dateTime.hour, (uint8_t *)&temp, 1);
+            pBuf[dataLen++] = (uint8_t)(temp);
+            Common_BINToBCD(&dateTime.minute, (uint8_t *)&temp, 1);
+            pBuf[dataLen++] = (uint8_t)(temp);
+            Common_BINToBCD(&dateTime.second, (uint8_t *)&temp, 1);
+            pBuf[dataLen++] = (uint8_t)(temp);
+            /*  停止原因 */
+            pBuf[dataLen++] = pOrderData->stopReason;
+            /* 逻辑卡号 */
+            memcpy(&pBuf[dataLen], pOrderData->logicCardNum, 8);
+            dataLen += 8;
+            /* 单价、电量、计损电量、金额 */
+            memcpy(&pBuf[dataLen], pOrderData->billInfo, 144);
+            dataLen += 144;
+        }
+        else
+        {
+            /* 单价、电量、计损电量、金额 */
+            memcpy(&pBuf[dataLen], pOrderData->billInfo, 64);
+            dataLen += 64;
+            /* 电表总起值 */
+            Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->startMeterVal);
+            dataLen += 4;
+            /* 电表总止值 */
+            Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->stopMeterVal);
+            dataLen += 4;
+            /* 总电量 */
+            Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->totalEnergy);
+            dataLen += 4;
+            /* 总计损电量 */
+            Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->totalLossEnergy);
+            dataLen += 4;
+            /* 总消费金额 */
+            Common_Uint32ToFourUint8(&pBuf[dataLen], pOrderData->totalMoney);
+            dataLen += 4;
+            /* 电动汽车唯一标识 */
+            memcpy(&pBuf[dataLen], pOrderData->vin, 17);
+            dataLen += 17;
+            /*  交易标识 */
+            pBuf[dataLen++] = pOrderData->dealFlag;
+            /* 交易日期 */
+            Conmon_TimestampToDateTime(pOrderData->dealDate, &dateTime);
+            temp = Common_uintBINToBCD(dateTime.year);
+            pBuf[dataLen++] = (temp >> 8) & 0xFF;
+            pBuf[dataLen++] = (uint8_t)(temp);
+            Common_BINToBCD(&dateTime.month, (uint8_t *)&temp, 1);
+            pBuf[dataLen++] = (uint8_t)(temp);
+            Common_BINToBCD(&dateTime.day, (uint8_t *)&temp, 1);
+            pBuf[dataLen++] = (uint8_t)(temp);
+            Common_BINToBCD(&dateTime.hour, (uint8_t *)&temp, 1);
+            pBuf[dataLen++] = (uint8_t)(temp);
+            Common_BINToBCD(&dateTime.minute, (uint8_t *)&temp, 1);
+            pBuf[dataLen++] = (uint8_t)(temp);
+            Common_BINToBCD(&dateTime.second, (uint8_t *)&temp, 1);
+            pBuf[dataLen++] = (uint8_t)(temp);
+            /*  停止原因 */
+            pBuf[dataLen++] = pOrderData->stopReason;
+            /* 逻辑卡号 */
+            memcpy(&pBuf[dataLen], pOrderData->logicCardNum, 8);
+            dataLen += 8;
+        }
+
+        pRecordLen[0] = dataLen;
+    }
+}
+
+
 uint8_t IotGN_GetGunState(uint8_t port)
 {
     uint8_t gunState = 0;
@@ -524,6 +672,8 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
             memcpy(pGnOrder->logicCardNum, pIotGNCtx->stProtoData[port].authCardID, 8);
         }
 
+        pOrderData->port = port;
+        pOrderData->protocolType = eAswPlatCardType_GN;
         pOrderData->orderLen = sizeof(MSNvmGNOrderInfo_Struct);
         pGnOrder->stopReason = eIotGNStopReason_PowerOff;
     }

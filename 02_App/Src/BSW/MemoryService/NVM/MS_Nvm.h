@@ -43,6 +43,7 @@ typedef enum
     eMSNvmBlockID_OrderRecord,
     eMSNvmBlockID_ErrorRecord,
     eMSNvmBlockID_RunningLogRecord,
+    eMSNvmBlockID_OmOrderRecord,
     eMSNvmBlockID_Count,
 }MSNvmBlockID_Enum;
 

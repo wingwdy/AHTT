@@ -19,6 +19,7 @@
 #include "Asw_IotProtoOMTypes.h"
 #include "Cdd_NetM.h"
 #include "Ms_Nvm.h"
+#include "SS_Ucm.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -45,7 +46,9 @@ typedef struct
     uint8_t setForbidStateFailReason;
     uint8_t setUnforbidStateResult;
     uint8_t setUnforbidStateFailReason;
+    uint8_t recvUpdateFlag;
     uint8_t setUpdateResult;
+    SSUcmResult_Enum lastUcmResult;
 }IotOMProtoData_Struct;
 
 typedef struct 

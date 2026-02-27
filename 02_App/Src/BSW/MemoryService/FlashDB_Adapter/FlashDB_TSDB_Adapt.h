@@ -30,6 +30,8 @@ typedef enum
 {
 	eTSDBAdaptChannel_ChargeRecord,
 	eTSDBAdaptChannel_ErrorRecord,
+	eTSDBAdaptChannel_RunningLog,
+	eTSDBAdaptChannel_OmChargeRecord,
 	eTSDBAdaptChannel_Count,
 }TSDBAdaptChannel_Enum;
 

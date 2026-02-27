@@ -26,7 +26,8 @@
 #define MSNVM_QRCODE_LEN                   256
 
 /* 订单长度 */
-#define MSNVM_ORDER_MAX_LEN                (512+512+512)
+#define MSNVM_ORDER_MAX_LEN                1024
+
 
 /* 故障信息长度 */
 #define MSNVM_ERROR_INFO_MAX_LEN           288
@@ -140,6 +141,7 @@ typedef struct
 }MSNvmGNOrderInfo_Struct;
 
 
+
 typedef struct 
 {
     //若根据协议2.1.0全部存储有 1098 字节; 根据协议2.1.1全部存储有 330 字节
@@ -163,18 +165,19 @@ typedef struct
     uint8_t stopReason;                       /* 停止原因 */
     uint8_t logicCardNum[8];                  /* 逻辑卡号 */
     uint8_t fee_num;                          /* 费率个数 */
-    uint32_t billInfo[48][4];                 /* 
-                                                48个时段对应的 
-                                                [][0]单价(5位小数)
-                                                [][1]电量(4位小数)
-                                                [][2]计损电量(4位小数)
-                                                [][3]金额(4位小数) 
-                                             */
+    // uint32_t billInfo[48][4];                 /* 
+    //                                             48个时段对应的 
+    //                                             [][0]单价(5位小数)
+    //                                             [][1]电量(4位小数)
+    //                                             [][2]计损电量(4位小数)
+    //                                             [][3]金额(4位小数) 
+    //                                          */
 
     uint32_t time_power[48];                /* 48时段电量 小数点后四位 */
 	
  
 }MSNvmYKC21OrderInfo_Struct;
+
 
 typedef union 
 {
@@ -188,15 +191,22 @@ typedef struct
 {
     uint8_t orderSaveState;                   /* 订单保存状态 */
     uint16_t orderLen;                        /* 订单数据长度 */
+    uint8_t port;                             /* 枪号 */
+    uint8_t protocolType;                     /* 协议类型 */
     MSNvmPlatOrderInfo_Union platOrderInfo;   /* 各平台订单类型数据 */
 }MSNvmOrderInfo_Struct;
-
 
 /* 故障记录 */
 typedef struct 
 {
     uint8_t userData[MSNVM_ERROR_INFO_MAX_LEN];
 }MSNvmErrorInfo_Struct;
+
+/* 运行日志记录 */
+typedef struct 
+{
+    uint8_t userData[MSNVM_RUNNING_LOG_MAX_LEN];
+}MSNvmRunningLog_Struct;
 
 
 /*********************************************************************************************** */
@@ -223,7 +233,7 @@ typedef struct
 
 typedef struct YKC21platinfo
 {
-    uint16_t   DefaultMAX_power[SYSCFG_CFG_GUN_NUM];                /* 默认最大功率 kw*/
+    uint16_t  DefaultMAX_power[SYSCFG_CFG_GUN_NUM];                /* 默认最大功率 kw*/
     uint32_t  DeaultMaxPowerStartTimess[SYSCFG_CFG_GUN_NUM];       /* 默认最大功率开始时间戳*/
     uint32_t  DeaultMaxPowerEndTimess[SYSCFG_CFG_GUN_NUM];         /* 默认最大功率结束时间戳 kw*/
 	uint8_t  Rsa_Keylength;	                                       /* 云快充2.1 rsa公钥长度 */

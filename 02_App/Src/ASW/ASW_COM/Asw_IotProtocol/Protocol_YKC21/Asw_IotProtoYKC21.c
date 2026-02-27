@@ -628,8 +628,76 @@ void IotYKC21_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStanda
     }
 }
 
+void IotYKC21_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t *pProtocolRecord, uint16_t *pRecordLen)
+{
+    MSNvmYKC21OrderInfo_Struct *pOrderData = &pFlashRecord->stYKC21OrderInfo;
+    uint8_t *pBuf = pProtocolRecord;
+    uint16_t dataLen = 0;
+    uint8_t index = 0;
+    CommonDateTime_Struct dateTime;
+    uint16_t temp = 0;
 
+    if (pFlashRecord != NULL && pProtocolRecord != NULL && pRecordLen != NULL)
+    {
+         /* 交易流水号 */
+    memcpy(&pBuf[dataLen], pOrderData->orderTransactionNum, 16);
+    dataLen += 16;
 
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pOrderData->pileDnBCD, 7);
+    dataLen += 7;
+    /* 枪号 */
+    pBuf[dataLen++] = pOrderData ->port;
+   
+     /* 开始时间 */
+	  memcpy(&pBuf[dataLen], pOrderData->startTime, 7);
+    dataLen += 7;
+
+    /* 结束时间 */
+	  memcpy(&pBuf[dataLen], pOrderData->stopTime, 7);
+    dataLen += 7;
+    /* 电表表号 电表密文 电表协议版本号 加密方式 */ 
+    memset(&pBuf[dataLen],0,(6+34+2+1));
+    dataLen += (6+34+2+1);
+    /* 电表总起值 */
+		memcpy(&pBuf[dataLen], pOrderData->startMeterVal, 5);
+    dataLen += 5;
+    /* 电表总止值 */
+		memcpy(&pBuf[dataLen], pOrderData->stopMeterVal, 5);
+    dataLen += 5;
+    /* 总电量 */
+		memcpy(&pBuf[dataLen], pOrderData->totalEnergy, 4);
+    dataLen += 4;
+    /* 总计损电量 */
+		memcpy(&pBuf[dataLen], pOrderData->totalLossEnergy, 4);
+    dataLen += 4;
+    /* 总消费金额 */
+		memcpy(&pBuf[dataLen], pOrderData->totalMoney, 4);
+    dataLen += 4;
+    /* 电动汽车唯一标识 */
+    memset(&pBuf[dataLen],0,17);
+    dataLen += 17;
+    /*  交易标识 */
+    pBuf[dataLen++] = pOrderData->dealFlag;
+    /* 交易日期 */
+		memcpy(&pBuf[dataLen], pOrderData->dealDate, 7);
+    dataLen += 7;
+    /*  停止原因 */
+    pBuf[dataLen++] = pOrderData->stopReason;
+    /* 逻辑卡号 */
+    memcpy(&pBuf[dataLen], pOrderData->logicCardNum, 8);
+    dataLen += 8;
+    /* 费率时段数量 */
+    pBuf[dataLen++] = 48;
+  
+   /* 48h 分段电量 */
+    memcpy(&pBuf[dataLen], pOrderData->time_power, 48*4);
+
+    dataLen += (4*48);
+
+     pRecordLen[0] = dataLen;
+    }
+}
 uint8_t IotYKC21_GetGunState(uint8_t port)
 {
     uint8_t gunState = 0;
@@ -792,7 +860,14 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
         }
 
         pOrderData->orderLen = sizeof(MSNvmYKC21OrderInfo_Struct);
+       
+
+
+        pOrderData->port = port+1;
+        pOrderData->protocolType = eAswPlatCardType_YKC21;
+        pOrderData->orderLen = sizeof(MSNvmYKC21OrderInfo_Struct);
         pYkcOrder->stopReason = eIotYKC21StopReason_PowerOff;
+
     }
  
 
@@ -808,21 +883,26 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
     Common_Uint32ToFourUint8(&pYkcOrder->totalLossEnergy[0],pChargeData->totalLossEnergy);
  
     Common_Uint32ToFourUint8(&pYkcOrder->totalMoney[0],pChargeData->totalMoney);
-  
 
+#if (20100 == IOT_YKC21_PROTOCOL_VERSION)
+    pYkcOrder->fee_num = pBillMode->rateCount;
 
-     pYkcOrder->fee_num =  pBillMode->rateCount;
- 
     for (index = 0; index < 48; index++)
     {
-        pYkcOrder->billInfo[index][0] = pBillMode->totalPrice[index];            // 单价
-        pYkcOrder->billInfo[index][1] = pChargeData->rateTotalEnergy[index];     // 电量     
-        pYkcOrder->billInfo[index][2] = pChargeData->rateTotalLossEnergy[index]; // 计损电量              
-        pYkcOrder->billInfo[index][3] = pChargeData->rateTotalMoney[index];      // 总金额  
+//        pYkcOrder->billInfo[index][0] = pBillMode->totalPrice[index];            // 单价
+//        pYkcOrder->billInfo[index][1] = pChargeData->rateTotalEnergy[index];     // 电量
+//        pYkcOrder->billInfo[index][2] = pChargeData->rateTotalLossEnergy[index]; // 计损电量
+//        pYkcOrder->billInfo[index][3] = pChargeData->rateTotalMoney[index];      // 总金额
 
-        pYkcOrder->time_power[index] = pChargeData->periodElePower[index];      // 48时段电量  
+        pYkcOrder->time_power[index] = pChargeData->periodElePower[index]; // 48时段电量
     }
-   
+#else
+    pYkcOrder->fee_num = 48;
+    for (index = 0; index < 48; index++)
+    {
+        pYkcOrder->time_power[index] = pChargeData->periodElePower[index]; // 48时段电量
+    }
+#endif
 
     if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
     {

@@ -28,10 +28,15 @@
 
 #define ASWMONITOR_CFG_REBOOT_DELAY_TIME           (2 * 1000U)
 
-
 /* 充电最小余额，1元，保留2位小数 */
-#define ASWMONITOR_CFG_CHARGE_MIN_ACCOUNT_MONEY    (100)     
+#define ASWMONITOR_CFG_CHARGE_MIN_ACCOUNT_MONEY    (100)
 
+/* 按金额充电，最小充电金额：0.5元，保留2位小数 */
+#define ASWMONITOR_CFG_CHARGE_MIN_CHARGE_MONEY     (50)
+/* 按金额充电，最小充电时间：1秒， */
+#define ASWMONITOR_CFG_CHARGE_MIN_CHARGE_TIME      (1)
+/* 按电量充电，最小充电电量：0.01度，保留2位小数 */
+#define ASWMONITOR_CFG_CHARGE_MIN_CHARGE_ENERGY    (1)
 
 #define ASWMONITOR_CFG_ReadBlockOrderInfo(port, orderInfo, size, ret)  do \
                                                             {\

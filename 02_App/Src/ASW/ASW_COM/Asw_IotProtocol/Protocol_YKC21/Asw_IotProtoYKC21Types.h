@@ -24,7 +24,7 @@
 *    Macro Definition
 ******************************************************************************/
 /* 通信协议版本 */
-#define IOT_YKC21_PROTOCOL_VERSION                 (20100U) //2.1.0
+#define IOT_YKC21_PROTOCOL_VERSION                 (20101U) //2.1.1
 
 /* 通信协议头定义--YKC21协议 */
 #define IOT_YKC21_PLUS_HEAD                       (0x68U)                
@@ -244,7 +244,7 @@ extern uint8_t random_key_A[16];            	// 随机密钥A
 *    Global Function Prototypes
 ******************************************************************************/
 
-#define ASW_IOT_PROTO_YKC21_VERINF 211 
+
 
 #endif /* ASW_IOT_PROTO_YKC21_TYPES_H_ */
 

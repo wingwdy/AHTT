@@ -118,7 +118,7 @@ extern void IotYkc21_powercontrol(uint16_t power,uint8_t port);
 uint8_t IotYKC21_GetGunState(uint8_t port);
 void IotYKC21_OfflineHandle(void);
 
-
+void IotYKC21_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t *pProtocolRecord, uint16_t *pRecordLen);
 
 
 

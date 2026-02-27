@@ -232,10 +232,20 @@ static uint8_t AswMonitor_DetectChargeCtrlMoney(uint8_t port, AswMonitorChargeCt
 {
     uint32_t totalMoney = pChargeData->totalMoney / 100;
     uint8_t ret = FALSE;
+    uint32_t diff = 0;
 
     if (totalMoney >= pstChargeCtrl->chargeCtrlVal)
     {
         ret = TRUE;
+    }
+    else
+    {
+        diff = pstChargeCtrl->chargeCtrlVal - totalMoney;
+
+        if (diff < ASWMONITOR_CFG_CHARGE_MIN_CHARGE_MONEY)
+        {
+            ret = TRUE;
+        }
     }
 
     return ret;
@@ -243,22 +253,43 @@ static uint8_t AswMonitor_DetectChargeCtrlMoney(uint8_t port, AswMonitorChargeCt
 static uint8_t AswMonitor_DetectChargeCtrlTime(uint8_t port, AswMonitorChargeCtrl_Struct *pstChargeCtrl, AswMonitorChargeData_Struct *pChargeData)
 {
     uint8_t ret = FALSE;
+    uint32_t diff = 0;
 
-    if (pChargeData->chargeTime > pstChargeCtrl->chargeCtrlVal)
+    if (pChargeData->chargeTime >= pstChargeCtrl->chargeCtrlVal)
     {
         ret = TRUE;
+    }
+    else
+    {
+        diff = pstChargeCtrl->chargeCtrlVal - pChargeData->chargeTime;
+
+        if (diff < ASWMONITOR_CFG_CHARGE_MIN_CHARGE_TIME)
+        {
+            ret = TRUE;
+        }
     }
 
     return ret;
 }
+
 static uint8_t AswMonitor_DetectChargeCtrlEnergy(uint8_t port, AswMonitorChargeCtrl_Struct *pstChargeCtrl, AswMonitorChargeData_Struct *pChargeData)
 {
     uint32_t totalLossEnergy = pChargeData->totalLossEnergy / 100;
     uint8_t ret = FALSE;
+    uint32_t diff = 0;
     
     if (totalLossEnergy >= pstChargeCtrl->chargeCtrlVal)
     {
         ret = TRUE;
+    }
+    else
+    {
+        diff = pstChargeCtrl->chargeCtrlVal - totalLossEnergy;
+
+        if (diff < ASWMONITOR_CFG_CHARGE_MIN_CHARGE_ENERGY)
+        {
+            ret = TRUE;
+        }
     }
 
     return ret;
@@ -313,6 +344,7 @@ static void AswMonitor_SaveChargeRecord(uint8_t port, AswMonitorData_Struct *pst
         if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
         {
             MSNvm_InsertNewRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
+            MSNvm_InsertNewRecord(eMSNvmBlockID_OmOrderRecord, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
         }
     }
 }
@@ -471,6 +503,7 @@ void AswMonitor_PrintChargeData(void)
         envTemp = AswChargeIf_GetEnvTemperature();
         power = AswChargeIf_GetOutputPower(port);
         energy = pChargeData->totalLossEnergy;
+        money = pChargeData->totalMoney;
         chargeTime = pChargeData->chargeTime;
         cpVol = AswChargeIf_GetCpVoltage(port);
         cpDuty = AswChargeIf_GetCpDuty(port);
@@ -777,8 +810,6 @@ uint8_t AswMonitor_IsOrderIdle(uint8_t port)
 }
 
 
-
-
 void AswMonitor_InitMemory(void)
 {
     AswMonitorData_Struct *pstAswMonitorData = NULL;
@@ -800,6 +831,7 @@ void AswMonitor_InitMemory(void)
                 pstAswMonitorData->stOrderData.orderSaveState = ASWMONITOR_ORDER_SAVE_STOP;
                 ASWMONITOR_CFG_WriteBlockOrderInfo(port, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
                 MSNvm_InsertNewRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
+                MSNvm_InsertNewRecord(eMSNvmBlockID_OmOrderRecord, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
             }
         }
     }

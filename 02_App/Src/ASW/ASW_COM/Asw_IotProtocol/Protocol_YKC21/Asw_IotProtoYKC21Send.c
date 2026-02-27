@@ -702,72 +702,77 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
     CommonDateTime_Struct dateTime;
     uint16_t temp = 0;
 
-     /* 交易流水号 */
-    memcpy(&pBuf[dataLen], pOrderData->orderTransactionNum, 16);
-    dataLen += 16;
-
-    /* 设备编码 */
-    memcpy(&pBuf[dataLen], pIotYKC21Ctx->pileDnBCD, 7);
-    dataLen += 7;
-    /* 枪号 */
-    pBuf[dataLen++] = port + 1;
-   
-    /* 开始时间 */
-	  memcpy(&pBuf[dataLen], pOrderData->startTime, 7);
-    dataLen += 7;
-
-    /* 结束时间 */
-	  memcpy(&pBuf[dataLen], pOrderData->stopTime, 7);
-    dataLen += 7;
-    /* 电表表号 电表密文 电表协议版本号 加密方式 */ 
-    memset(&pBuf[dataLen],0,(6+34+2+1));
-    dataLen += (6+34+2+1);
-    /* 电表总起值 */
-		memcpy(&pBuf[dataLen], pOrderData->startMeterVal, 5);
-    dataLen += 5;
-    /* 电表总止值 */
-		memcpy(&pBuf[dataLen], pOrderData->stopMeterVal, 5);
-    dataLen += 5;
-    /* 总电量 */
-		memcpy(&pBuf[dataLen], pOrderData->totalEnergy, 4);
-    dataLen += 4;
-    /* 总计损电量 */
-		memcpy(&pBuf[dataLen], pOrderData->totalLossEnergy, 4);
-    dataLen += 4;
-    /* 总消费金额 */
-		memcpy(&pBuf[dataLen], pOrderData->totalMoney, 4);
-    dataLen += 4;
-    /* 电动汽车唯一标识 */
-    memset(&pBuf[dataLen],0,17);
-    dataLen += 17;
-    /*  交易标识 */
-    pBuf[dataLen++] = pOrderData->dealFlag;
-    /* 交易日期 */
-		memcpy(&pBuf[dataLen], pOrderData->dealDate, 7);
-    dataLen += 7;
-    /*  停止原因 */
-    pBuf[dataLen++] = pOrderData->stopReason;
-    /* 逻辑卡号 */
-    memcpy(&pBuf[dataLen], pOrderData->logicCardNum, 8);
-    dataLen += 8;
-
-#if (210 == ASW_IOT_PROTO_YKC21_VERINF)
-    /* 费率时段数量 */
-    pBuf[dataLen++] = pOrderData->fee_num;
-    /* 单价、电量、计损电量、金额 */
-    memcpy(&pBuf[dataLen], pOrderData->billInfo, (pOrderData->fee_num) * 4 * 4);
-
-    dataLen += (pOrderData->fee_num) * 4 * 4;
-#else
-    pBuf[dataLen++] = 48;
-#endif
-
-    /* 48h 分段电量 */
-    memcpy(&pBuf[dataLen], pOrderData->time_power, 48 * 4);
-
-    dataLen += (4 * 48);
+    IotYKC21_TransformChargeRecord(&pIotYKC21Ctx->stOrderInfo.platOrderInfo, pBuf, &dataLen);
 
     return dataLen;
+
+
+//      /* 交易流水号 */
+//     memcpy(&pBuf[dataLen], pOrderData->orderTransactionNum, 16);
+//     dataLen += 16;
+
+//     /* 设备编码 */
+//     memcpy(&pBuf[dataLen], pIotYKC21Ctx->pileDnBCD, 7);
+//     dataLen += 7;
+//     /* 枪号 */
+//     pBuf[dataLen++] = port + 1;
+   
+//     /* 开始时间 */
+// 	  memcpy(&pBuf[dataLen], pOrderData->startTime, 7);
+//     dataLen += 7;
+
+//     /* 结束时间 */
+// 	  memcpy(&pBuf[dataLen], pOrderData->stopTime, 7);
+//     dataLen += 7;
+//     /* 电表表号 电表密文 电表协议版本号 加密方式 */ 
+//     memset(&pBuf[dataLen],0,(6+34+2+1));
+//     dataLen += (6+34+2+1);
+//     /* 电表总起值 */
+// 		memcpy(&pBuf[dataLen], pOrderData->startMeterVal, 5);
+//     dataLen += 5;
+//     /* 电表总止值 */
+// 		memcpy(&pBuf[dataLen], pOrderData->stopMeterVal, 5);
+//     dataLen += 5;
+//     /* 总电量 */
+// 		memcpy(&pBuf[dataLen], pOrderData->totalEnergy, 4);
+//     dataLen += 4;
+//     /* 总计损电量 */
+// 		memcpy(&pBuf[dataLen], pOrderData->totalLossEnergy, 4);
+//     dataLen += 4;
+//     /* 总消费金额 */
+// 		memcpy(&pBuf[dataLen], pOrderData->totalMoney, 4);
+//     dataLen += 4;
+//     /* 电动汽车唯一标识 */
+//     memset(&pBuf[dataLen],0,17);
+//     dataLen += 17;
+//     /*  交易标识 */
+//     pBuf[dataLen++] = pOrderData->dealFlag;
+//     /* 交易日期 */
+// 		memcpy(&pBuf[dataLen], pOrderData->dealDate, 7);
+//     dataLen += 7;
+//     /*  停止原因 */
+//     pBuf[dataLen++] = pOrderData->stopReason;
+//     /* 逻辑卡号 */
+//     memcpy(&pBuf[dataLen], pOrderData->logicCardNum, 8);
+//     dataLen += 8;
+
+// #if (20100 == IOT_YKC21_PROTOCOL_VERSION)
+//     // /* 费率时段数量 */
+//     // pBuf[dataLen++] = pOrderData->fee_num;
+//     // /* 单价、电量、计损电量、金额 */
+//     // memcpy(&pBuf[dataLen], pOrderData->billInfo, (pOrderData->fee_num) * 4 * 4);
+
+//     // dataLen += (pOrderData->fee_num) * 4 * 4;
+// #else
+//     pBuf[dataLen++] = 48;
+// #endif
+
+//     /* 48h 分段电量 */
+//     memcpy(&pBuf[dataLen], pOrderData->time_power, 48 * 4);
+
+//     dataLen += (4 * 48);
+
+//     return dataLen;
  }
 
 /* 空闲状态下的召唤记录上传 */
@@ -776,73 +781,11 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
     MSNvmYKC21OrderInfo_Struct *pOrderData = &pIotYKC21Ctx->stOrderInfo.platOrderInfo.stYKC21OrderInfo;
     uint16_t dataLen = 0;
     CommonDateTime_Struct dateTime;
-    uint16_t temp = 0;
-
-     /* 交易流水号 */
-    memcpy(&pBuf[dataLen], pOrderData->orderTransactionNum, 16);
-    dataLen += 16;
-
-    /* 设备编码 */
-    memcpy(&pBuf[dataLen], pIotYKC21Ctx->pileDnBCD, 7);
-    dataLen += 7;
-    /* 枪号 */
-    pBuf[dataLen++] = port + 1;
-   
-     /* 开始时间 */
-	  memcpy(&pBuf[dataLen], pOrderData->startTime, 7);
-    dataLen += 7;
-
-    /* 结束时间 */
-	  memcpy(&pBuf[dataLen], pOrderData->stopTime, 7);
-    dataLen += 7;
-    /* 电表表号 电表密文 电表协议版本号 加密方式 */ 
-    memset(&pBuf[dataLen],0,(6+34+2+1));
-    dataLen += (6+34+2+1);
-    /* 电表总起值 */
-		memcpy(&pBuf[dataLen], pOrderData->startMeterVal, 5);
-    dataLen += 5;
-    /* 电表总止值 */
-		memcpy(&pBuf[dataLen], pOrderData->stopMeterVal, 5);
-    dataLen += 5;
-    /* 总电量 */
-		memcpy(&pBuf[dataLen], pOrderData->totalEnergy, 4);
-    dataLen += 4;
-    /* 总计损电量 */
-		memcpy(&pBuf[dataLen], pOrderData->totalLossEnergy, 4);
-    dataLen += 4;
-    /* 总消费金额 */
-		memcpy(&pBuf[dataLen], pOrderData->totalMoney, 4);
-    dataLen += 4;
-    /* 电动汽车唯一标识 */
-    memset(&pBuf[dataLen],0,17);
-    dataLen += 17;
-    /*  交易标识 */
-    pBuf[dataLen++] = pOrderData->dealFlag;
-    /* 交易日期 */
-		memcpy(&pBuf[dataLen], pOrderData->dealDate, 7);
-    dataLen += 7;
-    /*  停止原因 */
-    pBuf[dataLen++] = pOrderData->stopReason;
-    /* 逻辑卡号 */
-    memcpy(&pBuf[dataLen], pOrderData->logicCardNum, 8);
-    dataLen += 8;
-    /* 费率时段数量 */
-    pBuf[dataLen++] = pOrderData->fee_num;
-    /* 单价、电量、计损电量、金额 */
-
-    memcpy(&pBuf[dataLen], pOrderData->billInfo, (pOrderData->fee_num)*4*4);
 
 
-    dataLen += (pOrderData->fee_num)*4*4;
-
-   
-   /* 48h 分段电量 */
-    memcpy(&pBuf[dataLen], pOrderData->time_power, 48*4);
-
-    dataLen += (4*48);
+    IotYKC21_TransformChargeRecord(&pIotYKC21Ctx->stOrderInfo.platOrderInfo, pBuf, &dataLen);
 
     return dataLen;
-
 
     
  }

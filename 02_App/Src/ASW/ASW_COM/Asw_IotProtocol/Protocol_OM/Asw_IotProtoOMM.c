@@ -82,6 +82,7 @@ static CommonSendCtrl_Struct* IotOM_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_OM_CMD_SET_FORBID_RSP:             pSendCtrl = &pIotOMCtx->stSendCtrl[port][9];   break;
         case IOT_OM_CMD_REPORT_FORBID_STATE:        pSendCtrl = &pIotOMCtx->stSendCtrl[port][10];   break;
         case IOT_OM_CMD_UPDATE_RSP:                 pSendCtrl = &pIotOMCtx->stSendCtrl[port][11];   break;
+        case IOT_OM_CMD_ORDER_RECORD:               pSendCtrl = &pIotOMCtx->stSendCtrl[port][12];   break;
         default: break;
     }
 
@@ -103,6 +104,7 @@ static CommonRecvCtrl_Struct* IotOM_GetRecvCtrl(uint8_t port, uint16_t cmd)
         case IOT_OM_CMD_SET_FORBID:                 pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][6];   break;
         case IOT_OM_CMD_REPORT_FORBID_STATE_RSP:    pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][7];   break;
         case IOT_OM_CMD_UPDATE:                     pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][8];   break;
+        case IOT_OM_CMD_ORDER_RECORD_RSP:           pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][9];   break;
         default: break;
     }
     return pRecvCtrl;
@@ -169,6 +171,7 @@ static void IotOM_CycleReportRealData(void)
     uint8_t curGunConnectState = 0;
     uint8_t realDataReportFlag = FALSE;
 
+
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
         curGunState = IotOM_GetGunState(port);
@@ -200,16 +203,63 @@ static void IotOM_CycleReportRealData(void)
             Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, port, IOT_OM_CMD_REPORT_REALDATA, TRUE);
         }
     }
+
+
 }
 
 static void IotOM_CycleDetectUnreporteRecord(void)
 {
+    uint8_t port = 0;
+    uint8_t recordSendFlag = FALSE;
 
+    if (MSNvm_QueryUnreportedRecordCount(eMSNvmBlockID_OmOrderRecord) > 0)
+    {
+        for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+        {
+            if (Common_GetSendEnable(pIotOMCtx->pFuncSendCtrl, port, IOT_OM_CMD_ORDER_RECORD) ||
+                Common_GetRecvTimerEnable(pIotOMCtx->pFuncRecvCtrl, port, IOT_OM_CMD_ORDER_RECORD_RSP))
+            {
+                recordSendFlag = TRUE;
+                break;
+            }
+        }
 
+        if (recordSendFlag == FALSE)
+        {
+            if (eGlobalRet_OK == MSNvm_QueryLatestUnreportedRecord(eMSNvmBlockID_OmOrderRecord, (uint8_t *)&pIotOMCtx->stOrderInfo, 
+                sizeof(MSNvmOrderInfo_Struct), &pIotOMCtx->time))
+            {
+                Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, pIotOMCtx->stOrderInfo.port, IOT_OM_CMD_ORDER_RECORD, TRUE);
+            }
+        }
+    }
+}
 
+static void IotOM_CycleDetectUnreportedUcmResult(void)
+{
+    SSUcmResult_Enum UcmResult = SSUcm_GetResult();
 
+    if (pIotOMCtx->stProtoData[0].recvUpdateFlag == TRUE)
+    {
+        if (UcmResult != eSSUcmResult_None && UcmResult != eSSUcmResult_Succ)
+        {
+            if (TRUE != Common_GetSendEnable(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_UPDATE_RSP))
+            {
+                Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_UPDATE_RSP, TRUE);
+            }
 
+            if (UcmResult == eSSUcmResult_HeadErr)
+            {
+                pIotOMCtx->stProtoData[0].setUpdateResult = 0x02;
+            }
+            else
+            {
+                pIotOMCtx->stProtoData[0].setUpdateResult = 0x03;
+            }
+        }
 
+        pIotOMCtx->stProtoData[0].recvUpdateFlag = FALSE;
+    }
 }
 
 static void IotOM_CycleDetectReportForbidState(void)
@@ -263,6 +313,8 @@ static void IotOM_CycleDetect(void)
     IotOM_CycleDetectUnreporteRecord();
 
     IotOM_CycleDetectReportForbidState();
+
+    IotOM_CycleDetectUnreportedUcmResult();
 }
 
 static void IotOM_WSNormalHandle(void)
@@ -303,11 +355,13 @@ uint8_t IotOM_GetGunState(uint8_t port)
         {
             gunState = 0x01; /* 启动中 */
         }
-        else if (chargeState == ASWCHARGEIF_WORKSTATE_CHARGING || 
-                chargeState == ASWCHARGEIF_WORKSTATE_PAUSEA || 
-                chargeState == ASWCHARGEIF_WORKSTATE_PAUSEB)
+        else if (chargeState == ASWCHARGEIF_WORKSTATE_CHARGING)
         {
             gunState = 0x02; /* 充电中 */
+        }
+        else if (chargeState == ASWCHARGEIF_WORKSTATE_PAUSEA || chargeState == ASWCHARGEIF_WORKSTATE_PAUSEB)
+        {
+            gunState = 0x06; /* 充电暂停 */
         }
         else if (chargeState == ASWCHARGEIF_WORKSTATE_STOPPING)
         {

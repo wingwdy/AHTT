@@ -327,8 +327,7 @@ static void SSUcm_SetWorkState(SSUcmWorkState_Enum eWorkState)
 
             if (g_stSSUcmCtx.eResult == eSSUcmResult_Succ)
             {
-                CddNetM_DeleteLink(eCddNetMPlatType_O);
-                CddNetM_DeleteLink(eCddNetMPlatType_OM);
+                g_stSSUcmCtx.eUcmWorkState = eSSUcmWorkState_Idle;
                 g_stSSUcmPara.eBootState = eSSUcmBootState_FileCheck;
                 SSUcm_WriteUcmPara();
                 SSUCM_CFG_Reboot();
@@ -337,7 +336,7 @@ static void SSUcm_SetWorkState(SSUcmWorkState_Enum eWorkState)
             else
             {
                 SSUCM_CFG_LogPrint("升级失败, 失败原因：%s!\r\n", c_UcmResultStr[g_stSSUcmCtx.eResult]);
-                memset(&g_stSSUcmCtx, 0x00, sizeof(g_stSSUcmCtx));
+                g_stSSUcmCtx.eUcmWorkState = eSSUcmWorkState_Idle;
             }
         }
     }
@@ -490,13 +489,26 @@ uint8_t SSUcm_IsUpdating(void)
 {
     uint8_t ret = FALSE;
 
-    if (g_stSSUcmCtx.eUcmWorkState > eSSUcmWorkState_Connecting)
+    if (g_stSSUcmCtx.eUcmWorkState >= eSSUcmWorkState_Connecting)
     {
         ret = TRUE;
     }
 
     return ret;
 }
+
+uint8_t SSUcm_IsOngoging(void)
+{
+    uint8_t ret = FALSE;
+
+    if (g_stSSUcmCtx.eUcmWorkState >= eSSUcmWorkState_WaitIdle)
+    {
+        ret = TRUE;
+    }
+
+    return ret;
+}
+
 
 void SSUcm_SetResult(SSUcmResult_Enum eResult)
 {
@@ -510,12 +522,21 @@ void SSUcm_SetResult(SSUcmResult_Enum eResult)
     }
 }
 
+SSUcmResult_Enum SSUcm_GetResult(void)
+{
+    SSUcmResult_Enum eResult = g_stSSUcmCtx.eResult;
+
+    g_stSSUcmCtx.eResult = eSSUcmResult_None;
+    return eResult;
+}
+
 void SSUcm_ReqStartOTA(CddNetMSocketPara_Union *pNetPara, eSSUcmChannelType_Enum eChannelType, 
     eSSUcmExcuteMode_Enum eExcuteMode, uint32_t timeout)
 {
-    if (g_stSSUcmCtx.eUcmWorkState == eSSUcmWorkState_Idle || 
-        g_stSSUcmCtx.eUcmWorkState == eSSUcmWorkState_WaitIdle)
+    if (g_stSSUcmCtx.eUcmWorkState == eSSUcmWorkState_Idle)
     {
+        memset(&g_stSSUcmCtx, 0x00, sizeof(g_stSSUcmCtx));
+
         if (pNetPara != NULL && eChannelType < eSSUcmChannelType_Count)
         {
             memcpy(&g_stSSUcmCtx.strNetPara, pNetPara, sizeof(CddNetMSocketPara_Union));
@@ -569,12 +590,7 @@ void SSUcm_MainFunction(void)
             {
                 g_stSSUcmCtx.delayFlag = FALSE;
 
-                if (eGlobalRet_OK == CddNetM_CreatLink(eCddNetMSocketType_FTP, g_stSSUcmCtx.strNetPara, eCddNetMPlatType_File))
-                {
-                    CddNetM_SetLinkDisconnect(eCddNetMPlatType_O);
-                    CddNetM_SetLinkDisconnect(eCddNetMPlatType_OM);
-                }
-                else
+                if (eGlobalRet_OK != CddNetM_CreatLink(eCddNetMSocketType_FTP, g_stSSUcmCtx.strNetPara, eCddNetMPlatType_File))
                 {
                     SSUcm_SetResult(eSSUcmResult_UnexpectedError);
                 }

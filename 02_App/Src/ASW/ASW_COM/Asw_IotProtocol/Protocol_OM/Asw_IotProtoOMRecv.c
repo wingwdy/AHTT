@@ -60,6 +60,8 @@ static uint8_t IotOM_RecvSetReboot(uint8_t *port, uint8_t *r_data, uint16_t len)
 static uint8_t IotOM_RecvSetForbid(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvReportForBidStateRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvUpdate(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotOM_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
+
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -173,6 +175,18 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .matchCmd = IOT_OM_CMD_UPDATE_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程更新",
+    },
+
+    [9] = 
+    {
+        .cmd = IOT_OM_CMD_ORDER_RECORD_RSP,
+        .cmdType = IOT_OM_CMDTYPE_RESPONSE,
+        .pRecvParse = IotOM_RecvOrderRecordRsp,
+        .maxTimeout = 10 * 1000,
+        .maxTryCnt = 10,
+        .matchCmd = IOT_OM_CMD_ORDER_RECORD,
+        .printFlag = TRUE,
+        .cMeaning = "订单上报应答",
     },
 };
 
@@ -331,46 +345,33 @@ static uint8_t IotOM_RecvUpdate(uint8_t *port, uint8_t *r_data, uint16_t len)
     char path[33] = {0};
     CddNetMSocketPara_Union stSocketPara = {0};
 
-    stSocketPara.stFtpPara.eFileFormat = eCddNetMFileType_BIN;
-    stSocketPara.stFtpPara.eMode = eCddNetMFtpMode_Download;
-
-    memcpy(stSocketPara.stFtpPara.ip, &pRecvData[index], 16);
-    index += 16;
-    memcpy(&stSocketPara.stFtpPara.port, &pRecvData[index], 2);
-    index += 2;
-
-    memcpy(stSocketPara.stFtpPara.user, &pRecvData[index], 16);
-    index += 16;
-    memcpy(stSocketPara.stFtpPara.passwd, &pRecvData[index], 16);
-    index += 16;
-    memcpy(path, &pRecvData[index], 32);
-    index += 32;
-    Common_ExtractPathAndFileName(path, stSocketPara.stFtpPara.path, sizeof(stSocketPara.stFtpPara.path), 
-    stSocketPara.stFtpPara.fileName, sizeof(stSocketPara.stFtpPara.fileName));   
-
-    /* 运维平台问题，这里清零，net那边会采用默认值*/
-    memset(stSocketPara.stFtpPara.path, 0x00, sizeof(stSocketPara.stFtpPara.path));
-    memset(stSocketPara.stFtpPara.user, 0x00, sizeof(stSocketPara.stFtpPara.user));
-    memset(stSocketPara.stFtpPara.passwd, 0x00, sizeof(stSocketPara.stFtpPara.passwd));
-
-    index += 1;
-
-    timeout = pRecvData[index++] * 60 * 1000;
-
-    /* 立即执行 */
-    if (pRecvData[index] == 0x01)
+    if (TRUE == SSUcm_IsOngoging())
     {
-        if (TRUE == SSUcm_CheckUpdateCondition())
-        {
-            pIotOMCtx->stProtoData[0].setUpdateResult = 0x00;
-        }
-        else
-        {
-            pIotOMCtx->stProtoData[0].setUpdateResult = 0x01;
-        }
+        pIotOMCtx->stProtoData[0].setUpdateResult = 0x01;
     }
-    else /* 空闲执行 */
+    else
     {
+        stSocketPara.stFtpPara.eFileFormat = eCddNetMFileType_BIN;
+        stSocketPara.stFtpPara.eMode = eCddNetMFtpMode_Download;
+
+        memcpy(stSocketPara.stFtpPara.ip, &pRecvData[index], 16);
+        index += 16;
+        memcpy(&stSocketPara.stFtpPara.port, &pRecvData[index], 2);
+        index += 2;
+
+        memcpy(stSocketPara.stFtpPara.user, &pRecvData[index], 16);
+        index += 16;
+        memcpy(stSocketPara.stFtpPara.passwd, &pRecvData[index], 16);
+        index += 16;
+        memcpy(path, &pRecvData[index], 32);
+        index += 32;
+        Common_ExtractPathAndFileName(path, stSocketPara.stFtpPara.path, sizeof(stSocketPara.stFtpPara.path), 
+        stSocketPara.stFtpPara.fileName, sizeof(stSocketPara.stFtpPara.fileName));   
+
+        index += 1;
+
+        timeout = pRecvData[index++] * 60 * 1000;
+
         if (TRUE == SSUcm_CheckUpdateCondition())
         {
             if (TRUE == SSUcm_CheckUpdateCondition())
@@ -379,12 +380,22 @@ static uint8_t IotOM_RecvUpdate(uint8_t *port, uint8_t *r_data, uint16_t len)
             }
             else
             {
-                pIotOMCtx->stProtoData[0].setUpdateResult = 0x10;
+                pIotOMCtx->stProtoData[0].setUpdateResult = 0x01;
             }
         }
+        
+        SSUcm_GetResult();
+        SSUcm_ReqStartOTA(&stSocketPara, eSSUcmChannelType_FTP, eSSUcmExcuteMode_WaitIdle, timeout);
+        pIotOMCtx->stProtoData[0].recvUpdateFlag = TRUE;
     }
 
-    SSUcm_ReqStartOTA(&stSocketPara, eSSUcmChannelType_FTP, eSSUcmExcuteMode_WaitIdle, timeout);
+    return TRUE;
+}
+
+static uint8_t IotOM_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OmOrderRecord, pIotOMCtx->time);
+    IOTOM_CFG_LogPrint("订单上报成功!\r\n");
     return TRUE;
 }
 
@@ -422,8 +433,7 @@ static IotOMFrameHead_Struct *IotOM_FindValidFrameLen(uint8_t *pData, uint16_t d
         { 
             frameLen = Common_TwoUint8ToUint16(pHead->dataLen);
 
-            if (/* Common_TwoUint8ToUint16(pHead->version) == IOT_OM_PROTOCOL_VERSION && */
-                frameLen > (sizeof(IotOMFrameHead_Struct) + 2))
+            if (frameLen > (sizeof(IotOMFrameHead_Struct) + 2))
             {
                 calcCrc16 = Common_CalcCRC16((uint8_t *)pHead, frameLen - 2);
                 pRecvCrc = (uint8_t *)pHead + frameLen - 2;
@@ -544,6 +554,12 @@ void IotOM_TimeoutDetect(void)
                     }
                     else
                     {
+                        if (pCmdRecvCtrl->cmd == IOT_OM_CMD_ORDER_RECORD_RSP)
+                        {
+                            IOTOM_CFG_LogPrint("订单上报失败，删除记录!\r\n");
+                            MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OmOrderRecord, pIotOMCtx->time);
+                        }
+
                         Common_ClearRptCount(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
                         Common_SetRecvTimerEnable(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd, FALSE);
                         Common_SetSendFlag(pIotOMCtx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, FALSE);
