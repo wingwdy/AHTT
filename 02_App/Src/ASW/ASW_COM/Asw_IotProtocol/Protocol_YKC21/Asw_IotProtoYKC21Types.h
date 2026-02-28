@@ -216,22 +216,22 @@ typedef struct
 }IotYKC21FrameHead_Struct;
 
 
-typedef struct {
-    uint8_t err_type;
-    uint8_t err_plat_type;
-    uint16_t err_code;
-} err_map_t;
+typedef struct 
+{
+    uint8_t  err_localtype;
+    uint8_t  err_plattype;
+    uint16_t err_codeid;
+} IotYKC21errMap_Struct;
 
 typedef enum
 {
-    ePlatType_N                = 0x00,     // 无效值 */
-    ePlatType_A                = 0x01,     // 车故障
-    ePlatType_B                = 0x02,     // 车桩交互故障
-    ePlatType_C                = 0x03,     // 桩/平台故障
-    ePlatType_D                = 0x04,     // 桩故障
-    ePlatType_E                = 0x05,     // 自定义故障
-}ERR_PLATFORM;
-
+    eIotYKC21ErrorState_Null,     /* 无效值 */
+    eIotYKC21ErrorState_Car,      /* 车故障 */
+    eIotYKC21ErrorState_CarPile , /* 车桩交互故障 */  
+    eIotYKC21ErrorState_Plat,     /* 桩/平台故障 */  
+    eIotYKC21ErrorState_Pile,     /* 桩故障 */ 
+    eIotYKC21ErrorState_Other,    /* 自定义故障 */ 
+}IotYKC21ErrorState_Enum;
 
 
 /******************************************************************************

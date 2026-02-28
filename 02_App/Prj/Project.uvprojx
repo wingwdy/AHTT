@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>GD32E503RE</Device>
           <Vendor>GigaDevice</Vendor>
-          <PackID>GigaDevice.GD32E50x_DFP.1.4.0</PackID>
+          <PackID>GigaDevice.GD32E50x_DFP.1.5.0</PackID>
           <PackURL>https://gd32mcu.com/data/documents/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x20000) IROM(0x08000000,0x080000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -489,9 +489,9 @@
               <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_XDT\Asw_IotProtoXDTSend.c</FilePath>
             </File>
             <File>
-              <FileName>Asw_IotProtoYKC21.c</FileName>
+              <FileName>Asw_IotProtoYKC21M.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC21\Asw_IotProtoYKC21.c</FilePath>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC21\Asw_IotProtoYKC21M.c</FilePath>
             </File>
             <File>
               <FileName>Asw_IotProtoYKC21Recv.c</FileName>

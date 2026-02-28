@@ -226,17 +226,17 @@ typedef struct
     uint8_t  elecLossRate;                                         /* 计量损耗费率，目前平台不支持计损功能，计损比例置 0 */        
     uint32_t elecPriceRate[MSNVM_YKC21_BILLMIDE_MULTRATE_COUNT];   /* 电费费率，小数点后5位 */ 
     uint32_t servePriceRate[MSNVM_YKC21_BILLMIDE_MULTRATE_COUNT];  /* 服务费费率，小数点后5位 */ 
-    uint8_t period_rate[MSNVM_YKC21_BILLMIDE_PERIOD_COUNT];        /* 48个30分钟，每个30分钟对应的费率号 */
+    uint8_t  period_rate[MSNVM_YKC21_BILLMIDE_PERIOD_COUNT];        /* 48个30分钟，每个30分钟对应的费率号 */
 }MSNvmYKC21ParamBillMode_Struct;
 
 typedef struct YKC21platinfo
 {
-    uint16_t  DefaultMAX_power[SYSCFG_CFG_GUN_NUM];                /* 默认最大功率 kw*/
-    uint32_t  DeaultMaxPowerStartTimess[SYSCFG_CFG_GUN_NUM];       /* 默认最大功率开始时间戳*/
-    uint32_t  DeaultMaxPowerEndTimess[SYSCFG_CFG_GUN_NUM];         /* 默认最大功率结束时间戳 kw*/
-	uint8_t  Rsa_Keylength;	                                       /* 云快充2.1 rsa公钥长度 */
-    uint8_t  Rsa_Key[128];	                                       /* 云快充2.1 rsa公钥 */
-    uint8_t  Token[14];	                                           /* 云快充2.1 token */
+    uint16_t  defaultMAX_power[SYSCFG_CFG_GUN_NUM];                /* 默认最大功率 kw*/
+    uint32_t  deaultMaxPowerStartTimess[SYSCFG_CFG_GUN_NUM];       /* 默认最大功率开始时间戳*/
+    uint32_t  deaultMaxPowerEndTimess[SYSCFG_CFG_GUN_NUM];         /* 默认最大功率结束时间戳 kw*/
+	uint8_t   rsa_Keylength;	                                   /* 云快充2.1 rsa公钥长度 */
+    uint8_t   rsa_Key[128];	                                       /* 云快充2.1 rsa公钥 */
+    uint8_t   token[14];	                                       /* 云快充2.1 token */
 } MSNvmYKC21_FlashPlatInfo_Struct;
 
 
