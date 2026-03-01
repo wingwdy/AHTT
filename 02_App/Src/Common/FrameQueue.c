@@ -68,6 +68,8 @@ static GlobalRet_Enum FrameQueue_PopMQTT(FrameQueueCtrlDCB_Struct *pDCB, char *p
 static GlobalRet_Enum FrameQueue_PushMQTT(FrameQueueCtrlDCB_Struct *pDCB, char *pTopic, uint16_t topicLen, uint8_t *pSrcData, uint16_t dataLen, uint8_t direction);
 static GlobalRet_Enum FrameQueue_PushTCP(FrameQueueCtrlDCB_Struct *pDCB, char *pTopic, uint16_t topicLen, uint8_t *pSrcData, uint16_t dataLen, uint8_t direction);
 static GlobalRet_Enum FrameQueue_GetLastFrameDataLen(uint8_t channelID, uint16_t *pDataLen, char *pTopic, uint16_t *pTopicLen, uint8_t direction);
+static GlobalRet_Enum FrameQueue_Push(FrameQueueCtrlDCB_Struct *pDCB, char *pTopic, uint16_t topicLen, uint8_t *pSrcData, uint16_t dataSize, uint8_t direction);
+static GlobalRet_Enum FrameQueue_Pop(FrameQueueCtrlDCB_Struct *pDCB, char *pTopic, uint16_t *pTopicLen, uint8_t *pDstData, uint16_t *pDataSize, uint8_t direction);
 
 /*******************************************************************************
 *    Static Local Functions Declaration
@@ -317,6 +319,74 @@ static GlobalRet_Enum FrameQueue_GetLastFrameDataLen(uint8_t channelID, uint16_t
     return eRet;
 }
 
+static GlobalRet_Enum FrameQueue_Push(FrameQueueCtrlDCB_Struct *pDCB, char *pTopic, uint16_t topicLen, uint8_t *pSrcData, uint16_t dataSize, uint8_t direction)
+{
+    GlobalRet_Enum eRet = eGlobalRet_OK;
+
+    if (pDCB->frameType == eFrameQueueType_MQTT)
+    {
+        if (pTopic == NULL || topicLen == 0)
+        {
+            eRet = eGlobalRet_ParaInvalid;
+        }
+        else
+        {
+            eRet = FrameQueue_PushMQTT(pDCB, pTopic, topicLen, pSrcData, dataSize, direction);
+        }
+    }
+    else if (pDCB->frameType == eFrameQueueType_TCP)
+    {
+        if (pTopic != NULL || topicLen != 0)
+        {
+            eRet = eGlobalRet_ParaInvalid;
+        }
+        else
+        {
+            eRet = FrameQueue_PushTCP(pDCB, pTopic, topicLen, pSrcData, dataSize, direction);
+        }
+    }
+    else
+    {
+        eRet = eGlobalRet_Unsupported;
+    }
+
+    return eRet;
+}
+
+static GlobalRet_Enum FrameQueue_Pop(FrameQueueCtrlDCB_Struct *pDCB, char *pTopic, uint16_t *pTopicLen, uint8_t *pDstData, uint16_t *pDataSize, uint8_t direction)
+{
+    GlobalRet_Enum eRet = eGlobalRet_OK;
+
+    if (pDCB->frameType == eFrameQueueType_MQTT)
+    {
+        if (pTopic == NULL || pTopicLen == NULL)
+        {
+            eRet = eGlobalRet_ParaInvalid;
+        }
+        else
+        {
+            eRet = FrameQueue_PopMQTT(pDCB, pTopic, pTopicLen, pDstData, pDataSize, direction);
+        }
+    }
+    else if (pDCB->frameType == eFrameQueueType_TCP)
+    {
+        if (pTopic != NULL || pTopicLen != NULL)
+        {
+            eRet = eGlobalRet_ParaInvalid;
+        }
+        else
+        {
+            eRet = FrameQueue_PopTCP(pDCB, pDstData, pDataSize, direction);
+        }
+    }
+    else
+    {
+        eRet = eGlobalRet_Unsupported;
+    }
+
+    return eRet;
+}
+
 GlobalRet_Enum FrameQueue_Creat(FrameQueueType_Enum eFrame, uint16_t txBufSize, uint16_t rxBufSize, uint8_t *pChannelID)
 {
     GlobalRet_Enum eRet = eGlobalRet_InitFail;
@@ -386,34 +456,7 @@ GlobalRet_Enum FrameQueue_PushTx(uint8_t channelID, char *pTopic, uint16_t topic
     PARA_ASSERT_RET(pSrcData != NULL && dataSize != 0, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pDCB->initFlag == TRUE, eGlobalRet_NotInit);
 
-    if (pDCB->frameType == eFrameQueueType_MQTT)
-    {
-        if (pTopic == NULL || topicLen == 0)
-        {
-            eRet = eGlobalRet_ParaInvalid;
-        }
-        else
-        {
-            eRet = FrameQueue_PushMQTT(pDCB, pTopic, topicLen, pSrcData, dataSize, FRAME_QUEUE_DIRECTION_TX);
-        }
-    }
-    else if (pDCB->frameType == eFrameQueueType_TCP)
-    {
-        if (pTopic != NULL || topicLen != 0)
-        {
-            eRet = eGlobalRet_ParaInvalid;
-        }
-        else
-        {
-            eRet = FrameQueue_PushTCP(pDCB, pTopic, topicLen, pSrcData, dataSize, FRAME_QUEUE_DIRECTION_TX);
-        }
-    }
-    else
-    {
-        eRet = eGlobalRet_Unsupported;
-    }
-
-    return eRet;
+    return FrameQueue_Push(pDCB, pTopic, topicLen, pSrcData, dataSize, FRAME_QUEUE_DIRECTION_TX);
 }
 
 GlobalRet_Enum FrameQueue_PushRx(uint8_t channelID, char *pTopic, uint16_t topicLen, uint8_t *pSrcData, uint16_t dataSize)
@@ -424,34 +467,7 @@ GlobalRet_Enum FrameQueue_PushRx(uint8_t channelID, char *pTopic, uint16_t topic
     PARA_ASSERT_RET(pSrcData != NULL && dataSize != 0, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pDCB->initFlag == TRUE, eGlobalRet_NotInit);
 
-    if (pDCB->frameType == eFrameQueueType_MQTT)
-    {
-        if (pTopic == NULL || topicLen == 0)
-        {
-            eRet = eGlobalRet_ParaInvalid;
-        }
-        else
-        {
-            eRet = FrameQueue_PushMQTT(pDCB, pTopic, topicLen, pSrcData, dataSize, FRAME_QUEUE_DIRECTION_RX);
-        }
-    }
-    else if (pDCB->frameType == eFrameQueueType_TCP)
-    {
-        if (pTopic != NULL || topicLen != 0)
-        {
-            eRet = eGlobalRet_ParaInvalid;
-        }
-        else
-        {
-            eRet = FrameQueue_PushTCP(pDCB, pTopic, topicLen, pSrcData, dataSize, FRAME_QUEUE_DIRECTION_RX);
-        }
-    }
-    else
-    {
-        eRet = eGlobalRet_Unsupported;
-    }
-
-    return eRet;
+    return FrameQueue_Push(pDCB, pTopic, topicLen, pSrcData, dataSize, FRAME_QUEUE_DIRECTION_RX);
 }
 
 
@@ -463,34 +479,7 @@ GlobalRet_Enum FrameQueue_PopTx(uint8_t channelID, char *pTopic, uint16_t *pTopi
     PARA_ASSERT_RET(pDstData != NULL && pDataSize != NULL, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pDCB->initFlag == TRUE, eGlobalRet_NotInit);
 
-    if (pDCB->frameType == eFrameQueueType_MQTT)
-    {
-        if (pTopic == NULL || pTopicLen == NULL)
-        {
-            eRet = eGlobalRet_ParaInvalid;
-        }
-        else
-        {
-            eRet = FrameQueue_PopMQTT(pDCB, pTopic, pTopicLen, pDstData, pDataSize, FRAME_QUEUE_DIRECTION_TX);
-        }
-    }
-    else if (pDCB->frameType == eFrameQueueType_TCP)
-    {
-        if (pTopic != NULL || pTopicLen != NULL)
-        {
-            eRet = eGlobalRet_ParaInvalid;
-        }
-        else
-        {
-            eRet = FrameQueue_PopTCP(pDCB, pDstData, pDataSize, FRAME_QUEUE_DIRECTION_TX);
-        }
-    }
-    else
-    {
-        eRet = eGlobalRet_Unsupported;
-    }
-
-    return eRet;
+    return FrameQueue_Pop(pDCB, pTopic, pTopicLen, pDstData, pDataSize, FRAME_QUEUE_DIRECTION_TX);
 }
 
 GlobalRet_Enum FrameQueue_PopRx(uint8_t channelID, char *pTopic, uint16_t *pTopicLen, uint8_t *pDstData, uint16_t *pDataSize)
@@ -501,34 +490,7 @@ GlobalRet_Enum FrameQueue_PopRx(uint8_t channelID, char *pTopic, uint16_t *pTopi
     PARA_ASSERT_RET(pDstData != NULL && pDataSize != NULL, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pDCB->initFlag == TRUE, eGlobalRet_NotInit);
 
-    if (pDCB->frameType == eFrameQueueType_MQTT)
-    {
-        if (pTopic == NULL || pTopicLen == NULL)
-        {
-            eRet = eGlobalRet_ParaInvalid;
-        }
-        else
-        {
-            eRet = FrameQueue_PopMQTT(pDCB, pTopic, pTopicLen, pDstData, pDataSize, FRAME_QUEUE_DIRECTION_RX);
-        }
-    }
-    else if (pDCB->frameType == eFrameQueueType_TCP)
-    {
-        if (pTopic != NULL || pTopicLen != NULL)
-        {
-            eRet = eGlobalRet_ParaInvalid;
-        }
-        else
-        {
-            eRet = FrameQueue_PopTCP(pDCB, pDstData, pDataSize, FRAME_QUEUE_DIRECTION_RX);
-        }
-    }
-    else
-    {
-        eRet = eGlobalRet_Unsupported;
-    }
-
-    return eRet;
+    return FrameQueue_Pop(pDCB, pTopic, pTopicLen, pDstData, pDataSize, FRAME_QUEUE_DIRECTION_RX);
 }
 GlobalRet_Enum FrameQueue_GetLastTxFrameDataLen(uint8_t channelID, uint16_t *pDataLen, char *pTopic, uint16_t *pTopicLen)
 {
