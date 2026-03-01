@@ -119,6 +119,10 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
+          <Key>DLGUARM</Key>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
           <Key>DLGTARM</Key>
           <Name>(6010=-1,-1,-1,-1,0)(6018=-1,-1,-1,-1,0)(6019=-1,-1,-1,-1,0)(6008=-1,-1,-1,-1,0)(6009=-1,-1,-1,-1,0)(6014=-1,-1,-1,-1,0)(6015=-1,-1,-1,-1,0)(6003=-1,-1,-1,-1,0)(6000=-1,-1,-1,-1,0)</Name>
         </SetRegEntry>
@@ -130,7 +134,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>JL2CM3</Key>
-          <Name>-U601012534 -O78 -S2 -ZTIFSpeedSel5000 -A0 -C0 -JU1 -JI127.0.0.1 -JP0 -RST0 -N00("ARM CoreSight SW-DP") -D00(0BE12477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -TB1 -TFE0 -FO7 -FD20000000 -FC1000 -FN1 -FF0GD32E50x_512.FLM -FS08000000 -FL080000 -FP0($$Device:GD32E503RE$Flash\GD32E50x_512.FLM)</Name>
+          <Name>-U601012534 -O78 -S2 -ZTIFSpeedSel5000 -A0 -C0 -JU1 -JI127.0.0.1 -JP0 -RST0 -N00("ARM CoreSight SW-DP") -D00(0BE12477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -TB1 -TFE0 -FO15 -FD20000000 -FC1000 -FN1 -FF0GD32E50x_512.FLM -FS08000000 -FL080000 -FP0($$Device:GD32E503RE$Flash\GD32E50x_512.FLM)</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -138,40 +142,7 @@
           <Name>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0GD32E50x_512 -FS08000000 -FL080000 -FP0($$Device:GD32E503RE$Flash\GD32E50x_512.FLM))</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint>
-        <Bp>
-          <Number>0</Number>
-          <Type>0</Type>
-          <LineNumber>791</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134348306</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC21\Asw_IotProtoYKC21.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_COM/Asw_IotProtocol/Protocol_YKC21/Asw_IotProtoYKC21.c\791</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>782</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134348198</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC21\Asw_IotProtoYKC21.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\D3_A32FB_GD32E503\../Src/ASW/ASW_COM/Asw_IotProtocol/Protocol_YKC21/Asw_IotProtoYKC21.c\782</Expression>
-        </Bp>
-      </Breakpoint>
+      <Breakpoint/>
       <WatchWindow1>
         <Ww>
           <count>0</count>
@@ -955,7 +926,7 @@
 
   <Group>
     <GroupName>BSW/MemoryService</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1083,7 +1054,7 @@
 
   <Group>
     <GroupName>BSW/MCAL</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

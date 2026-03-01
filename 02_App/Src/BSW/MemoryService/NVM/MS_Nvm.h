@@ -68,6 +68,7 @@ void MSNvm_ReadAll(void);
 /* 参数块读写接口 */
 GlobalRet_Enum MSNvm_ReadParaBlock(MSNvmBlockID_Enum eBlockID, uint8_t *pOutBuf, uint16_t dataLen);
 GlobalRet_Enum MSNvm_WriteParaBlock(MSNvmBlockID_Enum eBlockID, uint8_t *pInBuf, uint16_t dataLen);
+GlobalRet_Enum MSNvm_SetDefaultParaBlock(MSNvmBlockID_Enum eBlockID);
 
 /* 记录块读写接口 */
 GlobalRet_Enum MSNvm_ClearRecord(MSNvmBlockID_Enum eBlockID);
@@ -79,6 +80,9 @@ GlobalRet_Enum MSNvm_QueryLatestUnreportedRecord(MSNvmBlockID_Enum eBlockID, uin
 GlobalRet_Enum MSNvm_QueryRecordByTime(MSNvmBlockID_Enum eBlockID, uint8_t *pOutRecord, uint16_t recordSize, uint32_t time);
 GlobalRet_Enum MSNvm_QueryRecordByExternal(MSNvmBlockID_Enum eBlockID, uint8_t *para, uint16_t paraSize,
 pNvmCmpFunc pCmpFunc, uint8_t *pInRecord, uint16_t recordSize);
+
+/* 记录块和参数块 公共接口 */
+
 #endif
 
 

@@ -73,7 +73,7 @@ typedef enum
     eGlobalRet_ParaInvalid,
 
 
-    eGlobalRet_NotSupported,
+    eGlobalRet_Unsupported,
     eGlobalRet_InitFail,
     eGlobalRet_NotInit,
     

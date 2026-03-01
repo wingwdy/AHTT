@@ -410,7 +410,7 @@ GlobalRet_Enum FrameQueue_PushTx(uint8_t channelID, char *pTopic, uint16_t topic
     }
     else
     {
-        eRet = eGlobalRet_NotSupported;
+        eRet = eGlobalRet_Unsupported;
     }
 
     return eRet;
@@ -448,7 +448,7 @@ GlobalRet_Enum FrameQueue_PushRx(uint8_t channelID, char *pTopic, uint16_t topic
     }
     else
     {
-        eRet = eGlobalRet_NotSupported;
+        eRet = eGlobalRet_Unsupported;
     }
 
     return eRet;
@@ -487,7 +487,7 @@ GlobalRet_Enum FrameQueue_PopTx(uint8_t channelID, char *pTopic, uint16_t *pTopi
     }
     else
     {
-        eRet = eGlobalRet_NotSupported;
+        eRet = eGlobalRet_Unsupported;
     }
 
     return eRet;
@@ -525,7 +525,7 @@ GlobalRet_Enum FrameQueue_PopRx(uint8_t channelID, char *pTopic, uint16_t *pTopi
     }
     else
     {
-        eRet = eGlobalRet_NotSupported;
+        eRet = eGlobalRet_Unsupported;
     }
 
     return eRet;
@@ -604,7 +604,7 @@ GlobalRet_Enum FrameQueue_ProcessRxData(uint8_t channelID, typeFuncDecode pDecod
             }
             else
             {
-                eRet = eGlobalRet_NotSupported;
+                eRet = eGlobalRet_Unsupported;
             }
         }
     }
@@ -669,7 +669,7 @@ GlobalRet_Enum FrameQueue_TransmitTxData(uint8_t channelID, typeFuncTransmit pTr
             }
             else
             {
-                eRet = eGlobalRet_NotSupported;
+                eRet = eGlobalRet_Unsupported;
             }
         }
     }

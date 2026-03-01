@@ -50,14 +50,23 @@
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-
+IotGNCtx_Struct *pIotGNCtx = NULL;
 
 
 
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-IotGNCtx_Struct *pIotGNCtx = NULL;
+static CommonSendCtrl_Struct* IotGN_GetSendCtrl(uint8_t port, uint16_t cmd);
+static CommonRecvCtrl_Struct* IotGN_GetRecvCtrl(uint8_t port, uint16_t cmd);
+static void IotGN_CycleReportRealData(void);
+static void IotGN_CycleDetectUnreporteRecord(void);
+static void IotGN_CycleDetect(void);
+static void IotGN_WSInitHandle(void);
+static void IotGN_WSOfflineHandle(void);
+static void IotGN_WSLoginHandle(void);
+static void IotGN_WSNormalHandle(void);
+static IotGNStopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType);
 
 
 /*******************************************************************************
@@ -187,6 +196,7 @@ static void IotGN_CycleDetectUnreporteRecord(void)
             {
                 port = pIotGNCtx->stOrderInfo.port;
 
+                /* 避免当数据库存在脏数据时，脏数据有问题，持续进入到这边 */
                 if (port >= SYSCFG_CFG_GUN_NUM || 
                     pIotGNCtx->stOrderInfo.protocolType != eAswPlatCardType_GN ||
                     pIotGNCtx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)

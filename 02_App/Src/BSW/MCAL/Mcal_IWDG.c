@@ -59,7 +59,6 @@
 *******************************************************************************/
 void McalIWDG_Init(void)
 {
-#if (MCALIWDG_CFG_ENABLE == TRUE)
     dbg_periph_enable(DBG_FWDGT_HOLD);
 
     rcu_osci_on(RCU_IRC40K);
@@ -69,14 +68,11 @@ void McalIWDG_Init(void)
     fwdgt_config(MCALIWDG_CFG_OVERFOLW_VALUE, MCALIWDG_CFG_PRESCALER);
 
     fwdgt_enable();
-#endif
 }
 
 void McalIWDG_FeedWatchDog(void)
 {
-#if (MCALIWDG_CFG_ENABLE == TRUE)
     fwdgt_counter_reload();
-#endif
 }
 
 
