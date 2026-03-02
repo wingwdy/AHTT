@@ -283,11 +283,19 @@ static void AswCharge_WakeupStateHandle(uint8_t port, AswChargeCtrl_Struct *pCha
             }
             else
             {
-                if (wakeupStatus != GLOBAL_OPT_STATE_PROCESS)
+                if (evseState != ASWEVSE_STATE_3_DOT)
                 {
-                    AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STARTING);
-                    pChargeCtrl->startTimer = Common_GetSystick();
-                    pChargeCtrl->pwmStartTimer = 0;
+                    if (wakeupStatus != GLOBAL_OPT_STATE_PROCESS)
+                    {
+                        AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_STARTING);
+                        pChargeCtrl->startTimer = Common_GetSystick();
+                        pChargeCtrl->pwmStartTimer = 0;
+                    }
+                }
+                else
+                {
+                    AswCharge_SetWorkState(port, ASWCHARGE_WORKSTATE_CHARGING);
+                    memset(&pChargeCtrl->stFilterlittleCur, 0x00, sizeof(FilterProfile1_Struct));
                 }
             }
         }    

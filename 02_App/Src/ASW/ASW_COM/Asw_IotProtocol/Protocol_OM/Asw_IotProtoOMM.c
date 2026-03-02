@@ -133,7 +133,6 @@ static void IotOM_WSOfflineHandle(void)
     memset(pIotOMCtx->platDn, 0x30, 32);
     memcpy(pIotOMCtx->platDn + offset, pParam->platPileDn, copyLen);
 
-
     pIotOMCtx->loginSucc = FALSE;
     pIotOMCtx->queueBusyFlag = FALSE;
     pIotOMCtx->waitQueueIdleTick = 0;
@@ -171,7 +170,6 @@ static void IotOM_CycleReportRealData(void)
     uint8_t curGunConnectState = 0;
     uint8_t realDataReportFlag = FALSE;
 
-
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
         curGunState = IotOM_GetGunState(port);
@@ -196,15 +194,13 @@ static void IotOM_CycleReportRealData(void)
 
         if (realDataReportFlag == TRUE)
         {
+            realDataReportFlag = FALSE;
             pIotOMCtx->lastGunState[port] = curGunState;
             pIotOMCtx->lastGunConnectState[port] = curGunConnectState;
             pIotOMCtx->realDataReportTick[port] = Common_GetSystick();
-
             Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, port, IOT_OM_CMD_REPORT_REALDATA, TRUE);
         }
     }
-
-
 }
 
 static void IotOM_CycleDetectUnreporteRecord(void)
@@ -293,11 +289,6 @@ static void IotOM_CycleDetectReportForbidState(void)
         }
     }
 }
-
-
-
-
-
 
 static void IotOM_CycleReportMeterVal(void)
 {

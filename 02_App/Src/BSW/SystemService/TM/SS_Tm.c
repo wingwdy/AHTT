@@ -92,7 +92,7 @@ static void SSTM_UpdateSysTimeStamp(void)
         g_stTmCtrl.lastTickCount = currentTickCount;
     }
 
-    Conmon_TimestampToDateTime(g_stTmCtrl.secSysTimestamp, &g_stTmCtrl.dateTime);
+    Common_TimestampToDateTime(g_stTmCtrl.secSysTimestamp, &g_stTmCtrl.dateTime);
 
     sprintf(g_stTmCtrl.timeStr, "%04d-%02d-%02d %02d:%02d:%02d",
         g_stTmCtrl.dateTime.year, g_stTmCtrl.dateTime.month, g_stTmCtrl.dateTime.day, 
@@ -136,7 +136,7 @@ void SSTM_SynTimeBySecTimeStamp(uint32_t neWSecTimeStamp)
         g_stTmCtrl.msecSysTimeStamp = neWSecTimeStamp * 1000;
         g_stTmCtrl.lastTickCount = Common_GetSystick();
 
-        Conmon_TimestampToDateTime(g_stTmCtrl.secSysTimestamp, &dateTime);
+        Common_TimestampToDateTime(g_stTmCtrl.secSysTimestamp, &dateTime);
 
         sprintf(g_stTmCtrl.timeStr, "%04d-%02d-%02d %02d:%02d:%02d",
         dateTime.year, dateTime.month, dateTime.day, 

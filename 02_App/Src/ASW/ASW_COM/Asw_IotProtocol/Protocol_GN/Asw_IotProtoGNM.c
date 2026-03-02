@@ -162,10 +162,10 @@ static void IotGN_CycleReportRealData(void)
 
         if (realDataReportFlag == TRUE)
         {
+            realDataReportFlag = FALSE;
             pIotGNCtx->lastGunState[port] = curGunState;
             pIotGNCtx->lastGunConnectState[port] = curGunConnectState;
             pIotGNCtx->realDataReportTick[port] = Common_GetSystick();
-
             Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_REPORT_REALDATA, TRUE);
         }
     }
@@ -456,7 +456,7 @@ void IotGN_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t
         memcpy(&pBuf[dataLen], pOrderData->orderTransactionNum, 16);
         dataLen += 16;
         /* 开始时间 */
-        Conmon_TimestampToDateTime(pOrderData->startTime, &dateTime);
+        Common_TimestampToDateTime(pOrderData->startTime, &dateTime);
         temp = Common_uintBINToBCD(dateTime.year);
         pBuf[dataLen++] = (temp >> 8) & 0xFF;
         pBuf[dataLen++] = (uint8_t)(temp);
@@ -471,7 +471,7 @@ void IotGN_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t
         Common_BINToBCD(&dateTime.second, (uint8_t *)&temp, 1);
         pBuf[dataLen++] = (uint8_t)(temp);
         /* 结束时间 */
-        Conmon_TimestampToDateTime(pOrderData->stopTime, &dateTime);
+        Common_TimestampToDateTime(pOrderData->stopTime, &dateTime);
         temp = Common_uintBINToBCD(dateTime.year);
         pBuf[dataLen++] = (temp >> 8) & 0xFF;
         pBuf[dataLen++] = (uint8_t)(temp);
@@ -509,7 +509,7 @@ void IotGN_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t
             /*  交易标识 */
             pBuf[dataLen++] = pOrderData->dealFlag;
             /* 交易日期 */
-            Conmon_TimestampToDateTime(pOrderData->dealDate, &dateTime);
+            Common_TimestampToDateTime(pOrderData->dealDate, &dateTime);
             temp = Common_uintBINToBCD(dateTime.year);
             pBuf[dataLen++] = (temp >> 8) & 0xFF;
             pBuf[dataLen++] = (uint8_t)(temp);
@@ -558,7 +558,7 @@ void IotGN_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t
             /*  交易标识 */
             pBuf[dataLen++] = pOrderData->dealFlag;
             /* 交易日期 */
-            Conmon_TimestampToDateTime(pOrderData->dealDate, &dateTime);
+            Common_TimestampToDateTime(pOrderData->dealDate, &dateTime);
             temp = Common_uintBINToBCD(dateTime.year);
             pBuf[dataLen++] = (temp >> 8) & 0xFF;
             pBuf[dataLen++] = (uint8_t)(temp);
@@ -633,11 +633,14 @@ uint8_t IotGN_SwipCardCharge(uint8_t port)
 
     if (pIotGNCtx->loginSucc == TRUE)
     {
-        if ((TRUE != Common_GetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_PILE_START_CHARGE_REQ)) &&
-            (TRUE != Common_GetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, IOT_GN_CMD_PILE_START_CHARGE_RSP)))
+        if (port < SYSCFG_CFG_GUN_NUM)
         {
-            Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_PILE_START_CHARGE_REQ, TRUE);
-            ret = TRUE;
+            if ((TRUE != Common_GetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_PILE_START_CHARGE_REQ)) &&
+                (TRUE != Common_GetRecvTimerEnable(pIotGNCtx->pFuncRecvCtrl, port, IOT_GN_CMD_PILE_START_CHARGE_RSP)))
+            {
+                Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_PILE_START_CHARGE_REQ, TRUE);
+                ret = TRUE;
+            }
         }
     }
 
@@ -716,6 +719,7 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
 void IotGN_InitMemory(void)
 {
     pIotGNCtx = (IotGNCtx_Struct *)myMalloc(sizeof(IotGNCtx_Struct));
+
     if (pIotGNCtx != NULL)
     {
         memset(pIotGNCtx, 0, sizeof(IotGNCtx_Struct));
