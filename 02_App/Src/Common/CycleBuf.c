@@ -57,10 +57,10 @@ static CycleBuf_Struct g_stCycleBufCtrl[CYCLEBUF_MAX_CHANNEL_COUNT] = { 0 };
 *    Static Local Functions Declaration
 *******************************************************************************/
 static CycleBuf_Struct *CycleBuf_FindFreeChannel(uint8_t *pChannel);
-static GlobalRet_Enum CycleBuf_SingleWriteData(CycleBuf_Struct *pCycBuf, uint8_t * pSrcData, uint16_t dataSize);
-static GlobalRet_Enum CycleBuf_CircleWriteData(CycleBuf_Struct *pCycBuf, uint8_t * pSrcData, uint16_t dataSize);
-static GlobalRet_Enum CycleBuf_CircleReadData(CycleBuf_Struct *pCycBuf, uint8_t * pOutData, uint16_t readSize);
-static GlobalRet_Enum CycleBuf_SingleReadData(CycleBuf_Struct *pCycBuf, uint8_t * pOutData, uint16_t readSize);
+static void CycleBuf_CopyDataWithWrap(uint8_t *buf, uint16_t bufSize, uint16_t startIdx, const uint8_t *src, uint16_t size, uint16_t *newIdx);
+static void CycleBuf_CopyDataWithWrapRead(uint8_t *dst, const uint8_t *buf, uint16_t bufSize, uint16_t startIdx, uint16_t size, uint16_t *newIdx);
+static uint16_t CycleBuf_GetFreeSize(CycleBuf_Struct *pCycBuf);
+static uint16_t CycleBuf_GetUsedSize(CycleBuf_Struct *pCycBuf);
 
 /*******************************************************************************
 *    Function Source Code
@@ -90,132 +90,78 @@ static CycleBuf_Struct *CycleBuf_FindFreeChannel(uint8_t *pChannel)
     return pCycBuf;
 }
 
-static GlobalRet_Enum CycleBuf_SingleWriteData(CycleBuf_Struct *pCycBuf, uint8_t * pSrcData, uint16_t dataSize)
+static void CycleBuf_CopyDataWithWrap(uint8_t *buf, uint16_t bufSize, uint16_t startIdx, const uint8_t *src, uint16_t size, uint16_t *newIdx)
 {
-    GlobalRet_Enum eRet = eGlobalRet_OK;
-    uint16_t dataIdx = 0u;
-
-    if ((pCycBuf->writeIdx + dataSize) > pCycBuf->buffSize)
+    if (startIdx + size <= bufSize)
     {
-        eRet = eGlobalRet_NotEnoughBuf; 
+        /* 不需要跨边界，直接拷贝 */
+        memcpy(&buf[startIdx], src, size);
+        *newIdx = startIdx + size;
     }
     else
     {
-        for (dataIdx = 0; dataIdx < dataSize; dataIdx++)
-        {
-            pCycBuf->data[pCycBuf->writeIdx] = pSrcData[dataIdx];
-            pCycBuf->writeIdx++;
-        }
-
-        eRet = eGlobalRet_OK;
+        /* 需要跨边界，分两部分拷贝 */
+        uint16_t firstPartSize = bufSize - startIdx;
+        memcpy(&buf[startIdx], src, firstPartSize);
+        memcpy(&buf[0], &src[firstPartSize], size - firstPartSize);
+        *newIdx = size - firstPartSize;
     }
-
-    return eRet;
 }
 
-static GlobalRet_Enum CycleBuf_CircleWriteData(CycleBuf_Struct *pCycBuf, uint8_t * pSrcData, uint16_t dataSize)
+static void CycleBuf_CopyDataWithWrapRead(uint8_t *dst, const uint8_t *buf, uint16_t bufSize, uint16_t startIdx, uint16_t size, uint16_t *newIdx)
 {
-    GlobalRet_Enum eRet = eGlobalRet_OK;
-    uint16_t dataIdx = 0u;
-	uint16_t freeBuffSize = 0u;
-        
-    if ((pCycBuf->writeIdx + 1) % pCycBuf->buffSize == pCycBuf->readIdx)
+    if (startIdx + size <= bufSize)
     {
-        eRet = eGlobalRet_NotEnoughBuf;
+        /* 不需要跨边界，直接拷贝 */
+        memcpy(dst, &buf[startIdx], size);
+        *newIdx = startIdx + size;
     }
     else
     {
-        if (pCycBuf->writeIdx >= pCycBuf->readIdx)
-        {
-            freeBuffSize = pCycBuf->buffSize - (pCycBuf->writeIdx - pCycBuf->readIdx) - 1;
-        }
-        else 
-        {
-            freeBuffSize = pCycBuf->readIdx - pCycBuf->writeIdx - 1;
-        }
-
-        if (dataSize <= freeBuffSize)
-        {
-            for (dataIdx = 0; dataIdx < dataSize; dataIdx++)
-            {
-                pCycBuf->data[pCycBuf->writeIdx] = pSrcData[dataIdx];
-                pCycBuf->writeIdx++;
-
-                if (pCycBuf->writeIdx >= pCycBuf->buffSize)
-                {
-                    pCycBuf->writeIdx = 0;
-                }
-            }
-        
-            eRet = eGlobalRet_OK;
-        }
-        else
-        {
-            eRet = eGlobalRet_NotEnoughBuf;
-        }
+        /* 需要跨边界，分两部分拷贝 */
+        uint16_t firstPartSize = bufSize - startIdx;
+        memcpy(dst, &buf[startIdx], firstPartSize);
+        memcpy(&dst[firstPartSize], &buf[0], size - firstPartSize);
+        *newIdx = size - firstPartSize;
     }
-
-    return eRet;
 }
 
-static GlobalRet_Enum CycleBuf_CircleReadData(CycleBuf_Struct *pCycBuf, uint8_t * pOutData, uint16_t readSize)
+static uint16_t CycleBuf_GetFreeSize(CycleBuf_Struct *pCycBuf)
 {
-    GlobalRet_Enum eRet = eGlobalRet_NotEnoughData;
-    uint16_t dataIdx = 0u;
-	uint16_t remainDataSize = 0u;
+    uint16_t freeSize = 0;
+    
+    if (pCycBuf->writeIdx >= pCycBuf->readIdx)
+    {
+        freeSize = pCycBuf->buffSize - (pCycBuf->writeIdx - pCycBuf->readIdx) - 1;
+    }
+    else 
+    {
+        freeSize = pCycBuf->readIdx - pCycBuf->writeIdx - 1;
+    }
+    
+    return freeSize;
+}
 
+static uint16_t CycleBuf_GetUsedSize(CycleBuf_Struct *pCycBuf)
+{
+    uint16_t usedSize = 0;
+    
     if (pCycBuf->readIdx != pCycBuf->writeIdx)
     {
         if (pCycBuf->readIdx > pCycBuf->writeIdx)
         {
-            remainDataSize = pCycBuf->buffSize - (pCycBuf->readIdx - pCycBuf->writeIdx);
+            usedSize = pCycBuf->buffSize - pCycBuf->readIdx + pCycBuf->writeIdx;
         }
         else
         {
-            remainDataSize = pCycBuf->writeIdx - pCycBuf->readIdx;
-        }
-
-        if (readSize <= remainDataSize)
-        {
-            for (dataIdx = 0; dataIdx < readSize; dataIdx++)
-            {
-                pOutData[dataIdx] = pCycBuf->data[pCycBuf->readIdx];
-
-                pCycBuf->readIdx++;
-                if (pCycBuf->readIdx >= pCycBuf->buffSize)
-                {
-                    pCycBuf->readIdx = 0;
-                }
-            }
-            
-            eRet = eGlobalRet_OK;
+            usedSize = pCycBuf->writeIdx - pCycBuf->readIdx;
         }
     }
-
-    return eRet;
+    
+    return usedSize;
 }
 
-static GlobalRet_Enum CycleBuf_SingleReadData(CycleBuf_Struct *pCycBuf, uint8_t * pOutData, uint16_t readSize)
-{
-    GlobalRet_Enum eRet = eGlobalRet_NotEnoughData;
-    uint16_t dataIdx = 0u;
-	uint16_t remainDataSize = 0u;
 
-    remainDataSize = pCycBuf->writeIdx - pCycBuf->readIdx;
-
-    if (readSize <= remainDataSize)
-    {
-        for (dataIdx = 0; dataIdx < readSize; dataIdx++)
-        {
-            pOutData[dataIdx] = pCycBuf->data[pCycBuf->readIdx];
-            pCycBuf->readIdx++;
-        }
-
-        eRet = eGlobalRet_OK;
-    }
-
-    return eRet;
-}
 
 void CycleBuf_Init(void)
 {
@@ -274,6 +220,9 @@ GlobalRet_Enum CycleBuf_WriteData(uint8_t channel, uint8_t * pSrcData, uint16_t 
 {
 	GlobalRet_Enum eRet = eGlobalRet_OK;
     CycleBuf_Struct *pCycBuf = &g_stCycleBufCtrl[channel];
+    uint16_t writeIdx = 0u;
+    uint16_t newIdx = 0u;
+    uint16_t freeSize = 0u;
 
 	if ((0u == dataSize) || (channel >= CYCLEBUF_MAX_CHANNEL_COUNT) || (NULL == pSrcData))
     {
@@ -286,16 +235,58 @@ GlobalRet_Enum CycleBuf_WriteData(uint8_t channel, uint8_t * pSrcData, uint16_t 
     else
     {
         CYCLEBUF_ENTER_CRITICAL_AREA();
-
+        
+        /* 检查缓冲区状态和可用空间 */
         if (pCycBuf->profile == CYCLEBUF_PROFILE_CIRCLE)
         {
-            eRet = CycleBuf_CircleWriteData(pCycBuf, pSrcData, dataSize);
+            if ((pCycBuf->writeIdx + 1) % pCycBuf->buffSize == pCycBuf->readIdx)
+            {
+                eRet = eGlobalRet_NotEnoughBuf;
+            }
+            else
+            {
+                freeSize = CycleBuf_GetFreeSize(pCycBuf);
+                if (dataSize > freeSize)
+                {
+                    eRet = eGlobalRet_NotEnoughBuf;
+                }
+                else
+                {
+                    /* 计算写入位置 */
+                    writeIdx = pCycBuf->writeIdx;
+                    CYCLEBUF_EXIT_CRITICAL_AREA();
+                    
+                    /* 在临界区外进行数据传输 */
+                    CycleBuf_CopyDataWithWrap(pCycBuf->data, pCycBuf->buffSize, writeIdx, pSrcData, dataSize, &newIdx);
+                    
+                    /* 重新进入临界区更新指针 */
+                    CYCLEBUF_ENTER_CRITICAL_AREA();
+                    pCycBuf->writeIdx = newIdx;
+                    eRet = eGlobalRet_OK;
+                }
+            }
         }
         else
         {
-            eRet = CycleBuf_SingleWriteData(pCycBuf, pSrcData, dataSize);
+            if ((pCycBuf->writeIdx + dataSize) > pCycBuf->buffSize)
+            {
+                eRet = eGlobalRet_NotEnoughBuf; 
+            }
+            else
+            {
+                writeIdx = pCycBuf->writeIdx;
+                CYCLEBUF_EXIT_CRITICAL_AREA();
+                
+                /* 在临界区外进行数据传输 */
+                memcpy(&pCycBuf->data[writeIdx], pSrcData, dataSize);
+                
+                /* 重新进入临界区更新指针 */
+                CYCLEBUF_ENTER_CRITICAL_AREA();
+                pCycBuf->writeIdx += dataSize;
+                eRet = eGlobalRet_OK;
+            }
         }
-
+        
         CYCLEBUF_EXIT_CRITICAL_AREA();
     }
 
@@ -306,6 +297,8 @@ GlobalRet_Enum CycleBuf_WriteDataIsr(uint8_t channel, uint8_t * pSrcData, uint16
 {
 	GlobalRet_Enum eRet = eGlobalRet_OK;
     CycleBuf_Struct *pCycBuf = &g_stCycleBufCtrl[channel];
+    uint16_t freeBuffSize = 0u;
+    uint16_t newIdx = 0u;
 
 	if ((0u == dataSize) || (channel >= CYCLEBUF_MAX_CHANNEL_COUNT) || (NULL == pSrcData))
     {
@@ -319,11 +312,38 @@ GlobalRet_Enum CycleBuf_WriteDataIsr(uint8_t channel, uint8_t * pSrcData, uint16
     {
         if (pCycBuf->profile == CYCLEBUF_PROFILE_CIRCLE)
         {
-            eRet = CycleBuf_CircleWriteData(pCycBuf, pSrcData, dataSize);
+            if ((pCycBuf->writeIdx + 1) % pCycBuf->buffSize == pCycBuf->readIdx)
+            {
+                eRet = eGlobalRet_NotEnoughBuf;
+            }
+            else
+            {
+                freeBuffSize = CycleBuf_GetFreeSize(pCycBuf);
+
+                if (dataSize <= freeBuffSize)
+                {
+                    CycleBuf_CopyDataWithWrap(pCycBuf->data, pCycBuf->buffSize, pCycBuf->writeIdx, pSrcData, dataSize, &newIdx);
+                    pCycBuf->writeIdx = newIdx;
+                    eRet = eGlobalRet_OK;
+                }
+                else
+                {
+                    eRet = eGlobalRet_NotEnoughBuf;
+                }
+            }
         }
         else
         {
-            eRet = CycleBuf_SingleWriteData(pCycBuf, pSrcData, dataSize);
+            if ((pCycBuf->writeIdx + dataSize) > pCycBuf->buffSize)
+            {
+                eRet = eGlobalRet_NotEnoughBuf; 
+            }
+            else
+            {
+                memcpy(&pCycBuf->data[pCycBuf->writeIdx], pSrcData, dataSize);
+                pCycBuf->writeIdx += dataSize;
+                eRet = eGlobalRet_OK;
+            }
         }
     }
 
@@ -335,6 +355,9 @@ GlobalRet_Enum CycleBuf_ReadData(uint8_t channel, uint8_t * pOutData, uint16_t r
 {
 	GlobalRet_Enum eRet = eGlobalRet_OK;
 	CycleBuf_Struct *pCycBuf = &g_stCycleBufCtrl[channel];
+    uint16_t usedSize = 0u;
+    uint16_t readIdx = 0u;
+    uint16_t newIdx = 0u;
 
 	if ((0u == readSize) || (channel >= CYCLEBUF_MAX_CHANNEL_COUNT) || (NULL == pOutData))
     {
@@ -347,14 +370,59 @@ GlobalRet_Enum CycleBuf_ReadData(uint8_t channel, uint8_t * pOutData, uint16_t r
     else 
     {
         CYCLEBUF_ENTER_CRITICAL_AREA();
+        
+        /* 检查缓冲区状态和可用数据 */
         if (pCycBuf->profile == CYCLEBUF_PROFILE_CIRCLE)
         {
-            eRet = CycleBuf_CircleReadData(pCycBuf, pOutData, readSize);
+            if (pCycBuf->readIdx == pCycBuf->writeIdx)
+            {
+                eRet = eGlobalRet_NotEnoughData;
+            }
+            else
+            {
+                usedSize = CycleBuf_GetUsedSize(pCycBuf);
+                if (readSize > usedSize)
+                {
+                    eRet = eGlobalRet_NotEnoughData;
+                }
+                else
+                {
+                    /* 计算读取位置 */
+                    readIdx = pCycBuf->readIdx;
+                    CYCLEBUF_EXIT_CRITICAL_AREA();
+                    
+                    /* 在临界区外进行数据传输 */
+                    CycleBuf_CopyDataWithWrapRead(pOutData, pCycBuf->data, pCycBuf->buffSize, readIdx, readSize, &newIdx);
+                    
+                    /* 重新进入临界区更新指针 */
+                    CYCLEBUF_ENTER_CRITICAL_AREA();
+                    pCycBuf->readIdx = newIdx;
+                    eRet = eGlobalRet_OK;
+                }
+            }
         }
         else
         {
-            eRet = CycleBuf_SingleReadData(pCycBuf, pOutData, readSize);
+            usedSize = pCycBuf->writeIdx - pCycBuf->readIdx;
+            if (readSize > usedSize)
+            {
+                eRet = eGlobalRet_NotEnoughData;
+            }
+            else
+            {
+                readIdx = pCycBuf->readIdx;
+                CYCLEBUF_EXIT_CRITICAL_AREA();
+                
+                /* 在临界区外进行数据传输 */
+                memcpy(pOutData, &pCycBuf->data[readIdx], readSize);
+                
+                /* 重新进入临界区更新指针 */
+                CYCLEBUF_ENTER_CRITICAL_AREA();
+                pCycBuf->readIdx += readSize;
+                eRet = eGlobalRet_OK;
+            }
         }
+        
         CYCLEBUF_EXIT_CRITICAL_AREA(); 
     }
 
@@ -365,6 +433,8 @@ GlobalRet_Enum CycleBuf_ReadDataIsr(uint8_t channel, uint8_t * pOutData, uint16_
 {
 	GlobalRet_Enum eRet = eGlobalRet_OK;
 	CycleBuf_Struct *pCycBuf = &g_stCycleBufCtrl[channel];
+    uint16_t remainDataSize = 0u;
+    uint16_t newIdx = 0u;
 
 	if ((0u == readSize) || (channel >= CYCLEBUF_MAX_CHANNEL_COUNT) || (NULL == pOutData))
     {
@@ -378,11 +448,39 @@ GlobalRet_Enum CycleBuf_ReadDataIsr(uint8_t channel, uint8_t * pOutData, uint16_
     {
         if (pCycBuf->profile == CYCLEBUF_PROFILE_CIRCLE)
         {
-            eRet = CycleBuf_CircleReadData(pCycBuf, pOutData, readSize);
+            if (pCycBuf->readIdx != pCycBuf->writeIdx)
+            {
+                remainDataSize = CycleBuf_GetUsedSize(pCycBuf);
+
+                if (readSize <= remainDataSize)
+                {
+                    CycleBuf_CopyDataWithWrapRead(pOutData, pCycBuf->data, pCycBuf->buffSize, pCycBuf->readIdx, readSize, &newIdx);
+                    pCycBuf->readIdx = newIdx;
+                    eRet = eGlobalRet_OK;
+                }
+                else
+                {
+                    eRet = eGlobalRet_NotEnoughData;
+                }
+            }
+            else
+            {
+                eRet = eGlobalRet_NotEnoughData;
+            }
         }
         else
         {
-            eRet = CycleBuf_SingleReadData(pCycBuf, pOutData, readSize);
+            remainDataSize = pCycBuf->writeIdx - pCycBuf->readIdx;
+            if (readSize <= remainDataSize)
+            {
+                memcpy(pOutData, &pCycBuf->data[pCycBuf->readIdx], readSize);
+                pCycBuf->readIdx += readSize;
+                eRet = eGlobalRet_OK;
+            }
+            else
+            {
+                eRet = eGlobalRet_NotEnoughData;
+            }
         }
     }
 
@@ -392,9 +490,10 @@ GlobalRet_Enum CycleBuf_ReadDataIsr(uint8_t channel, uint8_t * pOutData, uint16_
 GlobalRet_Enum CycleBuf_PreviewReadData(uint8_t channel, uint8_t * pOutData, uint16_t readSize)
 {
 	GlobalRet_Enum eRet = eGlobalRet_OK;
-	uint16_t dataIdx = 0u;
 	uint16_t curReadIdx = 0u;
     uint16_t curWriteIdx = 0;
+    uint16_t usedSize = 0u;
+    uint16_t newIdx = 0u;
 
 	CycleBuf_Struct *pCycBuf = &g_stCycleBufCtrl[channel];
 
@@ -411,14 +510,55 @@ GlobalRet_Enum CycleBuf_PreviewReadData(uint8_t channel, uint8_t * pOutData, uin
         CYCLEBUF_ENTER_CRITICAL_AREA();
         curReadIdx = pCycBuf->readIdx;
         curWriteIdx = pCycBuf->writeIdx;
-         
+        
+        /* 检查缓冲区状态和可用数据 */
         if (pCycBuf->profile == CYCLEBUF_PROFILE_CIRCLE)
         {
-            eRet = CycleBuf_CircleReadData(pCycBuf, pOutData, readSize);
+            if (pCycBuf->readIdx == pCycBuf->writeIdx)
+            {
+                eRet = eGlobalRet_NotEnoughData;
+            }
+            else
+            {
+                usedSize = CycleBuf_GetUsedSize(pCycBuf);
+                if (readSize > usedSize)
+                {
+                    eRet = eGlobalRet_NotEnoughData;
+                }
+                else
+                {
+                    /* 计算读取位置 */
+                    uint16_t readIdx = pCycBuf->readIdx;
+                    CYCLEBUF_EXIT_CRITICAL_AREA();
+                    
+                    /* 在临界区外进行数据传输 */
+                    CycleBuf_CopyDataWithWrapRead(pOutData, pCycBuf->data, pCycBuf->buffSize, readIdx, readSize, &newIdx);
+                    
+                    /* 重新进入临界区恢复指针 */
+                    CYCLEBUF_ENTER_CRITICAL_AREA();
+                    eRet = eGlobalRet_OK;
+                }
+            }
         }
         else
         {
-            eRet = CycleBuf_SingleReadData(pCycBuf, pOutData, readSize);
+            usedSize = pCycBuf->writeIdx - pCycBuf->readIdx;
+            if (readSize > usedSize)
+            {
+                eRet = eGlobalRet_NotEnoughData;
+            }
+            else
+            {
+                uint16_t readIdx = pCycBuf->readIdx;
+                CYCLEBUF_EXIT_CRITICAL_AREA();
+                
+                /* 在临界区外进行数据传输 */
+                memcpy(pOutData, &pCycBuf->data[readIdx], readSize);
+                
+                /* 重新进入临界区恢复指针 */
+                CYCLEBUF_ENTER_CRITICAL_AREA();
+                eRet = eGlobalRet_OK;
+            }
         }
 
         pCycBuf->readIdx = curReadIdx;

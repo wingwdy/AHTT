@@ -26,6 +26,7 @@
 #include "Asw_lotProtoYKC21aes.h"
 #include "Common.h"
 #include "Asw_PlatM.h"
+// #include "test.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -402,7 +403,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-static void YKC21_Recv_Data_Decrypt(uint8_t *r_data, int len)
+static uint32_t YKC21_Recv_Data_Decrypt(uint8_t *r_data, int len)
 {
     /*
     uint8_t test_iv[16];
@@ -412,7 +413,26 @@ static void YKC21_Recv_Data_Decrypt(uint8_t *r_data, int len)
     /* 初始向量与密钥一致 */
     AES_init_ctx_iv(&g_ex, random_key_A, random_key_A);
     AES_CBC_decrypt_buffer(&g_ex, r_data, len);
+
+       return len;
 }
+
+static  uint32_t YKC21_Recv_Data_Decrypt_test(uint8_t *in_ciphertext, int ciphertext_len,uint8_t *out_plaintext)
+{
+     uint32_t decrypted_len = 0;
+    // int ret  = 0;
+    //  ret = aes_128_cbc_decrypt(random_key_A, in_ciphertext, ciphertext_len, out_plaintext, &decrypted_len);
+    // if (ret != 0)
+    // {
+    //     decrypted_len = 0; 
+    //     IOTYKC21_CFG_LogPrint("解密密失败 failed: %d\n", ret);
+       
+    // }
+
+     return decrypted_len;
+}
+
+
 static const IotYKC21RecvCtrl_Struct* IotYKC21_GetRecvCtrlPtr(uint16_t cmd)
 {
     const IotYKC21RecvCtrl_Struct* pCtrl = NULL;
@@ -477,6 +497,7 @@ static void IotYKC21_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
     IotYKC21FrameHead_Struct *pFrameHead = IotYKC21_FindValidFrameLen(pData, dataLen, dealLen);
     uint8_t port = 0;
     uint16_t frameLen = 0;
+    uint16_t decrypted_len = 0;
 
     if (pFrameHead != NULL)
     {
@@ -488,18 +509,25 @@ static void IotYKC21_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
             {
                 frameLen = pFrameHead->dataLen[0] << 8 | pFrameHead->dataLen[1];
                 /* 解密数据 */
-                memset(IotYKC21Decryptbuf, 0, IOT_YKC21_RX_ECRPTBUFFER_MAXSIZE);
-                memcpy(IotYKC21Decryptbuf, (uint8_t *)pFrameHead + sizeof(IotYKC21FrameHead_Struct),IOTYKC21_RX_EcrptMessageBodylength(frameLen));
+                memset(IotYKC21Decryptbuf, 0, IOT_YKC21_RX_ECRPTBUFFER_MAXSIZE);  
                 if(pCmdRecvCtrl->encryptionFlag)
                 {
-                     YKC21_Recv_Data_Decrypt(IotYKC21Decryptbuf,IOTYKC21_RX_EcrptMessageBodylength(frameLen));
+					memcpy(IotYKC21Decryptbuf, (uint8_t *)pFrameHead + sizeof(IotYKC21FrameHead_Struct),IOTYKC21_RX_EcrptMessageBodylength(frameLen));
+                    decrypted_len =  YKC21_Recv_Data_Decrypt(IotYKC21Decryptbuf,IOTYKC21_RX_EcrptMessageBodylength(frameLen));
+                 // decrypted_len = YKC21_Recv_Data_Decrypt_test( (uint8_t *)pFrameHead + sizeof(IotYKC21FrameHead_Struct),IOTYKC21_RX_EcrptMessageBodylength(frameLen),IotYKC21Decryptbuf);
                 }
-                if (TRUE == pCmdRecvCtrl->pRecvParse(&port, IotYKC21Decryptbuf, frameLen))
+                else
+                {
+                    memcpy(IotYKC21Decryptbuf, (uint8_t *)pFrameHead + sizeof(IotYKC21FrameHead_Struct),IOTYKC21_RX_EcrptMessageBodylength(frameLen));
+                    decrypted_len = IOTYKC21_RX_EcrptMessageBodylength(frameLen);
+                }
+
+                if (TRUE == pCmdRecvCtrl->pRecvParse(&port, IotYKC21Decryptbuf, decrypted_len))
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTYKC21_CFG_LogPrint("[枪：%d]接收解密后消息体数据[cmd: 0x%02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
-                        DSLogM_HexOutput((uint8_t *)IotYKC21Decryptbuf, frameLen);
+                        IOTYKC21_CFG_LogPrint("[枪：%d]接收解密后消息体数据[cmd: 0x%02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, decrypted_len);
+                        DSLogM_HexOutput((uint8_t *)IotYKC21Decryptbuf, decrypted_len);
                     }
 
                     if (pCmdRecvCtrl->cmdType == IOT_YKC21_CMDTYPE_RESPONSE)
@@ -1186,7 +1214,7 @@ void IotYKC21_TimeoutDetect(void)
 
                 if (timeoutCount >= pCmdRecvCtrl->maxTryCnt)
                 {
-                    if (pCmdRecvCtrl->cmd == IOT_YKC21_CMD_HEARTBEAT_RSP || pCmdRecvCtrl->cmd == IOT_YKC21_CMD_LOGIN_RSP)
+                    if (pCmdRecvCtrl->cmd == IOT_YKC21_CMD_HEARTBEAT_RSP || pCmdRecvCtrl->cmd == IOT_YKC21_CMD_LOGIN_RSP || pCmdRecvCtrl->cmd == IOT_YKC21_CMD_BILLMODE_VERIFY_RSP ||  pCmdRecvCtrl->cmd == IOT_YKC21_CMD_BILLMODE_MUTIRATE_RSP)
                     {
                         IotYKC21_OfflineHandle();
                     }

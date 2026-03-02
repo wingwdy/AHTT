@@ -18,8 +18,6 @@
 ******************************************************************************/
 #include "SysCfg.h"
 
-#define MCALIWDG_CFG_ENABLE            SYSTEM_CFG_WATCHDOG_ENABLE
-
 #define MCALIWDG_CFG_PRESCALER         FWDGT_PSC_DIV256
 
 #define MCALIWDG_CFG_RELOAD_VALUE      (40000 / 256)

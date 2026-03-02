@@ -48,6 +48,7 @@ typedef struct
     uint8_t arErrLevel[eErr_Num];
     uint16_t arRecoverCnt[eErr_Num];
     AswErrChargeCondition_Enum eChargeCondition;
+    uint32_t errStatusVersion;  /* 故障状态版本号 */
 }AswErrorHandle_Struct;
 
 
@@ -65,6 +66,7 @@ static void AswErrHandle_SelfRecoverDetect(uint8_t port);
 static void AswErrHandle_RefreshChargeCondition(AswErrorHandle_Struct *pErrorHandle);
 static void AswErrHandle_SetErrHandle(uint8_t port, AswErrorHandle_Struct *pErrorHandle, const AswErrorHandleConfig_Struct *pConfig);
 static void AswErrHandle_ClearErrHandle(uint8_t port, AswErrorHandle_Struct *pErrorHandle, const AswErrorHandleConfig_Struct *pConfig);
+static void AswErrHandle_UpdateErrStatusVersion(AswErrorHandle_Struct *pErrorHandle);
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
@@ -97,6 +99,7 @@ static void AswErrHandle_SetErrHandle(uint8_t port, AswErrorHandle_Struct *pErro
         
         ASWERR_CFG_LogPrint("[枪：%d]故障：[%s] 产生\r\n", port, pConfig->errDesc);
         AswErrHandle_RefreshChargeCondition(pErrorHandle);
+        AswErrHandle_UpdateErrStatusVersion(pErrorHandle);  /* 更新故障状态版本号 */
         ASWERR_CFG_ErrStateChangeNotice(port, errType, TRUE, pErrorHandle->arErrLevel[errType]);
     }
 }
@@ -129,6 +132,7 @@ static void AswErrHandle_ClearErrHandle(uint8_t port, AswErrorHandle_Struct *pEr
         ASWERR_CFG_ErrStateChangeNotice(port, errType, FALSE, pErrorHandle->arErrLevel[errType]);
         pErrorHandle->arErrLevel[errType] = eAswErrorLevel_0;
         AswErrHandle_RefreshChargeCondition(pErrorHandle);
+        AswErrHandle_UpdateErrStatusVersion(pErrorHandle);  /* 更新故障状态版本号 */
     }
 }
 
@@ -175,6 +179,18 @@ static void AswErrHandle_RefreshChargeCondition(AswErrorHandle_Struct *pErrorHan
     else
     {
         pErrorHandle->eChargeCondition = eErrChargeCondition_Allow;
+    }
+}
+
+static void AswErrHandle_UpdateErrStatusVersion(AswErrorHandle_Struct *pErrorHandle)
+{
+    /* 简单地递增版本号 */
+    pErrorHandle->errStatusVersion++;
+    
+    /* 防止溢出，当版本号达到最大值时重置为1 */
+    if (pErrorHandle->errStatusVersion == 0)
+    {
+        pErrorHandle->errStatusVersion = 1;
     }
 }
 
@@ -347,5 +363,18 @@ AswErrorType_Enum AswErrHandle_GetExsistError(uint8_t port)
     }
 
     return (AswErrorType_Enum)index;
+}
+
+uint32_t AswErrHandle_GetErrStatusVersion(uint8_t port)
+{
+    AswErrorHandle_Struct *pErrorHandle = &g_stAswErrorHandle[port];
+    uint32_t version = 0;
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        version = pErrorHandle->errStatusVersion;
+    }
+
+    return version;
 }
 

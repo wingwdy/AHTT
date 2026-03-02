@@ -137,7 +137,7 @@ uint16_t Common_ReplaceStr(uint8_t* pData, uint16_t nDataLen, char* cDestStr, vo
 uint16_t Common_ReplaceNum(uint8_t* pData, uint16_t nDataLen, char* cDestStr, uint16_t replace, uint16_t defaultNum);
 
 uint32_t Common_DateTimeToTimestamp(CommonDateTime_Struct *dt);
-void Conmon_TimestampToDateTime(uint32_t timestamp, CommonDateTime_Struct *dt);
+void Common_TimestampToDateTime(uint32_t timestamp, CommonDateTime_Struct *dt);
 void Common_TimestampToCp56Time2a(uint32_t timestamp, uint8_t *cp56time2a);
 uint32_t Common_Cp56Time2aToTimestamp(const uint8_t *cp56time2a);
 

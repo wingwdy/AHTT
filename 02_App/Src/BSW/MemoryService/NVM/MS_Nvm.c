@@ -270,6 +270,31 @@ GlobalRet_Enum MSNvm_QueryRecordByExternal(MSNvmBlockID_Enum eBlockID, uint8_t *
     return MSMemIf_QueryRecordByExternal(pDescriptor->deviceID, pDescriptor->memIfID, para, paraSize, pCmpFunc, pInRecord, recordSize);
 }
 
+GlobalRet_Enum MSNvm_SetDefaultParaBlock(MSNvmBlockID_Enum eBlockID)
+{
+    const MSNvmBlockDescriptor_Struct *pDescriptor = NULL;
+    GlobalRet_Enum eRet = eGlobalRet_OK;
+    uint16_t calcCrc16 = 0;
+
+    PARA_ASSERT_RET((eBlockID < eMSNvmBlockID_Count), eGlobalRet_ParaInvalid);
+
+    pDescriptor = &c_stMSNvmBlockDescriptorTable[eBlockID];
+
+    PARA_ASSERT_RET(pDescriptor->deviceID == MSMEMIF_DEVICE_EA_KVDB, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(g_stMsNvmCtrlCtx.initFlag == TRUE, eGlobalRet_NotInit);
+    PARA_ASSERT_RET(pDescriptor->pFuncDefault != NULL, eGlobalRet_Unsupported);
+
+    xSemaphoreTake(g_stMsNvmCtrlCtx.mutex, portMAX_DELAY);
+    pDescriptor->pFuncDefault(pDescriptor->ramBlockDataAddr, pDescriptor->blockSize);
+    calcCrc16 = Common_CalcCRC16(pDescriptor->ramBlockDataAddr, pDescriptor->blockSize);
+    Common_Uint16ToTwoUint8(pDescriptor->ramBlockDataAddr + pDescriptor->blockSize, calcCrc16);
+    xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
+    
+    MSNvm_WriteFlashData(eBlockID);
+
+    return eGlobalRet_OK;
+}
+
 
 
 

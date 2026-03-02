@@ -233,6 +233,7 @@ static void IotYKC21_CycleReportRealData(void)
 
         if (realDataReportFlag == TRUE)
         {
+            realDataReportFlag = FALSE;
             pIotYKC21Ctx->lastGunState[port] = curGunState;
             pIotYKC21Ctx->lastGunConnectState[port] = curGunConnectState;
             pIotYKC21Ctx->realDataReportTick[port] = Common_GetSystick();
@@ -282,52 +283,60 @@ static void IotYKC21_CycleDetectUnreporteRecord(void)
     }
 }
 
-
 static void IotYKC21_UpError(void)
 {
     uint8_t port = 0;
     uint8_t index = 0;
     uint8_t error_mapnumber = 0;
     uint8_t error_Exit = FALSE;
-    uint8_t CP56Time2a[7] = {0};
-    static uint64_t ErrStatus[SYSCFG_CFG_GUN_NUM] = {0}; /* 可记录64位错误类型 */
+    static uint32_t erro_old_version[SYSCFG_CFG_GUN_NUM]= {0};
+    uint32_t erro_now_version[SYSCFG_CFG_GUN_NUM] = {0};
+    static uint64_t ErrStatus[SYSCFG_CFG_GUN_NUM] = {0}; /* 可记录64个错误类型 */
+
     error_mapnumber = (ARRAY_SIZE(Iot_Ykc21Error_map) > 64) ? ARRAY_SIZE(Iot_Ykc21Error_map) : 64;
 
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
+
         if (TRUE != Common_GetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULT_REQ))
         {
-            for (index = 0; index < error_mapnumber; index++)
+            /* 故障产生或取消 */
+            erro_now_version[port] = AswErrHandle_GetErrStatusVersion(port);
+            if (erro_old_version[port] != erro_now_version[port])
             {
-                error_Exit = AswErrHandle_CheckErrExit(port, Iot_Ykc21Error_map[index].err_localtype);
-
-                if ((ErrStatus[port] & (1 << index)) != error_Exit && eIotYKC21ErrorState_Null != Iot_Ykc21Error_map[index].err_plattype)
+                erro_old_version[port] = erro_now_version[port];
+                /* 循环查找变化故障 */
+                for (index = 0; index < error_mapnumber; index++)
                 {
+                    error_Exit = AswErrHandle_CheckErrExit(port, Iot_Ykc21Error_map[index].err_localtype);
 
-                    if (TRUE == error_Exit)
+                    if ((ErrStatus[port] & (1 << index)) != error_Exit && eIotYKC21ErrorState_Null != Iot_Ykc21Error_map[index].err_plattype)
                     {
-                        ErrStatus[port] |= (1 << index); /* 置1*/
+                        if (TRUE == error_Exit)
+                        {
+                            ErrStatus[port] |= (1 << index); /* 置1 */
 
-                        pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearTime = SSTM_GetSecTimestamp();
-                        pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearType = Iot_Ykc21Error_map[index].err_plattype;
-                        pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearId = Iot_Ykc21Error_map[index].err_codeid;
+                            pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearTime = SSTM_GetSecTimestamp();
+                            pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearType = Iot_Ykc21Error_map[index].err_plattype;
+                            pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearId = Iot_Ykc21Error_map[index].err_codeid;
 
-                        Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULT_REQ, TRUE);
-                        IOTYKC21_CFG_LogPrint("[枪：%d]故障发生,云快充2.1上报故障编码[0x%04x]\r\n", port, Iot_Ykc21Error_map[index].err_codeid);
+                            Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULT_REQ, TRUE);
+                            IOTYKC21_CFG_LogPrint("[枪：%d]故障发生,云快充2.1上报故障编码[0x%04x]\r\n", port, Iot_Ykc21Error_map[index].err_codeid);
+                        }
+                        else
+                        {
+                            ErrStatus[port] &= ~(1 << index); /* 置0 */
+
+                            pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearTime = SSTM_GetSecTimestamp();
+                            pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearType = Iot_Ykc21Error_map[index].err_plattype;
+                            pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearId = Iot_Ykc21Error_map[index].err_codeid;
+
+                            Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULTREST_REQ, TRUE);
+                            IOTYKC21_CFG_LogPrint("[枪：%d]故障取消,云快充2.1上报故障编码[0x%04x]\r\n", port, Iot_Ykc21Error_map[index].err_codeid);
+                        }
+
+                        break;
                     }
-                    else
-                    {
-                        ErrStatus[port] &= ~(1 << index); /* 置0 */
-
-                        pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearTime = SSTM_GetSecTimestamp();
-                        pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearType = Iot_Ykc21Error_map[index].err_plattype;
-                        pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearId = Iot_Ykc21Error_map[index].err_codeid;
-
-                        Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULTREST_REQ, TRUE);
-                        IOTYKC21_CFG_LogPrint("[枪：%d]故障取消,云快充2.1上报故障编码[0x%04x]\r\n", port, Iot_Ykc21Error_map[index].err_codeid);
-                    }
-
-                    break;
                 }
             }
         }
@@ -747,16 +756,19 @@ uint8_t IotYKC21_SwipCardCharge(uint8_t port)
 
     if (pIotYKC21Ctx->loginSucc == TRUE)
     {
-        if ((TRUE != Common_GetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_PILE_START_CHARGE_REQ)) &&
-            (TRUE != Common_GetRecvTimerEnable(pIotYKC21Ctx->pFuncRecvCtrl, port, IOT_YKC21_CMD_PILE_START_CHARGE_RSP)))
+        if (port < SYSCFG_CFG_GUN_NUM)
         {
-            Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_PILE_START_CHARGE_REQ, TRUE);
-            ret = TRUE;
-            IOTYKC21_CFG_LogPrint("[枪：%d]刷卡成功，请求启动充电!\r\n", port);
-        }
-        else
-        {
-            IOTYKC21_CFG_LogPrint("[枪：%d]刷卡成功，但是已经有卡在申请启动充电，本次刷卡作废!\r\n", port);
+            if ((TRUE != Common_GetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_PILE_START_CHARGE_REQ)) &&
+                (TRUE != Common_GetRecvTimerEnable(pIotYKC21Ctx->pFuncRecvCtrl, port, IOT_YKC21_CMD_PILE_START_CHARGE_RSP)))
+            {
+                Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_PILE_START_CHARGE_REQ, TRUE);
+                ret = TRUE;
+                IOTYKC21_CFG_LogPrint("[枪：%d]刷卡成功，请求启动充电!\r\n", port);
+            }
+            else
+            {
+                IOTYKC21_CFG_LogPrint("[枪：%d]刷卡成功，但是已经有卡在申请启动充电，本次刷卡作废!\r\n", port);
+            }
         }
     }
 

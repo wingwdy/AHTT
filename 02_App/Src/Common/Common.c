@@ -219,7 +219,7 @@ uint32_t Common_DateTimeToTimestamp(CommonDateTime_Struct *dt)
     return timestamp;
 }
 
-void Conmon_TimestampToDateTime(uint32_t timestamp, CommonDateTime_Struct *dt)
+void Common_TimestampToDateTime(uint32_t timestamp, CommonDateTime_Struct *dt)
 {
     uint32_t days = timestamp / 86400UL;
     uint32_t remainder = timestamp % 86400UL;
@@ -243,7 +243,7 @@ void Common_TimestampToCp56Time2a(uint32_t timestamp, uint8_t *cp56time2a)
     uint32_t days;
 
     // 将时间戳转换为日期时间结构
-    Conmon_TimestampToDateTime(timestamp, &dt);
+    Common_TimestampToDateTime(timestamp, &dt);
 
      // 计算从1970年1月1日到指定日期的天数
     days = Common_DateToDays(dt.year, dt.month, dt.day);
