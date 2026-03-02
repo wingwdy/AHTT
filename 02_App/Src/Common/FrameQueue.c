@@ -52,10 +52,14 @@ typedef struct
     uint16_t txLen;
 	uint16_t txBufSize;
 	uint8_t* pTXBuf;
+	uint16_t txReadIdx;
+	uint16_t txWriteIdx;
 	
 	uint16_t rxLen;
 	uint16_t rxBufSize;
 	uint8_t* pRXBuf;
+	uint16_t rxReadIdx;
+	uint16_t rxWriteIdx;
 }FrameQueueCtrlDCB_Struct;
 
 
@@ -103,49 +107,77 @@ static GlobalRet_Enum FrameQueue_PopMQTT(FrameQueueCtrlDCB_Struct *pDCB, char *p
     FrameQueueHead_Struct stHead = {0};
     GlobalRet_Enum eRet = eGlobalRet_NotEnoughData;
     uint8_t *pOptBuf = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->pTXBuf : pDCB->pRXBuf;
+    uint16_t bufSize = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->txBufSize : pDCB->rxBufSize;
     uint16_t *pBufLen = (direction == FRAME_QUEUE_DIRECTION_TX) ? &pDCB->txLen : &pDCB->rxLen;
+    uint16_t *pReadIdx = (direction == FRAME_QUEUE_DIRECTION_TX) ? &pDCB->txReadIdx : &pDCB->rxReadIdx;
     uint16_t magicNumber = 0;
     uint16_t topicLength = 0;
     uint16_t dataLength = 0;
-    uint8_t *pDataStart = NULL;
-    uint16_t remainingBytes = 0;
+    uint16_t totalSize = 0;
+    uint16_t readIdx = *pReadIdx;
+    uint16_t firstPart = 0;
     
-    if (pBufLen[0] >= sizeof(FrameQueueHead_Struct))
+    if (*pBufLen >= sizeof(FrameQueueHead_Struct))
     {
-        memcpy(&stHead, pOptBuf, sizeof(FrameQueueHead_Struct));
+        /* 读取头部 */
+        if (readIdx + sizeof(FrameQueueHead_Struct) <= bufSize)
+        {
+            memcpy(&stHead, &pOptBuf[readIdx], sizeof(FrameQueueHead_Struct));
+        }
+        else
+        {
+            firstPart = bufSize - readIdx;
+            memcpy(&stHead, &pOptBuf[readIdx], firstPart);
+            memcpy((uint8_t*)&stHead + firstPart, &pOptBuf[0], sizeof(FrameQueueHead_Struct) - firstPart);
+        }
         
         magicNumber = Common_TwoUint8ToUint16(stHead.ctrlWord);
         topicLength = Common_TwoUint8ToUint16(stHead.topicLen);
         dataLength = Common_TwoUint8ToUint16(stHead.dataLen);
+        totalSize = sizeof(FrameQueueHead_Struct) + topicLength + dataLength;
         
-        if (magicNumber == FRAME_QUEUE_MAGIC_NUMBER &&
-            (sizeof(FrameQueueHead_Struct) + topicLength + dataLength) <= pBufLen[0])
+        if (magicNumber == FRAME_QUEUE_MAGIC_NUMBER && totalSize <= *pBufLen)
         {
-            pDataStart = pOptBuf + sizeof(FrameQueueHead_Struct);
+            /* 跳过头部 */
+            readIdx = (readIdx + sizeof(FrameQueueHead_Struct)) % bufSize;
             
+            /* 读取Topic */
             if (topicLength > 0)
             {
-                memcpy(pTopic, pDataStart, topicLength);
+                if (readIdx + topicLength <= bufSize)
+                {
+                    memcpy(pTopic, &pOptBuf[readIdx], topicLength);
+                }
+                else
+                {
+                    firstPart = bufSize - readIdx;
+                    memcpy(pTopic, &pOptBuf[readIdx], firstPart);
+                    memcpy(&pTopic[firstPart], &pOptBuf[0], topicLength - firstPart);
+                }
                 *pTopicLen = topicLength;
+                readIdx = (readIdx + topicLength) % bufSize;
             }
             
+            /* 读取数据 */
             if (dataLength > 0)
             {
-                memcpy(pDstData, pDataStart + topicLength, dataLength);
+                if (readIdx + dataLength <= bufSize)
+                {
+                    memcpy(pDstData, &pOptBuf[readIdx], dataLength);
+                }
+                else
+                {
+                    firstPart = bufSize - readIdx;
+                    memcpy(pDstData, &pOptBuf[readIdx], firstPart);
+                    memcpy(&pDstData[firstPart], &pOptBuf[0], dataLength - firstPart);
+                }
                 *pDataSize = dataLength;
+                readIdx = (readIdx + dataLength) % bufSize;
             }
             
-            remainingBytes = pBufLen[0] - (sizeof(FrameQueueHead_Struct) + topicLength + dataLength);
-
-            if (remainingBytes > 0)
-            {
-                memmove(pOptBuf, 
-                        pOptBuf + sizeof(FrameQueueHead_Struct) + topicLength + dataLength, 
-                        remainingBytes);
-            }
-            
-            // 更新缓冲区长度
-            *pBufLen = remainingBytes;
+            // 更新读取指针和缓冲区长度
+            *pReadIdx = readIdx;
+            *pBufLen -= totalSize;
             
             eRet = eGlobalRet_OK;
         }
@@ -159,40 +191,58 @@ static GlobalRet_Enum FrameQueue_PopTCP(FrameQueueCtrlDCB_Struct *pDCB, uint8_t 
     FrameQueueHead_Struct stHead = {0};
     GlobalRet_Enum eRet = eGlobalRet_NotEnoughData;
     uint8_t *pOptBuf = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->pTXBuf : pDCB->pRXBuf;
+    uint16_t bufSize = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->txBufSize : pDCB->rxBufSize;
     uint16_t *pBufLen = (direction == FRAME_QUEUE_DIRECTION_TX) ? &pDCB->txLen : &pDCB->rxLen;
+    uint16_t *pReadIdx = (direction == FRAME_QUEUE_DIRECTION_TX) ? &pDCB->txReadIdx : &pDCB->rxReadIdx;
     uint16_t magicNumber = 0;
     uint16_t dataLength = 0;
-    uint8_t *pDataStart = NULL;
-    uint16_t remainingBytes = 0;
+    uint16_t totalSize = 0;
+    uint16_t readIdx = *pReadIdx;
+    uint16_t firstPart = 0;
 
-    if (pBufLen[0] >= sizeof(FrameQueueHead_Struct))
+    if (*pBufLen >= sizeof(FrameQueueHead_Struct))
     {
-        memcpy(&stHead, pOptBuf, sizeof(FrameQueueHead_Struct));
+        /* 读取头部 */
+        if (readIdx + sizeof(FrameQueueHead_Struct) <= bufSize)
+        {
+            memcpy(&stHead, &pOptBuf[readIdx], sizeof(FrameQueueHead_Struct));
+        }
+        else
+        {
+            firstPart = bufSize - readIdx;
+            memcpy(&stHead, &pOptBuf[readIdx], firstPart);
+            memcpy((uint8_t*)&stHead + firstPart, &pOptBuf[0], sizeof(FrameQueueHead_Struct) - firstPart);
+        }
         
         magicNumber = Common_TwoUint8ToUint16(stHead.ctrlWord);
         dataLength = Common_TwoUint8ToUint16(stHead.dataLen);
+        totalSize = sizeof(FrameQueueHead_Struct) + dataLength;
         
-        if (magicNumber == FRAME_QUEUE_MAGIC_NUMBER && 
-            (sizeof(FrameQueueHead_Struct) + dataLength) <= pBufLen[0])
+        if (magicNumber == FRAME_QUEUE_MAGIC_NUMBER && totalSize <= *pBufLen)
         {
-
-            pDataStart = pOptBuf + sizeof(FrameQueueHead_Struct);
+            /* 跳过头部 */
+            readIdx = (readIdx + sizeof(FrameQueueHead_Struct)) % bufSize;
             
+            /* 读取数据 */
             if (pDstData != NULL && pDataSize != NULL && dataLength > 0)
             {
-                memcpy(pDstData, pDataStart, dataLength);
+                if (readIdx + dataLength <= bufSize)
+                {
+                    memcpy(pDstData, &pOptBuf[readIdx], dataLength);
+                }
+                else
+                {
+                    firstPart = bufSize - readIdx;
+                    memcpy(pDstData, &pOptBuf[readIdx], firstPart);
+                    memcpy(&pDstData[firstPart], &pOptBuf[0], dataLength - firstPart);
+                }
                 *pDataSize = dataLength;
+                readIdx = (readIdx + dataLength) % bufSize;
             }
     
-            remainingBytes = pBufLen[0] - (sizeof(FrameQueueHead_Struct) + dataLength);
-            if (remainingBytes > 0)
-            {
-                memmove(pOptBuf, 
-                        pOptBuf + sizeof(FrameQueueHead_Struct) + dataLength, 
-                        remainingBytes);
-            }
-            
-            pBufLen[0] = remainingBytes;
+            // 更新读取指针和缓冲区长度
+            *pReadIdx = readIdx;
+            *pBufLen -= totalSize;
             eRet = eGlobalRet_OK;
         }
     }
@@ -208,19 +258,61 @@ static GlobalRet_Enum FrameQueue_PushMQTT(FrameQueueCtrlDCB_Struct *pDCB, char *
     uint8_t *pOptBuf = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->pTXBuf : pDCB->pRXBuf;
     uint16_t bufSize = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->txBufSize : pDCB->rxBufSize;
     uint16_t *pBufLen = (direction == FRAME_QUEUE_DIRECTION_TX) ? &pDCB->txLen : &pDCB->rxLen;
+    uint16_t *pWriteIdx = (direction == FRAME_QUEUE_DIRECTION_TX) ? &pDCB->txWriteIdx : &pDCB->rxWriteIdx;
+    uint16_t totalSize = sizeof(FrameQueueHead_Struct) + topicLen + dataLen;
+    uint16_t writeIdx = *pWriteIdx;
+    uint16_t firstPart = 0;
 
-    if (pBufLen[0] + topicLen + dataLen + sizeof(FrameQueueHead_Struct) < bufSize)
+    if (*pBufLen + totalSize < bufSize)
     {
         Common_Uint16ToTwoUint8(stHead.ctrlWord, ctrlWord);
         Common_Uint16ToTwoUint8(stHead.topicLen, topicLen);
         Common_Uint16ToTwoUint8(stHead.dataLen, dataLen);
 
-        memcpy(pOptBuf + pBufLen[0], &stHead, sizeof(FrameQueueHead_Struct));
-        pBufLen[0] += sizeof(FrameQueueHead_Struct);
-        memcpy(pOptBuf + pBufLen[0], pTopic, topicLen);
-        pBufLen[0] += topicLen;
-        memcpy(pOptBuf + pBufLen[0], pSrcData, dataLen);
-        pBufLen[0] += dataLen;
+        /* 写入头部 */
+        if (writeIdx + sizeof(FrameQueueHead_Struct) <= bufSize)
+        {
+            memcpy(&pOptBuf[writeIdx], &stHead, sizeof(FrameQueueHead_Struct));
+            writeIdx += sizeof(FrameQueueHead_Struct);
+        }
+        else
+        {
+            firstPart = bufSize - writeIdx;
+            memcpy(&pOptBuf[writeIdx], &stHead, firstPart);
+            memcpy(&pOptBuf[0], (uint8_t*)&stHead + firstPart, sizeof(FrameQueueHead_Struct) - firstPart);
+            writeIdx = sizeof(FrameQueueHead_Struct) - firstPart;
+        }
+
+        /* 写入Topic */
+        if (writeIdx + topicLen <= bufSize)
+        {
+            memcpy(&pOptBuf[writeIdx], pTopic, topicLen);
+            writeIdx += topicLen;
+        }
+        else
+        {
+            firstPart = bufSize - writeIdx;
+            memcpy(&pOptBuf[writeIdx], pTopic, firstPart);
+            memcpy(&pOptBuf[0], &pTopic[firstPart], topicLen - firstPart);
+            writeIdx = topicLen - firstPart;
+        }
+
+        /* 写入数据 */
+        if (writeIdx + dataLen <= bufSize)
+        {
+            memcpy(&pOptBuf[writeIdx], pSrcData, dataLen);
+            writeIdx += dataLen;
+        }
+        else
+        {
+            firstPart = bufSize - writeIdx;
+            memcpy(&pOptBuf[writeIdx], pSrcData, firstPart);
+            memcpy(&pOptBuf[0], &pSrcData[firstPart], dataLen - firstPart);
+            writeIdx = dataLen - firstPart;
+        }
+
+        *pWriteIdx = writeIdx;
+        *pBufLen += totalSize;
         eRet = eGlobalRet_OK;
     }
 
@@ -235,16 +327,46 @@ static GlobalRet_Enum FrameQueue_PushTCP(FrameQueueCtrlDCB_Struct *pDCB, char *p
     uint8_t *pOptBuf = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->pTXBuf : pDCB->pRXBuf;
     uint16_t bufSize = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->txBufSize : pDCB->rxBufSize;
     uint16_t *pBufLen = (direction == FRAME_QUEUE_DIRECTION_TX) ? &pDCB->txLen : &pDCB->rxLen;
+    uint16_t *pWriteIdx = (direction == FRAME_QUEUE_DIRECTION_TX) ? &pDCB->txWriteIdx : &pDCB->rxWriteIdx;
+    uint16_t totalSize = sizeof(FrameQueueHead_Struct) + dataLen;
+    uint16_t writeIdx = *pWriteIdx;
+    uint16_t firstPart = 0;
 
-    if (pBufLen[0] + dataLen + sizeof(FrameQueueHead_Struct) < bufSize)
+    if (*pBufLen + totalSize < bufSize)
     {
         Common_Uint16ToTwoUint8(stHead.ctrlWord, ctrlWord);
         Common_Uint16ToTwoUint8(stHead.dataLen, dataLen);
 
-        memcpy(pOptBuf + pBufLen[0], &stHead, sizeof(FrameQueueHead_Struct));
-        pBufLen[0] += sizeof(FrameQueueHead_Struct);
-        memcpy(pOptBuf + pBufLen[0], pSrcData, dataLen);
-        pBufLen[0] += dataLen;
+        /* 写入头部 */
+        if (writeIdx + sizeof(FrameQueueHead_Struct) <= bufSize)
+        {
+            memcpy(&pOptBuf[writeIdx], &stHead, sizeof(FrameQueueHead_Struct));
+            writeIdx += sizeof(FrameQueueHead_Struct);
+        }
+        else
+        {
+            firstPart = bufSize - writeIdx;
+            memcpy(&pOptBuf[writeIdx], &stHead, firstPart);
+            memcpy(&pOptBuf[0], (uint8_t*)&stHead + firstPart, sizeof(FrameQueueHead_Struct) - firstPart);
+            writeIdx = sizeof(FrameQueueHead_Struct) - firstPart;
+        }
+
+        /* 写入数据 */
+        if (writeIdx + dataLen <= bufSize)
+        {
+            memcpy(&pOptBuf[writeIdx], pSrcData, dataLen);
+            writeIdx += dataLen;
+        }
+        else
+        {
+            firstPart = bufSize - writeIdx;
+            memcpy(&pOptBuf[writeIdx], pSrcData, firstPart);
+            memcpy(&pOptBuf[0], &pSrcData[firstPart], dataLen - firstPart);
+            writeIdx = dataLen - firstPart;
+        }
+
+        *pWriteIdx = writeIdx;
+        *pBufLen += totalSize;
         eRet = eGlobalRet_OK;
     }
 
@@ -257,21 +379,37 @@ static GlobalRet_Enum FrameQueue_GetLastFrameDataLen(uint8_t channelID, uint16_t
     FrameQueueHead_Struct stHead = {0};
     GlobalRet_Enum eRet = eGlobalRet_NotEnoughData;
     uint8_t *pOptBuf = NULL;
+    uint16_t bufSize = 0;
     uint16_t bufLen = 0;
+    uint16_t readIdx = 0;
     uint16_t magicNumber = 0;
     uint16_t dataLength = 0;
     uint16_t topicLength = 0;
+    uint16_t totalSize = 0;
+    uint16_t firstPart = 0;
 
     PARA_ASSERT_RET(channelID < FRAME_QUEUE_CHANNEL_COUNT, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pDataLen != NULL, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pDCB->initFlag == TRUE, eGlobalRet_NotInit);
 
     pOptBuf = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->pTXBuf : pDCB->pRXBuf;
+    bufSize = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->txBufSize : pDCB->rxBufSize;
     bufLen = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->txLen : pDCB->rxLen;
+    readIdx = (direction == FRAME_QUEUE_DIRECTION_TX) ? pDCB->txReadIdx : pDCB->rxReadIdx;
     
     if (bufLen >= sizeof(FrameQueueHead_Struct))
     {
-        memcpy(&stHead, pOptBuf, sizeof(FrameQueueHead_Struct));
+        /* 读取头部 */
+        if (readIdx + sizeof(FrameQueueHead_Struct) <= bufSize)
+        {
+            memcpy(&stHead, &pOptBuf[readIdx], sizeof(FrameQueueHead_Struct));
+        }
+        else
+        {
+            firstPart = bufSize - readIdx;
+            memcpy(&stHead, &pOptBuf[readIdx], firstPart);
+            memcpy((uint8_t*)&stHead + firstPart, &pOptBuf[0], sizeof(FrameQueueHead_Struct) - firstPart);
+        }
         
         magicNumber = Common_TwoUint8ToUint16(stHead.ctrlWord);
         dataLength = Common_TwoUint8ToUint16(stHead.dataLen);
@@ -279,8 +417,8 @@ static GlobalRet_Enum FrameQueue_GetLastFrameDataLen(uint8_t channelID, uint16_t
         if (pDCB->frameType == eFrameQueueType_MQTT)
         {
             topicLength = Common_TwoUint8ToUint16(stHead.topicLen);
-            if (magicNumber == FRAME_QUEUE_MAGIC_NUMBER && 
-                (sizeof(FrameQueueHead_Struct) + topicLength + dataLength) <= bufLen)
+            totalSize = sizeof(FrameQueueHead_Struct) + topicLength + dataLength;
+            if (magicNumber == FRAME_QUEUE_MAGIC_NUMBER && totalSize <= bufLen)
             {
                 *pDataLen = dataLength;
                 
@@ -292,7 +430,17 @@ static GlobalRet_Enum FrameQueue_GetLastFrameDataLen(uint8_t channelID, uint16_t
 
                 if (pTopic != NULL)
                 {
-                    memcpy(pTopic, pOptBuf + sizeof(FrameQueueHead_Struct), topicLength);
+                    uint16_t topicReadIdx = (readIdx + sizeof(FrameQueueHead_Struct)) % bufSize;
+                    if (topicReadIdx + topicLength <= bufSize)
+                    {
+                        memcpy(pTopic, &pOptBuf[topicReadIdx], topicLength);
+                    }
+                    else
+                {
+                    firstPart = bufSize - topicReadIdx;
+                    memcpy(pTopic, &pOptBuf[topicReadIdx], firstPart);
+                    memcpy(&pTopic[firstPart], &pOptBuf[0], topicLength - firstPart);
+                }
                 }
 
                 eRet = eGlobalRet_OK;
@@ -300,8 +448,8 @@ static GlobalRet_Enum FrameQueue_GetLastFrameDataLen(uint8_t channelID, uint16_t
         }
         else if (pDCB->frameType == eFrameQueueType_TCP)
         {
-            if (magicNumber == FRAME_QUEUE_MAGIC_NUMBER && 
-                (sizeof(FrameQueueHead_Struct) + dataLength) <= bufLen)
+            totalSize = sizeof(FrameQueueHead_Struct) + dataLength;
+            if (magicNumber == FRAME_QUEUE_MAGIC_NUMBER && totalSize <= bufLen)
             {
                 *pDataLen = dataLength;
                 
@@ -403,10 +551,14 @@ GlobalRet_Enum FrameQueue_Creat(FrameQueueType_Enum eFrame, uint16_t txBufSize, 
         pDCB->txLen = 0;
         pDCB->txBufSize = txBufSize;
         pDCB->pTXBuf = (uint8_t *)myCalloc(txBufSize, 1);
+        pDCB->txReadIdx = 0;
+        pDCB->txWriteIdx = 0;
 
         pDCB->rxLen = 0;
         pDCB->rxBufSize = rxBufSize;
         pDCB->pRXBuf = (uint8_t *)myCalloc(rxBufSize, 1);
+        pDCB->rxReadIdx = 0;
+        pDCB->rxWriteIdx = 0;
 
         if (pDCB->pRXBuf != NULL && pDCB->pTXBuf != NULL)
         {
@@ -418,13 +570,13 @@ GlobalRet_Enum FrameQueue_Creat(FrameQueueType_Enum eFrame, uint16_t txBufSize, 
         {
             if (pDCB->pTXBuf != NULL)
             {
-                free(pDCB->pTXBuf);
+                myFree(pDCB->pTXBuf);
                 pDCB->pTXBuf = NULL;
             }
 
             if (pDCB->pRXBuf != NULL)
             {
-                free(pDCB->pRXBuf);
+                myFree(pDCB->pRXBuf);
                 pDCB->pRXBuf = NULL;
             }
 
@@ -444,7 +596,11 @@ GlobalRet_Enum FrameQueue_Reset(uint8_t channelID)
     PARA_ASSERT_RET(pDCB->initFlag == TRUE, eGlobalRet_NotInit);
 
     pDCB->txLen = 0;
+    pDCB->txReadIdx = 0;
+    pDCB->txWriteIdx = 0;
     pDCB->rxLen = 0;
+    pDCB->rxReadIdx = 0;
+    pDCB->rxWriteIdx = 0;
     return eRet;
 }
 
@@ -507,61 +663,144 @@ GlobalRet_Enum FrameQueue_ProcessRxData(uint8_t channelID, typeFuncDecode pDecod
     FrameQueueCtrlDCB_Struct *pDCB = &g_stFrameQueueCtrlDCB[channelID];
     GlobalRet_Enum eRet = eGlobalRet_OK;
     uint16_t processedLen = 0;
-    FrameQueueHead_Struct *pHead = NULL;
+    FrameQueueHead_Struct stHead = {0};
     uint16_t dataLen = 0;
     uint16_t topicLen = 0;
     uint16_t dealLen = 0;  
     uint8_t *pTopicData = NULL;
     uint8_t *pFrameData = NULL;
+    uint16_t totalSize = 0;
+    uint16_t readIdx = pDCB->rxReadIdx;
+    uint16_t firstPart = 0;
 
     PARA_ASSERT_RET(channelID < FRAME_QUEUE_CHANNEL_COUNT, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pDecodeFunc != NULL, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pDCB->initFlag == TRUE, eGlobalRet_NotInit);
     PARA_ASSERT_RET(pDCB->rxLen > 0, eGlobalRet_NotEnoughData);
 
-    pHead = (FrameQueueHead_Struct *)pDCB->pRXBuf;
+    /* 读取头部 */
+    if (readIdx + sizeof(FrameQueueHead_Struct) <= pDCB->rxBufSize)
+    {
+        memcpy(&stHead, &pDCB->pRXBuf[readIdx], sizeof(FrameQueueHead_Struct));
+    }
+    else
+    {
+        firstPart = pDCB->rxBufSize - readIdx;
+        memcpy(&stHead, &pDCB->pRXBuf[readIdx], firstPart);
+        memcpy((uint8_t*)&stHead + firstPart, &pDCB->pRXBuf[0], sizeof(FrameQueueHead_Struct) - firstPart);
+    }
 
-    if (Common_TwoUint8ToUint16(pHead->ctrlWord) != FRAME_QUEUE_MAGIC_NUMBER)
+    if (Common_TwoUint8ToUint16(stHead.ctrlWord) != FRAME_QUEUE_MAGIC_NUMBER)
     {
         pDCB->rxLen = 0;
+        pDCB->rxReadIdx = 0;
+        pDCB->rxWriteIdx = 0;
         eRet = eGlobalRet_UnexpectedError;
     }
     else
     { 
-        dataLen = Common_TwoUint8ToUint16(pHead->dataLen);
-        topicLen = Common_TwoUint8ToUint16(pHead->topicLen);
+        dataLen = Common_TwoUint8ToUint16(stHead.dataLen);
+        topicLen = Common_TwoUint8ToUint16(stHead.topicLen);
+        totalSize = sizeof(FrameQueueHead_Struct) + dataLen + topicLen;
 
-        if ((sizeof(FrameQueueHead_Struct) + dataLen + topicLen) > pDCB->rxLen)
+        if (totalSize > pDCB->rxLen)
         {
             pDCB->rxLen = 0;
+            pDCB->rxReadIdx = 0;
+            pDCB->rxWriteIdx = 0;
             eRet = eGlobalRet_UnexpectedError;
         }
         else
         {
             if (pDCB->frameType == eFrameQueueType_MQTT)
             {
-                pTopicData = pDCB->pRXBuf + sizeof(FrameQueueHead_Struct);
-                pFrameData = pDCB->pRXBuf + sizeof(FrameQueueHead_Struct) + topicLen;
-                pDecodeFunc(pFrameData, dataLen, topicLen, pTopicData, &dealLen);
-                memmove(pDCB->pRXBuf, 
-                        pDCB->pRXBuf + sizeof(FrameQueueHead_Struct) + dataLen + topicLen, 
-                        pDCB->rxLen - sizeof(FrameQueueHead_Struct) - dataLen - topicLen);
-
-                pDCB->rxLen -= (sizeof(FrameQueueHead_Struct) + dataLen + topicLen);
+                /* 跳过头部 */
+                readIdx = (readIdx + sizeof(FrameQueueHead_Struct)) % pDCB->rxBufSize;
+                
+                /* 直接使用环形缓冲区中的数据 */
+                if (readIdx + topicLen <= pDCB->rxBufSize)
+                {
+                    pTopicData = &pDCB->pRXBuf[readIdx];
+                }
+                else
+                {
+                    /* 如果Topic跨边界，需要特殊处理，这里暂时使用临时缓冲区 */
+                    pTopicData = (uint8_t*)myCalloc(topicLen, 1);
+                    if (pTopicData != NULL)
+                    {
+                        firstPart = pDCB->rxBufSize - readIdx;
+                        memcpy(pTopicData, &pDCB->pRXBuf[readIdx], firstPart);
+                        memcpy(&pTopicData[firstPart], &pDCB->pRXBuf[0], topicLen - firstPart);
+                    }
+                }
+                
+                readIdx = (readIdx + topicLen) % pDCB->rxBufSize;
+                
+                /* 直接使用环形缓冲区中的数据 */
+                if (readIdx + dataLen <= pDCB->rxBufSize)
+                {
+                    pFrameData = &pDCB->pRXBuf[readIdx];
+                    pDecodeFunc(pFrameData, dataLen, topicLen, pTopicData, &dealLen);
+                }
+                else
+                {
+                    /* 如果数据跨边界，需要特殊处理，这里暂时使用临时缓冲区 */
+                    pFrameData = (uint8_t*)myCalloc(dataLen, 1);
+                    if (pFrameData != NULL)
+                    {
+                        firstPart = pDCB->rxBufSize - readIdx;
+                        memcpy(pFrameData, &pDCB->pRXBuf[readIdx], firstPart);
+                        memcpy(&pFrameData[firstPart], &pDCB->pRXBuf[0], dataLen - firstPart);
+                        pDecodeFunc(pFrameData, dataLen, topicLen, pTopicData, &dealLen);
+                        myFree(pFrameData);
+                    }
+                }
+                
+                /* 释放临时缓冲区 */
+                if (pTopicData != &pDCB->pRXBuf[(readIdx - topicLen + pDCB->rxBufSize) % pDCB->rxBufSize])
+                {
+                    myFree(pTopicData);
+                }
+                
+                readIdx = (readIdx + dataLen) % pDCB->rxBufSize;
+                pDCB->rxReadIdx = readIdx;
+                pDCB->rxLen -= totalSize;
             }
             else if (pDCB->frameType == eFrameQueueType_TCP)
             {
-                while (dataLen > processedLen)
+                /* 跳过头部 */
+                readIdx = (readIdx + sizeof(FrameQueueHead_Struct)) % pDCB->rxBufSize;
+                
+                /* 直接使用环形缓冲区中的数据 */
+                if (readIdx + dataLen <= pDCB->rxBufSize)
                 {
-                    pFrameData = pDCB->pRXBuf + sizeof(FrameQueueHead_Struct) + processedLen;
-                    pDecodeFunc(pFrameData, dataLen - processedLen, 0, NULL, &dealLen);
-                    processedLen += dealLen;
+                    pFrameData = &pDCB->pRXBuf[readIdx];
+                    while (dataLen > processedLen)
+                    {
+                        pDecodeFunc(&pFrameData[processedLen], dataLen - processedLen, 0, NULL, &dealLen);
+                        processedLen += dealLen;
+                    }
                 }
-
-                memmove(pDCB->pRXBuf, 
-                        pDCB->pRXBuf + sizeof(FrameQueueHead_Struct) + dataLen, 
-                        pDCB->rxLen - sizeof(FrameQueueHead_Struct) - dataLen);
-
+                else
+                {
+                    /* 如果数据跨边界，需要特殊处理，这里暂时使用临时缓冲区 */
+                    pFrameData = (uint8_t*)myCalloc(dataLen, 1);
+                    if (pFrameData != NULL)
+                    {
+                        firstPart = pDCB->rxBufSize - readIdx;
+                        memcpy(pFrameData, &pDCB->pRXBuf[readIdx], firstPart);
+                        memcpy(&pFrameData[firstPart], &pDCB->pRXBuf[0], dataLen - firstPart);
+                        while (dataLen > processedLen)
+                        {
+                            pDecodeFunc(&pFrameData[processedLen], dataLen - processedLen, 0, NULL, &dealLen);
+                            processedLen += dealLen;
+                        }
+                        myFree(pFrameData);
+                    }
+                }
+                
+                readIdx = (readIdx + dataLen) % pDCB->rxBufSize;
+                pDCB->rxReadIdx = readIdx;
                 pDCB->rxLen -= (sizeof(FrameQueueHead_Struct) + dataLen);
             }
             else
@@ -578,55 +817,109 @@ GlobalRet_Enum FrameQueue_TransmitTxData(uint8_t channelID, typeFuncTransmit pTr
 {
     FrameQueueCtrlDCB_Struct *pDCB = &g_stFrameQueueCtrlDCB[channelID];
     GlobalRet_Enum eRet = eGlobalRet_OK;
-    FrameQueueHead_Struct *pHead = NULL;
+    FrameQueueHead_Struct stHead = {0};
     uint16_t dataLen = 0;
     uint16_t topicLen = 0;
     uint8_t *pFrameData = NULL;
+    uint16_t totalSize = 0;
+    uint16_t readIdx = pDCB->txReadIdx;
+    uint16_t firstPart = 0;
 
     PARA_ASSERT_RET(channelID < FRAME_QUEUE_CHANNEL_COUNT, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pTransmitFunc != NULL, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pDCB->initFlag == TRUE, eGlobalRet_NotInit);
     PARA_ASSERT_RET(pDCB->txLen > 0, eGlobalRet_NotEnoughData);
 
-    pHead = (FrameQueueHead_Struct *)pDCB->pTXBuf;
+    /* 读取头部 */
+    if (readIdx + sizeof(FrameQueueHead_Struct) <= pDCB->txBufSize)
+    {
+        memcpy(&stHead, &pDCB->pTXBuf[readIdx], sizeof(FrameQueueHead_Struct));
+    }
+    else
+    {
+        firstPart = pDCB->txBufSize - readIdx;
+        memcpy(&stHead, &pDCB->pTXBuf[readIdx], firstPart);
+        memcpy((uint8_t*)&stHead + firstPart, &pDCB->pTXBuf[0], sizeof(FrameQueueHead_Struct) - firstPart);
+    }
 
-    if (Common_TwoUint8ToUint16(pHead->ctrlWord) != FRAME_QUEUE_MAGIC_NUMBER)
+    if (Common_TwoUint8ToUint16(stHead.ctrlWord) != FRAME_QUEUE_MAGIC_NUMBER)
     {
         pDCB->txLen = 0;
+        pDCB->txReadIdx = 0;
+        pDCB->txWriteIdx = 0;
         eRet = eGlobalRet_UnexpectedError;
     }
     else
     { 
-        dataLen = Common_TwoUint8ToUint16(pHead->dataLen);
-        topicLen = Common_TwoUint8ToUint16(pHead->topicLen);
+        dataLen = Common_TwoUint8ToUint16(stHead.dataLen);
+        topicLen = Common_TwoUint8ToUint16(stHead.topicLen);
+        totalSize = sizeof(FrameQueueHead_Struct) + dataLen + topicLen;
 
-        if ((sizeof(FrameQueueHead_Struct) + dataLen + topicLen) > pDCB->txLen)
+        if (totalSize > pDCB->txLen)
         {
             pDCB->txLen = 0;
+            pDCB->txReadIdx = 0;
+            pDCB->txWriteIdx = 0;
             eRet = eGlobalRet_UnexpectedError;
         }
         else
         {
             if (pDCB->frameType == eFrameQueueType_MQTT)
             {
-                pFrameData = pDCB->pTXBuf + sizeof(FrameQueueHead_Struct) + topicLen;
-                pTransmitFunc(pFrameData, dataLen, userData);
-
-                memmove(pDCB->pTXBuf, 
-                        pDCB->pTXBuf + sizeof(FrameQueueHead_Struct) + dataLen + topicLen, 
-                        pDCB->txLen - sizeof(FrameQueueHead_Struct) - dataLen - topicLen);
-
-                pDCB->txLen -= (sizeof(FrameQueueHead_Struct) + dataLen + topicLen);
+                /* 跳过头部和Topic */
+                readIdx = (readIdx + sizeof(FrameQueueHead_Struct) + topicLen) % pDCB->txBufSize;
+                
+                /* 直接使用环形缓冲区中的数据 */
+                if (readIdx + dataLen <= pDCB->txBufSize)
+                {
+                    pFrameData = &pDCB->pTXBuf[readIdx];
+                    pTransmitFunc(pFrameData, dataLen, userData);
+                }
+                else
+                {
+                    /* 如果数据跨边界，需要特殊处理，这里暂时使用临时缓冲区 */
+                    pFrameData = (uint8_t*)myCalloc(dataLen, 1);
+                    if (pFrameData != NULL)
+                    {
+                        firstPart = pDCB->txBufSize - readIdx;
+                        memcpy(pFrameData, &pDCB->pTXBuf[readIdx], firstPart);
+                        memcpy(&pFrameData[firstPart], &pDCB->pTXBuf[0], dataLen - firstPart);
+                        pTransmitFunc(pFrameData, dataLen, userData);
+                        myFree(pFrameData);
+                    }
+                }
+                
+                readIdx = (readIdx + dataLen) % pDCB->txBufSize;
+                pDCB->txReadIdx = readIdx;
+                pDCB->txLen -= totalSize;
             }
             else if (pDCB->frameType == eFrameQueueType_TCP)
             {
-                pFrameData = pDCB->pTXBuf + sizeof(FrameQueueHead_Struct);
-                pTransmitFunc(pFrameData, dataLen, userData);
-
-                memmove(pDCB->pTXBuf, 
-                        pDCB->pTXBuf + sizeof(FrameQueueHead_Struct) + dataLen, 
-                        pDCB->txLen - sizeof(FrameQueueHead_Struct) - dataLen);
-
+                /* 跳过头部 */
+                readIdx = (readIdx + sizeof(FrameQueueHead_Struct)) % pDCB->txBufSize;
+                
+                /* 直接使用环形缓冲区中的数据 */
+                if (readIdx + dataLen <= pDCB->txBufSize)
+                {
+                    pFrameData = &pDCB->pTXBuf[readIdx];
+                    pTransmitFunc(pFrameData, dataLen, userData);
+                }
+                else
+                {
+                    /* 如果数据跨边界，需要特殊处理，这里暂时使用临时缓冲区 */
+                    pFrameData = (uint8_t*)myCalloc(dataLen, 1);
+                    if (pFrameData != NULL)
+                    {
+                        firstPart = pDCB->txBufSize - readIdx;
+                        memcpy(pFrameData, &pDCB->pTXBuf[readIdx], firstPart);
+                        memcpy(&pFrameData[firstPart], &pDCB->pTXBuf[0], dataLen - firstPart);
+                        pTransmitFunc(pFrameData, dataLen, userData);
+                        myFree(pFrameData);
+                    }
+                }
+                
+                readIdx = (readIdx + dataLen) % pDCB->txBufSize;
+                pDCB->txReadIdx = readIdx;
                 pDCB->txLen -= (sizeof(FrameQueueHead_Struct) + dataLen);
             }
             else
