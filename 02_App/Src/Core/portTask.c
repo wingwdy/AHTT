@@ -29,6 +29,7 @@
 #include "SS_Tm.h"
 #include "SS_Snapshot.h"
 #include "SS_Ucm.h"
+#include "SS_WdgM.h"
 
 #include "Cdd_CP.h"
 #include "Cdd_Relay.h"
@@ -72,6 +73,7 @@ typedef struct
 	const configSTACK_DEPTH_TYPE usStackDepth;
 	UBaseType_t uxPriority;
     TaskHandle_t taskHandle;
+    uint8_t wdgId;
 }portTask_CtrBlk;
 
 
@@ -84,18 +86,20 @@ static void Task_100msA(void *arg);
 static void Task_20msA(void *arg);
 static void Task_20msB(void *arg);
 static void Task_1SecA(void *arg);
+static void Task_WdgM100ms(void *arg);
 
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
 static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
 {
-    {"App10msA",        Task_10msA,          NULL,         384,   6 } ,
-    {"App10msB",        Task_10msB,          NULL,         384,   7 } ,
-    {"App20msA",        Task_20msA,          NULL,         256,   4 } ,
-    {"App20msB",        Task_20msB,          NULL,         2048,  5 } ,
-    {"App100msA",       Task_100msA,         NULL,         512,   5 } ,
-    {"App1SecA",        Task_1SecA,          NULL,         256,   4 } ,
+    {"App10msA",        Task_10msA,          &g_stTaskCtrBlkTable[0],         384,   6 } ,
+    {"App10msB",        Task_10msB,          &g_stTaskCtrBlkTable[1],         384,   7 } ,
+    {"App20msA",        Task_20msA,          &g_stTaskCtrBlkTable[2],         256,   4 } ,
+    {"App20msB",        Task_20msB,          &g_stTaskCtrBlkTable[3],         2048,  5 } ,
+    {"App100msA",       Task_100msA,         &g_stTaskCtrBlkTable[4],         512,   5 } ,
+    {"App1SecA",        Task_1SecA,          &g_stTaskCtrBlkTable[5],         256,   4 } ,
+    {"Wdg100msA",       Task_WdgM100ms,      &g_stTaskCtrBlkTable[6],         128,   8 } ,
 };
 
 /*******************************************************************************
@@ -145,44 +149,58 @@ void portTask_CreatAllTask(void)
         {
             PORTTASK_CFG_LogPrint("%s: Task create failed!!\r\n", pTaskCtr->cTaskName);
         }
+        else
+        {
+            SSWdgM_RegisterModule(pTaskCtr->cTaskName, 5000, &pTaskCtr->wdgId);
+        }
 	}
 }
 
 static void Task_10msA(void *arg)
 {
+    portTask_CtrBlk *pTaskCtr = (portTask_CtrBlk *)arg;
+    
     while (1)
     {
         CddCP_MainFunction();
         AswEVSE_MainFunction();
         AswCharge_MainFunction();
         CddRelay_MainFunction();
+        SSWdgM_Checkin(pTaskCtr->wdgId);
         vTaskDelay(10);
     }
 }
 
 static void Task_10msB(void *arg)
 {
+    portTask_CtrBlk *pTaskCtr = (portTask_CtrBlk *)arg;
+
     while (1)
     {
         CddRcd_MainFunction();
         CddPE_MainFunction();
         CddCardM_MainFunction();
+        SSWdgM_Checkin(pTaskCtr->wdgId);
         vTaskDelay(10);
     }
 }
 
 static void Task_20msA(void *arg)
 {
+    portTask_CtrBlk *pTaskCtr = (portTask_CtrBlk *)arg;
     while (1)
     {
         AswLedEvent_MainFunction();
         CddLedM_MainFunction();
+        SSWdgM_Checkin(pTaskCtr->wdgId);
         vTaskDelay(20);
     }
 }
 
 static void Task_20msB(void *arg)
 {
+    portTask_CtrBlk *pTaskCtr = (portTask_CtrBlk *)arg;
+
     while (1)
     {
         CddNetM_MainFunction();
@@ -190,12 +208,15 @@ static void Task_20msB(void *arg)
         SSSnapshot_MainFunction();
         DSConsole_MainFunction();
         SSUcm_MainFunction();
+        SSWdgM_Checkin(pTaskCtr->wdgId);
         vTaskDelay(20);
     }
 }
 
 static void Task_100msA(void *arg)
 {
+    portTask_CtrBlk *pTaskCtr = (portTask_CtrBlk *)arg;
+
     while (1)
     {
         CddMeterM_MainFunction();
@@ -204,21 +225,34 @@ static void Task_100msA(void *arg)
         AswMonitor_MainFunction();
         AswVoltCurHandle_MainFunction();
         AswTempHandle_MainFunction();
-        McalIWDG_FeedWatchDog();
+        SSWdgM_Checkin(pTaskCtr->wdgId);
         vTaskDelay(100);
     }
 }
 
 static void Task_1SecA(void *arg)
 {
+    portTask_CtrBlk *pTaskCtr = (portTask_CtrBlk *)arg;
+
     while (1)
     {
         SSTM_MainFunction();
+        SSWdgM_Checkin(pTaskCtr->wdgId);
         vTaskDelay(1000);
     }
 }
 
+static void Task_WdgM100ms(void *arg)
+{
+    portTask_CtrBlk *pTaskCtr = (portTask_CtrBlk *)arg;
 
+    while (1)
+    {
+        SSWdgM_MainFunction();
+        SSWdgM_Checkin(pTaskCtr->wdgId);
+        vTaskDelay(100);
+    }
+}
 
 
 

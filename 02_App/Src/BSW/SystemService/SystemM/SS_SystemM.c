@@ -46,6 +46,7 @@
 #include "SS_Tm.h"
 #include "SS_Snapshot.h"
 #include "SS_Ucm.h"
+#include "SS_WdgM.h"
 
 #include "Common.h"
 #include "stdio.h"
@@ -100,7 +101,8 @@ static void SSSystemM_InitTwo(void)
 {
     MSNvm_InitMemory();
     MSNvm_ReadAll();
-
+    
+    SSWdgM_InitMemory();
     SSSnapshot_InitMemory();
     AswErrHandle_InitMemory();
     SSUcm_InitMemory();
