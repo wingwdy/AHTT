@@ -24,15 +24,16 @@
 *    Macro Definition
 ******************************************************************************/
 /* 通信协议版本 */
-#define IOT_YKC21_PROTOCOL_VERSION                 (20101U) //2.1.1
+#define IOT_YKC21_PROTOCOL_VERSION                 (20101U) /* 2.1.1 */
 
 /* 通信协议头定义--YKC21协议 */
-#define IOT_YKC21_PLUS_HEAD                       (0x68U)                
-
-
- 
+#define IOT_YKC21_PLUS_HEAD                       (0x68U)        
+#define IOT_YKC21_ECRPTHEAD_LENGTH                (2+7+1+1)         /* 2(序列号域)+7(发送时间)+1(加密标志)+1(帧类型标志)*/ 
+#define IOT_YKC21_RX_Totallength(X)               (x + 1 + 2 + 2)   /*  x+ 1(起始标志)+ 2(数据长度）+ 2(帧校验域)*/ 
+#define IOTYKC21_RX_EcrptMessageBodylength(x)     (x - IOT_YKC21_ECRPTHEAD_LENGTH)   /* 云快充2.1 收到加密消息体长度*/             
 /* 通信buff缓存定义 */
-#define IOT_YKC21_TXRX_BUFFER_SIZE                 (3072U)
+#define IOT_YKC21_TXRX_BUFFER_SIZE                (2048U)
+#define IOT_YKC21_RX_ECRPTBUFFER_MAXSIZE           (384U) 
 
 /* 计费模型类型定义 */
 #define IOT_YKC21_BILLMODE_RATE_TYPE_MULT          48
@@ -185,6 +186,7 @@ typedef uint8_t (*IotYKC21_pRecvParseFuncType)(uint8_t *port, uint8_t *r_data, u
 typedef struct
 {
     uint16_t cmd;
+    uint8_t encryptionFlag;
 	uint8_t cmdType;
     uint32_t sendCycle;
     IotYKC21_pSendPackFuncType pSendFunc;
@@ -196,6 +198,7 @@ typedef struct
 typedef struct 
 {
 	uint16_t cmd;
+    uint8_t encryptionFlag;
 	uint8_t cmdType; 
 	IotYKC21_pRecvParseFuncType pRecvParse;
 	uint16_t maxTimeout;

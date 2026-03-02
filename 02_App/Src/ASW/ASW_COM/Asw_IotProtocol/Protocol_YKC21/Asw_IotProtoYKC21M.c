@@ -500,7 +500,6 @@ static void IotYKC21_WSNormalHandle(void)
             IotYKC21_CycleDetect();
         }
 
-
         IotYKC21_FunDeal();         /* 功能执行函数 */
 
         IotYKC21_UpCtrlSendDeal();

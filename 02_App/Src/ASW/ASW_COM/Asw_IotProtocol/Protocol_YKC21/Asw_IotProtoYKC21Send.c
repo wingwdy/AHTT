@@ -98,6 +98,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [0] = 
     {
         .cmd = IOT_YKC21_CMD_LOGIN_REQ,
+        .encryptionFlag = FALSE,
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .matchCmd = IOT_YKC21_CMD_LOGIN_RSP,
         .pSendFunc = IotYKC21_SendLoginReq,
@@ -109,6 +110,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [1] = 
     {
         .cmd = IOT_YKC21_CMD_HEARTBEAT_REQ,
+        .encryptionFlag = FALSE,
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .matchCmd = IOT_YKC21_CMD_HEARTBEAT_RSP,
         .pSendFunc = IotYKC21_SendHeartBeat,
@@ -120,6 +122,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [2] = 
     {
         .cmd = IOT_YKC21_CMD_BILLMODE_VERIFY_REQ,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .matchCmd = IOT_YKC21_CMD_BILLMODE_VERIFY_RSP,
         .pSendFunc = IotYKC21_SendBillModeVerifyReq,
@@ -131,6 +134,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [3] = 
     {
         .cmd = IOT_YKC21_CMD_BILLMODE_REQ,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .matchCmd = IOT_YKC21_CMD_BILLMODE_MUTIRATE_RSP,
         .pSendFunc = IotYKC21_SendBillModeReq,
@@ -142,6 +146,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [4] = 
     {
         .cmd = IOT_YKC21_CMD_REPORT_REALDATA,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .matchCmd = IOT_YKC21_CMD_NULL,
         .pSendFunc = IotYKC21_SendRealData,
@@ -153,6 +158,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [5] = 
     {
         .cmd = IOT_YKC21_CMD_CALL_REALDATA_ACK,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_CALL_REALDATA,
         .pSendFunc = IotYKC21_SendRealData,
@@ -165,6 +171,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [6] = 
     {
         .cmd = IOT_YKC21_CMD_REMOTE_STOP_CHARGE_RSP,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_REMOTE_STOP_CHARGE,
         .pSendFunc = IotYKC21_SendChargeStopRsp,
@@ -176,6 +183,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [7] = 
     {
         .cmd = IOT_YKC21_CMD_MULTI_ORDER_RECORD_REQ,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .matchCmd = IOT_YKC21_CMD_ORDER_RECORD_RSP,
         .pSendFunc = IotYKC21_SendMultyOrderRecordReq,
@@ -187,6 +195,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [8] = 
     {
         .cmd = IOT_YKC21_CMD_MULTI_ORDER_RECORD_ACK,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .matchCmd = NULL,
         .pSendFunc = IotYKC21_SendMultyOrderRecordack,
@@ -198,6 +207,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [9] = 
     {
         .cmd = IOT_YKC21_CMD_UPDATE_ACCOUNT_MONEY_RSP,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_UPDATE_ACCOUNT_MONEY,
         .pSendFunc = IotYKC21_SendUpdateAccountMoneyRsp,
@@ -209,6 +219,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [10] = 
     {
         .cmd = IOT_YKC21_CMD_FAULTREST_REQ,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .matchCmd = IOT_YKC21_CMD_FAULTREST_RSP,
         .pSendFunc = IotYKC21_SendFaultRestReq,
@@ -220,6 +231,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [11] = 
     {
         .cmd = IOT_YKC21_CMD_RECORD_RSP,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_Call_RECORD,
         .pSendFunc = IotYKC21_SendRecordRsp,
@@ -231,6 +243,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [12] = 
     {
         .cmd = IOT_YKC21_CMD_FAULT_REQ,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .matchCmd = IOT_YKC21_CMD_FAULT_RSP,
         .pSendFunc = IotYKC21_SendFaultReq,
@@ -242,6 +255,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [13] = 
     {
         .cmd = IOT_YKC21_CMD_POWERCHANG_RSP,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_SET_POWERCHANG,
         .pSendFunc = IotYKC21_SendPowerChangeRsp,
@@ -253,6 +267,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [14] = 
     {
         .cmd = IOT_YKC21_CMD_SYNC_TIME_RSP,
+        .encryptionFlag = FALSE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_SYNC_TIME,
         .pSendFunc = IotYKC21_SendSyncTimeRsp,
@@ -264,6 +279,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [15] = 
     {
         .cmd = IOT_YKC21_CMD_SET_BILLMODE_MULTIRATE_RSP,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_SET_BILLMODE_MULTIRATE,
         .pSendFunc = IotYKC21_SendSetBillModeMultiRateRsp,
@@ -275,6 +291,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [16] = 
     {
         .cmd = IOT_YKC21_CMD_POWERDEFAULT_MAX_RSP,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_SET_POWERDEFAULT_MAX,
         .pSendFunc = IotYKC21_SendPowerDefaultMaxRsp,
@@ -287,6 +304,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [17] =
     {
         .cmd = IOT_YKC21_CMD_SET_QRCODE_RSP,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_SET_QRCODE,
         .pSendFunc = IotYKC21_SendSetQrcodeRsp,
@@ -298,6 +316,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [18] =
     {
         .cmd = IOT_YKC21_CMD_SET_PARAM_RSP,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_SET_PARAM,
         .pSendFunc = IotYKC21_SendSetParamRsp,
@@ -310,6 +329,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [19] =
     {
         .cmd = IOT_YKC21_CMD_REBOOT_RSP,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_REBOOT,
         .pSendFunc = IotYKC21_SendSetRebootRsp,
@@ -321,6 +341,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [20] =
     {
         .cmd = IOT_YKC21_CMD_SET_FTP_RSP,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_SET_FTP,
         .pSendFunc = IotYKC21_SendSetFTPRsp,
@@ -332,6 +353,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [21] =
     {
         .cmd = IOT_YKC21_CMD_SET_KEY_RSP,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_SET_KEY,
         .pSendFunc = IotYKC21_SendSetKeyRsp,
@@ -343,6 +365,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [22] = 
     {
         .cmd = IOT_YKC21_CMD_PILE_START_CHARGE_REQ,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .matchCmd = IOT_YKC21_CMD_PILE_START_CHARGE_RSP,
         .pSendFunc = IotYKC21_SendPileStartChargeReq,
@@ -354,6 +377,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [23] = 
     {
         .cmd = IOT_YKC21_CMD_REMOTE_START_CHARGE_RSP,
+        .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_REMOTE_START_CHARGE,
         .pSendFunc = IotYKC21_SendChargeStartRsp,
@@ -1015,65 +1039,58 @@ static uint16_t IotYKC21_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf)
      return dataLen;
  }
 
- static void IotYKC21printf_unenecryptinformation(uint8_t cmd, uint8_t *pBuf,uint16_t dataLen)
- {
-    if (cmd == 0x3D)
-    {
-        IOTYKC21_CFG_LogPrint("YKC21发送未加密账单消息体数据[cmd: 0x%02X][%d]: ", cmd, dataLen);
-        DSLogM_HexOutput(&pBuf[0], (dataLen));
-    }
 
- }
-
-
-static uint16_t IotYKC21_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
+static uint16_t IotYKC21_PackHead(uint16_t cmd, uint8_t encryptflg,uint8_t printflg, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
 {
     /* 起始标志 数据长度 序列号域 发送时间 加密标志 帧类型标志 消息体  帧校验域 */
     /*   1 字节  2 字节   2 字节   7 字节  1 字节   1 字节    N 字节  2 字节 */
     IotYKC21FrameHead_Struct *pFrameHead = (IotYKC21FrameHead_Struct *)pBuf;
-    /*  uint16_t totalLen = dataLen + sizeof(IotYKC21FrameHead_Struct); */
     uint16_t encryptionMessageLen = 0; /*  消息体加密后长度 */
     uint32_t SecTimestamp = 0;
     uint16_t crc16totalLen = 0; /*  帧校验域：从序列号域到数据域的 CRC 校验 */
     uint16_t crc16 = 0;
 
+    if (TRUE == printflg)
+    {
+        IOTYKC21_CFG_LogPrint("YKC21发送未加密消息体数据[cmd: 0x%02X][%d]: ", cmd, dataLen);
+        DSLogM_HexOutput(&pBuf[1 + 2 + IOT_YKC21_ECRPTHEAD_LENGTH], dataLen);
+    }
+
     pFrameHead->head = 0x68;
 
-    if (cmd == IOT_YKC21_CMD_LOGIN_REQ || cmd == IOT_YKC21_CMD_HEARTBEAT_REQ || cmd == IOT_YKC21_CMD_HEARTBEAT_RSP ||
-        cmd == IOT_YKC21_CMD_SYNC_TIME_RSP || cmd == IOT_YKC21_CMD_SYNC_TIME)
+    if (FALSE == encryptflg)
     {
         encryptionMessageLen = dataLen;
-        /*  不加密: 充电桩登陆认证、充电桩心跳包、心跳包应答、对时设置、对时设置应答不需要加密 */
-        pFrameHead->dataLen[0] = (2 + 7 + 1 + 1 + encryptionMessageLen) >> 8;
-        pFrameHead->dataLen[1] = (2 + 7 + 1 + 1 + encryptionMessageLen) & 0xFF; /*  “序列号域+发送时间+加密标志+帧类型标志+消息体”字节数之和 */
+        pFrameHead->dataLen[0] = (IOT_YKC21_ECRPTHEAD_LENGTH + encryptionMessageLen) >> 8;
+        pFrameHead->dataLen[1] = (IOT_YKC21_ECRPTHEAD_LENGTH + encryptionMessageLen) & 0xFF; /* “序列号域+发送时间+加密标志+帧类型标志+消息体”字节数之和 */
         pFrameHead->seq[0] = seq >> 8;
         pFrameHead->seq[1] = seq & 0xFF;
-
 
         SecTimestamp = SSTM_GetSecTimestamp();
         Common_TimestampToCp56Time2a(SecTimestamp, &pFrameHead->sendcp56time[0]);
 
         pFrameHead->encryptFlag = 0;
-
         pFrameHead->cmd = cmd;
-        crc16totalLen = (2 + 7 + 1 + 1 + encryptionMessageLen);
+
+        crc16totalLen = (IOT_YKC21_ECRPTHEAD_LENGTH + encryptionMessageLen);
     }
     else
     {
-        pFrameHead->encryptFlag = 1;
-        pFrameHead->cmd = cmd;
-        IotYKC21printf_unenecryptinformation(cmd, &pBuf[1 + 2 + 2 + 7 + 1], (1 + dataLen));
-        encryptionMessageLen = YKC21_Send_Data_enecrypt(&pBuf[1 + 2 + 2 + 7 + 1 + 1], dataLen); /* 加密 */
 
-        pFrameHead->dataLen[0] = (2 + 7 + 1 + 1 + encryptionMessageLen) >> 8;
-        pFrameHead->dataLen[1] = (2 + 7 + 1 + 1 + encryptionMessageLen) & 0xFF; /* 序列号域+发送时间+加密标志+帧类型标志+消息体”字节数之和 */
+        encryptionMessageLen = YKC21_Send_Data_enecrypt(&pBuf[1 + 2 + IOT_YKC21_ECRPTHEAD_LENGTH], dataLen); /* 加密 */
+
+        pFrameHead->dataLen[0] = (IOT_YKC21_ECRPTHEAD_LENGTH + encryptionMessageLen) >> 8;
+        pFrameHead->dataLen[1] = (IOT_YKC21_ECRPTHEAD_LENGTH + encryptionMessageLen) & 0xFF; /* 序列号域+发送时间+加密标志+帧类型标志+消息体”字节数之和 */
         pFrameHead->seq[0] = seq >> 8;
         pFrameHead->seq[1] = seq & 0xFF;
 
         SecTimestamp = SSTM_GetSecTimestamp();
         Common_TimestampToCp56Time2a(SecTimestamp, &pFrameHead->sendcp56time[0]);
 
-        crc16totalLen = (2 + 7 + 1 + 1 + encryptionMessageLen);
+        pFrameHead->encryptFlag = 1;
+        pFrameHead->cmd = cmd;
+
+        crc16totalLen = (IOT_YKC21_ECRPTHEAD_LENGTH + encryptionMessageLen);
     }
 
     crc16 = Common_CalcCRC16(&pBuf[3], crc16totalLen);
@@ -1141,7 +1158,7 @@ void IotYKC21_UpCtrlSendDeal(void)
 
                     if (dataLen > 0)
                     {
-                        dataLen = IotYKC21_PackHead(pCmdSendCtrl->cmd, reqSeq, txBuf, dataLen);
+                        dataLen = IotYKC21_PackHead(pCmdSendCtrl->cmd, pCmdSendCtrl->encryptionFlag, pCmdSendCtrl->printFlag, reqSeq, txBuf, dataLen);
 
                         if (eGlobalRet_OK != FrameQueue_PushTx(pIotYKC21Ctx->frameQueueChannelID, NULL, 0, txBuf, dataLen))
                         {
@@ -1155,7 +1172,7 @@ void IotYKC21_UpCtrlSendDeal(void)
 
                         if (pCmdSendCtrl->printFlag)
                         {
-                            IOTYKC21_CFG_LogPrint("[枪：%d]发送[cmd: 0x%02X, %s][%d]: ", port, (uint8_t)pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
+                            IOTYKC21_CFG_LogPrint("[枪：%d]加密发送[cmd: 0x%02X, %s][%d]: ", port, (uint8_t)pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
                             DSLogM_HexOutput(txBuf, dataLen);
                         }
 

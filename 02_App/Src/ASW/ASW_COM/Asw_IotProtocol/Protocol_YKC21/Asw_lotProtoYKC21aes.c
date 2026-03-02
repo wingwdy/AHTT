@@ -518,7 +518,6 @@ void AES_CBC_decrypt_buffer(struct AES_ctx* ctx, uint8_t* buf, size_t length)
   }
 
 }
-
 #endif // #if defined(CBC) && (CBC == 1)
 
 
