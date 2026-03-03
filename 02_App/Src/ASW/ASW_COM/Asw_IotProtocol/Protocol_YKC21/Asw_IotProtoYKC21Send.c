@@ -54,7 +54,11 @@
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
+extern IotYKC21Ctx_Struct *pIotYKC21Ctx;
 
+struct AES_ctx g_ex;
+uint8_t random_key_A[16]="1234567890123456"; // 随机密钥A
+uint8_t IotYKC21encryptbuf[IOT_YKC21_RX_ECRPTBUFFER_MAXSIZE]; /* 加密的数据 */
 
 
 /*******************************************************************************
@@ -88,11 +92,7 @@ static uint16_t IotYKC21_SendChargeStartRsp(uint8_t port, uint8_t *pBuf);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-extern IotYKC21Ctx_Struct *pIotYKC21Ctx;
 
-struct AES_ctx g_ex;
-uint8_t random_key_A[16]="1234567890123456"; // 随机密钥A
- 
 
 static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEND_COUNT] = 
 {
@@ -208,7 +208,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
     [9] = 
     {
         .cmd = IOT_YKC21_CMD_UPDATE_ACCOUNT_MONEY_RSP,
-        .encryptionFlag = TRUE,
+        .encryptionFlag = FALSE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_UPDATE_ACCOUNT_MONEY,
         .pSendFunc = IotYKC21_SendUpdateAccountMoneyRsp,
@@ -1041,8 +1041,8 @@ static uint16_t IotYKC21_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf)
      return dataLen;
  }
 
-uint8_t IotYKC21encryptbuf[IOT_YKC21_RX_ECRPTBUFFER_MAXSIZE]; /* 加密的数据 */
-static uint16_t IotYKC21_PackHead(uint16_t cmd, uint8_t encryptflg,uint8_t printflg, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
+
+static uint16_t IotYKC21_PackHead(uint8_t port, uint16_t cmd, uint8_t encryptflg,uint8_t printflg, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
 {
     /* 起始标志 数据长度 序列号域 发送时间 加密标志 帧类型标志 消息体  帧校验域 */
     /*   1 字节  2 字节   2 字节   7 字节  1 字节   1 字节    N 字节  2 字节 */
@@ -1054,7 +1054,7 @@ static uint16_t IotYKC21_PackHead(uint16_t cmd, uint8_t encryptflg,uint8_t print
 
     if (TRUE == printflg)
     {
-        IOTYKC21_CFG_LogPrint("YKC21发送未加密消息体数据[cmd: 0x%02X][%d]: ", cmd, dataLen);
+        IOTYKC21_CFG_LogPrint("[枪：%d]发送未加密消息体数据[cmd: 0x%02X][%d]: ",port ,cmd, dataLen);
         DSLogM_HexOutput(&pBuf[1 + 2 + IOT_YKC21_ECRPTHEAD_LENGTH], dataLen);
     }
 
@@ -1162,7 +1162,7 @@ void IotYKC21_UpCtrlSendDeal(void)
 
                     if (dataLen > 0)
                     {
-                        dataLen = IotYKC21_PackHead(pCmdSendCtrl->cmd, pCmdSendCtrl->encryptionFlag, pCmdSendCtrl->printFlag, reqSeq, txBuf, dataLen);
+                        dataLen = IotYKC21_PackHead(port,pCmdSendCtrl->cmd, pCmdSendCtrl->encryptionFlag, pCmdSendCtrl->printFlag, reqSeq, txBuf, dataLen);
 
                         if (eGlobalRet_OK != FrameQueue_PushTx(pIotYKC21Ctx->frameQueueChannelID, NULL, 0, txBuf, dataLen))
                         {

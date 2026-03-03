@@ -414,22 +414,7 @@ static uint32_t YKC21_Recv_Data_Decrypt(uint8_t *r_data, int len)
     AES_init_ctx_iv(&g_ex, random_key_A, random_key_A);
     AES_CBC_decrypt_buffer(&g_ex, r_data, len);
 
-       return len;
-}
-
-static  uint32_t YKC21_Recv_Data_Decrypt_test(uint8_t *in_ciphertext, int ciphertext_len,uint8_t *out_plaintext)
-{
-     uint32_t decrypted_len = 0;
-    // int ret  = 0;
-    //  ret = aes_128_cbc_decrypt(random_key_A, in_ciphertext, ciphertext_len, out_plaintext, &decrypted_len);
-    // if (ret != 0)
-    // {
-    //     decrypted_len = 0; 
-    //     IOTYKC21_CFG_LogPrint("解密密失败 failed: %d\n", ret);
-       
-    // }
-
-     return decrypted_len;
+    return len;
 }
 
 
@@ -513,8 +498,11 @@ static void IotYKC21_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
                 if(pCmdRecvCtrl->encryptionFlag)
                 {
 					memcpy(IotYKC21Decryptbuf, (uint8_t *)pFrameHead + sizeof(IotYKC21FrameHead_Struct),IOTYKC21_RX_EcrptMessageBodylength(frameLen));
+
+                    IOTYKC21_CFG_LogPrint("[枪：%d]接收未解密消息体数据[cmd: 0x%02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, IOTYKC21_RX_EcrptMessageBodylength(frameLen));
+                    DSLogM_HexOutput((uint8_t *)IotYKC21Decryptbuf, IOTYKC21_RX_EcrptMessageBodylength(frameLen));
+
                     decrypted_len =  YKC21_Recv_Data_Decrypt(IotYKC21Decryptbuf,IOTYKC21_RX_EcrptMessageBodylength(frameLen));
-                 // decrypted_len = YKC21_Recv_Data_Decrypt_test( (uint8_t *)pFrameHead + sizeof(IotYKC21FrameHead_Struct),IOTYKC21_RX_EcrptMessageBodylength(frameLen),IotYKC21Decryptbuf);
                 }
                 else
                 {
@@ -738,10 +726,14 @@ static uint8_t IotYKC21_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, u
 
     memcpy(pIotYKC21Ctx->stProtoData[port[0]].updateAccountMoneyCardID, &pRecvData[index], 8);
 
-    if (0 == memcmp(&pRecvData[index], invalidCardID, 8) == 0)
+    if (0 == memcmp(&pRecvData[index], invalidCardID, 8))
     {
         index += 8;
         pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
+        if (pChargeCtrl->eChargeCtrlType == eAswMonitorChargeCtrlType_JudgeMoney)
+        {
+            pChargeCtrl->chargeCtrlVal = pChargeCtrl->accountMoney;
+        }
         IOTYKC21_CFG_LogPrint("[枪：%d]更新账户余额成功，余额：%d!\r\n", port[0], pChargeCtrl->accountMoney);
         pIotYKC21Ctx->stProtoData[port[0]].updateAccountMoneyResult = 0x00;
     }
@@ -753,6 +745,10 @@ static uint8_t IotYKC21_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, u
             {
                 index += 8;
                 pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
+                if (pChargeCtrl->eChargeCtrlType == eAswMonitorChargeCtrlType_JudgeMoney)
+                {
+                    pChargeCtrl->chargeCtrlVal = pChargeCtrl->accountMoney;
+                }
                 IOTYKC21_CFG_LogPrint("[枪：%d]更新账户余额成功，余额：%d!\r\n", port[0], pChargeCtrl->accountMoney);
                 pIotYKC21Ctx->stProtoData[port[0]].updateAccountMoneyResult = 0x00;
             }
@@ -1093,9 +1089,10 @@ static uint8_t IotYKC21_RecvSetKey(uint8_t *port, uint8_t *r_data, uint16_t len)
     MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
-    uint8_t refreshglg = FALSE;
+    uint8_t refreshglg = TRUE;
 
-     pIotYKC21Ctx->rsaRefreshflg = FALSE;
+    pIotYKC21Ctx->rsaRefreshflg = FALSE;
+    pIotYKC21Ctx->rsaReponseDelaytick = 0;
 
     for (uint8_t i = 0; i < SYSCFG_CFG_GUN_NUM; i++)
     {

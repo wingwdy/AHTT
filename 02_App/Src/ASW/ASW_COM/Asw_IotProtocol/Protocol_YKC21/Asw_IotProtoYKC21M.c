@@ -321,7 +321,7 @@ static void IotYKC21_UpError(void)
                             pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearId = Iot_Ykc21Error_map[index].err_codeid;
 
                             Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULT_REQ, TRUE);
-                            IOTYKC21_CFG_LogPrint("[枪：%d]故障发生,云快充2.1上报故障编码[0x%04x]\r\n", port, Iot_Ykc21Error_map[index].err_codeid);
+                            IOTYKC21_CFG_LogPrint("[枪：%d]故障发生时间戳[%d],云快充2.1上报故障编码[0x%04x]\r\n", port, pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearTime, Iot_Ykc21Error_map[index].err_codeid);
                         }
                         else
                         {
@@ -332,7 +332,7 @@ static void IotYKC21_UpError(void)
                             pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearId = Iot_Ykc21Error_map[index].err_codeid;
 
                             Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULTREST_REQ, TRUE);
-                            IOTYKC21_CFG_LogPrint("[枪：%d]故障取消,云快充2.1上报故障编码[0x%04x]\r\n", port, Iot_Ykc21Error_map[index].err_codeid);
+                            IOTYKC21_CFG_LogPrint("[枪：%d]故障取消时间戳[%d],云快充2.1上报故障编码[0x%04x]\r\n", port, pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearTime, Iot_Ykc21Error_map[index].err_codeid);
                         }
 
                         break;
@@ -412,7 +412,6 @@ static void  IotYKC21_UpRSAKey(void)
             pIotYKC21Ctx->rsaRefreshflg = FALSE;
             /* 执行重连 */
             IotYKC21_OfflineHandle();
-            // AswMonitor_SetReboot(eAswMonitorRebootType_WaitIdle);
         }
     }
 }
@@ -485,8 +484,6 @@ static void IotYKC21_WSOfflineHandle(void)
 }
 
 
-
-
 static void IotYKC21_WSLoginHandle(void)
 {
     if (TRUE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_O))
@@ -518,7 +515,6 @@ static void IotYKC21_WSNormalHandle(void)
         IotYKC21_TimeoutDetect();
     }
 }
-
 
 
 static IotYKC21StopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType)

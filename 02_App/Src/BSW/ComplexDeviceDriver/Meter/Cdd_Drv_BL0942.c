@@ -366,9 +366,13 @@ static void CddDrvVL0942_RefreshData(uint8_t port, CddDrvBL0942_Struct *pBL0942)
     memcpy(data, pBL0942->cacheBuf + index, 3); 
     pBL0942->tempCount = Common_FourUint8ToUint32(data);
 
-   
-    // pBL0942->tempCount = 12;//JJUNTEST
-
+    // JJUNTEST
+    // static uint32_t temptick = 0;
+    // if (TRUE == Common_JudgeTimeoutMs(temptick, 2000))
+    // {
+    //     temptick = Common_GetSystick();
+    //     pBL0942->tempCount = 7; 
+    // }
 
     pBL0942->totalCount += pBL0942->tempCount;
 }
