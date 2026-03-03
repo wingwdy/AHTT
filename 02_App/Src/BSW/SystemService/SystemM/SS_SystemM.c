@@ -47,6 +47,7 @@
 #include "SS_Snapshot.h"
 #include "SS_Ucm.h"
 #include "SS_WdgM.h"
+#include "SS_Csm.h"
 
 #include "Common.h"
 #include "stdio.h"
@@ -93,6 +94,8 @@ static void SSSystemM_InitOne(void)
     DSLogM_InitMemory();
     DSConsole_Init();
     SSTM_InitMemory();
+    SSWdgM_InitMemory();
+    SSCsm_InitMemory();
     SSSystemM_ShowInfo();
     McalMcu_ClearResetFlags();
 }

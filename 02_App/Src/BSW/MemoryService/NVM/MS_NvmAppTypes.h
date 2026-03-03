@@ -23,31 +23,30 @@
 *    Macro Definition
 ******************************************************************************/
 /* 二维码长度 */
-#define MSNVM_QRCODE_LEN                   256
+#define MSNVM_QRCODE_LEN                      256
 
 /* 订单长度 */
-#define MSNVM_ORDER_MAX_LEN                1024
-
+#define MSNVM_ORDER_MAX_LEN                   512
 
 /* 故障信息长度 */
-#define MSNVM_ERROR_INFO_MAX_LEN           288
+#define MSNVM_ERROR_INFO_MAX_LEN              288
 
 /* 运行日志长度 */
-#define MSNVM_RUNNING_LOG_MAX_LEN          2048
+#define MSNVM_RUNNING_LOG_MAX_LEN             2048
 
 /* 桩编码字符串长度 */
-#define MSNVM_PILE_DN_LEN                  40
+#define MSNVM_PILE_DN_LEN                     40
 
 /* 各平台私有参数长度 */
-#define MSNVM_PLAT_PRIVATE_PARAM_LEN        (512+128)
+#define MSNVM_PLAT_PRIVATE_PARAM_LEN          (512 + 128)
 
 /* 平台IP长度 */
-#define MSNVM_PLAT_IP_LEN                  72
+#define MSNVM_PLAT_IP_LEN                     72
 
 /* 计费模型 */
-#define MSNVM_GN_BILLMODE_MULTRATE_COUNT   9
-#define MSNVM_GN_BILLMODE_4RATE_COUNT      4
-#define MSNVM_GN_BILLMIDE_PERIOD_COUNT     48
+#define MSNVM_GN_BILLMODE_MULTRATE_COUNT      9
+#define MSNVM_GN_BILLMODE_4RATE_COUNT         4
+#define MSNVM_GN_BILLMIDE_PERIOD_COUNT        48
 
 //YKC21
 #define MSNVM_YKC21_BILLMIDE_MULTRATE_COUNT   48
@@ -141,10 +140,9 @@ typedef struct
 }MSNvmGNOrderInfo_Struct;
 
 
-
 typedef struct 
 {
-    //若根据协议2.1.0全部存储有 1098 字节; 根据协议2.1.1全部存储有 330 字节
+    /* 根据协议2.1.1全部存储有 330 字节 */
     uint8_t orderTransactionNum[16];          /* 交易流水号 */
     uint8_t pileDnBCD[7];                     /* 设备编号 */
     uint8_t port;                             /* 枪号 */
@@ -165,15 +163,7 @@ typedef struct
     uint8_t stopReason;                       /* 停止原因 */
     uint8_t logicCardNum[8];                  /* 逻辑卡号 */
     uint8_t fee_num;                          /* 费率个数 */
-    // uint32_t billInfo[48][4];                 /* 
-    //                                             48个时段对应的 
-    //                                             [][0]单价(5位小数)
-    //                                             [][1]电量(4位小数)
-    //                                             [][2]计损电量(4位小数)
-    //                                             [][3]金额(4位小数) 
-    //                                          */
-
-    uint32_t time_power[48];                /* 48时段电量 小数点后四位 */
+    uint32_t time_power[48];                  /* 48时段电量 小数点后四位 */
 }MSNvmYKC21OrderInfo_Struct;
 
 
