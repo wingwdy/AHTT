@@ -489,9 +489,9 @@
               <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_XDT\Asw_IotProtoXDTSend.c</FilePath>
             </File>
             <File>
-              <FileName>Asw_IotProtoYKC21.c</FileName>
+              <FileName>Asw_IotProtoYKC21M.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC21\Asw_IotProtoYKC21.c</FilePath>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC21\Asw_IotProtoYKC21M.c</FilePath>
             </File>
             <File>
               <FileName>Asw_IotProtoYKC21Recv.c</FileName>

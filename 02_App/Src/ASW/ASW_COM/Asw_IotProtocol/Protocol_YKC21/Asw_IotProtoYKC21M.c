@@ -25,8 +25,6 @@
 #include "Asw_IotProtoYKC21Recv.h"
 #include "Asw_ChargeIf.h"
 #include "MS_Nvm.h"
-#include "Global.h"
-#include "Cdd_CP.h"
 #include "SS_Tm.h"
 #include "Asw_VoltCurHandle.h"
 
@@ -55,16 +53,63 @@
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
+IotYKC21Ctx_Struct *pIotYKC21Ctx = NULL;
+const char Default_RsaKey[]={"MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKaTP4eBWYBh3JDnYa7h2nuYACREgmV1o250/36ebYwaUswQDbUdMoeRvRIWxhCtXEzVkMYtH07ctmpzMo8uTvMCAwEAAQ=="};
+const char Default_TokenStr[] = {"54260225221003"};	
 
+static const IotYKC21errMap_Struct Iot_Ykc21Error_map[] = 
+{
+    {eErr_CpVoltAbnor,        eIotYKC21ErrorState_Pile,	0x0324}, 
+    {eErr_CpGroundFault,      eIotYKC21ErrorState_Pile,	0x0440},
+    {eErr_PEBreakFault,       eIotYKC21ErrorState_Pile,	0x02E2},
+    {eErr_EmergencyStop,      eIotYKC21ErrorState_Pile,	0x02C3},
+    {eErr_InputLineReversed,  eIotYKC21ErrorState_Pile,	0x0441},
+    {eErr_LeakageCurrErr,     eIotYKC21ErrorState_Pile,	0x031E},
+    {eErr_ShortCircleErr,     eIotYKC21ErrorState_Pile,	0x0313},
+    {eErr_RCDSelfcheckErr,    eIotYKC21ErrorState_Pile, 0x031E}, 
+    {eErr_AphaseInputOverVol, eIotYKC21ErrorState_Pile,	0x02DE},
 
+    {eErr_AphaseInputLessVol, eIotYKC21ErrorState_Pile,	0x02DE},
+
+    {eErr_OutputOverCurr,     eIotYKC21ErrorState_Pile,	0x0303},
+    {eErr_JcqMaloperation,    eIotYKC21ErrorState_Pile,	0x0326},
+    {eErr_JcqSynechiaFault,   eIotYKC21ErrorState_Pile,	0x02C8},
+    {eErr_HmiCommErr,         eIotYKC21ErrorState_Pile,	0x0332},
+	{eErr_ReaderCommErr,      eIotYKC21ErrorState_Pile,	0x02C5},
+
+    {eErr_MeterCommErr,   	  eIotYKC21ErrorState_Pile,	0x02C6},  
+    {eErr_EnvOverTempErr,     eIotYKC21ErrorState_Pile,	0x02C9},
+    {eErr_GunOverTempErr,     eIotYKC21ErrorState_Pile,	0x02C9},
+    {eErr_POverTempErr,       eIotYKC21ErrorState_Pile,	0x02CA},
+    {eErr_DatabaseErr,        eIotYKC21ErrorState_Other,0x0440},             
+    {eErr_MeterCalcErr,   	  eIotYKC21ErrorState_Pile,	0x02C7},  
+    {eErr_ChgStartTimeout,    eIotYKC21ErrorState_Pile,	0x0003},
+    {eErr_DiodeStop,      	  eIotYKC21ErrorState_Pile,	0x02DA},
+ 
+    {eSrc_LittleCurr,         eIotYKC21ErrorState_Null,	0x0441},
+    {eSrc_S2BreakOff,         eIotYKC21ErrorState_Null,	0x0442},
+    {eSrc_AppStop,      	  eIotYKC21ErrorState_Null,	0x0443},
+    {eSrc_MannulStop,         eIotYKC21ErrorState_Null,	0x0444},
+    {eSrc_CardStop,      	  eIotYKC21ErrorState_Null,	0x0445},
+    {eSrc_InsuffBalance,      eIotYKC21ErrorState_Null,	0x0446},
+    {eSrc_StopbyMoney,        eIotYKC21ErrorState_Null,	0x0447},
+    {eSrc_StopbyTime,         eIotYKC21ErrorState_Null,	0x0448},
+    {eSrc_StopbyEnergy,       eIotYKC21ErrorState_Null,	0x0449},
+    {eErr_GunDisConn,         eIotYKC21ErrorState_Null,	0x044A},
+   
+    {eErr_CPBreakOff,         eIotYKC21ErrorState_Pile,	0x0440 },
+
+    {eErr_NetNoSIMErr,        eIotYKC21ErrorState_Pile,	0x02E8 },  
+    {eErr_PlatformOffline,    eIotYKC21ErrorState_Plat,	0x01B4 },
+
+};
 
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-IotYKC21Ctx_Struct *pIotYKC21Ctx = NULL;
+
  
-const uint8_t  Test_Rsa_Key[]={"MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKaTP4eBWYBh3JDnYa7h2nuYACREgmV1o250/36ebYwaUswQDbUdMoeRvRIWxhCtXEzVkMYtH07ctmpzMo8uTvMCAwEAAQ=="};
-char Test_TokenStr[] = {"54260225221003"};	
+
 
 /*******************************************************************************
 *    Function Source Code
@@ -84,7 +129,7 @@ static CommonSendCtrl_Struct* IotYKC21_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_YKC21_CMD_CALL_REALDATA_ACK:		    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][5];   break;
         case IOT_YKC21_CMD_REMOTE_STOP_CHARGE_RSP:	    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][6];   break;
         case IOT_YKC21_CMD_MULTI_ORDER_RECORD_REQ:	    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][7];   break;
-        case IOT_YKC21_CMD_MULTI_ORDER_RECORD_ACK:	pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][8];   break;
+        case IOT_YKC21_CMD_MULTI_ORDER_RECORD_ACK:	    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][8];   break;
         case IOT_YKC21_CMD_UPDATE_ACCOUNT_MONEY_RSP:    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][9];   break;
         case IOT_YKC21_CMD_FAULTREST_REQ:			    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][10];   break;
         case IOT_YKC21_CMD_RECORD_RSP:				    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][11];  break;
@@ -188,6 +233,7 @@ static void IotYKC21_CycleReportRealData(void)
 
         if (realDataReportFlag == TRUE)
         {
+            realDataReportFlag = FALSE;
             pIotYKC21Ctx->lastGunState[port] = curGunState;
             pIotYKC21Ctx->lastGunConnectState[port] = curGunConnectState;
             pIotYKC21Ctx->realDataReportTick[port] = Common_GetSystick();
@@ -237,220 +283,173 @@ static void IotYKC21_CycleDetectUnreporteRecord(void)
     }
 }
 
- 
-
-static const err_map_t error_map[] = {
-    {eErr_CpVoltAbnor,       ePlatType_D,	0x0324},
-    {eErr_CpGroundFault,     ePlatType_D,	0x0440},
-    {eErr_PEBreakFault,      ePlatType_D,	0x02E2},
-    {eErr_EmergencyStop,     ePlatType_D,	0x02C3},
-    {eErr_InputLineReversed, ePlatType_D,	0x0441},
-    {eErr_LeakageCurrErr,    ePlatType_D,	0x031E},
-    {eErr_DiodeStop,      	 ePlatType_D,	0x02DA},
-    {eErr_ShortCircleErr,    ePlatType_D,	0x0313},
-    {eErr_RCDSelfcheckErr,   ePlatType_D,   0x031E},  
-    
-    
-    {eErr_OutputOverCurr,    ePlatType_D,	0x0303},
-    {eErr_JcqMaloperation,   ePlatType_D,	0x0326},
-	{eErr_JcqSynechiaFault,  ePlatType_D,	0x02C8},
-    {eErr_HmiCommErr,        ePlatType_D,	0x0332},
-     
-
-	{eErr_ReaderCommErr,     ePlatType_D,	0x02C5},
-    {eErr_MeterCommErr,   	 ePlatType_D,	0x02C6},  
-    {eErr_EnvOverTempErr,    ePlatType_D,	0x02C9},
-    {eErr_GunOverTempErr,    ePlatType_D,	0x02C9},
-    {eErr_POverTempErr,      ePlatType_D,	0x02CA},
-    {eErr_MeterCalcErr,   	 ePlatType_D,	0x02C7}, 
-    
-    {eErr_AphaseInputOverVol,      ePlatType_D,	0x02DE},
-    {eErr_AphaseInputLessVol,      ePlatType_D,	0x02DE},
-
-    {eErr_NetNoSIMErr,       ePlatType_D,	0x02E8},  
-    {eErr_PlatformOffline,   ePlatType_C,	0x01B4}
-};
-
-//获取故障平台上传类型
-static uint8_t get_hard_err_type(uint8_t u8Port ,uint8_t err)
-{
-    for (uint16_t i = 0; i < sizeof(error_map)/sizeof(error_map[0]); ++i) {
-        if (err == error_map[i].err_type) {
-			return error_map[i].err_plat_type;
-        }
-    }
-
-	return NULL;
-}
-
-//获取故障编码
-static uint16_t get_hard_err_code(uint8_t u8Port,uint8_t err)
-{
-    for (uint16_t i = 0; i < sizeof(error_map)/sizeof(error_map[0]); ++i) {
-        if (AswErrHandle_CheckErrExit(u8Port, error_map[i].err_type)) {
-            return error_map[i].err_code;
-        }
-    }
-
-	return NULL;
-}
 static void IotYKC21_UpError(void)
 {
-    uint8_t port;
-	uint8_t SendFaultFlag = FALSE;		// 故障发生发送标记
-	uint8_t SendResetFlag = FALSE;		// 故障复位发送标记
-	static uint8_t ErrSts[SYSCFG_CFG_GUN_NUM][ARRAY_SIZE(error_map)] = {0};
-	uint8_t i;						// source error index
-	static uint16_t flow = 0;
-		
- 
+    uint8_t port = 0;
+    uint8_t index = 0;
+    uint8_t error_mapnumber = 0;
+    uint8_t error_Exit = FALSE;
+    static uint32_t erro_old_version[SYSCFG_CFG_GUN_NUM]= {0};
+    uint32_t erro_now_version[SYSCFG_CFG_GUN_NUM] = {0};
+    static uint64_t ErrStatus[SYSCFG_CFG_GUN_NUM] = {0}; /* 可记录64个错误类型 */
 
-	// one by one	
-	for(port=0; port < SYSCFG_CFG_GUN_NUM; port++)
-	{
-		if(TRUE == Common_GetSendEnable(pIotYKC21Ctx->pFuncSendCtrl,port, IOT_YKC21_CMD_FAULT_REQ))
-			return;
-	}
+    error_mapnumber = (ARRAY_SIZE(Iot_Ykc21Error_map) > 64) ? ARRAY_SIZE(Iot_Ykc21Error_map) : 64;
 
-	for(port=0; port < SYSCFG_CFG_GUN_NUM; port++)
-	{
-		for(i=0; i<ARRAY_SIZE(error_map); i++)
-		{
-            if (ErrSts[port][i] != AswErrHandle_CheckErrExit(port, error_map[i].err_type)) // 故障状态改变
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+    {
+
+        if (TRUE != Common_GetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULT_REQ))
+        {
+            /* 故障产生或取消 */
+            erro_now_version[port] = AswErrHandle_GetErrStatusVersion(port);
+            if (erro_old_version[port] != erro_now_version[port])
             {
-                ErrSts[port][i] = AswErrHandle_CheckErrExit(port, error_map[i].err_type);
-                IotYKC21Err_Struct *ykc21ErrorSwap = &ErrSendPlatform[port];
-                if (ErrSts[port][i] == TRUE) // error happen
+                erro_old_version[port] = erro_now_version[port];
+                /* 循环查找变化故障 */
+                for (index = 0; index < error_mapnumber; index++)
                 {
-                    uint32_t SecTimestamp = SSTM_GetSecTimestamp();
-  
-                    Common_TimestampToCp56Time2a(SecTimestamp, &ykc21ErrorSwap->StartTime[0]);
+                    error_Exit = AswErrHandle_CheckErrExit(port, Iot_Ykc21Error_map[index].err_localtype);
 
-                    memset(&ykc21ErrorSwap->StopTime, 0, 7);
-                    ykc21ErrorSwap->status = 1;
-                    SendFaultFlag = TRUE;
-                    ykc21ErrorSwap->flow = flow;
-                    flow++;
+                    if ((ErrStatus[port] & (1 << index)) != error_Exit && eIotYKC21ErrorState_Null != Iot_Ykc21Error_map[index].err_plattype)
+                    {
+                        if (TRUE == error_Exit)
+                        {
+                            ErrStatus[port] |= (1 << index); /* 置1 */
 
-                    ykc21ErrorSwap->WarnType = get_hard_err_type(port, error_map[i].err_type);
-                    ykc21ErrorSwap->WarnId = get_hard_err_code(port, error_map[i].err_type);
-                    IOTYKC21_CFG_LogPrint("\r\n GUN = %d ,WarnType = %d , WarnId = %d \r\n", port, ErrSendPlatform[port].WarnType, ErrSendPlatform[port].WarnId);
-                    break; // up one error every time
+                            pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearTime = SSTM_GetSecTimestamp();
+                            pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearType = Iot_Ykc21Error_map[index].err_plattype;
+                            pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearId = Iot_Ykc21Error_map[index].err_codeid;
+
+                            Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULT_REQ, TRUE);
+                            IOTYKC21_CFG_LogPrint("[枪：%d]故障发生时间戳[%d],云快充2.1上报故障编码[0x%04x]\r\n", port, pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearTime, Iot_Ykc21Error_map[index].err_codeid);
+                        }
+                        else
+                        {
+                            ErrStatus[port] &= ~(1 << index); /* 置0 */
+
+                            pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearTime = SSTM_GetSecTimestamp();
+                            pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearType = Iot_Ykc21Error_map[index].err_plattype;
+                            pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearId = Iot_Ykc21Error_map[index].err_codeid;
+
+                            Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULTREST_REQ, TRUE);
+                            IOTYKC21_CFG_LogPrint("[枪：%d]故障取消时间戳[%d],云快充2.1上报故障编码[0x%04x]\r\n", port, pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearTime, Iot_Ykc21Error_map[index].err_codeid);
+                        }
+
+                        break;
+                    }
                 }
-                else			// error cancel
-				{					
-                     Common_TimestampToCp56Time2a(SSTM_GetSecTimestamp(), &ykc21ErrorSwap->StopTime[0]);
-					IOTYKC21_CFG_LogPrint("\r\n GUN = %d , error_cancel , err_type = %d \r\n",port,error_map[i].err_type);
-					ykc21ErrorSwap->status = 0;					
-					SendResetFlag = TRUE;
-					break;				
-				}
             }
-        }	
-		if(SendFaultFlag == TRUE ||  SendResetFlag == TRUE)
-			break;		// up one error every time
-	}
-
-	if(SendFaultFlag == TRUE)//故障产生发送
-	{
-		SendFaultFlag = FALSE;
-        Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULT_REQ, TRUE);
-	}
-	
-	if(SendResetFlag == TRUE)//故障清除发送
-	{
-		SendResetFlag = FALSE;
-		Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULTREST_REQ, TRUE);
-	}
-
-
-
+        }
+    }
 }
-void IotYkc21_powercontrol(uint16_t power,uint8_t port)
+void IotYkc21_powercontrol(uint8_t port,uint16_t power)
  {
-    //功率调节
     static uint16_t power_running_NOW[SYSCFG_CFG_GUN_NUM] = {0};
-  
-    if(power != power_running_NOW[port])
-       {
 
-        AswVoltCur_AdjustOutputCurrent(port,eAswVoltCurAdjustMode_PowerAbsolute,power*1000);
+    if (power != power_running_NOW[port])
+    {
+        AswVoltCur_AdjustOutputCurrent(port, eAswVoltCurAdjustMode_PowerAbsolute, power * 1000);
         power_running_NOW[port] = power;
         IOTYKC21_CFG_LogPrint("云快充2.1协议[枪：%d]功率调整为[%d]kw\r\n", port, power);
-       }
+    }
  }
 static void IotYkc21_PowerLimit(void)
 {
-    for (uint8_t port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
-    {
-        IotYKC21_PowerChange_Struct *pPowerChange = &IotYKC21_PowerChangeConfig[port];
-        uint32_t NowTime = SSTM_GetSecTimestamp();
+    uint32_t NowTimestamp = 0;
+    uint8_t port = 0;
 
-        if (0x03 != IotYKC21_GetGunState(port)) // 充电中
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+    {
+        NowTimestamp = SSTM_GetSecTimestamp();
+
+        if (0x03 != IotYKC21_GetGunState(port))
         {
             break;
         }
-        // 动态控制功率
-        if (pPowerChange->Limittimess != 0)
+        /* 动态控制功率 */
+        if (pIotYKC21Ctx->stProtoData[port].powerConfig.limitendtimess != 0)
         {
-            if (NowTime <= pPowerChange->LimitEndtimess)
-                IotYkc21_powercontrol(pPowerChange->power_running, port);
+            if (NowTimestamp <= pIotYKC21Ctx->stProtoData[port].powerConfig.limitendtimess)
+            {
+                IotYkc21_powercontrol(port, pIotYKC21Ctx->stProtoData[port].powerConfig.power_running);
+            }
             else
             {
-                pPowerChange->instruct_rsp_priority = 0;
-                pPowerChange->power_running = 0;
-                pPowerChange->Limittimess = 0;
-                pPowerChange->LimitEndtimess = 0;
+                pIotYKC21Ctx->stProtoData[port].powerConfig.priority = 0;
+                pIotYKC21Ctx->stProtoData[port].powerConfig.power_running = 0;
+                pIotYKC21Ctx->stProtoData[port].powerConfig.limitendtimess = 0;
             }
         }
         else
         {
-            // 默认最大功率
-            if (pPowerChange->DeaultMaxPowerEndTimess != 0)
+            /* 默认最大功率 */
+            if (pIotYKC21Ctx->stProtoData[port].powerConfig.deaultMaxPowerEndTimess != 0)
             {
-                if (NowTime >= pPowerChange->DeaultMaxPowerStartTimess && NowTime <= pPowerChange->DeaultMaxPowerEndTimess)
-                    IotYkc21_powercontrol(pPowerChange->DefaultPower_max, port);
+                if (NowTimestamp >= pIotYKC21Ctx->stProtoData[port].powerConfig.deaultMaxPowerStartTimess && NowTimestamp <= pIotYKC21Ctx->stProtoData[port].powerConfig.deaultMaxPowerEndTimess)
+                {
+                    IotYkc21_powercontrol(port, pIotYKC21Ctx->stProtoData[port].powerConfig.defaultPower_max);
+                }
                 else
-                    IotYkc21_powercontrol(7, port);
+                {
+                    IotYkc21_powercontrol(port, 7);
+                }
             }
             else
-                IotYkc21_powercontrol(7, port);
+                IotYkc21_powercontrol(port, 7);
+        }
+    }
+}
+
+
+static void  IotYKC21_UpRSAKey(void)
+{
+    if (TRUE == pIotYKC21Ctx->rsaRefreshflg)
+    {
+        if (TRUE == Common_JudgeTimeoutMs(pIotYKC21Ctx->rsaReponseDelaytick, 2000))
+        {    /* 2s */
+            pIotYKC21Ctx->rsaReponseDelaytick = 0;
+            pIotYKC21Ctx->rsaRefreshflg = FALSE;
+            /* 执行重连 */
+            IotYKC21_OfflineHandle();
         }
     }
 }
 
 static void IotYKC21_CycleDetect(void)
-{ 
-    IotYKC21_CycleReportRealData(); //实时报文传递
+{
+    IotYKC21_CycleReportRealData(); /* 实时报文传递 */
 
-    IotYKC21_CycleDetectUnreporteRecord(); //记录上报
+    IotYKC21_CycleDetectUnreporteRecord(); /* 记录上报 */
 
-    IotYKC21_UpError();			//故障上报处理
-
-    IotYkc21_PowerLimit();	
+    IotYKC21_UpError(); /* 故障上报处理 */
 }
 
-		
+static void IotYKC21_FunDeal(void)
+{
+    IotYkc21_PowerLimit(); /* 功率调节 */
+
+    IotYKC21_UpRSAKey(); /* RSA密钥回复指令处理 */
+}
 static void IotYKC21_WSInitHandle(void)
 {
+    uint8_t port = 0;
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
-
+    
     // 检测长度超过128，默认数值
-    if (pPlatInfo->Rsa_Keylength > 128)
+    if (pPlatInfo->rsa_Keylength > 128)
     {
-        pPlatInfo->Rsa_Keylength = 128;
-        memcpy(pPlatInfo->Rsa_Key, Test_Rsa_Key, 128);
-        memcpy(pPlatInfo->Token, Test_TokenStr, 14);
+        pPlatInfo->rsa_Keylength = 128;
+        memcpy(pPlatInfo->rsa_Key, Default_RsaKey, 128);
+        memcpy(pPlatInfo->token, Default_TokenStr, 14);
     }
 
     // 更新存储的最大默认功率
-    for (uint8_t i = 0; i < SYSCFG_CFG_GUN_NUM; i++)
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
-        IotYKC21_PowerChange_Struct *pPowerChange = &IotYKC21_PowerChangeConfig[i];
-        pPowerChange->DefaultPower_max = pPlatInfo->DefaultMAX_power[i];
-        pPowerChange->DeaultMaxPowerStartTimess = pPlatInfo->DeaultMaxPowerStartTimess[i];
-        pPowerChange->DeaultMaxPowerEndTimess = pPlatInfo->DeaultMaxPowerEndTimess[i];
+        pIotYKC21Ctx->stProtoData[port].powerConfig.defaultPower_max = pPlatInfo->defaultMAX_power[port];
+        pIotYKC21Ctx->stProtoData[port].powerConfig.deaultMaxPowerStartTimess = pPlatInfo->deaultMaxPowerStartTimess[port];
+        pIotYKC21Ctx->stProtoData[port].powerConfig.deaultMaxPowerEndTimess = pPlatInfo->deaultMaxPowerEndTimess[port];
     }
     
     pIotYKC21Ctx->eWorkState = eIOTYKC21WorkState_Offline;
@@ -460,6 +459,9 @@ static void IotYKC21_WSInitHandle(void)
 static void IotYKC21_WSOfflineHandle(void)
 {
     MSNvmPlatParam_Struct * pParam =  AswPlatM_GetPlatParamPtr();
+
+
+    pIotYKC21Ctx->rsaRefreshflg = FALSE;
 
     pIotYKC21Ctx->loginSucc = FALSE;
     pIotYKC21Ctx->queueBusyFlag = FALSE;
@@ -484,8 +486,6 @@ static void IotYKC21_WSOfflineHandle(void)
 }
 
 
-
-
 static void IotYKC21_WSLoginHandle(void)
 {
     if (TRUE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_O))
@@ -508,6 +508,8 @@ static void IotYKC21_WSNormalHandle(void)
             IotYKC21_CycleDetect();
         }
 
+        IotYKC21_FunDeal();         /* 功能执行函数 */
+
         IotYKC21_UpCtrlSendDeal();
 
         IotYKC21_UpCtrlRecvDeal();
@@ -515,7 +517,6 @@ static void IotYKC21_WSNormalHandle(void)
         IotYKC21_TimeoutDetect();
     }
 }
-
 
 
 static IotYKC21StopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType)
@@ -631,9 +632,6 @@ void IotYKC21_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStanda
 
             }
 
-    
-
-
             pStandardBillMode->periodCount = 48;
             pStandardBillMode->validFlag = TRUE;
         }
@@ -651,63 +649,59 @@ void IotYKC21_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint
 
     if (pFlashRecord != NULL && pProtocolRecord != NULL && pRecordLen != NULL)
     {
-         /* 交易流水号 */
-    memcpy(&pBuf[dataLen], pOrderData->orderTransactionNum, 16);
-    dataLen += 16;
+        /* 交易流水号 */
+        memcpy(&pBuf[dataLen], pOrderData->orderTransactionNum, 16);
+        dataLen += 16;
 
-    /* 设备编码 */
-    memcpy(&pBuf[dataLen], pOrderData->pileDnBCD, 7);
-    dataLen += 7;
-    /* 枪号 */
-    pBuf[dataLen++] = pOrderData ->port + 1;
-   
-     /* 开始时间 */
-	  memcpy(&pBuf[dataLen], pOrderData->startTime, 7);
-    dataLen += 7;
+        /* 设备编码 */
+        memcpy(&pBuf[dataLen], pOrderData->pileDnBCD, 7);
+        dataLen += 7;
+        /* 枪号 */
+        pBuf[dataLen++] = pOrderData->port + 1;
+        /* 开始时间 */
+        memcpy(&pBuf[dataLen], pOrderData->startTime, 7);
+        dataLen += 7;
+        /* 结束时间 */
+        memcpy(&pBuf[dataLen], pOrderData->stopTime, 7);
+        dataLen += 7;
+        /* 电表表号 电表密文 电表协议版本号 加密方式 */
+        memset(&pBuf[dataLen], 0, (6 + 34 + 2 + 1));
+        dataLen += (6 + 34 + 2 + 1);
+        /* 电表总起值 */
+        memcpy(&pBuf[dataLen], pOrderData->startMeterVal, 5);
+        dataLen += 5;
+        /* 电表总止值 */
+        memcpy(&pBuf[dataLen], pOrderData->stopMeterVal, 5);
+        dataLen += 5;
+        /* 总电量 */
+        memcpy(&pBuf[dataLen], pOrderData->totalEnergy, 4);
+        dataLen += 4;
+        /* 总计损电量 */
+        memcpy(&pBuf[dataLen], pOrderData->totalLossEnergy, 4);
+        dataLen += 4;
+        /* 总消费金额 */
+        memcpy(&pBuf[dataLen], pOrderData->totalMoney, 4);
+        dataLen += 4;
+        /* 电动汽车唯一标识 */
+        memset(&pBuf[dataLen], 0, 17);
+        dataLen += 17;
+        /*  交易标识 */
+        pBuf[dataLen++] = pOrderData->dealFlag;
+        /* 交易日期 */
+        memcpy(&pBuf[dataLen], pOrderData->dealDate, 7);
+        dataLen += 7;
+        /*  停止原因 */
+        pBuf[dataLen++] = pOrderData->stopReason;
+        /* 逻辑卡号 */
+        memcpy(&pBuf[dataLen], pOrderData->logicCardNum, 8);
+        dataLen += 8;
+        /* 费率时段数量 */
+        pBuf[dataLen++] = 48;
+        /* 48h 分段电量 */
+        memcpy(&pBuf[dataLen], pOrderData->time_power, 48 * 4);
+        dataLen += (4 * 48);
 
-    /* 结束时间 */
-	  memcpy(&pBuf[dataLen], pOrderData->stopTime, 7);
-    dataLen += 7;
-    /* 电表表号 电表密文 电表协议版本号 加密方式 */ 
-    memset(&pBuf[dataLen],0,(6+34+2+1));
-    dataLen += (6+34+2+1);
-    /* 电表总起值 */
-		memcpy(&pBuf[dataLen], pOrderData->startMeterVal, 5);
-    dataLen += 5;
-    /* 电表总止值 */
-		memcpy(&pBuf[dataLen], pOrderData->stopMeterVal, 5);
-    dataLen += 5;
-    /* 总电量 */
-		memcpy(&pBuf[dataLen], pOrderData->totalEnergy, 4);
-    dataLen += 4;
-    /* 总计损电量 */
-		memcpy(&pBuf[dataLen], pOrderData->totalLossEnergy, 4);
-    dataLen += 4;
-    /* 总消费金额 */
-		memcpy(&pBuf[dataLen], pOrderData->totalMoney, 4);
-    dataLen += 4;
-    /* 电动汽车唯一标识 */
-    memset(&pBuf[dataLen],0,17);
-    dataLen += 17;
-    /*  交易标识 */
-    pBuf[dataLen++] = pOrderData->dealFlag;
-    /* 交易日期 */
-		memcpy(&pBuf[dataLen], pOrderData->dealDate, 7);
-    dataLen += 7;
-    /*  停止原因 */
-    pBuf[dataLen++] = pOrderData->stopReason;
-    /* 逻辑卡号 */
-    memcpy(&pBuf[dataLen], pOrderData->logicCardNum, 8);
-    dataLen += 8;
-    /* 费率时段数量 */
-    pBuf[dataLen++] = 48;
-  
-   /* 48h 分段电量 */
-    memcpy(&pBuf[dataLen], pOrderData->time_power, 48*4);
-
-    dataLen += (4*48);
-
-     pRecordLen[0] = dataLen;
+        pRecordLen[0] = dataLen;
     }
 }
 uint8_t IotYKC21_GetGunState(uint8_t port)
@@ -760,16 +754,19 @@ uint8_t IotYKC21_SwipCardCharge(uint8_t port)
 
     if (pIotYKC21Ctx->loginSucc == TRUE)
     {
-        if ((TRUE != Common_GetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_PILE_START_CHARGE_REQ)) &&
-            (TRUE != Common_GetRecvTimerEnable(pIotYKC21Ctx->pFuncRecvCtrl, port, IOT_YKC21_CMD_PILE_START_CHARGE_RSP)))
+        if (port < SYSCFG_CFG_GUN_NUM)
         {
-            Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_PILE_START_CHARGE_REQ, TRUE);
-            ret = TRUE;
-            IOTYKC21_CFG_LogPrint("[枪：%d]刷卡成功，请求启动充电!\r\n", port);
-        }
-        else
-        {
-            IOTYKC21_CFG_LogPrint("[枪：%d]刷卡成功，但是已经有卡在申请启动充电，本次刷卡作废!\r\n", port);
+            if ((TRUE != Common_GetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_PILE_START_CHARGE_REQ)) &&
+                (TRUE != Common_GetRecvTimerEnable(pIotYKC21Ctx->pFuncRecvCtrl, port, IOT_YKC21_CMD_PILE_START_CHARGE_RSP)))
+            {
+                Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_PILE_START_CHARGE_REQ, TRUE);
+                ret = TRUE;
+                IOTYKC21_CFG_LogPrint("[枪：%d]刷卡成功，请求启动充电!\r\n", port);
+            }
+            else
+            {
+                IOTYKC21_CFG_LogPrint("[枪：%d]刷卡成功，但是已经有卡在申请启动充电，本次刷卡作废!\r\n", port);
+            }
         }
     }
 
@@ -782,11 +779,12 @@ uint8_t IotYKC21_RfreshYKC21key(char *YKC21key, uint16_t YKC21key_len)
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
 
-    IOTYKC21_CFG_LogPrint("ykc2.1平台RSA密钥长度变化：[\"%d\"]-->[\"%d\"]\r\n", pPlatInfo->Rsa_Keylength, YKC21key_len);
-    IOTYKC21_CFG_LogPrint("ykc2.1平台RSA密钥变化：[\"%.128s\"]-->[\"%s\"]\r\n", pPlatInfo->Rsa_Key, YKC21key);
-    pPlatInfo->Rsa_Keylength = YKC21key_len;
-    memset(pPlatInfo->Rsa_Key,0,128);
-    memcpy(pPlatInfo->Rsa_Key,YKC21key,pPlatInfo->Rsa_Keylength);
+    IOTYKC21_CFG_LogPrint("ykc2.1平台RSA密钥长度变化：[\"%d\"]-->[\"%d\"]\r\n", pPlatInfo->rsa_Keylength, YKC21key_len);
+    IOTYKC21_CFG_LogPrint("ykc2.1平台RSA密钥变化：[\"%.128s\"]-->[\"%s\"]\r\n", pPlatInfo->rsa_Key, YKC21key);
+    pPlatInfo->rsa_Keylength = YKC21key_len;
+    memset(pPlatInfo->rsa_Key,0,128);
+    memcpy(pPlatInfo->rsa_Key,YKC21key,pPlatInfo->rsa_Keylength);
+
     MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
 
     return TRUE;
@@ -798,9 +796,10 @@ uint8_t IotYKC21_RfreshYKC21token(char *YKC21token,uint16_t YKC21token_len)
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
    
-    IOTYKC21_CFG_LogPrint("ykc2.1平台token变化：[\"%s\"]-->[\"%s\"]\r\n", pPlatInfo->Token, YKC21token);
-    memset(pPlatInfo->Token, 0, 14);
-    memcpy(pPlatInfo->Token, YKC21token, YKC21token_len); 
+    IOTYKC21_CFG_LogPrint("ykc2.1平台token变化：[\"%s\"]-->[\"%s\"]\r\n", pPlatInfo->token, YKC21token);
+    memset(pPlatInfo->token, 0, 14);
+    memcpy(pPlatInfo->token, YKC21token, YKC21token_len); 
+
     MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
  
     return TRUE;
@@ -810,11 +809,12 @@ void IotYKC21_PrintfYKC21KeyAndToken(void)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
-   
-    IOTYKC21_CFG_LogPrint("ykc2.1平台RSA密钥长度[%d]：密钥字符串：[\"%.128s\"]\r\n",pPlatInfo->Rsa_Keylength,pPlatInfo->Rsa_Key);
-    IOTYKC21_CFG_LogPrint("ykc2.1平台token：[\"%.14s\"]\r\n", pPlatInfo->Token);
-   
-    return;
+
+    if (pIotYKC21Ctx != NULL)
+    {
+        IOTYKC21_CFG_LogPrint("RSA密钥[%d]：[\"%.128s\"]\r\n",pPlatInfo->rsa_Keylength,pPlatInfo->rsa_Key);
+        IOTYKC21_CFG_LogPrint("token：[\"%.14s\"]\r\n", pPlatInfo->token);
+    }
 }
 
 
@@ -866,24 +866,18 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
     }
  
     Common_TimestampToCp56Time2a(pChargeData->chargeStopTime, &pYkcOrder->stopTime[0]);
- 
 
     memset(&pYkcOrder->stopMeterVal[0], 0, 5);
     Common_Uint32ToFourUint8(&pYkcOrder->stopMeterVal[0], pChargeData->stopMeterVal);
-
     Common_Uint32ToFourUint8(&pYkcOrder->totalEnergy[0], pChargeData->totalEnergy);
-
     Common_Uint32ToFourUint8(&pYkcOrder->totalLossEnergy[0],pChargeData->totalLossEnergy);
- 
     Common_Uint32ToFourUint8(&pYkcOrder->totalMoney[0],pChargeData->totalMoney);
-
 
     pYkcOrder->fee_num = 48;
     for (index = 0; index < 48; index++)
     {
         pYkcOrder->time_power[index] = pChargeData->periodElePower[index]; // 48时段电量
     }
-
 
     if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
     {

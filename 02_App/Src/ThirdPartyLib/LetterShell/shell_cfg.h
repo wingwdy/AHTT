@@ -74,7 +74,7 @@
 /**
  * @brief 历史命令记录数量
  */
-#define     SHELL_HISTORY_MAX_NUMBER    5
+#define     SHELL_HISTORY_MAX_NUMBER    1
 
 /**
  * @brief 双击间隔(ms)
@@ -85,7 +85,7 @@
 /**
  * @brief 管理的最大shell数量
  */
-#define     SHELL_MAX_NUMBER            5
+#define     SHELL_MAX_NUMBER            1
 
 /**
  * @brief shell格式化输出的缓冲大小

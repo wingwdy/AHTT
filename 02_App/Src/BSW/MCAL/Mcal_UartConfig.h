@@ -23,7 +23,7 @@
 *    Macro Definition
 ******************************************************************************/
 /* Uart for debug */
-#define   MCALUART_CFG_UART5_RECVBUF_SIZE               (320U)
+#define   MCALUART_CFG_UART5_RECVBUF_SIZE               (200U)
 #define   MCALUART_CFG_UART5_SENDBUF_SIZE               (1024 + 2048)
 
 /* Uart for 4G */

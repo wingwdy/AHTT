@@ -42,25 +42,54 @@ typedef enum
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+typedef struct
+{  
+ 
+    uint16_t defaultPower_max;          /* 当前默认最大功率 kw */
+    uint32_t deaultMaxPowerStartTimess; /* 到达此时间后按配置最大功率执行时间戳 */
+    uint32_t deaultMaxPowerEndTimess;   /* 到达此时间后解除最大功率执行时间戳 */
+
+ 
+    uint8_t  priority;                  /* 指令响应优先级 */
+    uint16_t power_running;             /* 运行中功率 kw */
+    uint32_t limitendtimess;            /* 运行中功率结束时间戳 */
+}IotYKC21PowerConfig_Struct;
+
+typedef struct
+{			 
+	uint8_t  errorAppearType;				  
+	uint16_t errorAppearId;
+    uint32_t errorAppearTime;	
+
+    uint8_t  errorDisppearType;				  
+	uint16_t errorDisppearId;						 							 			 
+	uint32_t  errorDisppearTime;					 
+}IotYKC21Err_Struct;
+
+
 typedef struct 
 {
-    uint8_t remoteStartResult;          /* 启动结果 */
-    uint8_t remoteStartFailReason;      /* 启动失败原因 */
+    uint8_t remoteStartResult;              /* 启动结果 */
+    uint8_t remoteStartFailReason;          /* 启动失败原因 */
     uint8_t newRecvOrderTransactionNum[16]; /* 新接收的订单交易流水号 */
     uint8_t curUsedOrderTransactionNum[16]; /* 正在使用的订单交易流水号 */
 
-    uint8_t remoteStopResult;           /* 停止结果 */
-    uint8_t remoteStopFailReason;       /* 停止失败原因 */
+    uint8_t remoteStopResult;               /* 停止结果 */
+    uint8_t remoteStopFailReason;           /* 停止失败原因 */
 
     MSNvmOrderInfo_Struct stOrderInfo;
 
-    uint8_t authCardID[8];              /* 授权卡号 刷卡启动生效后，填充 */
+    uint8_t authCardID[8];                  /* 授权卡号 刷卡启动生效后，填充 */
 
     uint8_t updateAccountMoneyCardID[8];
     uint8_t updateAccountMoneyResult;
 
     uint8_t setQrCodeResult;
     uint8_t setUpdateResult;
+    
+    IotYKC21PowerConfig_Struct powerConfig;  /* 功率调节参数 */
+    IotYKC21Err_Struct erroInfo;             /* 故障发生和消除 */
+
 }IotYKC21ProtoData_Struct;
 
 
@@ -74,8 +103,13 @@ typedef struct
     IotYKC21ProtoData_Struct stProtoData[SYSCFG_CFG_GUN_NUM];
     MSNvmOrderInfo_Struct stOrderInfo;
     uint32_t time;
-
+   
     /* 离线后需清除数据 */
+    
+    /* RSA密钥刷新 */
+    uint8_t rsaRefreshflg; 
+    uint32_t rsaReponseDelaytick;
+
     uint8_t loginSucc;
     uint8_t queueBusyFlag;
     uint32_t waitQueueIdleTick;
@@ -112,7 +146,7 @@ uint8_t IotYKC21_SwipCardCharge(uint8_t port);
 uint8_t IotYKC21_RfreshYKC21key(char *YKC21key, uint16_t YKC21key_len);
 uint8_t IotYKC21_RfreshYKC21token(char *YKC21token,uint16_t YKC21token_len);
 void IotYKC21_PrintfYKC21KeyAndToken(void);
-void IotYkc21_powercontrol(uint16_t power,uint8_t port);
+void IotYkc21_powercontrol(uint8_t port,uint16_t power);
 void IotYKC21_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t *pProtocolRecord, uint16_t *pRecordLen);
 
 /* 内部适用 */
