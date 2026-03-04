@@ -116,7 +116,7 @@ void AswPlatM_PrintAllConfigInfo(void)
     
     if(0 == strcmp(pProtocolDescriptor->pName, "ykc2.1"))
     {
-        ASWPLATM_CFG_LogPrint("--------------ykc2.1登录----------------------------------------------------\r\n");
+        ASWPLATM_CFG_LogPrint("--------------ykc2.1.1登录----------------------------------------------------\r\n");
         IotYKC21_PrintfYKC21KeyAndToken();
         ASWPLATM_CFG_LogPrint("----------------------------------------------------------------------------\r\n");
     }
@@ -277,7 +277,7 @@ uint8_t AswPlatM_Setykc21key(char *pykc21key, uint8_t len)
          return ret;
     }
 
-    if (len <= 128)
+    if (len <= MSNVM_PLAT_YKC21_RSAKEYLEN)
     {
         IotYKC21_RfreshYKC21key(pykc21key,len);
         ret = TRUE;
@@ -297,7 +297,7 @@ uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
          return ret;
     }
 
-    if (len <= 14)
+    if (len <= MSNVM_PLAT_YKC21_TOKENLEN)
     {
         IotYKC21_RfreshYKC21token(pykc21token,len);
         ret = TRUE;

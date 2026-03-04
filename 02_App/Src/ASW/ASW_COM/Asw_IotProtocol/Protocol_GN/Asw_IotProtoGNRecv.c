@@ -619,8 +619,8 @@ static uint8_t IotGN_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, uint1
         {
             IOTGN_CFG_LogPrint("余额不足，拒绝充电！余额：%d.%02d 元!\r\n", accountMoney / 100, accountMoney % 100);
             pIotGNCtx->stProtoData[port[0]].remoteStartResult = 0;
-            /* 无余额不足的失败响应，暂时填离线*/
-            pIotGNCtx->stProtoData[port[0]].remoteStartFailReason = 0x04;
+            /* 充电启动失败，余额不足*/
+            pIotGNCtx->stProtoData[port[0]].remoteStartFailReason = 0x04E;
         }
         else
         {

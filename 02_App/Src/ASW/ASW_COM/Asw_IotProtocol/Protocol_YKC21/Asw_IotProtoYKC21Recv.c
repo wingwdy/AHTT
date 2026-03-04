@@ -26,7 +26,6 @@
 #include "Asw_lotProtoYKC21aes.h"
 #include "Common.h"
 #include "Asw_PlatM.h"
-// #include "test.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -561,22 +560,23 @@ static uint8_t IotYKC21_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t le
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t gunNo = 0;
+    uint8_t revRsakeylen = 0;
 
     if (pRecvData[index] == 0x00)
     {
         AswErrhandle_ResetErrExsitCallback(0, eErr_PlatformOffline);
 
         /* 更新Rsa参数 */
-        pPlatInfo->rsa_Keylength = pRecvData[index + 1];
+        revRsakeylen = pRecvData[index + 1];
+        pPlatInfo->rsa_Keylength = revRsakeylen > MSNVM_PLAT_YKC21_RSAKEYLEN ? MSNVM_PLAT_YKC21_RSAKEYLEN : revRsakeylen;
         memcpy(&pPlatInfo->rsa_Key, &pRecvData[index + 2], pPlatInfo->rsa_Keylength);
 
-        for (gunNo = 0; gunNo < SYSCFG_CFG_GUN_NUM; gunNo++)
-        {
-            Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, gunNo, IOT_YKC21_CMD_HEARTBEAT_REQ, TRUE);
-            Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, gunNo, IOT_YKC21_CMD_BILLMODE_VERIFY_REQ, TRUE);
-        }
+        Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, gunNo, IOT_YKC21_CMD_HEARTBEAT_REQ, TRUE);
+        Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, gunNo, IOT_YKC21_CMD_BILLMODE_VERIFY_REQ, TRUE);
 
         pIotYKC21Ctx->loginSucc = TRUE;
+
+        MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
     }
     else
     {
@@ -585,10 +585,7 @@ static uint8_t IotYKC21_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t le
         IotYKC21_OfflineHandle();
     }
 
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
-
     return TRUE;
-
 }
 
 static uint8_t IotYKC21_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
@@ -943,32 +940,32 @@ static uint8_t IotYKC21_CheckChargeStart(uint8_t port, uint8_t *pFailReason)
     /* 订单未结束 */
     if (TRUE != AswMonitor_IsOrderIdle(port))
     {
-        reason = 0x02;
+        reason = 0x02; /* 枪已在充电 */
     }
     /* 存在故障 */
     else if (AswErrHandle_IsExsistError(port) == TRUE)
     {
-        reason = 0x03;
+        reason = 0x03; /* 设备故障 */
     }
     /* 枪未连接 */
     else if (AswChargeIf_CheckGunConnected(port) != TRUE)
     {
-        reason = 0x05;
+        reason = 0x05;/* 未插枪 */
     }
     /* 计费异常 */
     else if (TRUE != AswMonitor_CheckBillModeValid(port))
     {
-        reason = 0x07; 
+        reason = 0x07; /* 自定义 */
     }
     /* 升级中 */
     else if (TRUE == SSUcm_IsUpdating())
     {
-        reason = 0x08;
+        reason = 0x08; /* 自定义 */
     }
     /* 设备禁用 */
     else if (TRUE == AswMonitor_CheckForbidState())
     {
-        reason = 0x09;
+        reason = 0x04; /* 设备离线 */
     }
     else
     {}
@@ -983,6 +980,7 @@ static uint8_t IotYKC21_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, ui
     uint8_t index = 0;
     uint8_t *pRecvData = r_data;
     uint8_t failReason = 0;
+    uint32_t accountMoney = 0;
 
     /* 订单号 */
     memcpy(pIotYKC21Ctx->stProtoData[port[0]].newRecvOrderTransactionNum, &pRecvData[index], 16);
@@ -997,35 +995,48 @@ static uint8_t IotYKC21_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, ui
 
     if (TRUE == IotYKC21_CheckChargeStart(port[0], &failReason))
     {
-        memcpy(pIotYKC21Ctx->stProtoData[port[0]].curUsedOrderTransactionNum,
-               pIotYKC21Ctx->stProtoData[port[0]].newRecvOrderTransactionNum,
-               16);
-
         /* 逻辑卡号 物理卡号 */
         index += 16;
         /* 账户余额 */
+        accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
         pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
-        pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeMoney;
-        pChargeCtrl->chargeCtrlVal = pChargeCtrl->accountMoney;
-        index += 4;
 
-        /* 本次充电当前允许的最大功率*/
-        uint16_t powerChange = Common_TwoUint8ToUint16(&pRecvData[index]);
-        if (powerChange != 0)
-            IotYkc21_powercontrol(port[0], powerChange * 1000);
-        index += 2;
-        /* SOC限制 */
-        index += 1;
-        /* 充电电量限制 */
-        if (0 != Common_FourUint8ToUint32(&pRecvData[index]))
+        if (accountMoney <= IOTYKC21_CFG_CHARGE_MIN_ACCOUNT_MONEY)
         {
-            pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeEnergy;
-            pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) / 100;
+            IOTYKC21_CFG_LogPrint("余额不足，拒绝充电！余额：%d.%02d 元!\r\n", accountMoney / 100, accountMoney % 100);
+            pIotYKC21Ctx->stProtoData[port[0]].remoteStartResult = 0;
+            /* 充电启动失败，余额不足*/
+            pIotYKC21Ctx->stProtoData[port[0]].remoteStartFailReason = 0x04E;
         }
+        else
+        {
+            memcpy(pIotYKC21Ctx->stProtoData[port[0]].curUsedOrderTransactionNum,
+                   pIotYKC21Ctx->stProtoData[port[0]].newRecvOrderTransactionNum,
+                   16);
 
-        pIotYKC21Ctx->stProtoData[port[0]].remoteStartResult = 1;
-        pIotYKC21Ctx->stProtoData[port[0]].remoteStartFailReason = 0;
-        AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_APP);
+            pChargeCtrl->accountMoney = accountMoney;
+            pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeMoney;
+            pChargeCtrl->chargeCtrlVal = pChargeCtrl->accountMoney;
+            index += 4;
+
+            /* 本次充电当前允许的最大功率*/
+            uint16_t powerChange = Common_TwoUint8ToUint16(&pRecvData[index]);
+            if (powerChange != 0)
+                IotYkc21_powercontrol(port[0], powerChange * 1000);
+            index += 2;
+            /* SOC限制 */
+            index += 1;
+            /* 充电电量限制 */
+            if (0 != Common_FourUint8ToUint32(&pRecvData[index]))
+            {
+                pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeEnergy;
+                pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) / 100;
+            }
+
+            pIotYKC21Ctx->stProtoData[port[0]].remoteStartResult = 1;
+            pIotYKC21Ctx->stProtoData[port[0]].remoteStartFailReason = 0;
+            AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_APP);
+        }
     }
     else
     {

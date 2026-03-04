@@ -24,7 +24,9 @@
 *    Macro Definition
 ******************************************************************************/
 /* 通信协议版本 */
-#define IOT_YKC21_PROTOCOL_VERSION                 (20101U) /* 2.1.1 */
+#define IOT_YKC21_PROTOCOL_VERSION_H                 (2U) /* 2.1.1 */
+#define IOT_YKC21_PROTOCOL_VERSION_M                 (1U)  
+#define IOT_YKC21_PROTOCOL_VERSION_L                 (1U)  
 
 /* 通信协议头定义--YKC21协议 */
 #define IOT_YKC21_PLUS_HEAD                       (0x68U)        
@@ -44,6 +46,9 @@
 
 /* 日志接口函数定义 */
 #define IOTYKC21_CFG_LogPrint(fmt, ...)            DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
+
+/* 充电最小余额，1元，保留2位小数 */
+#define IOTYKC21_CFG_CHARGE_MIN_ACCOUNT_MONEY      (100)   
 
 /* 协议CMD 定义 */
 #define IOT_YKC21_CMDTYPE_REQUSET			       (0x00U)
@@ -112,7 +117,7 @@ typedef enum
 {
     /* 非ykc2.1协议对应部分 */
     eIotYKC21StopReason_Null             = 0,
-     eIotYKC21StopReason_CpVoltAbnor     = 0x01,    /* CP电压异常 */
+    eIotYKC21StopReason_CpVoltAbnor      = 0x01,    /* CP电压异常 */
     eIotYKC21StopReason_CpGroundFault    = 0x02,    /* CP对地短路 */
     eIotYKC21StopReason_PEBreakFault     = 0x03,    /* PE接地故障 */
     eIotYKC21StopReason_LeakageCurrErr   = 0x07,    /* 漏电故障 */
