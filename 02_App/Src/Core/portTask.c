@@ -30,7 +30,7 @@
 #include "SS_Snapshot.h"
 #include "SS_WdgM.h"
 #include "SS_Ucm.h"
-#include "SS_Csm.h"
+
 
 #include "Cdd_CP.h"
 #include "Cdd_Relay.h"
@@ -209,7 +209,6 @@ static void Task_20msB(void *arg)
         SSSnapshot_MainFunction();
         DSConsole_MainFunction();
         SSUcm_MainFunction();
-        SSCsm_MainFunction();
         SSWdgM_Checkin(pTaskCtr->wdgId);
         vTaskDelay(20);
     }
