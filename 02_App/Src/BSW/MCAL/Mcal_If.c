@@ -66,7 +66,6 @@
 void McalIf_Init(void)
 {
     McalMCU_SystickInit();
-    McalIWDG_Init();
     CycleBuf_Init();
     McalPort_Init();
     McalUart_Init();

@@ -255,6 +255,10 @@ uint8_t AswPlatM_SetPlatType(char *platName)
                     c_stAswPlatMProtocolDescriptorTable[currentPlatType].cProtoMeaning, pProtocolDescriptor->cProtoMeaning);
                 g_stAswPlatMCtx.stPlatParam.platMainType = index;
                 MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));
+
+                MSNvm_SetDefaultParaBlock(eMSNvmBlockID_Gun0Qrcode);
+                MSNvm_SetDefaultParaBlock(eMSNvmBlockID_Gun0OrderInfo);
+                MSNvm_SetDefaultParaBlock(eMSNvmBlockID_PlatPrivateParam);
             }
 
             ret = TRUE;

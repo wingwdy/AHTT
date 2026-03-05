@@ -97,7 +97,7 @@ static int write(long offset, const uint8_t *buf, size_t size)
 {
     uint32_t addr = nor_flash0.addr + offset;
     int ret = -1;
-
+    
     if (eGlobalRet_OK == W25Q_Write(addr, buf, size))
     {
         ret = 1;
@@ -110,8 +110,6 @@ static int erase(long offset, size_t size)
 {
     uint32_t addr = nor_flash0.addr + offset;
     int ret = -1;
-
-    McalIWDG_FeedWatchDog();
 
     if (eGlobalRet_OK == W25Q_Erase(addr, size))
     {

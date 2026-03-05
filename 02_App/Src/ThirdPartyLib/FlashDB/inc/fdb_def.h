@@ -59,9 +59,8 @@ extern "C" {
 #endif
 
 /* log function. default FDB_PRINT macro is printf() */
-#ifndef FDB_PRINT
-#define FDB_PRINT(...)                 
-//#define FDB_PRINT(...)                 DSLOGM_Debug(DSLogMModule_Flash, ##__VA_ARGS__)
+#ifndef FDB_PRINT          
+#define FDB_PRINT(...)                 DSLOGM_Debug(DSLogMModule_Flash, ##__VA_ARGS__)
 #endif
 #define FDB_LOG_PREFIX1()              FDB_PRINT("[FlashDB]" FDB_LOG_TAG)
 #define FDB_LOG_PREFIX2()              FDB_PRINT(" ")

@@ -64,7 +64,7 @@ const SSWdgConfig_Struct c_SSWdgConfig =
         [eSSWdgWdgIndex_Internal] = 
         {
             .enable = TRUE,
-            .pWdgInit = NULL,
+            .pWdgInit = McalIWDG_Init,
             .pWdgFeed = McalIWDG_FeedWatchDog,
         },
         /* 外部看门狗配置 */

@@ -26,7 +26,7 @@
 #define MSNVM_QRCODE_LEN                      256
 
 /* 订单长度 */
-#define MSNVM_ORDER_MAX_LEN                   512
+#define MSNVM_ORDER_MAX_LEN                   1024
 
 
 /* 故障信息长度 */

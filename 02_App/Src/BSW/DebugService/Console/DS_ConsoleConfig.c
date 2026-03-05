@@ -31,6 +31,9 @@
 
 #include "Mcal_Mcu.h"
 
+#include "fal.h"
+#include "fal_cfg.h"
+
 #include "PortTask.h"
 
 /************************s*******************************************************
@@ -72,7 +75,7 @@ static int32_t DSConsoleCfg_HandleGbMode(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_GetPara(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_ReadAgingState(int32_t argc, char *argv[]);
-
+static int32_t DSConsoleCfg_ClearFlash(int32_t argc, char *argv[]);
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
@@ -85,6 +88,7 @@ DSCONSOLE_CFG_ADD_CMD(gbmode,        DSConsoleCfg_HandleGbMode, "gbmode 1 / 2" E
 DSCONSOLE_CFG_ADD_CMD(set,           DSConsoleCfg_SetPara, "set xxx" set param);
 DSCONSOLE_CFG_ADD_CMD(get,           DSConsoleCfg_GetPara, "get xxx" get param);
 DSCONSOLE_CFG_ADD_CMD(ReadAgingState,DSConsoleCfg_ReadAgingState, "ReadAgingState" ReadAgingState);
+DSCONSOLE_CFG_ADD_CMD(clearFlash,    DSConsoleCfg_ClearFlash,     "clearFlash"    clearFlash);
 
 static int32_t DSConsoleCfg_Reboot(int32_t argc, char *argv[])
 {
@@ -401,6 +405,32 @@ static int32_t DSConsoleCfg_ReadAgingState(int32_t argc, char *argv[])
 {
     DSCONSOLE_CFG_LogPrint("AgingState: %d\r\n", CddModeM_IsAgingTestFinish());
     return 0;
+}
+
+static int32_t DSConsoleCfg_ClearFlash(int32_t argc, char *argv[])
+{
+    int32_t ret = -1;
+    DSCONSOLE_CFG_LogPrint("开始格式化Flash....\r\n");
+
+    const struct fal_flash_dev *flash_dev = fal_flash_device_find(NOR_FLASH_DEV_NAME);
+    if (flash_dev != NULL)
+    {
+        ret = flash_dev->ops.erase(0, flash_dev->len);
+        if (ret >= 0)
+        {
+            DSCONSOLE_CFG_LogPrint("格式化Flash完成！\r\n");
+        }
+        else
+        {
+            DSCONSOLE_CFG_LogPrint("格式化Flash失败！错误码: %d\r\n", ret);
+        }
+    }
+    else
+    {
+        DSCONSOLE_CFG_LogPrint("获取Flash设备失败！\r\n");
+    }
+
+    return ret;
 }
 
 

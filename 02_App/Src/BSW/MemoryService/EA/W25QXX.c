@@ -311,6 +311,8 @@ GlobalRet_Enum W25Q_Erase(uint32_t targetAddr, uint32_t len)
             break;
         }
 
+        W25Q_CFG_FeedWdg();
+
         currentAddr += W25Q_CFG_SECTOR_SIZE;
         remaining -= W25Q_CFG_SECTOR_SIZE;
         W25Q_WriteDisable();
