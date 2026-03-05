@@ -79,7 +79,6 @@ static uint8_t SSWdgM_FindAvailableModuleId(void);
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-
 static uint8_t SSWdgM_FindAvailableModuleId(void)
 {
     uint8_t moduleId;
@@ -147,15 +146,12 @@ void SSWdgM_MainFunction(void)
     SSWdgWdgIndex_Enum wdgIndex;
     
     /* 检查是否到了检查间隔，且没有超时 */
-    if (TRUE != g_stSSWdgCtx.ctx.hasTimeout)
+    if (Common_JudgeTimeoutMs(g_stSSWdgCtx.ctx.lastCheckTime, SSWDGM_CFG_CHECK_INTERVAL))
     {
-        if (Common_JudgeTimeoutMs(g_stSSWdgCtx.ctx.lastCheckTime, SSWDGM_CFG_CHECK_INTERVAL))
-        {
-            SSWdgM_CheckTimeout();
-            g_stSSWdgCtx.ctx.lastCheckTime = currentTime;
-        }
+        SSWdgM_CheckTimeout();
+        g_stSSWdgCtx.ctx.lastCheckTime = currentTime;
     }
-
+    
     /* 只有当没有线程超时时才喂狗 */
     if (TRUE != g_stSSWdgCtx.ctx.hasTimeout)
     {
