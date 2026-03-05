@@ -1,2 +1,7 @@
 GD32E503
 Listings
+*.uvguix.*
+JLinkLog.txt
+RTE
+EventRecorderStub.scvd
+Project.uvoptx
