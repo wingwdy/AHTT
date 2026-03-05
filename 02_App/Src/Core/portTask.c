@@ -87,7 +87,7 @@ static void Task_100msA(void *arg);
 static void Task_20msA(void *arg);
 static void Task_20msB(void *arg);
 static void Task_1SecA(void *arg);
-static void Task_WdgM100ms(void *arg);
+static void Task_Wdg100ms(void *arg);
 
 /*******************************************************************************
 *    Global variables Declaration
@@ -98,9 +98,9 @@ static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
     {"App10msB",        Task_10msB,          &g_stTaskCtrBlkTable[1],         384,   7 } ,
     {"App20msA",        Task_20msA,          &g_stTaskCtrBlkTable[2],         256,   4 } ,
     {"App20msB",        Task_20msB,          &g_stTaskCtrBlkTable[3],         2048,  5 } ,
-    {"App100msA",       Task_100msA,         &g_stTaskCtrBlkTable[4],         512,   5 } ,
-    {"App1SecA",        Task_1SecA,          &g_stTaskCtrBlkTable[5],         256,   4 } ,
-    {"Wdg100msA",       Task_WdgM100ms,      &g_stTaskCtrBlkTable[6],         128,   8 } ,
+    {"App100ms",        Task_100msA,         &g_stTaskCtrBlkTable[4],         512,   5 } ,
+    {"App1Sec",         Task_1SecA,          &g_stTaskCtrBlkTable[5],         256,   4 } ,
+    {"Wdg100ms",        Task_Wdg100ms,       &g_stTaskCtrBlkTable[6],         128,   8 } ,
 };
 
 /*******************************************************************************
@@ -243,7 +243,7 @@ static void Task_1SecA(void *arg)
     }
 }
 
-static void Task_WdgM100ms(void *arg)
+static void Task_Wdg100ms(void *arg)
 {
     portTask_CtrBlk *pTaskCtr = (portTask_CtrBlk *)arg;
 

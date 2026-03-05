@@ -332,7 +332,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
             }
             else
             {
-                DSCONSOLE_CFG_LogPrint("Set ykc21key failed! erroplat or len > 128\r\n");
+                DSCONSOLE_CFG_LogPrint("Set ykc21key failed! error plat or len > 128\r\n");
             }
         }
         /* 设置YKC21token  */
