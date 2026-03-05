@@ -437,18 +437,17 @@ static uint16_t IotYKC21_SendLoginReq(uint8_t port, uint8_t *pBuf)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
-
+    uint8_t cSimID[20] = {0};
     uint16_t dataLen = 0;
-
     CddNetMOperator_Enum eOperator = CddNetM_GetOperatorType();
+    uint8_t b64_buf[88];
+    uint8_t versionLen = 0;
 
     /* 随机密钥 */
-    uint8_t b64_buf[88];
     encrypt_and_decrypt_data(pPlatInfo->rsa_Key, b64_buf, random_key_A);
     memcpy(&pBuf[dataLen], b64_buf, 88);
     IOTYKC21_CFG_LogPrint("随机钥匙A: ");
     DSLogM_HexOutput((uint8_t *)random_key_A, 16);
-
     dataLen += 88;
     /* 设备编码 */
     memcpy(&pBuf[dataLen], pIotYKC21Ctx->pileDnBCD, 7);
@@ -461,30 +460,20 @@ static uint16_t IotYKC21_SendLoginReq(uint8_t port, uint8_t *pBuf)
     dataLen += 1;
 
     /* 通信协议版本 */
-
     pBuf[dataLen] = IOT_YKC21_PROTOCOL_VERSION_H;
     pBuf[dataLen + 1] = IOT_YKC21_PROTOCOL_VERSION_M;
     pBuf[dataLen + 2] = IOT_YKC21_PROTOCOL_VERSION_L;
     dataLen += 3;
 
     /* 程序版本 */
-    uint8_t u8VerLne = strlen(APP_SW_VERSION_STRING) > 8 ? 8 : strlen(APP_SW_VERSION_STRING);
-    memcpy(&pBuf[dataLen], APP_SW_VERSION_STRING, u8VerLne);
-    dataLen += u8VerLne;
-    if (u8VerLne == 7)
-    {
-        /* 不足8位补0  1.3.2.1->1.3.2.01 */
-        uint8_t temp = 0;
-        temp = pBuf[dataLen - 1];
-        pBuf[dataLen - 1] = '0';
-        pBuf[dataLen] = temp;
-        dataLen++;
-    }
+    versionLen = strlen(APP_SW_VERSION_STRING) > 8 ? 8 : strlen(APP_SW_VERSION_STRING);
+    memset(&pBuf[dataLen], 0x00, 8);
+    memcpy(&pBuf[dataLen], APP_SW_VERSION_STRING, versionLen); 
+    dataLen += 8;
 
     /* 网络链接类型 */
     pBuf[dataLen++] = 0x00;
     /* Sim 卡 */
-    uint8_t cSimID[20] = {0};
     CddNetM_GetIccid(&cSimID[0]);
     Common_AsciiToBCD((char *)cSimID, &pBuf[dataLen], 10);
     dataLen += 10;
@@ -500,6 +489,7 @@ static uint16_t IotYKC21_SendLoginReq(uint8_t port, uint8_t *pBuf)
         pBuf[dataLen++] = 0x04;
 
     /* token */
+    memset(&pBuf[dataLen], 0x00, 7);
     Common_AsciiToBCD((char *)pPlatInfo->token, &pBuf[dataLen], 14);
     dataLen += 7;
     /* 手机号码 */
@@ -507,15 +497,12 @@ static uint16_t IotYKC21_SendLoginReq(uint8_t port, uint8_t *pBuf)
     dataLen += 11;
 
     /* 支持网络制式 */
-    pBuf[dataLen++] = 4;
-
+    pBuf[dataLen++] = 7;
     /* 当前网络制式 */
     pBuf[dataLen++] = 4;
-
     /* 经度 */
     memset(&pBuf[dataLen], 0, 4);
     dataLen += 4;
-
     /* 纬度 */
     memset(&pBuf[dataLen], 0, 4);
     dataLen += 4;
@@ -524,7 +511,7 @@ static uint16_t IotYKC21_SendLoginReq(uint8_t port, uint8_t *pBuf)
 }
 
 
- 
+
 static uint16_t IotYKC21_SendHeartBeat(uint8_t port, uint8_t *pBuf)
 {
     uint16_t dataLen = 0;
@@ -552,9 +539,7 @@ static uint16_t IotYKC21_SendHeartBeat(uint8_t port, uint8_t *pBuf)
 
     memcpy(&pBuf[dataLen], pBillMode->billModeID, sizeof(pBillMode->billModeID));
     dataLen += sizeof(pBillMode->billModeID);
-
     return dataLen;
-
  }
 
  static uint16_t IotYKC21_SendBillModeReq(uint8_t port, uint8_t *pBuf)
