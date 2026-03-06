@@ -1222,7 +1222,7 @@ void IotYKC21_TimeoutDetect(void)
 
                 if (timeoutCount >= pCmdRecvCtrl->maxTryCnt)
                 {
-                    if (pCmdRecvCtrl->cmd == IOT_YKC21_CMD_HEARTBEAT_RSP || pCmdRecvCtrl->cmd == IOT_YKC21_CMD_LOGIN_RSP || pCmdRecvCtrl->cmd == IOT_YKC21_CMD_BILLMODE_VERIFY_RSP ||  pCmdRecvCtrl->cmd == IOT_YKC21_CMD_BILLMODE_MUTIRATE_RSP)
+                    if (pCmdRecvCtrl->cmd == IOT_YKC21_CMD_HEARTBEAT_RSP || pCmdRecvCtrl->cmd == IOT_YKC21_CMD_LOGIN_RSP)
                     {
                         IotYKC21_OfflineHandle();
                     }
