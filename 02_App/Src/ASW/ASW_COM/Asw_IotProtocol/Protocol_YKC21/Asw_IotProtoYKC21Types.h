@@ -24,9 +24,9 @@
 *    Macro Definition
 ******************************************************************************/
 /* 通信协议版本 */
-#define IOT_YKC21_PROTOCOL_VERSION_H                 (2U) /* 2.1.1 */
+#define IOT_YKC21_PROTOCOL_VERSION_H                 (2U) /* 2.1.0 */
 #define IOT_YKC21_PROTOCOL_VERSION_M                 (1U)  
-#define IOT_YKC21_PROTOCOL_VERSION_L                 (1U)  
+#define IOT_YKC21_PROTOCOL_VERSION_L                 (0U)  
 
 /* 通信协议头定义--YKC21协议 */
 #define IOT_YKC21_PLUS_HEAD                       (0x68U)        

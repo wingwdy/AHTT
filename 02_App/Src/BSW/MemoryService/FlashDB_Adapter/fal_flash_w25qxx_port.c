@@ -55,7 +55,7 @@ const struct fal_flash_dev nor_flash0 =
 {
     .name       = NOR_FLASH_DEV_NAME,
     .addr       = 0,
-    .len        = 4 * 1024 * 1024,
+    .len        = NOR_FLASH_DEV_SIZE,
     .blk_size   = 4 * 1024,
     .ops        = {
     		.init = init,

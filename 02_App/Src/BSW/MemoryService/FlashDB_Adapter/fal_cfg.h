@@ -12,6 +12,7 @@
 #define _FAL_CFG_H_
 
 #define NOR_FLASH_DEV_NAME                     "norflash0"
+#define NOR_FLASH_DEV_SIZE                     (4 * 1024 * 1024)
 
 #define FAL_KVDB_NAME_PARA                     "para_kvdb"
 #define FAL_TSDB_NAME_CHARGE_RECORD            "charge_record_tsdb"

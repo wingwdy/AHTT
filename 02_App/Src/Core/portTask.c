@@ -100,7 +100,7 @@ static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
     {"App20msB",        Task_20msB,          &g_stTaskCtrBlkTable[3],         2048,  5 } ,
     {"App100ms",        Task_100msA,         &g_stTaskCtrBlkTable[4],         512,   5 } ,
     {"App1Sec",         Task_1SecA,          &g_stTaskCtrBlkTable[5],         256,   9 } ,
-    {"Wdg100ms",        Task_Wdg100ms,       &g_stTaskCtrBlkTable[6],         128,   9 } ,
+    {"Wdg100ms",        Task_Wdg100ms,       &g_stTaskCtrBlkTable[6],         64,    9 } ,
 };
 
 /*******************************************************************************
@@ -122,7 +122,7 @@ void portTask_ShowStackInfo(void)
 		pTaskCtr = &g_stTaskCtrBlkTable[index];
 
         uxHighWaterMark = uxTaskGetStackHighWaterMark(pTaskCtr->taskHandle);
-        PORTTASK_CFG_LogPrint("线程名: %s,\t\t总分配: %4d 字节, \t剩余: %4d 字节, \t空置率: %d%% \r\n", 
+        PORTTASK_CFG_LogPrint("线程名: %-10s, \t总分配: %4d 字节, \t剩余: %4d 字节, \t空置率: %d%% \r\n", 
             pTaskCtr->cTaskName, pTaskCtr->usStackDepth * 4, uxHighWaterMark * 4, uxHighWaterMark * 100 / pTaskCtr->usStackDepth);
     }
 
