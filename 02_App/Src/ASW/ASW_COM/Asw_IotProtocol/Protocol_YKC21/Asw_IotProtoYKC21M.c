@@ -341,7 +341,7 @@ static void IotYKC21_UpError(void)
         }
     }
 }
-static void IotYkc21_DetectPowerLimit(void)
+static void IotYKC21_DetectPowerLimit(void)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
@@ -426,7 +426,7 @@ static void IotYKC21_CycleDetect(void)
 static void IotYKC21_FunDeal(void)
 {
     /* 功率调节 */
-    IotYkc21_DetectPowerLimit(); 
+    IotYKC21_DetectPowerLimit(); 
     /* RSA密钥回复指令处理 */
     IotYKC21_UpRSAKey(); 
 }
