@@ -207,7 +207,7 @@ static void AswVoltCur_LimitManage(uint8_t port)
 
 /* 
     当eMode = eAswVoltCurAdjustMode_PowerAbsolute时， val为绝对值，单位为W
-    当eMode = eAswVoltCurAdjustMode_PowerPercentum时，val为百分比 保留1位小数
+    当eMode = eAswVoltCurAdjustMode_PowerPercent时，val为百分比 保留1位小数
 */
 void AswVoltCur_AdjustOutputCurrent(uint8_t port, AswVoltCurAdjustMode_Enum eMode, uint32_t val)
 {
@@ -239,7 +239,7 @@ void AswVoltCur_AdjustOutputCurrent(uint8_t port, AswVoltCurAdjustMode_Enum eMod
 
             break;
         }
-        case eAswVoltCurAdjustMode_PowerPercentum:
+        case eAswVoltCurAdjustMode_PowerPercent:
         {
             ASWVOLTCUR_CFG_LogPrint("远程调节功率，调节模式：百分比调节，调节百分比为：%d.%d%%\r\n", val / 10, val % 10);
             if (val == 1000)

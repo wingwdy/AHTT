@@ -31,7 +31,7 @@
 typedef enum
 {
     eAswVoltCurAdjustMode_PowerAbsolute,             /* 功率绝对值 */
-    eAswVoltCurAdjustMode_PowerPercentum,            /* 功率百分比 */
+    eAswVoltCurAdjustMode_PowerPercent,              /* 功率百分比 */
     eAswVoltCurAdjustMode_Count,                     /* 功率调节模式个数 */
 }AswVoltCurAdjustMode_Enum;
 

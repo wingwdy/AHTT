@@ -19,6 +19,7 @@
 #include "Common.h"
 #include "Asw_Charge.h"
 #include "Cdd_Relay.h"
+#include "Asw_VoltCurHandle.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -33,8 +34,12 @@
 #define ASWCHARGEIF_WORKSTATE_STOPPING       ASWCHARGE_WORKSTATE_STOPPING  /* 停止中状态 */
 #define ASWCHARGEIF_WORKSTATE_FINISH         ASWCHARGE_WORKSTATE_FINISH    /* 停止完成状态 */
 
-#define AswCHARGEIF_RELAYSTATE_OFF           eCddRelayState_Off
-#define AswCHARGEIF_RELAYSTATE_ON            eCddRelayState_On
+#define ASWCHARGEIF_RELAYSTATE_OFF           eCddRelayState_Off
+#define ASWCHARGEIF_RELAYSTATE_ON            eCddRelayState_On
+
+#define ASWCHARGEIF_ADJUST_POWER_ABSOLUTE    eAswVoltCurAdjustMode_PowerAbsolute
+#define ASWCHARGEIF_ADJUST_POWER_RELATIVE    eAswVoltCurAdjustMode_PowerPercent
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -69,7 +74,8 @@ uint64_t AswChargeIf_GetMeterEnergyVal(uint8_t port);
 void AswChargeIf_ChargeStart(uint8_t port);
 AswErrorType_Enum AswChargeIf_GetStopReason(uint8_t port);
 uint8_t AswChargeIf_GetAuthFlag(uint8_t port);
-#endif /* ASW_CHARGEIF_H_ */
+void AswChargeIf_AdjustOutputCurrent(uint8_t port, uint8_t adjustMode, uint32_t val);
+#endif /* ASW_CHARGEIF_H_ */    
 
 
 

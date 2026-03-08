@@ -163,6 +163,21 @@ uint8_t AswChargeIf_GetAuthFlag(uint8_t port)
     return AswCharge_GetAuthFlag(port);
 }
 
+void AswChargeIf_AdjustOutputCurrent(uint8_t port, uint8_t adjustMode, uint32_t val)
+{
+    switch (adjustMode)
+    {
+        case ASWCHARGEIF_ADJUST_POWER_ABSOLUTE:
+            AswVoltCur_AdjustOutputCurrent(port, eAswVoltCurAdjustMode_PowerAbsolute, val);
+            break;
+        case ASWCHARGEIF_ADJUST_POWER_RELATIVE:
+            AswVoltCur_AdjustOutputCurrent(port, eAswVoltCurAdjustMode_PowerPercent, val);
+            break;
+        default:
+            break;
+    }
+}
+
 
 
 

@@ -379,7 +379,7 @@ uint8_t IotOM_GetGunState(uint8_t port)
         }
         else if (chargeState == ASWCHARGEIF_WORKSTATE_STOPPING)
         {
-            if (AswChargeIf_GetRelayState(port) == AswCHARGEIF_RELAYSTATE_ON)
+            if (AswChargeIf_GetRelayState(port) == ASWCHARGEIF_RELAYSTATE_ON)
             {
                 gunState = 0x02; /* 充电中 */
             }

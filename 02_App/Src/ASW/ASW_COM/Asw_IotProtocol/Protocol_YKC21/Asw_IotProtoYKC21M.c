@@ -27,7 +27,7 @@
 #include "MS_Nvm.h"
 #include "SS_Tm.h"
 #include "Asw_VoltCurHandle.h"
-
+#include "Asw_ChargeIf.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -131,7 +131,7 @@ static CommonSendCtrl_Struct* IotYKC21_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_YKC21_CMD_MULTI_ORDER_RECORD_REQ:	    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][7];   break;
         case IOT_YKC21_CMD_MULTI_ORDER_RECORD_ACK:	    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][8];   break;
         case IOT_YKC21_CMD_UPDATE_ACCOUNT_MONEY_RSP:    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][9];   break;
-        case IOT_YKC21_CMD_FAULTREST_REQ:			    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][10];   break;
+        case IOT_YKC21_CMD_FAULTREST_REQ:			    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][10];  break;
         case IOT_YKC21_CMD_RECORD_RSP:				    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][11];  break;
         case IOT_YKC21_CMD_FAULT_REQ:				    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][12];  break;
         case IOT_YKC21_CMD_POWERCHANG_RSP:			    pSendCtrl = &pIotYKC21Ctx->stSendCtrl[port][13];  break;
@@ -202,7 +202,6 @@ uint8_t IotYKC21_CompareRecordOrderNum(uint8_t *record, uint8_t *pCompara, uint1
 
 static void IotYKC21_CycleReportRealData(void)
 {
-  
     uint32_t realDataReportCycle;
     uint8_t port;
     uint8_t curGunState = 0;
@@ -342,64 +341,63 @@ static void IotYKC21_UpError(void)
         }
     }
 }
-void IotYkc21_powercontrol(uint8_t port,uint16_t power)
- {
-    static uint16_t power_running_NOW[SYSCFG_CFG_GUN_NUM] = {0};
-
-    if (power != power_running_NOW[port])
-    {
-        AswVoltCur_AdjustOutputCurrent(port, eAswVoltCurAdjustMode_PowerAbsolute, power * 1000);
-        power_running_NOW[port] = power;
-        IOTYKC21_CFG_LogPrint("云快充2.1协议[枪：%d]功率调整为[%d]kw\r\n", port, power);
-    }
- }
-static void IotYkc21_PowerLimit(void)
+static void IotYkc21_DetectPowerLimit(void)
 {
-    uint32_t NowTimestamp = 0;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    uint32_t currentTimeStamp = SSTM_GetSecTimestamp();
     uint8_t port = 0;
+    uint8_t adjustFlag = FALSE;
 
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
-        NowTimestamp = SSTM_GetSecTimestamp();
+        adjustFlag = FALSE;
 
         if (0x03 != IotYKC21_GetGunState(port))
         {
-            break;
+            IotYKC21_SetPowerControl(port, SYSCFG_CFG_MAX_OUTPUT_CURRENT);
+            pIotYKC21Ctx->stProtoData[port].powerLimitFlag = FALSE;
+            continue;
         }
-        /* 动态控制功率 */
-        if (pIotYKC21Ctx->stProtoData[port].powerConfig.limitendtimess != 0)
+
+        /* 优先功率修改策略 */
+        if (pIotYKC21Ctx->stProtoData[port].powerLimitFlag == TRUE)
         {
-            if (NowTimestamp <= pIotYKC21Ctx->stProtoData[port].powerConfig.limitendtimess)
+            if (currentTimeStamp <= pIotYKC21Ctx->stProtoData[port].powerlimitEndTimeStamp)
             {
-                IotYkc21_powercontrol(port, pIotYKC21Ctx->stProtoData[port].powerConfig.power_running);
+                IotYKC21_SetPowerControl(port, pIotYKC21Ctx->stProtoData[port].platLimitPower);
+                adjustFlag = TRUE;
             }
             else
             {
-                pIotYKC21Ctx->stProtoData[port].powerConfig.priority = 0;
-                pIotYKC21Ctx->stProtoData[port].powerConfig.power_running = 0;
-                pIotYKC21Ctx->stProtoData[port].powerConfig.limitendtimess = 0;
+                pIotYKC21Ctx->stProtoData[port].powerLimitFlag = FALSE;
             }
         }
-        else
+        /* 默认最大功率策略 */
+        else if (pPlatInfo->defaultMaxPowerLimitFlag[port] == TRUE)
         {
-            /* 默认最大功率 */
-            if (pIotYKC21Ctx->stProtoData[port].powerConfig.deaultMaxPowerEndTimess != 0)
+            if (currentTimeStamp >= pPlatInfo->deaultMaxPowerStartTimeStamp[port] && 
+                currentTimeStamp <= pPlatInfo->deaultMaxPowerEndTimeStamp[port])
             {
-                if (NowTimestamp >= pIotYKC21Ctx->stProtoData[port].powerConfig.deaultMaxPowerStartTimess && NowTimestamp <= pIotYKC21Ctx->stProtoData[port].powerConfig.deaultMaxPowerEndTimess)
-                {
-                    IotYkc21_powercontrol(port, pIotYKC21Ctx->stProtoData[port].powerConfig.defaultPower_max);
-                }
-                else
-                {
-                    IotYkc21_powercontrol(port, 7);
-                }
+                IotYKC21_SetPowerControl(port, pPlatInfo->defaultMaxPower[port]);
+                adjustFlag = TRUE;
+            }
+            else if (currentTimeStamp > pPlatInfo->deaultMaxPowerEndTimeStamp[port])
+            {
+                pPlatInfo->defaultMaxPowerLimitFlag[port] = FALSE;
+                MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
             }
             else
-                IotYkc21_powercontrol(port, 7);
+            {}
+        }
+
+        /* 未触发功率限制，设置为最大功率 */
+        if (adjustFlag == FALSE)
+        {
+            IotYKC21_SetPowerControl(port, SYSCFG_CFG_MAX_OUTPUT_CURRENT);
         }
     }
 }
-
 
 static void  IotYKC21_UpRSAKey(void)
 {
@@ -417,19 +415,22 @@ static void  IotYKC21_UpRSAKey(void)
 
 static void IotYKC21_CycleDetect(void)
 {
-    IotYKC21_CycleReportRealData(); /* 实时报文传递 */
-
-    IotYKC21_CycleDetectUnreporteRecord(); /* 记录上报 */
-
-    IotYKC21_UpError(); /* 故障上报处理 */
+    /* 实时报文传递 */
+    IotYKC21_CycleReportRealData();         
+    /* 记录上报 */
+    IotYKC21_CycleDetectUnreporteRecord(); 
+    /* 故障上报处理 */
+    IotYKC21_UpError(); 
 }
 
 static void IotYKC21_FunDeal(void)
 {
-    IotYkc21_PowerLimit(); /* 功率调节 */
-
-    IotYKC21_UpRSAKey(); /* RSA密钥回复指令处理 */
+    /* 功率调节 */
+    IotYkc21_DetectPowerLimit(); 
+    /* RSA密钥回复指令处理 */
+    IotYKC21_UpRSAKey(); 
 }
+
 static void IotYKC21_WSInitHandle(void)
 {
     uint8_t port = 0;
@@ -444,14 +445,6 @@ static void IotYKC21_WSInitHandle(void)
         memcpy(pPlatInfo->token, Default_TokenStr, 14);
     }
 
-    // 更新存储的最大默认功率
-    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
-    {
-        pIotYKC21Ctx->stProtoData[port].powerConfig.defaultPower_max = pPlatInfo->defaultMAX_power[port];
-        pIotYKC21Ctx->stProtoData[port].powerConfig.deaultMaxPowerStartTimess = pPlatInfo->deaultMaxPowerStartTimess[port];
-        pIotYKC21Ctx->stProtoData[port].powerConfig.deaultMaxPowerEndTimess = pPlatInfo->deaultMaxPowerEndTimess[port];
-    }
-    
     pIotYKC21Ctx->eWorkState = eIOTYKC21WorkState_Offline;
 }
 
@@ -580,6 +573,16 @@ static IotYKC21StopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType)
     }
 
     return eStopReason;
+}
+
+void IotYKC21_SetPowerControl(uint8_t port, uint32_t powerLimit)
+{
+    if (pIotYKC21Ctx->stProtoData[port].lastSetPower != powerLimit)
+    {
+        AswChargeIf_AdjustOutputCurrent(port, ASWCHARGEIF_ADJUST_POWER_ABSOLUTE, powerLimit);
+        pIotYKC21Ctx->stProtoData[port].lastSetPower = powerLimit;
+        IOTYKC21_CFG_LogPrint("[枪：%d]:云快充2.1协议, 功率调整为[%d]kw\r\n", port, powerLimit);
+    }
 }
 
 void IotYKC21_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardBillMode)
@@ -742,7 +745,7 @@ void IotYKC21_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
     {
         strcpy(pLinkPara->stTcpPara.ip, pParam->platMainIp);
         pLinkPara->stTcpPara.port = pParam->platMainPort;
-        FrameQueue_Creat(eFrameQueueType_TCP, 3072, 3072, &pIotYKC21Ctx->frameQueueChannelID);
+        FrameQueue_Creat(eFrameQueueType_TCP, 2048, 2048, &pIotYKC21Ctx->frameQueueChannelID);
         pLinkPara->stTcpPara.frameQueueChannelID = pIotYKC21Ctx->frameQueueChannelID;
     }
 }

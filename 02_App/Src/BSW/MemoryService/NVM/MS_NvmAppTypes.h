@@ -144,8 +144,6 @@ typedef struct
     uint32_t billInfo[9][4];                  /* 9个费率对应的 单价(5位小数)、电量(4位小数)、计损电量(4位小数)、金额(4位小数) */
 }MSNvmGNOrderInfo_Struct;
 
-
-
 typedef struct 
 {
     /* 根据协议2.1.1全部存储有 330 字节 */
@@ -227,9 +225,10 @@ typedef struct
 
 typedef struct YKC21platinfo
 {
-    uint16_t  defaultMAX_power[SYSCFG_CFG_GUN_NUM];                /* 默认最大功率 kw*/
-    uint32_t  deaultMaxPowerStartTimess[SYSCFG_CFG_GUN_NUM];       /* 默认最大功率开始时间戳*/
-    uint32_t  deaultMaxPowerEndTimess[SYSCFG_CFG_GUN_NUM];         /* 默认最大功率结束时间戳 kw*/
+    uint8_t   defaultMaxPowerLimitFlag[SYSCFG_CFG_GUN_NUM];        /* 默认最大功率限制标志位 */
+    uint16_t  defaultMaxPower[SYSCFG_CFG_GUN_NUM];                 /* 默认最大功率 kW，保留3位小数*/
+    uint32_t  deaultMaxPowerStartTimeStamp[SYSCFG_CFG_GUN_NUM];    /* 默认最大功率开始时间戳 */
+    uint32_t  deaultMaxPowerEndTimeStamp[SYSCFG_CFG_GUN_NUM];      /* 默认最大功率结束时间戳 */
 	uint8_t   rsa_Keylength;	                                   /* 云快充2.1 rsa公钥长度 */
     uint8_t   rsa_Key[MSNVM_PLAT_YKC21_RSAKEYLEN];	               /* 云快充2.1 rsa公钥 */
     uint8_t   token[MSNVM_PLAT_YKC21_TOKENLEN];	                   /* 云快充2.1 token */

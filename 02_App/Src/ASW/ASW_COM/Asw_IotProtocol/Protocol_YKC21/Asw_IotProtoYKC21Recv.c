@@ -26,6 +26,7 @@
 #include "Asw_lotProtoYKC21aes.h"
 #include "Common.h"
 #include "Asw_PlatM.h"
+#include "Asw_ChargeIf.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -77,22 +78,17 @@ static uint8_t IotYKC21_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, u
 static uint8_t IotYKC21_RecvFaultRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC21_RecvFaultRestRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC21_RecvCallRecord(uint8_t *port, uint8_t *r_data, uint16_t len);
-static uint8_t IotYKC21_RecvSetPowerCharge(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotYKC21_RecvSetPowerChange(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC21_RecvSyncTime(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC21_RecvSetBillModeMultiRate(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC21_RecvSetQRCode(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC21_RecvSetParam(uint8_t *port, uint8_t *r_data, uint16_t len);
-static uint8_t IotYKC21_RecvSetPowerDefaultMax(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotYKC21_RecvSetDefaultMaxPower(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC21_RecvSetReboot(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC21_RecvSetFTP(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC21_RecvSetKey(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC21_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC21_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
-
-
- 
-
-
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -250,7 +246,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmd = IOT_YKC21_CMD_SET_POWERCHANG,
         .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
-        .pRecvParse = IotYKC21_RecvSetPowerCharge,
+        .pRecvParse = IotYKC21_RecvSetPowerChange,
         .maxTimeout = 0,
         .maxTryCnt = 1,
         .matchCmd = IOT_YKC21_CMD_POWERCHANG_RSP,
@@ -297,8 +293,6 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cMeaning = "设置二维码",
     },
 
-
-
     [15] = 
     {
         .cmd = IOT_YKC21_CMD_SET_PARAM,
@@ -312,14 +306,12 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cMeaning = "参数设置",
     },
 
-
-    
     [16] = 
     {
         .cmd = IOT_YKC21_CMD_SET_POWERDEFAULT_MAX,
         .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
-        .pRecvParse = IotYKC21_RecvSetPowerDefaultMax,
+        .pRecvParse = IotYKC21_RecvSetDefaultMaxPower,
         .maxTimeout = 0,
         .maxTryCnt = 1,
         .matchCmd = IOT_YKC21_CMD_POWERDEFAULT_MAX_RSP,
@@ -327,7 +319,6 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cMeaning = "最大功率下发",
     },
 
-    
     [17] = 
     {
         .cmd = IOT_YKC21_CMD_REBOOT,
@@ -600,9 +591,7 @@ static uint8_t IotYKC21_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_
     }
 
     return TRUE;
-
 }
-
 
 static uint8_t IotYKC21_RecvBillModeVerifyRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
@@ -643,7 +632,6 @@ static uint8_t IotYKC21_RecvBillModeMultRateRsp(uint8_t *port, uint8_t *r_data, 
     uint8_t *pRecvData = r_data;
     uint8_t temp = 0;
 
-
     memcpy(pBillMode->billModeID, &pRecvData[index], 2);
     index += 2;
 
@@ -663,7 +651,6 @@ static uint8_t IotYKC21_RecvBillModeMultRateRsp(uint8_t *port, uint8_t *r_data, 
 
     MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
     return TRUE;
-
 }
 
 static uint8_t IotYKC21_RecvCallRealData(uint8_t *port, uint8_t *r_data, uint16_t len)
@@ -672,9 +659,7 @@ static uint8_t IotYKC21_RecvCallRealData(uint8_t *port, uint8_t *r_data, uint16_
     uint8_t *pRecvData = r_data;
     
     IOT_YKC21_RecvGunNoTransform(pRecvData[index], port[0]);
-
     return TRUE;
-
 }
 static uint8_t IotYKC21_RecvRemoteStopCharge(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
@@ -695,9 +680,7 @@ static uint8_t IotYKC21_RecvRemoteStopCharge(uint8_t *port, uint8_t *r_data, uin
         AswErrhandle_SetErrExsitCallback(port[0], eSrc_AppStop);
     }
 
-    Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, 0, IOT_YKC21_CMD_REMOTE_STOP_CHARGE_RSP, TRUE);
     return TRUE;
-
 }
 static uint8_t IotYKC21_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
@@ -774,23 +757,40 @@ static uint8_t IotYKC21_RecvCallRecord(uint8_t *port, uint8_t *r_data, uint16_t 
    
     memset(pIotYKC21Ctx->stProtoData[port[0]].newRecvOrderTransactionNum, 0, 16);
     memcpy(pIotYKC21Ctx->stProtoData[port[0]].newRecvOrderTransactionNum, &pRecvData[0], 16);
-
-    IOT_YKC21_RecvGunNoTransform(pRecvData[16+7], port[0]);
+    IOT_YKC21_RecvGunNoTransform(pRecvData[16 + 7], port[0]);
 
     return TRUE;
-
 }
 
-static uint8_t IotYKC21_RecvSetPowerCharge(uint8_t *port, uint8_t *r_data, uint16_t len)
+static uint8_t IotYKC21_RecvSetPowerChange(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
     uint8_t index = 7;
-    uint16_t limittimess = 0 ;
-    IOT_YKC21_RecvGunNoTransform(r_data[index], port[0]);
+    uint32_t limitTimeSec = 0 ;
+    uint32_t curTimeStamp = SSTM_GetSecTimestamp();
+    uint32_t tempPowerLimit = 0;
 
-    pIotYKC21Ctx->stProtoData[port[0]].powerConfig.power_running = (r_data[index+2]<<8|r_data[index+1]);
-    pIotYKC21Ctx->stProtoData[port[0]].powerConfig.priority = (r_data[index+3]); 
-    limittimess = (r_data[index+5]<<8|r_data[index+4])*60 ;
-    pIotYKC21Ctx->stProtoData[port[0]].powerConfig.limitendtimess = limittimess + SSTM_GetSecTimestamp();
+    /* 转换枪号 */
+    IOT_YKC21_RecvGunNoTransform(r_data[index], port[0]);
+    index++;
+    /* 允许最大功率，单位：kW */
+    tempPowerLimit = Common_TwoUint8ToUint16(&r_data[index]) * 1000;
+    index += 2;
+    /* 指令响应优先级，数字越大优先级越高, 暂时用不到 */
+    index++;
+    /* 限制时间 */
+    limitTimeSec = Common_TwoUint8ToUint16(&r_data[index]) * 60;
+    /* 判断设置条件 */
+    if (0x03 == IotYKC21_GetGunState(port[0]) && tempPowerLimit <= SYSCFG_CFG_MAX_OUTPUT_POWER)
+    {
+        pIotYKC21Ctx->stProtoData[port[0]].platLimitPower = tempPowerLimit ;
+        pIotYKC21Ctx->stProtoData[port[0]].powerlimitEndTimeStamp = limitTimeSec + curTimeStamp;
+        pIotYKC21Ctx->stProtoData[port[0]].powerLimitFlag = TRUE;
+        pIotYKC21Ctx->stProtoData[port[0]].setPowerChangeResult = 0x01;
+    }
+    else
+    {
+        pIotYKC21Ctx->stProtoData[port[0]].setPowerChangeResult = 0x00;
+    }
 
     return TRUE;
 }
@@ -802,19 +802,17 @@ static uint8_t IotYKC21_RecvSyncTime(uint8_t *port, uint8_t *r_data, uint16_t le
     uint8_t tempBin1 = 0;
     uint8_t tempBin2 = 0;
     CommonDateTime_Struct dataTime;
-    uint8_t millisecond_H, millisecond_L = 0;
-    millisecond_L = pRecvData[index++];
-    millisecond_H = pRecvData[index++];
-    dataTime.millisecond = millisecond_H << 8 | millisecond_L;
+
+    dataTime.millisecond = Common_TwoUint8ToUint16(&pRecvData[index]);
     dataTime.second = dataTime.millisecond / 1000;
+    index += 2;
+
     dataTime.minute = pRecvData[index++];
     dataTime.hour = pRecvData[index++];
     dataTime.day = pRecvData[index++] & 0x1F;
     dataTime.month = pRecvData[index++];
     dataTime.year = pRecvData[index++] + 2000;
-
     SSTM_SynTimeByDateTime(&dataTime);
-
     return TRUE;
 }
 static uint8_t IotYKC21_RecvSetBillModeMultiRate(uint8_t *port, uint8_t *r_data, uint16_t len)
@@ -843,10 +841,9 @@ static uint8_t IotYKC21_RecvSetBillModeMultiRate(uint8_t *port, uint8_t *r_data,
     index += 48;
 
     MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
-    
     return TRUE;
-
 }
+
 static uint8_t IotYKC21_RecvSetQRCode(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
     uint8_t index = 7;
@@ -854,14 +851,19 @@ static uint8_t IotYKC21_RecvSetQRCode(uint8_t *port, uint8_t *r_data, uint16_t l
     uint8_t QRCodelength = 0;
     MSNvmDrcode_Struct qrParam = {0};
 
+    /* 提取枪号 */
     IOT_YKC21_RecvGunNoTransform(pRecvData[index], port[0]);
-    QRCodelength = pRecvData[index + 2];
+    index++;
+    /* 二维码限制，暂时用不到 */
+    index++;
+     /* 二维码长度 */
+    QRCodelength = pRecvData[index++];
 
     if (port[0] == 0)
     {
-        memcpy(qrParam.qrcode, &pRecvData[index + 2 + 1], QRCodelength);
+        memcpy(qrParam.qrcode, &pRecvData[index], QRCodelength);
         MSNvm_WriteParaBlock(eMSNvmBlockID_Gun0Qrcode, (uint8_t *)&qrParam, sizeof(MSNvmDrcode_Struct));
-        IOTYKC21_CFG_LogPrint("[枪：%d]设置的二维码内容：%.100s\r\n", port[0], &pRecvData[index + 2 + 1]);
+        IOTYKC21_CFG_LogPrint("[枪：%d]设置的二维码内容：%.100s\r\n", port[0], &pRecvData[index]);
     }
 
     return TRUE;
@@ -870,48 +872,48 @@ static uint8_t IotYKC21_RecvSetParam(uint8_t *port, uint8_t *r_data, uint16_t le
 {
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
-    uint8_t overstarttime = 0;
-    uint8_t overofflinettime = 0;
 
     IOT_YKC21_RecvGunNoTransform(pRecvData[index], port[0]);
-
-    /* 鉴权超时时间 */
-    overstarttime = pRecvData[index + 2]; // 目前默认15s，不支持更改 
-
-    /* 离线充电时间 */
-    overofflinettime = pRecvData[index + 3]; // 离线续充时间 
-
     return TRUE;
 }
-static uint8_t IotYKC21_RecvSetPowerDefaultMax(uint8_t *port, uint8_t *r_data, uint16_t len)
+static uint8_t IotYKC21_RecvSetDefaultMaxPower(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-    uint8_t index = 7;
-
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
-
+    uint8_t index = 7;
+    uint16_t tempMaxDefaultPower = 0;
+    uint32_t tempDefaultPowerStartTimeStamp = 0;
+    uint32_t tempDefaultPowerStopTimeStamp = 0;
+    /* 转换枪号 */
     IOT_YKC21_RecvGunNoTransform(r_data[index], port[0]);
-
-    pIotYKC21Ctx->stProtoData[port[0]].powerConfig.defaultPower_max = (r_data[index + 2] << 8 | r_data[index + 1]);
-    pIotYKC21Ctx->stProtoData[port[0]].powerConfig.deaultMaxPowerStartTimess = Common_Cp56Time2aToTimestamp(&r_data[index + 3]);
-    pIotYKC21Ctx->stProtoData[port[0]].powerConfig.deaultMaxPowerEndTimess = Common_Cp56Time2aToTimestamp(&r_data[index + 3 + 7]);
-
-    /* 判断数值正确性 */
-    if (pIotYKC21Ctx->stProtoData[port[0]].powerConfig.defaultPower_max > 7)
+    index++;
+    /* 默认最大功率 kW*/
+    tempMaxDefaultPower = Common_TwoUint8ToUint16(&r_data[index]) * 1000;
+    index += 2;
+    /* 默认最大功率开始时间 */
+    tempDefaultPowerStartTimeStamp = Common_Cp56Time2aToTimestamp(&r_data[index]);
+    index += 7;
+    /* 默认最大功率结束时间 */
+    tempDefaultPowerStopTimeStamp = Common_Cp56Time2aToTimestamp(&r_data[index]);
+    index += 7;
+    /* 默认最大功率超出范围 或 结束时间早于当前时间 */
+    if (tempMaxDefaultPower > SYSCFG_CFG_MAX_OUTPUT_POWER ||
+        tempDefaultPowerStopTimeStamp < SSTM_GetSecTimestamp())
     {
-        pIotYKC21Ctx->stProtoData[port[0]].powerConfig.defaultPower_max = 0;
-        pIotYKC21Ctx->stProtoData[port[0]].powerConfig.deaultMaxPowerStartTimess = 0;
-        pIotYKC21Ctx->stProtoData[port[0]].powerConfig.deaultMaxPowerEndTimess = 0;
+        /* 设置失败 */
+        pIotYKC21Ctx->stProtoData[port[0]].setDefaultMaxPowerResult = 0x00;
     }
-
-    /* 存储 */
-    pPlatInfo->defaultMAX_power[port[0]] = pIotYKC21Ctx->stProtoData[port[0]].powerConfig.defaultPower_max;
-    pPlatInfo->deaultMaxPowerStartTimess[port[0]] = pIotYKC21Ctx->stProtoData[port[0]].powerConfig.deaultMaxPowerStartTimess;
-    pPlatInfo->deaultMaxPowerStartTimess[port[0]] = pIotYKC21Ctx->stProtoData[port[0]].powerConfig.deaultMaxPowerEndTimess;
-
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
-
-    Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, 0, IOT_YKC21_CMD_POWERDEFAULT_MAX_RSP, TRUE);
+    else
+    {
+        /* 设置成功 */
+        pIotYKC21Ctx->stProtoData[port[0]].setDefaultMaxPowerResult = 0x01;
+        /* 保存参数 */
+        pPlatInfo->defaultMaxPower[port[0]] = tempMaxDefaultPower;
+        pPlatInfo->deaultMaxPowerStartTimeStamp[port[0]] = tempDefaultPowerStartTimeStamp;
+        pPlatInfo->deaultMaxPowerEndTimeStamp[port[0]] = tempDefaultPowerStopTimeStamp;
+        pPlatInfo->defaultMaxPowerLimitFlag[port[0]] = TRUE;
+        MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+    }
 
     return TRUE;
 }
@@ -965,7 +967,7 @@ static uint8_t IotYKC21_CheckChargeStart(uint8_t port, uint8_t *pFailReason)
     /* 设备禁用 */
     else if (TRUE == AswMonitor_CheckForbidState())
     {
-        reason = 0x04; /* 设备离线 */
+        reason = 0x09; /* 设备离线 */
     }
     else
     {}
@@ -976,18 +978,21 @@ static uint8_t IotYKC21_CheckChargeStart(uint8_t port, uint8_t *pFailReason)
 
 static uint8_t IotYKC21_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
     AswMonitorChargeCtrl_Struct *pChargeCtrl = NULL;
     uint8_t index = 0;
     uint8_t *pRecvData = r_data;
     uint8_t failReason = 0;
     uint32_t accountMoney = 0;
+    uint16_t powerLimit = 0;
 
     /* 订单号 */
     memcpy(pIotYKC21Ctx->stProtoData[port[0]].newRecvOrderTransactionNum, &pRecvData[index], 16);
     index += 16;
-
-    /* 枪号 */
+    /* 桩编号 */
     index += 7;
+    /* 提取枪号 */
     IOT_YKC21_RecvGunNoTransform(pRecvData[index], port[0]);
     index++;
 
@@ -999,31 +1004,39 @@ static uint8_t IotYKC21_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, ui
         index += 16;
         /* 账户余额 */
         accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
-        pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
+        index += 4;
 
         if (accountMoney <= IOTYKC21_CFG_CHARGE_MIN_ACCOUNT_MONEY)
         {
             IOTYKC21_CFG_LogPrint("余额不足，拒绝充电！余额：%d.%02d 元!\r\n", accountMoney / 100, accountMoney % 100);
             pIotYKC21Ctx->stProtoData[port[0]].remoteStartResult = 0;
-            /* 充电启动失败，余额不足*/
+            /* 充电启动失败，余额不足 */
             pIotYKC21Ctx->stProtoData[port[0]].remoteStartFailReason = 0x4E;
         }
         else
         {
-            memcpy(pIotYKC21Ctx->stProtoData[port[0]].curUsedOrderTransactionNum,
-                   pIotYKC21Ctx->stProtoData[port[0]].newRecvOrderTransactionNum,
-                   16);
-
             pChargeCtrl->accountMoney = accountMoney;
-            pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeMoney;
-            pChargeCtrl->chargeCtrlVal = pChargeCtrl->accountMoney;
-            index += 4;
 
-            /* 本次充电当前允许的最大功率*/
-            uint16_t powerChange = Common_TwoUint8ToUint16(&pRecvData[index]);
-            if (powerChange != 0)
-                IotYkc21_powercontrol(port[0], powerChange * 1000);
+            memcpy(pIotYKC21Ctx->stProtoData[port[0]].curUsedOrderTransactionNum,
+                   pIotYKC21Ctx->stProtoData[port[0]].newRecvOrderTransactionNum, 16);
+
+            /* 本次充电当前允许的最大功率 */
+            powerLimit = Common_TwoUint8ToUint16(&pRecvData[index]) * 1000;
             index += 2;
+
+            if (powerLimit == 0)
+            {
+                if (pPlatInfo->defaultMaxPowerLimitFlag[port[0]] == TRUE)
+                {
+                    powerLimit = pPlatInfo->defaultMaxPower[port[0]];
+                }
+                else
+                {
+                    powerLimit = SYSCFG_CFG_MAX_OUTPUT_POWER;
+                }
+            }
+
+            IotYKC21_SetPowerControl(port[0], powerLimit);
             /* SOC限制 */
             index += 1;
             /* 充电电量限制 */
@@ -1031,6 +1044,11 @@ static uint8_t IotYKC21_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, ui
             {
                 pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeEnergy;
                 pChargeCtrl->chargeCtrlVal = Common_FourUint8ToUint32(&pRecvData[index]) / 100;
+            }
+            else
+            {
+                pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeMoney;
+                pChargeCtrl->chargeCtrlVal = pChargeCtrl->accountMoney;
             }
 
             pIotYKC21Ctx->stProtoData[port[0]].remoteStartResult = 1;
@@ -1051,44 +1069,94 @@ static uint8_t IotYKC21_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, ui
 
 static uint8_t IotYKC21_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
     AswMonitorChargeCtrl_Struct *pChargeCtrl = NULL;
-    uint8_t index = (16 + 7);
+    uint8_t index = 0;
     uint8_t *pRecvData = r_data;
     uint8_t failReason = 0;
+    uint32_t accountMoney = 0;
+    uint32_t powerLimit = 0;
+    uint32_t energyLimit = 0;
+    uint8_t *pOrderNum = NULL;
+    uint8_t *pCardNum = NULL;
 
+    /* 交易流水号 */
+    pOrderNum = &pRecvData[index];
+    index += 16;
+    /* 桩编号, 不需要 */
+    index += 7;
+    /* 提取枪号 */
     IOT_YKC21_RecvGunNoTransform(pRecvData[index], port[0]);
+    index++;
 
     pChargeCtrl = AswMonitor_GetChargeCtrlPtr(port[0]);
-    index = 0;
+
     if (TRUE == IotYKC21_CheckChargeStart(port[0], &failReason))
     {
+        /* 逻辑卡号 */
+        pCardNum = &pRecvData[index];
+        index += 8;
+        /* 账户余额 */
+        accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
+        index += 4;
+        /* 本次充电当前允许的最大功率 */
+        powerLimit = Common_TwoUint8ToUint16(&pRecvData[index]) * 1000;
+        index += 2;
+        /* SOC限制用不着 */
+        index += 1;
+        /* 充电电量限制 */
+        energyLimit = Common_FourUint8ToUint32(&pRecvData[index]);
+        index += 4;
+
         /* 鉴权成功标志 */
-        if (pRecvData[index + 16 + 7 + 1 + 8 + 4 + 2 + 1 + 4] == 0x01)
+        if (pRecvData[index++] == 0x01)
         {
             /* 订单号 */
-            memcpy(pIotYKC21Ctx->stProtoData[port[0]].curUsedOrderTransactionNum, &pRecvData[index], 16);
-            index += (16 + 7 + 1);
+            memcpy(pIotYKC21Ctx->stProtoData[port[0]].curUsedOrderTransactionNum, pOrderNum, 16);
             /* 卡号 */
-            memcpy(pIotYKC21Ctx->stProtoData[port[0]].authCardID, &pRecvData[index], 8);
-            index += 8;
+            memcpy(pIotYKC21Ctx->stProtoData[port[0]].authCardID, pCardNum, 8);
             /* 账户余额 */
-            pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
-            index += 4;
+            pChargeCtrl->accountMoney = accountMoney;
 
-            pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeMoney;
-            pChargeCtrl->chargeCtrlVal = pChargeCtrl->accountMoney;
+            /* 本次充电当前允许的最大功率 */
+            if (powerLimit == 0)
+            {
+                if (pPlatInfo->defaultMaxPowerLimitFlag[port[0]] == TRUE)
+                {
+                    powerLimit = pPlatInfo->defaultMaxPower[port[0]];
+                }
+                else
+                {
+                    powerLimit = SYSCFG_CFG_MAX_OUTPUT_POWER;
+                }
+            }
 
-            /*本次充电当前允许的最大功率 */
-            index += 2;
+            IotYKC21_SetPowerControl(port[0], powerLimit);
+
+            /* 充电电量限制 */
+            if (0 != energyLimit)
+            {
+                pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeEnergy;
+                pChargeCtrl->chargeCtrlVal = energyLimit / 100;
+            }
+            else
+            {
+                pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeMoney;
+                pChargeCtrl->chargeCtrlVal = pChargeCtrl->accountMoney;
+            }
 
             AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_CARD);
             IOTYKC21_CFG_LogPrint("[枪：%d]充电桩申请主动启动充电成功!\r\n", port[0]);
         }
         else
         {
-            index += (16 + 7 + 1 + 8 + 4 + 2 + 1 + 4 + 1);
-            IOTYKC21_CFG_LogPrint("[枪：%d]充电桩申请主动启动充电失败，失败原因：%02X!\r\n", port[0], pRecvData[index]);
+            IOTYKC21_CFG_LogPrint("[枪：%d]充电桩申请主动启动充电失败，失败原因：0x%02X!\r\n", port[0], pRecvData[index]);
         }
+    }
+    else
+    {
+        IOTYKC21_CFG_LogPrint("[枪：%d]充电桩申请主动启动充电, 平台应答成功，但设备无法启动充电，失败原因：%d\r\n", port[0], failReason);
     }
 
     return TRUE;

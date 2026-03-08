@@ -43,19 +43,6 @@ typedef enum
 *    Typedef Definition
 ******************************************************************************/
 typedef struct
-{  
- 
-    uint16_t defaultPower_max;          /* 当前默认最大功率 kw */
-    uint32_t deaultMaxPowerStartTimess; /* 到达此时间后按配置最大功率执行时间戳 */
-    uint32_t deaultMaxPowerEndTimess;   /* 到达此时间后解除最大功率执行时间戳 */
-
- 
-    uint8_t  priority;                  /* 指令响应优先级 */
-    uint16_t power_running;             /* 运行中功率 kw */
-    uint32_t limitendtimess;            /* 运行中功率结束时间戳 */
-}IotYKC21PowerConfig_Struct;
-
-typedef struct
 {			 
 	uint8_t  errorAppearType;				  
 	uint16_t errorAppearId;
@@ -87,10 +74,16 @@ typedef struct
     uint8_t setQrCodeResult;
     uint8_t setUpdateResult;
     
-    IotYKC21PowerConfig_Struct powerConfig;  /* 功率调节参数 */
     IotYKC21Err_Struct erroInfo;             /* 故障发生和消除 */
 
-}IotYKC21ProtoData_Struct;
+    uint8_t setDefaultMaxPowerResult;        /* 设置默认最大功率结果 */
+
+    uint8_t setPowerChangeResult;            /* 设置功率修改结果 */  
+    uint8_t  powerLimitFlag;                 /* 充电中功率限制标志位 */
+    uint32_t platLimitPower;                 /* 充电中限制功率 kw 保留3位小数 */
+    uint32_t powerlimitEndTimeStamp;         /* 充电中限制功率结束时间戳 */
+    uint32_t lastSetPower;                   /* 上一次设置的充电功率 */
+}IotYKC21ProtoData_Struct; 
 
 
 typedef struct 
@@ -153,7 +146,7 @@ void IotYKC21_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint
 uint8_t IotYKC21_GetGunState(uint8_t port);
 void IotYKC21_OfflineHandle(void);
 uint8_t IotYKC21_CompareRecordOrderNum(uint8_t *record, uint8_t *pCompara, uint16_t paraSize);
-
+void IotYKC21_SetPowerControl(uint8_t port, uint32_t powerLimit);
 
 
 

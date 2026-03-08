@@ -76,7 +76,7 @@ static uint16_t IotYKC21_SendFaultReq(uint8_t port, uint8_t *pBuf);
 static uint16_t IotYKC21_SendPowerChangeRsp (uint8_t port, uint8_t *pBuf);
 static uint16_t IotYKC21_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotYKC21_SendSetBillModeMultiRateRsp(uint8_t port, uint8_t *pBuf);
-static uint16_t IotYKC21_SendPowerDefaultMaxRsp (uint8_t port, uint8_t *pBuf);
+static uint16_t IotYKC21_SendSetDefaultMaxPowerRsp (uint8_t port, uint8_t *pBuf);
 static uint16_t IotYKC21_SendSetQrcodeRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotYKC21_SendSetParamRsp (uint8_t port, uint8_t *pBuf);
 static uint16_t IotYKC21_SendSetRebootRsp(uint8_t port, uint8_t *pBuf);
@@ -292,7 +292,7 @@ static const IotYKC21SendCtrl_Struct c_stIotYKC21SendctrlTable[IOT_YKC21_CMD_SEN
         .encryptionFlag = TRUE,
         .cmdType = IOT_YKC21_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC21_CMD_SET_POWERDEFAULT_MAX,
-        .pSendFunc = IotYKC21_SendPowerDefaultMaxRsp,
+        .pSendFunc = IotYKC21_SendSetDefaultMaxPowerRsp,
         .sendCycle = 0,
         .printFlag = TRUE,
         .cMeaning = "默认最大功率下发应答"
@@ -827,22 +827,11 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
      dataLen += 7;
      /* 枪号 */
      pBuf[dataLen++] = port + 1;
-
-     if (0x03 == IotYKC21_GetGunState(port) && pIotYKC21Ctx->stProtoData[port].powerConfig.power_running <= 7)
-     {
-         pBuf[dataLen++] = 1;
-     }
-     else
-     {
-         pBuf[dataLen++] = 0; // 失败
-
-         pIotYKC21Ctx->stProtoData[port].powerConfig.priority = 0;
-         pIotYKC21Ctx->stProtoData[port].powerConfig.power_running = 7;
-         pIotYKC21Ctx->stProtoData[port].powerConfig.limitendtimess = 0;
-     }
-
+     /* 功率修改结果 */
+     pBuf[dataLen++] = pIotYKC21Ctx->stProtoData[port].setPowerChangeResult;
      return dataLen;
  }
+
  static uint16_t IotYKC21_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf)
  {
      CommonDateTime_Struct dateTime;
@@ -875,7 +864,7 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
 
      return dataLen;
  }
- static uint16_t IotYKC21_SendPowerDefaultMaxRsp (uint8_t port, uint8_t *pBuf)
+ static uint16_t IotYKC21_SendSetDefaultMaxPowerRsp(uint8_t port, uint8_t *pBuf)
  {
      uint16_t dataLen = 0;
 
@@ -884,18 +873,11 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
      dataLen += 7;
      /* 枪号 */
      pBuf[dataLen++] = port + 1;
-
-     if (pIotYKC21Ctx->stProtoData[port].powerConfig.deaultMaxPowerStartTimess != 0 && pIotYKC21Ctx->stProtoData[port].powerConfig.deaultMaxPowerEndTimess != 0)
-     {
-         pBuf[dataLen++] = 1;
-     }
-     else
-     {
-         pBuf[dataLen++] = 0;
-     }
-
+    /* 设置结果 */
+     pBuf[dataLen++] = pIotYKC21Ctx->stProtoData[port].setDefaultMaxPowerResult;
      return dataLen;
  }
+
  static uint16_t IotYKC21_SendSetQrcodeRsp(uint8_t port, uint8_t *pBuf)
  {
      uint16_t dataLen = 0;
@@ -919,10 +901,8 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
      dataLen += 7;
      /* 枪号 */
      pBuf[dataLen++] = port + 1;
-
      /* 默认失败 */
      pBuf[dataLen++] = 1;
-
      return dataLen;
  }
  static uint16_t IotYKC21_SendSetRebootRsp(uint8_t port, uint8_t *pBuf)
