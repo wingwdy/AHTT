@@ -59,6 +59,14 @@ static void IotOM_WSInitHandle(void);
 static void IotOM_WSOfflineHandle(void);
 static void IotOM_WSLoginHandle(void);
 static void IotOM_WSNormalHandle(void);
+static CommonSendCtrl_Struct* IotOM_GetSendCtrl(uint8_t port, uint16_t cmd);
+static CommonRecvCtrl_Struct* IotOM_GetRecvCtrl(uint8_t port, uint16_t cmd);
+static void IotOM_CycleReportRealData(void);
+static void IotOM_CycleDetectUnreporteRecord(void);
+static void IotOM_CycleDetectUnreportedUcmResult(void);
+static void IotOM_CycleDetectReportForbidState(void);
+static void IotOM_CycleReportMeterVal(void);
+static void IotOM_CycleDetect(void);
 
 
 /*******************************************************************************
@@ -83,6 +91,7 @@ static CommonSendCtrl_Struct* IotOM_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_OM_CMD_REPORT_FORBID_STATE:        pSendCtrl = &pIotOMCtx->stSendCtrl[port][10];   break;
         case IOT_OM_CMD_UPDATE_RSP:                 pSendCtrl = &pIotOMCtx->stSendCtrl[port][11];   break;
         case IOT_OM_CMD_ORDER_RECORD:               pSendCtrl = &pIotOMCtx->stSendCtrl[port][12];   break;
+        case IOT_OM_CMD_REMOTE_QUERY_SET_PARAM_RSP: pSendCtrl = &pIotOMCtx->stSendCtrl[port][13];   break;
         default: break;
     }
 
@@ -105,8 +114,10 @@ static CommonRecvCtrl_Struct* IotOM_GetRecvCtrl(uint8_t port, uint16_t cmd)
         case IOT_OM_CMD_REPORT_FORBID_STATE_RSP:    pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][7];   break;
         case IOT_OM_CMD_UPDATE:                     pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][8];   break;
         case IOT_OM_CMD_ORDER_RECORD_RSP:           pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][9];   break;
+        case IOT_OM_CMD_REMOTE_QUERY_SET_PARAM:     pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][10];  break;
         default: break;
     }
+    
     return pRecvCtrl;
 }
 

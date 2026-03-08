@@ -42,6 +42,9 @@
 #define IOTOM_CFG_IDLE_METERVAL_CYCLE           (10 * 60 * 1000)
 #define IOTOM_CFG_CHARGING_METERVAL_CYCLE       (60 * 1000)
 
+/* 操作的参数 */
+#define IOTOM_CFG_OPT_PARAM_COUNT               (12U)
+
 /* 协议CMD 定义 */
 #define IOT_OM_CMDTYPE_REQUSET			        (0x00U)
 #define IOT_OM_CMDTYPE_RESPONSE                 (0x01U)
@@ -56,12 +59,13 @@
 #define IOT_OM_CMD_CALL_REALDATA_ACK            (0xF13U)            /* 召测实时数据应答 */
 #define IOT_OM_CMD_REPORT_METERVAL              (0x15U)             /* 上报电表底数 */
 #define IOT_OM_CMD_ORDER_RECORD                 (0x17U)             /* 订单记录 */
+#define IOT_OM_CMD_REMOTE_QUERY_SET_PARAM_RSP   (0x51U)             /* 远程设置查询记录应答 */
 #define IOT_OM_CMD_SET_QRCODE_RSP               (0x59U)             /* 设置二维码应答 */
 #define IOT_OM_CMD_REBOOT_RSP                   (0x91U)             /* 设置远程重启应答 */
 #define IOT_OM_CMD_UPDATE_RSP                   (0x93U)             /* 远程更新应答 */
 #define IOT_OM_CMD_SET_FORBID_RSP               (0x95U)             /* 设置禁用应答状态 */
 #define IOT_OM_CMD_REPORT_FORBID_STATE          (0x97U)             /* 上报禁用状态 */
-#define IOT_OM_CMD_SEND_COUNT                   (13U)
+#define IOT_OM_CMD_SEND_COUNT                   (14U)
 
 /* 协议CMD 接收定义 */
 #define IOT_OM_CMD_LOGIN_RSP                    (0x02U)             /* 登陆应答 */
@@ -69,12 +73,13 @@
 #define IOT_OM_CMD_CALL_NETMODULE_INFO          (0x06U)             /* 请求网络模块信息 */
 #define IOT_OM_CMD_CALL_REALDATA                (0x12U)             /* 召测实时数据 */
 #define IOT_OM_CMD_ORDER_RECORD_RSP             (0x16U)             /* 订单上报应答 */
+#define IOT_OM_CMD_REMOTE_QUERY_SET_PARAM       (0x52U)             /* 远程设置查询记录 */
 #define IOT_OM_CMD_SET_QRCODE                   (0x5AU)             /* 设置二维码 */
 #define IOT_OM_CMD_REBOOT                       (0x92U)             /* 设置远程重启 */
 #define IOT_OM_CMD_UPDATE                       (0x94U)             /* 设置远程更新 */
 #define IOT_OM_CMD_SET_FORBID                   (0x96U)             /* 设置禁用状态 */
 #define IOT_OM_CMD_REPORT_FORBID_STATE_RSP      (0x98U)             /* 上报禁用状态应答 */
-#define IOT_OM_CMD_RECV_COUNT                   (10U)
+#define IOT_OM_CMD_RECV_COUNT                   (11U)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

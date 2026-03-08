@@ -61,7 +61,12 @@ static uint8_t IotOM_RecvSetForbid(uint8_t *port, uint8_t *r_data, uint16_t len)
 static uint8_t IotOM_RecvReportForBidStateRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvUpdate(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
-
+static uint8_t IotOM_RecvRemoteQueryParam(uint8_t *r_data, uint16_t len);
+static uint8_t IotOM_RecvRemoteSetParam(uint8_t *r_data, uint16_t len);
+static uint8_t IotOM_RecvRemoteQuerySetParam(uint8_t *port, uint8_t *r_data, uint16_t len);
+static const IotOMRecvCtrl_Struct* IotOM_GetRecvCtrlPtr(uint16_t cmd);
+static IotOMFrameHead_Struct *IotOM_FindValidFrameLen(uint8_t *pData, uint16_t dataLen, uint16_t *dealLen);
+static void IotOM_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen, uint8_t *pTopic, uint16_t *dealLen);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -187,6 +192,18 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .matchCmd = IOT_OM_CMD_ORDER_RECORD,
         .printFlag = TRUE,
         .cMeaning = "订单上报应答",
+    },
+
+    [10] = 
+    {
+        .cmd = IOT_OM_CMD_REMOTE_QUERY_SET_PARAM,
+        .cmdType = IOT_OM_CMDTYPE_REQUSET,
+        .pRecvParse = IotOM_RecvRemoteQuerySetParam,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_OM_CMD_REMOTE_QUERY_SET_PARAM_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "远程设置查询参数",
     },
 };
 
@@ -396,6 +413,206 @@ static uint8_t IotOM_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t
 {
     MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OmOrderRecord, pIotOMCtx->time);
     IOTOM_CFG_LogPrint("订单上报成功!\r\n");
+    return TRUE;
+}
+
+static uint8_t IotOM_RecvRemoteQueryParam(uint8_t *r_data, uint16_t len)
+{
+    uint8_t result = TRUE;
+    uint8_t dataIndex = 32 + 1;
+    uint8_t *pRecvData = r_data;
+    uint8_t paramCount = 0;
+    uint8_t paramIndex = 0;
+    uint8_t key[17] = {0};
+
+    /* 读取参数个数 */
+    paramCount = pRecvData[dataIndex++];
+
+    /* 清除之前的查询状态 */
+    pIotOMCtx->stProtoData[0].queryParamFlag = 0;
+
+    if (paramCount > 0)
+    {
+        /* 处理每个参数 */
+        for (paramIndex = 0; paramIndex < paramCount; paramIndex++)
+        {
+            /* 读取参数key */
+            memcpy(key, &pRecvData[dataIndex], 16);
+            dataIndex += 16;
+
+            /* 根据key处理查询逻辑 */
+            if (strcmp((const char *)key, "platDn") == 0)
+            {
+                Common_SetBitFlag(&pIotOMCtx->stProtoData[0].queryParamFlag, 0);
+            }
+            else if (strcmp((const char *)key, "platType") == 0)
+            {
+                Common_SetBitFlag(&pIotOMCtx->stProtoData[0].queryParamFlag, 1);
+            }
+            else if (strcmp((const char *)key, "ipAddr") == 0)
+            {
+                Common_SetBitFlag(&pIotOMCtx->stProtoData[0].queryParamFlag, 2);    
+            }
+            else if (strcmp((const char *)key, "port") == 0)
+            {
+                Common_SetBitFlag(&pIotOMCtx->stProtoData[0].queryParamFlag, 3);    
+            }
+            else if (strcmp((const char *)key, "cardType") == 0)
+            {
+                Common_SetBitFlag(&pIotOMCtx->stProtoData[0].queryParamFlag, 4);    
+            }
+            else if (strcmp((const char *)key, "devOperator") == 0)
+            {
+                Common_SetBitFlag(&pIotOMCtx->stProtoData[0].queryParamFlag, 5);    
+            }
+            else if (strcmp((const char *)key, "iv") == 0)
+            {
+                Common_SetBitFlag(&pIotOMCtx->stProtoData[0].queryParamFlag, 6);    
+            }
+            else if (strcmp((const char *)key, "cipherKey") == 0)
+            {
+                Common_SetBitFlag(&pIotOMCtx->stProtoData[0].queryParamFlag, 7);    
+            }
+            else if (strcmp((const char *)key, "productKey") == 0)
+            {
+                Common_SetBitFlag(&pIotOMCtx->stProtoData[0].queryParamFlag, 8);    
+            }
+            else if (strcmp((const char *)key, "token") == 0)
+            {
+                Common_SetBitFlag(&pIotOMCtx->stProtoData[0].queryParamFlag, 9);    
+            }
+            else if (strcmp((const char *)key, "productSecret") == 0)
+            {
+                Common_SetBitFlag(&pIotOMCtx->stProtoData[0].queryParamFlag, 10);    
+            }
+            else if (strcmp((const char *)key, "workmode") == 0)
+            {
+                Common_SetBitFlag(&pIotOMCtx->stProtoData[0].queryParamFlag, 11);    
+            }
+            else
+            {
+                result = FALSE;
+                IOTOM_CFG_LogPrint("查询参数: %s (未知参数)\r\n", key);
+            }
+        }
+    }
+    else
+    {
+        result = FALSE;
+    }
+ 
+    return result;
+}
+
+static uint8_t IotOM_RecvRemoteSetParam(uint8_t *r_data, uint16_t len)
+{
+    uint8_t result = TRUE;
+    uint8_t dataIndex = 32 + 1;
+    uint8_t *pRecvData = r_data;
+    uint8_t paramCount = 0;
+    uint8_t paramIndex = 0;
+    uint8_t key[17] = {0}; 
+    uint8_t valueLen = 0;
+
+    /* 设置参数个数 */
+    paramCount = pRecvData[dataIndex++];
+
+    if (paramCount > 0)
+    {
+        /* 处理每个参数 */
+        for (paramIndex = 0; paramIndex < paramCount; paramIndex++)
+        {
+            /* 读取参数值长度 */
+            valueLen = pRecvData[dataIndex++];
+            
+            /* 读取参数key */
+            memcpy(key, &pRecvData[dataIndex], 16);
+            dataIndex += 16;
+
+            /* 根据key处理设置逻辑 */
+            if (strcmp((const char *)key, "platDn") == 0)
+            {
+
+            }
+            else if (strcmp((const char *)key, "platType") == 0)
+            {
+
+            }
+            else if (strcmp((const char *)key, "ipAddr") == 0)
+            {
+   
+            }
+            else if (strcmp((const char *)key, "port") == 0)
+            {
+  
+            }
+            else if (strcmp((const char *)key, "cardType") == 0)
+            {
+
+            }
+            else if (strcmp((const char *)key, "devOperator") == 0)
+            {
+   
+            }
+            else if (strcmp((const char *)key, "iv") == 0)
+            {
+
+            }
+            else if (strcmp((const char *)key, "cipherKey") == 0)
+            {
+ 
+            }
+            else if (strcmp((const char *)key, "productKey") == 0)
+            {
+   
+            }
+            else if (strcmp((const char *)key, "token") == 0)
+            {
+  
+            }
+            else if (strcmp((const char *)key, "productSecret") == 0)
+            {
+ 
+            }
+            else if (strcmp((const char *)key, "workmode") == 0)
+            {
+
+            }
+            else
+            {
+                result = FALSE;
+                IOTOM_CFG_LogPrint("设置参数: %s (未知参数)\r\n", key);
+            }
+
+            dataIndex += valueLen;
+        }
+    }
+    else
+    {
+        result = FALSE;
+    }
+
+    return result;
+}
+
+static uint8_t IotOM_RecvRemoteQuerySetParam(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    uint8_t optResult = TRUE;
+
+    /* 读取参数 */
+    if (r_data[32] == 0x00)
+    {
+        optResult = IotOM_RecvRemoteQueryParam(r_data, len);
+        pIotOMCtx->stProtoData[0].optParamAction = 0x00;
+        pIotOMCtx->stProtoData[0].optParamResult = optResult ? 0x00 : 0x01;
+    }
+    else  /* 查询参数 */
+    {
+        optResult = IotOM_RecvRemoteSetParam(r_data, len);
+        pIotOMCtx->stProtoData[0].optParamAction = 0x01;
+        pIotOMCtx->stProtoData[0].optParamResult = optResult ? 0x00 : 0x01;
+    }
+    
     return TRUE;
 }
 

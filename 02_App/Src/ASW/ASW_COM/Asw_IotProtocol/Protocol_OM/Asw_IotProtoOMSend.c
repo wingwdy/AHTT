@@ -61,6 +61,9 @@ static uint16_t IotOM_SendSetForbidRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendSetForbidState(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendUpdateResponse(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendOrderRecord(uint8_t port, uint8_t *pBuf);
+static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf);
+static void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf);   
+static uint16_t IotOM_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf, uint16_t dataLen);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -209,6 +212,17 @@ static const IotOMSendCtrl_Struct c_stIotOMSendctrlTable[IOT_OM_CMD_SEND_COUNT] 
         .sendCycle = 0,
         .printFlag = TRUE,
         .cMeaning = "订单数据上报"
+    },
+
+    [13] = 
+    {
+        .cmd = IOT_OM_CMD_REMOTE_QUERY_SET_PARAM_RSP,
+        .cmdType = IOT_OM_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_OM_CMD_REMOTE_QUERY_SET_PARAM,
+        .pSendFunc = IotOM_SendRemoteQuerySetParamRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "远程设置查询参数应答"
     },
 };
 
@@ -619,6 +633,155 @@ static uint16_t IotOM_SendOrderRecord(uint8_t port, uint8_t *pBuf)
     Common_Uint32ToFourUint8(&pBuf[dataLen], orderLen);
     dataLen += 4;
     dataLen += orderLen;
+    return dataLen;
+}
+
+static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
+{
+    uint16_t dataLen = 0;
+    uint8_t valueLen = 0;
+    uint8_t *pParamCount = NULL;
+    uint8_t paramBit = 0;
+    uint8_t *pParamLen = NULL;
+
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
+    dataLen += 32;
+    /* 参数操作：0-读取，1-设置 */
+    pBuf[dataLen++] = pIotOMCtx->stProtoData[port].optParamAction; // 根据实际操作类型设置
+    /* 参数操作结果：0-成功，1-失败 */
+    pBuf[dataLen++] = pIotOMCtx->stProtoData[port].optParamResult; // 使用存储的操作结果
+
+    if (pIotOMCtx->stProtoData[port].optParamAction == 0x00 &&
+        pIotOMCtx->stProtoData[port].optParamResult == 0x00)
+    {
+        /* 指针指向参数个数赋值内存，方便赋值 */
+        pParamCount = &pBuf[dataLen++];
+
+        if (Common_GetBitFlag(&pIotOMCtx->stProtoData[port].queryParamFlag, 0))
+        {
+            pParamLen = &pBuf[dataLen++];
+            memset(&pBuf[dataLen], 0, 16);
+            snprintf((char *)&pBuf[dataLen], 16, "%s", "platDn");
+            dataLen += 16;
+            /* todo 填内容 */
+
+            pParamCount[0]++;
+        }
+
+        if (Common_GetBitFlag(&pIotOMCtx->stProtoData[port].queryParamFlag, 1))
+        {
+            pParamLen = &pBuf[dataLen++];
+            memset(&pBuf[dataLen], 0, 16);
+            snprintf((char *)&pBuf[dataLen], 16, "%s", "platType");
+            dataLen += 16;
+            /* todo 填内容 */
+
+            pParamCount[0]++;
+        }
+
+        if (Common_GetBitFlag(&pIotOMCtx->stProtoData[port].queryParamFlag, 2))
+        {
+            pParamLen = &pBuf[dataLen++];
+            memset(&pBuf[dataLen], 0, 16);
+            snprintf((char *)&pBuf[dataLen], 16, "%s", "ipAddr");
+            dataLen += 16;
+            /* todo 填内容 */
+
+            pParamCount[0]++;
+        }
+
+        if (Common_GetBitFlag(&pIotOMCtx->stProtoData[port].queryParamFlag, 3))
+        {
+            pParamLen = &pBuf[dataLen++];
+            memset(&pBuf[dataLen], 0, 16);
+            snprintf((char *)&pBuf[dataLen], 16, "%s", "port");
+            dataLen += 16;
+            /* todo 填内容 */
+            pParamCount[0]++;
+        }
+
+        if (Common_GetBitFlag(&pIotOMCtx->stProtoData[port].queryParamFlag, 4))
+        {
+            pParamLen = &pBuf[dataLen++];
+            memset(&pBuf[dataLen], 0, 16);
+            snprintf((char *)&pBuf[dataLen], 16, "%s", "cardType");
+            dataLen += 16;
+            /* todo 填内容 */
+            pParamCount[0]++;
+        }
+
+        if (Common_GetBitFlag(&pIotOMCtx->stProtoData[port].queryParamFlag, 5))
+        {
+            pParamLen = &pBuf[dataLen++];
+            memset(&pBuf[dataLen], 0, 16);
+            snprintf((char *)&pBuf[dataLen], 16, "%s", "devOperator");
+            dataLen += 16;
+            /* todo 填内容 */
+            pParamCount[0]++;
+        }
+
+        if (Common_GetBitFlag(&pIotOMCtx->stProtoData[port].queryParamFlag, 6))
+        {
+            pParamLen = &pBuf[dataLen++];
+            memset(&pBuf[dataLen], 0, 16);
+            snprintf((char *)&pBuf[dataLen], 16, "%s", "iv");
+            dataLen += 16;
+            /* todo 填内容 */
+            pParamCount[0]++;
+        }
+
+        if (Common_GetBitFlag(&pIotOMCtx->stProtoData[port].queryParamFlag, 7))
+        {
+            pParamLen = &pBuf[dataLen++];
+            memset(&pBuf[dataLen], 0, 16);
+            snprintf((char *)&pBuf[dataLen], 16, "%s", "cipherKey");
+            dataLen += 16;
+            /* todo 填内容 */
+            pParamCount[0]++;
+        }
+
+        if (Common_GetBitFlag(&pIotOMCtx->stProtoData[port].queryParamFlag, 8))
+        {
+            pParamLen = &pBuf[dataLen++];
+            memset(&pBuf[dataLen], 0, 16);
+            snprintf((char *)&pBuf[dataLen], 16, "%s", "productKey");
+            dataLen += 16;
+            /* todo 填内容 */
+            pParamCount[0]++;
+        }
+
+        if (Common_GetBitFlag(&pIotOMCtx->stProtoData[port].queryParamFlag, 9))
+        {
+            pParamLen = &pBuf[dataLen++];
+            memset(&pBuf[dataLen], 0, 16);
+            snprintf((char *)&pBuf[dataLen], 16, "%s", "token");
+            dataLen += 16;
+            /* todo 填内容 */
+            pParamCount[0]++;
+        }
+
+        if (Common_GetBitFlag(&pIotOMCtx->stProtoData[port].queryParamFlag, 10))
+        {
+            pParamLen = &pBuf[dataLen++];
+            memset(&pBuf[dataLen], 0, 16);
+            snprintf((char *)&pBuf[dataLen], 16, "%s", "productSecret");
+            dataLen += 16;
+            /* todo 填内容 */
+            pParamCount[0]++;
+        }
+
+        if (Common_GetBitFlag(&pIotOMCtx->stProtoData[port].queryParamFlag, 11))
+        {
+            pParamLen = &pBuf[dataLen++];
+            memset(&pBuf[dataLen], 0, 16);
+            snprintf((char *)&pBuf[dataLen], 16, "%s", "workmode");
+            dataLen += 16;
+            /* todo 填内容 */
+            pParamCount[0]++;
+        }
+    }
+
     return dataLen;
 }
 

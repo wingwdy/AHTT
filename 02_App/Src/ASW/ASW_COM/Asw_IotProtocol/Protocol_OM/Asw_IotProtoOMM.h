@@ -49,6 +49,9 @@ typedef struct
     uint8_t recvUpdateFlag;
     uint8_t setUpdateResult;
     SSUcmResult_Enum lastUcmResult;
+    uint8_t optParamAction;             /* 0x00: 查询参数, 0x01: 设置参数 */
+    uint8_t optParamResult;             /* 0x00: 成功, 0x01: 失败 */
+    uint16_t queryParamFlag;            /* 每个bit对应一个参数, 用于对应参数查询  */
 }IotOMProtoData_Struct;
 
 typedef struct 
