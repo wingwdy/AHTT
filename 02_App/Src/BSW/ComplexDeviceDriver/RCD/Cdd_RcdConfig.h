@@ -33,7 +33,7 @@
 #define CDDRCD_CFG_SET                                      MCALPORT_PIN_HIGH    
 #define CDDRCD_CFG_RESET                                    MCALPORT_PIN_LOW
 
-#define CDDRCD_CFG_TASK_PERIOD                    		    (uint16_t)(10u)/*10ms*/
+#define CDDRCD_CFG_TASK_PERIOD                    		    (uint16_t)(10u) /*10ms*/
 #define CDDRCD_CFG_SELFCHECK_CAL_T2_TIME             	    ((uint16_t)80u / CDDRCD_CFG_TASK_PERIOD)/*50ms<=T2<=100ms*/
 #define CDDRCD_CFG_SELFCHECK_CAL_T3_TIME             	    ((uint16_t)500u  / CDDRCD_CFG_TASK_PERIOD)/*T3>=500ms*/
 #define CDDRCD_CFG_SELFCHECK_TEST_T5_TIME             	    ((uint16_t)200u  / CDDRCD_CFG_TASK_PERIOD)/*T5>=200ms*/

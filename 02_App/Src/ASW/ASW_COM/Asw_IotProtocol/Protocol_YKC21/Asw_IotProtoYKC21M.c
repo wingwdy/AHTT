@@ -355,7 +355,7 @@ static void IotYKC21_DetectPowerLimit(void)
 
         if (0x03 != IotYKC21_GetGunState(port))
         {
-            IotYKC21_SetPowerControl(port, SYSCFG_CFG_MAX_OUTPUT_CURRENT);
+            IotYKC21_SetPowerControl(port, SYSCFG_CFG_MAX_OUTPUT_POWER);
             pIotYKC21Ctx->stProtoData[port].powerLimitFlag = FALSE;
             continue;
         }
@@ -394,7 +394,7 @@ static void IotYKC21_DetectPowerLimit(void)
         /* 未触发功率限制，设置为最大功率 */
         if (adjustFlag == FALSE)
         {
-            IotYKC21_SetPowerControl(port, SYSCFG_CFG_MAX_OUTPUT_CURRENT);
+            IotYKC21_SetPowerControl(port, SYSCFG_CFG_MAX_OUTPUT_POWER);
         }
     }
 }
@@ -599,7 +599,7 @@ void IotYKC21_SetPowerControl(uint8_t port, uint32_t powerLimit)
     {
         AswChargeIf_AdjustOutputCurrent(port, ASWCHARGEIF_ADJUST_POWER_ABSOLUTE, powerLimit);
         pIotYKC21Ctx->stProtoData[port].lastSetPower = powerLimit;
-        IOTYKC21_CFG_LogPrint("[枪：%d]:云快充2.1协议, 功率调整为[%d]kw\r\n", port, powerLimit);
+        IOTYKC21_CFG_LogPrint("[枪：%d]:云快充2.1协议, 功率调整为[%d]w\r\n", port, powerLimit);
     }
 }
 
