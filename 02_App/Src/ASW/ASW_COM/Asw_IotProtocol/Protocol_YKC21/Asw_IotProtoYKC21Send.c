@@ -979,21 +979,14 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
 
  static uint16_t IotYKC21_SendSetKeyRsp(uint8_t port, uint8_t *pBuf)
  {
-     uint16_t dataLen = 0;
-     /* 设备编码 */
-     memcpy(&pBuf[dataLen], pIotYKC21Ctx->pileDnBCD, 7);
-     dataLen += 7;
-     /* 设置结果 */
-     if (TRUE == pIotYKC21Ctx->rsaPublicKeyRefreshFlag)
-     {
-         pBuf[dataLen++] = 1;
-     }
-     else
-     {
-        pBuf[dataLen++] = 0;
-     }
-         
-     return dataLen;
+    uint16_t dataLen = 0;
+    /* 设备编码 */
+    memcpy(&pBuf[dataLen], pIotYKC21Ctx->pileDnBCD, 7);
+    dataLen += 7;
+
+    /* 设置结果 */
+    pBuf[dataLen++] = pIotYKC21Ctx->stProtoData[port].setKeyResult;
+    return dataLen;
  }
 
 static uint16_t IotYKC21_PackHead(uint8_t port, uint16_t cmd, uint8_t encryptflg,uint8_t printflg, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)

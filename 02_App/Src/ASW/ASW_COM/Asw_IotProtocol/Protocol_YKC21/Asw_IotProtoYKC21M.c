@@ -439,7 +439,7 @@ static void IotYKC21_CycleDetect(void)
     IotYKC21_CycleDetectUnreporteRecord(); 
     /* 故障上报处理 */
     IotYKC21_UpError();
-    /* RSA密钥回复指令处理 */
+    /* RSA延迟更新密钥处理 */
     IotYKC21_DelayRefreshRSAKey(); 
 }
 
