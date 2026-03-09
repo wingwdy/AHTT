@@ -73,16 +73,18 @@ typedef struct
 
     uint8_t setQrCodeResult;
     uint8_t setUpdateResult;
+    uint8_t  setKeyResult;                   /* 设置密钥结果 */     
     
     IotYKC21Err_Struct erroInfo;             /* 故障发生和消除 */
 
     uint8_t setDefaultMaxPowerResult;        /* 设置默认最大功率结果 */
-
     uint8_t setPowerChangeResult;            /* 设置功率修改结果 */  
     uint8_t  powerLimitFlag;                 /* 充电中功率限制标志位 */
     uint32_t platLimitPower;                 /* 充电中限制功率 kw 保留3位小数 */
     uint32_t powerlimitEndTimeStamp;         /* 充电中限制功率结束时间戳 */
     uint32_t lastSetPower;                   /* 上一次设置的充电功率 */
+
+
 }IotYKC21ProtoData_Struct; 
 
 
@@ -100,8 +102,9 @@ typedef struct
     /* 离线后需清除数据 */
     
     /* RSA密钥刷新 */
-    uint8_t rsaRefreshflg; 
-    uint32_t rsaReponseDelaytick;
+    uint8_t rsaPubicKeyWaitIdleRefreshFlag;
+    uint8_t rsaPublicKeyRefreshFlag;
+    uint32_t rsaPubicKeyDelayRefreshTick;
 
     uint8_t loginSucc;
     uint8_t queueBusyFlag;

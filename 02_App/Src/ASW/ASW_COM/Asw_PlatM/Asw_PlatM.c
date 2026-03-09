@@ -276,7 +276,7 @@ uint8_t AswPlatM_Setykc21key(char *pykc21key, uint8_t len)
  
    if (currentPlatType == eAswPlatType_YKC21)
     {
-        if (len <= MSNVM_PLAT_YKC21_RSAKEYLEN)
+        if (len <= MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN)
         {
             IotYKC21_RfreshYKC21key(pykc21key,len);
             ret = TRUE;
@@ -296,7 +296,7 @@ uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
          return ret;
     }
 
-    if (len <= MSNVM_PLAT_YKC21_TOKENLEN)
+    if (len <= MSNVM_PLAT_YKC21_TOKEN_LEN)
     {
         IotYKC21_RfreshYKC21token(pykc21token,len);
         ret = TRUE;

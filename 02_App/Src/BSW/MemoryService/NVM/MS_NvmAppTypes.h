@@ -42,8 +42,8 @@
 #define MSNVM_PLAT_PRIVATE_PARAM_LEN          (512 + 128)
 
 /* RSA 密钥长度 token长度 */
-#define MSNVM_PLAT_YKC21_RSAKEYLEN            128
-#define MSNVM_PLAT_YKC21_TOKENLEN             14
+#define MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN   128
+#define MSNVM_PLAT_YKC21_TOKEN_LEN            14
 
 /* 平台IP长度 */
 #define MSNVM_PLAT_IP_LEN                     72
@@ -230,8 +230,8 @@ typedef struct YKC21platinfo
     uint32_t  deaultMaxPowerStartTimeStamp[SYSCFG_CFG_GUN_NUM];    /* 默认最大功率开始时间戳 */
     uint32_t  deaultMaxPowerEndTimeStamp[SYSCFG_CFG_GUN_NUM];      /* 默认最大功率结束时间戳 */
 	uint8_t   rsa_Keylength;	                                   /* 云快充2.1 rsa公钥长度 */
-    uint8_t   rsa_Key[MSNVM_PLAT_YKC21_RSAKEYLEN];	               /* 云快充2.1 rsa公钥 */
-    uint8_t   token[MSNVM_PLAT_YKC21_TOKENLEN];	                   /* 云快充2.1 token */
+    uint8_t   rsa_Key[MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN];	               /* 云快充2.1 rsa公钥 */
+    uint8_t   token[MSNVM_PLAT_YKC21_TOKEN_LEN];	                   /* 云快充2.1 token */
 } MSNvmYKC21_FlashPlatInfo_Struct;
 
 

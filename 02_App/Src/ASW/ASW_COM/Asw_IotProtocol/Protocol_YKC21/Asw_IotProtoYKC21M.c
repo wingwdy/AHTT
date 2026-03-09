@@ -399,16 +399,34 @@ static void IotYKC21_DetectPowerLimit(void)
     }
 }
 
-static void  IotYKC21_UpRSAKey(void)
+static void IotYKC21_DelayRefreshRSAKey(void)
 {
-    if (TRUE == pIotYKC21Ctx->rsaRefreshflg)
+    uint8_t gunNo = 0;
+    uint8_t refreshFlag = TRUE;
+
+    if (TRUE == pIotYKC21Ctx->rsaPublicKeyRefreshFlag)
     {
-        if (TRUE == Common_JudgeTimeoutMs(pIotYKC21Ctx->rsaReponseDelaytick, 2000))
-        {    /* 2s */
-            pIotYKC21Ctx->rsaReponseDelaytick = 0;
-            pIotYKC21Ctx->rsaRefreshflg = FALSE;
-            /* 执行重连 */
-            IotYKC21_OfflineHandle();
+        if (TRUE == Common_JudgeTimeoutMs(pIotYKC21Ctx->rsaPubicKeyDelayRefreshTick, 2000))
+        {
+            if (pIotYKC21Ctx->rsaPubicKeyWaitIdleRefreshFlag == TRUE)
+            {
+                for (gunNo = 0; gunNo < SYSCFG_CFG_GUN_NUM; gunNo++)
+                {
+                    if (0x02 != IotYKC21_GetGunState(gunNo)) 
+                    {
+                        refreshFlag = FALSE;
+                        break;
+                    }
+                }
+            }
+
+            if (refreshFlag == TRUE)
+            {
+                pIotYKC21Ctx->rsaPubicKeyWaitIdleRefreshFlag = FALSE;
+                pIotYKC21Ctx->rsaPublicKeyRefreshFlag = FALSE;
+                /* 执行重连 */
+                IotYKC21_OfflineHandle();
+            }
         }
     }
 }
@@ -420,15 +438,15 @@ static void IotYKC21_CycleDetect(void)
     /* 记录上报 */
     IotYKC21_CycleDetectUnreporteRecord(); 
     /* 故障上报处理 */
-    IotYKC21_UpError(); 
+    IotYKC21_UpError();
+    /* RSA密钥回复指令处理 */
+    IotYKC21_DelayRefreshRSAKey(); 
 }
 
 static void IotYKC21_FunDeal(void)
 {
     /* 功率调节 */
     IotYKC21_DetectPowerLimit(); 
-    /* RSA密钥回复指令处理 */
-    IotYKC21_UpRSAKey(); 
 }
 
 static void IotYKC21_WSInitHandle(void)
@@ -453,9 +471,8 @@ static void IotYKC21_WSOfflineHandle(void)
 {
     MSNvmPlatParam_Struct * pParam =  AswPlatM_GetPlatParamPtr();
 
-
-    pIotYKC21Ctx->rsaRefreshflg = FALSE;
-
+    pIotYKC21Ctx->rsaPubicKeyWaitIdleRefreshFlag = FALSE;
+    pIotYKC21Ctx->rsaPublicKeyRefreshFlag = FALSE;
     pIotYKC21Ctx->loginSucc = FALSE;
     pIotYKC21Ctx->queueBusyFlag = FALSE;
     pIotYKC21Ctx->waitQueueIdleTick = 0;
@@ -501,7 +518,8 @@ static void IotYKC21_WSNormalHandle(void)
             IotYKC21_CycleDetect();
         }
 
-        IotYKC21_FunDeal();         /* 功能执行函数 */
+        /* 功率调节 */
+        IotYKC21_DetectPowerLimit();
 
         IotYKC21_UpCtrlSendDeal();
 

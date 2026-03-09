@@ -559,7 +559,7 @@ static uint8_t IotYKC21_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t le
 
         /* 更新Rsa参数 */
         revRsakeylen = pRecvData[index + 1];
-        pPlatInfo->rsa_Keylength = revRsakeylen > MSNVM_PLAT_YKC21_RSAKEYLEN ? MSNVM_PLAT_YKC21_RSAKEYLEN : revRsakeylen;
+        pPlatInfo->rsa_Keylength = revRsakeylen > MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN ? MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN : revRsakeylen;
         memcpy(&pPlatInfo->rsa_Key, &pRecvData[index + 2], pPlatInfo->rsa_Keylength);
 
         Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, gunNo, IOT_YKC21_CMD_HEARTBEAT_REQ, TRUE);
@@ -1168,32 +1168,48 @@ static uint8_t IotYKC21_RecvSetKey(uint8_t *port, uint8_t *r_data, uint16_t len)
     MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
-    uint8_t refreshglg = TRUE;
+    uint8_t refreshFlag = TRUE;
     uint8_t gunNo = 0;
+    uint8_t keyLen = 0;
+    uint8_t excuteCtrl = 0;
+    uint8_t *pKey = NULL;
 
-    pIotYKC21Ctx->rsaRefreshflg = FALSE;
+    /* 密钥长度 */
+    keyLen = pRecvData[index++];
+    /* 密钥 */
+    pKey = &pRecvData[index];
+    index += keyLen;
+    /* 执行控制 */
+    excuteCtrl = pRecvData[index];
 
-    for (gunNo = 0; gunNo < SYSCFG_CFG_GUN_NUM; gunNo++)
+    if (keyLen <= MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN)
     {
-        if (0x03 == IotYKC21_GetGunState(gunNo)) // 充电中
+        /* 空闲执行 */
+        if (excuteCtrl == 0x02)
         {
-            refreshglg = FALSE;
-            break;
+            for (gunNo = 0; gunNo < SYSCFG_CFG_GUN_NUM; gunNo++)
+            {
+                if (0x02 != IotYKC21_GetGunState(gunNo)) 
+                {
+                    pIotYKC21Ctx->rsaPubicKeyWaitIdleRefreshFlag = TRUE;
+                    break;
+                }
+            }
         }
+
+        pPlatInfo->rsa_Keylength = keyLen;
+        memset(pPlatInfo->rsa_Key, 0, MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN);
+        memcpy(pPlatInfo->rsa_Key, pKey, pPlatInfo->rsa_Keylength);
+        IotYKC21_PrintfYKC21KeyAndToken();
+        MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+
+        pIotYKC21Ctx->rsaPublicKeyRefreshFlag = TRUE;
+        pIotYKC21Ctx->rsaPubicKeyDelayRefreshTick = Common_GetSystick();
+        pIotYKC21Ctx->stProtoData[0].setKeyResult = 0x01;
     }
-
-    if (TRUE == refreshglg)
+    else
     {
-        if (pRecvData[index] <= MSNVM_PLAT_YKC21_RSAKEYLEN)
-        {
-            pPlatInfo->rsa_Keylength = pRecvData[index];
-            memset(pPlatInfo->rsa_Key, 0, MSNVM_PLAT_YKC21_RSAKEYLEN);
-            memcpy(pPlatInfo->rsa_Key, &pRecvData[index + 1], pPlatInfo->rsa_Keylength);
-            IotYKC21_PrintfYKC21KeyAndToken();
-            MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
-            pIotYKC21Ctx->rsaRefreshflg = TRUE;
-            pIotYKC21Ctx->rsaReponseDelaytick = Common_GetSystick();
-        }
+        pIotYKC21Ctx->stProtoData[0].setKeyResult = 0x00;
     }
 
     return TRUE;

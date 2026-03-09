@@ -948,13 +948,11 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
      /* 远程启动结果 */
      pBuf[dataLen++] = pIotYKC21Ctx->stProtoData[port].remoteStartResult;
      pBuf[dataLen++] = pIotYKC21Ctx->stProtoData[port].remoteStartFailReason;
-
      return dataLen;
  }
 
  static uint16_t IotYKC21_SendPileStartChargeReq(uint8_t port, uint8_t *pBuf)
  {
-     AswMonitorChargeData_Struct *pChargeData = AswMonitor_GetChargeDataPtr(port);
      AswMonitorChargeCtrl_Struct *pstChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
      uint16_t dataLen = 0;
      /* 设备编码 */
@@ -977,17 +975,16 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
      dataLen += 17;
 
      return dataLen;
-
  }
 
- static uint16_t IotYKC21_SendSetKeyRsp (uint8_t port, uint8_t *pBuf)
+ static uint16_t IotYKC21_SendSetKeyRsp(uint8_t port, uint8_t *pBuf)
  {
      uint16_t dataLen = 0;
      /* 设备编码 */
      memcpy(&pBuf[dataLen], pIotYKC21Ctx->pileDnBCD, 7);
      dataLen += 7;
      /* 设置结果 */
-     if (TRUE == pIotYKC21Ctx->rsaRefreshflg)
+     if (TRUE == pIotYKC21Ctx->rsaPublicKeyRefreshFlag)
      {
          pBuf[dataLen++] = 1;
      }
@@ -998,7 +995,6 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
          
      return dataLen;
  }
-
 
 static uint16_t IotYKC21_PackHead(uint8_t port, uint16_t cmd, uint8_t encryptflg,uint8_t printflg, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
 {
@@ -1036,10 +1032,9 @@ static uint16_t IotYKC21_PackHead(uint8_t port, uint16_t cmd, uint8_t encryptflg
     }
     else
     {
-       memset(IotYKC21encryptbuf,0,IOT_YKC21_RX_ECRPTBUFFER_MAXSIZE);
-       memcpy(IotYKC21encryptbuf,&pBuf[1 + 2 + IOT_YKC21_ECRPTHEAD_LENGTH],dataLen);
-       encryptionMessageLen = YKC21_Send_Data_enecrypt(&pBuf[1 + 2 + IOT_YKC21_ECRPTHEAD_LENGTH], dataLen); /* 加密 */
-      
+        memset(IotYKC21encryptbuf,0,IOT_YKC21_RX_ECRPTBUFFER_MAXSIZE);
+        memcpy(IotYKC21encryptbuf,&pBuf[1 + 2 + IOT_YKC21_ECRPTHEAD_LENGTH],dataLen);
+        encryptionMessageLen = YKC21_Send_Data_enecrypt(&pBuf[1 + 2 + IOT_YKC21_ECRPTHEAD_LENGTH], dataLen); /* 加密 */
 
         pFrameHead->dataLen[0] = (IOT_YKC21_ECRPTHEAD_LENGTH + encryptionMessageLen) >> 8;
         pFrameHead->dataLen[1] = (IOT_YKC21_ECRPTHEAD_LENGTH + encryptionMessageLen) & 0xFF; /* 序列号域+发送时间+加密标志+帧类型标志+消息体”字节数之和 */
