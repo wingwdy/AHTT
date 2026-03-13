@@ -20,6 +20,7 @@
 #include "Cdd_Drv_EG800AK.h"
 #include "AT_TCP.h"
 #include "AT_FTP.h"
+#include "AT_MQTT.h"
 #include "SS_Tm.h"
 #include "Asw_ErrorHandle.h"
 /*******************************************************************************
@@ -126,17 +127,28 @@ const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
     NULL,                                      NULL,                         ATModule_FailHandle},
 };
 
-const ATUrcDescribtor_Struct c_stATUrcDescribtor[9] =
+
+/* 高频的往上放 */
+const ATUrcDescribtor_Struct c_stATUrcDescribtor[14] =
 {
-    [0] = { "+QIOPEN:",             ATTCP_UrcQIPOpen,    TRUE,    "TCP建立连接"},
-    [1] = { "SEND OK",              ATTCP_UrcSendOK,     FALSE,   "数据发送成功"},
-    [2] = { "+QNTP:",               ATModule_UrcNtp,     TRUE,    "网络时间同步"},
-    [3] = { "+QIURC: \"closed\"",   ATTCP_UrcClose,      TRUE,    "断开连接"},
-    [4] = { "+QIURC: \"recv\"",     ATTCP_UrcRecv,       FALSE,   "新数据通知"},
-    [5] = { "+QFWRITE:",            ATFTP_UrcRecvWrite,  TRUE,    "写文件应答"},
-    [6] = { "+QFTPOPEN:",           ATFTP_UrcRecvOpen,   TRUE,    "FTP建立连接"},
-    [7] = { "+QFTPPUT:",            ATFTP_UrcRecvPut,    TRUE,    "FTP文件上传通知"},
-    [8] = { "+QFTPGET:",            ATFTP_UrcRecvGet,    TRUE,    "FTP文件下载通知"},
+    { "+QMTRECV: ",           ATMQTT_UrcQMTRecv,        TRUE,    "MQTT接收数据"},
+    { "SEND OK",              ATTCP_UrcSendOK,          FALSE,   "数据发送成功"},
+    { "+QIURC: \"recv\"",     ATTCP_UrcRecv,            FALSE,   "新数据通知"},
+    { "+QMTPUBEX: ",          ATMQTT_UrcQMTPubex,       TRUE,    "MQTT数据发送完成"},
+
+    { "+QFWRITE:",            ATFTP_UrcRecvWrite,       TRUE,    "写文件应答"},
+
+    { "+QIOPEN:",             ATTCP_UrcQIPOpen,         TRUE,    "TCP建立连接"},
+    { "+QNTP:",               ATModule_UrcNtp,          TRUE,    "网络时间同步"},
+    { "+QIURC: \"closed\"",   ATTCP_UrcClose,           TRUE,    "断开连接"},     
+
+    { "+QFTPOPEN:",           ATFTP_UrcRecvOpen,        TRUE,    "FTP建立连接"},
+    { "+QFTPPUT:",            ATFTP_UrcRecvPut,         TRUE,    "FTP文件上传通知"},
+    { "+QFTPGET:",            ATFTP_UrcRecvGet,         TRUE,    "FTP文件下载通知"},
+
+    { "+QMTOPEN: ",           ATMQTT_UrcQMTOpen,        TRUE,    "MQTT打开客户端成功"},
+    { "+QMTCONN: ",           ATMQTT_UrcQMTConnect,     TRUE,    "MQTT打开客户端成功"},
+    { "+QMTSTAT: ",           ATMQTT_UrcQMTStat,        TRUE,    "MQTT状态通知"},
 };
 
 

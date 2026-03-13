@@ -42,7 +42,7 @@ typedef enum
     eATTCPCmd_Close,
     eATTCPCmd_QueryState,
     eATTCPCmd_Count,
-}ATTcpCmd_Enum;
+}ATTCPCmd_Enum;
 
 
 

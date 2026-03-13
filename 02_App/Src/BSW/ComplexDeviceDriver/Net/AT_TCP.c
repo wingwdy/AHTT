@@ -44,7 +44,7 @@ typedef struct
     uint8_t waitTcpConnectOkFlag;
     uint32_t waitTcpConnectOkTickStart;
     uint32_t cycleDetectSocketStateTickStart;
-}ATTcpPrivate_Struct;
+}ATTCPPrivate_Struct;
 
 
 
@@ -75,7 +75,7 @@ static uint8_t ATTCP_FailHandle(uint8_t socketIndex, void * socketPara, uint8_t 
 const ATCmdDescribtor_Struct c_stTCPATCmdDescribtor[eATTCPCmd_Count] =
 {
     [eATTCPCmd_Open] =
-    { "AT+QIOPEN=1,[ID],\"TCP\",\"[MIP]\",[MPORT],0,0\r\n",     "+QIOPEN",        3,   20000,     3000,  TRUE, "建立连接",
+    { "AT+QIOPEN=1,[ID],\"TCP\",\"[MIP]\",[MPORT],0,0\r\n",     "+QIOPEN=",       3,   20000,     3000,  TRUE, "建立连接",
     ATTCP_PackOpenSocket,                                       ATTCP_RecvOpenSocket,                    ATTCP_FailHandle},
 
     [eATTCPCmd_Read] =
@@ -93,7 +93,6 @@ const ATCmdDescribtor_Struct c_stTCPATCmdDescribtor[eATTCPCmd_Count] =
     [eATTCPCmd_QueryState] =
     { "AT+QISTATE=1,[ID]\r\n",                                  "+QISTATE:",      3,   5000,      3000,  FALSE, "查询连接状态",
     ATTCP_PackQIPQurey,                                         ATTCP_RecvQuery,                         ATTCP_FailHandle},
-
 };
 
 /*************************************************************************
@@ -145,6 +144,10 @@ static uint16_t ATTCP_PackWriteData(uint8_t socketIndex, void * socketPara, uint
         nATLen = Common_ReplaceNum(pData, nATLen, "[ID]", socketIndex, socketIndex);
         nATLen = Common_ReplaceNum(pData, nATLen, "[LEN]", dataLen, dataLen);
     }
+    else
+    {
+        nATLen = 0;
+    }
 
     return nATLen;
 }
@@ -161,7 +164,7 @@ static uint8_t ATTCP_RecvQIPClose(uint8_t socketIndex, void * socketPara, uint8_
 static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
-    ATTcpPrivate_Struct *pPrivate = (ATTcpPrivate_Struct *)pSocketCtrl->user_data;
+    ATTCPPrivate_Struct *pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
     uint8_t *pTemp = NULL;
     uint8_t ret = FALSE;
     pTemp = Common_SearchData(pData, dataLen, "OK", strlen("OK"));
@@ -180,7 +183,7 @@ static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint
 static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
-    ATTcpPrivate_Struct *pPrivate = (ATTcpPrivate_Struct *)pSocketCtrl->user_data;
+    ATTCPPrivate_Struct *pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
     CddNetMSocketPara_Union *pSocketPara = (CddNetMSocketPara_Union *)pSocketCtrl->specificPara;
     uint8_t *pTemp = NULL;
     uint8_t *pDest = NULL;
@@ -248,7 +251,7 @@ static uint8_t ATTCP_RecvClose(uint8_t socketIndex, void * socketPara, uint8_t *
 static uint8_t ATTCP_RecvQuery(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
-    ATTcpPrivate_Struct *pPrivate = (ATTcpPrivate_Struct *)pSocketCtrl->user_data;
+    ATTCPPrivate_Struct *pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
     char service_type[16], ip_address[64];     
     int32_t connectID, remote_port, local_port, socket_state, contextID, access_mode, serverID;        
     uint8_t *pTemp = Common_SearchData(pData, dataLen, "+QISTATE:", strlen("+QISTATE:"));
@@ -279,7 +282,7 @@ static uint8_t ATTCP_RecvQuery(uint8_t socketIndex, void * socketPara, uint8_t *
 static uint8_t ATTCP_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
-    ATTcpPrivate_Struct *pPrivate = (ATTcpPrivate_Struct *)pSocketCtrl->user_data;
+    ATTCPPrivate_Struct *pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
     uint8_t *pTemp = NULL;
     uint8_t ret = FALSE;
     pTemp = Common_SearchData(pData, dataLen, "OK", strlen("OK"));
@@ -313,7 +316,7 @@ static uint8_t ATTCP_FailHandle(uint8_t socketIndex, void * socketPara, uint8_t 
 static void ATTCP_SetSocketState(uint8_t socketIndex, void *socketPara, CddNetMSocketState_Enum eSocketState)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
-    ATTcpPrivate_Struct *pPrivate = (ATTcpPrivate_Struct *)pSocketCtrl->user_data;
+    ATTCPPrivate_Struct *pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
 
     if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
     {
@@ -364,7 +367,7 @@ static void ATTCP_PeriodDetectWriteData(CddDrvEG800AKSocketCtrl_Struct *pSocketC
 
 static void ATTCP_SocketStateMange(uint8_t socketIndex, CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl, CddNetMTcpPara_Struct *pTcpPara)
 {
-    ATTcpPrivate_Struct *pPrivate = (ATTcpPrivate_Struct *)pSocketCtrl->user_data;
+    ATTCPPrivate_Struct *pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
 
     if (pSocketCtrl->eSocketState == eCddNetMSocketState_Connecting)
     {
@@ -372,7 +375,6 @@ static void ATTCP_SocketStateMange(uint8_t socketIndex, CddDrvEG800AKSocketCtrl_
         {
             if (Common_JudgeTimeoutMs(pPrivate->waitTcpConnectOkTickStart, ATTCP_WAIT_IPOPEN_TIMEOUT))
             {
-                pPrivate->waitTcpConnectOkTickStart = Common_GetSystick();
                 ATTCP_CloseSocket(pSocketCtrl);
             }
             else if (Common_JudgeTimeoutMs(pPrivate->cycleDetectSocketStateTickStart, ATTCP_DECTECT_STATE_PERIOD))
@@ -437,13 +439,11 @@ static void ATTCP_SocketStateMange(uint8_t socketIndex, CddDrvEG800AKSocketCtrl_
     {}
 }
 
-
-
 void ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = NULL;
     CddDrvEG800AKCtrl_Struct *pModulePara = (CddDrvEG800AKCtrl_Struct *)modulePara;
-    ATTcpPrivate_Struct *pPrivate = NULL;
+    ATTCPPrivate_Struct *pPrivate = NULL;
     int32_t socketIndex = 0;
     int32_t connectState = 0;
     uint8_t *pTemp = NULL;
@@ -460,7 +460,7 @@ void ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
             if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
             {
                 pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
-                pPrivate = (ATTcpPrivate_Struct *)pSocketCtrl->user_data;
+                pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
 
                 if (connectState == 0)
                 {
@@ -530,7 +530,7 @@ void ATTCP_UrcRecv(uint8_t *pData, void * modulePara, uint16_t dataLen)
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = NULL;
     CddDrvEG800AKCtrl_Struct *pModulePara = (CddDrvEG800AKCtrl_Struct *)modulePara;
     int32_t socketIndex = 0;
-    ATTcpPrivate_Struct *pPrivate = NULL;
+    ATTCPPrivate_Struct *pPrivate = NULL;
     uint8_t *pTemp = NULL;
 
     if (NULL != (pTemp = Common_SearchData(pData, dataLen, "+QIURC: \"recv\"", strlen("+QIURC: \"recv\""))))
@@ -542,7 +542,7 @@ void ATTCP_UrcRecv(uint8_t *pData, void * modulePara, uint16_t dataLen)
             if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
             {
                 pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
-                pPrivate = (ATTcpPrivate_Struct *)pSocketCtrl->user_data;
+                pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
                 CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATTCPCmd_Read);
                 pPrivate->cycleReadTickStart = Common_GetSystick();
             }
@@ -553,7 +553,7 @@ void ATTCP_UrcRecv(uint8_t *pData, void * modulePara, uint16_t dataLen)
 void ATTCP_CloseSocket(void *socketCtrl)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketCtrl;
-    ATTcpPrivate_Struct *pPrivate = (ATTcpPrivate_Struct *)pSocketCtrl->user_data;
+    ATTCPPrivate_Struct *pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
 
     pPrivate->waitTcpConnectOkFlag = FALSE;
 

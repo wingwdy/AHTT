@@ -17,7 +17,7 @@
 #include "AT_Module.h"
 #include "AT_TCP.h"
 #include "AT_FTP.h"
-
+#include "AT_MQTT.h"
 /*******************************************************************************
 *    Header File Inclusion
 *******************************************************************************/
@@ -58,6 +58,9 @@ const CddDrvEG800AKSocketConfig_Struct c_stCddDrvEG800AKSocketConfigTable[eCddNe
     {
         .cmdTaskCount = eATModuleCmd_QueryCount,
         .pATCmdDescribtorTable = c_stModuleATCmdDescribtor,
+        .stateHandle = NULL,
+        .socketCloseHandle = NULL,
+        .recvTransparentData = NULL,
     },
 
     [eCddNetMSocketType_TCP] = 
@@ -66,6 +69,16 @@ const CddDrvEG800AKSocketConfig_Struct c_stCddDrvEG800AKSocketConfigTable[eCddNe
         .pATCmdDescribtorTable = c_stTCPATCmdDescribtor,
         .stateHandle = ATTCP_StateHandle,
         .socketCloseHandle = ATTCP_CloseSocket,
+        .recvTransparentData = NULL,
+    },
+
+    [eCddNetMSocketType_MQTT] = 
+    {
+        .cmdTaskCount = eATMQTTCmd_Count,
+        .pATCmdDescribtorTable = c_stMQTTATCmdDescribtor,
+        .stateHandle = ATMQTT_StateHandle,
+        .socketCloseHandle = ATMQTT_CloseSocket,
+        .recvTransparentData = NULL,
     },
 
     [eCddNetMSocketType_FTP] = 
