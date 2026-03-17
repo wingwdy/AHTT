@@ -13,7 +13,7 @@
 #include "bsp_LogUart.h"
 
 
-#define BOOT_LOADER_VER 				0x10000001 //v1.0.0.1 (GD芯片)
+#define BOOT_LOADER_VER 				0x10000002//v1.0.0.2 (GD芯片)
 
 uint32_t g_sec_test = 0;
 

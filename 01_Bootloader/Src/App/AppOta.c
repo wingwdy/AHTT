@@ -374,6 +374,12 @@ static uint8_t ota_head_check(uint8_t *pOtaData)
 	pOtaCtx->u32FileCs = fourUint8ToUint32(pOtaHead->cs32);
 	pOtaCtx->finalFrameLen = pOtaCtx->binFileLen%OTA_FRAME_SIZE;
 	pOtaCtx->tatolFrameCnt = (pOtaCtx->binFileLen+OTA_FRAME_SIZE-1) / OTA_FRAME_SIZE;
+
+	if (pOtaCtx->finalFrameLen == 0)
+	{
+		pOtaCtx->finalFrameLen = OTA_FRAME_SIZE;
+	}
+		
 //	pOtaCtx->tatolCopyCnt = (fourUint8ToUint32(pOtaHead->binFileLen)+OTA_FRAME_SIZE-1) / OTA_FRAME_SIZE;
 	
 	return SET;
