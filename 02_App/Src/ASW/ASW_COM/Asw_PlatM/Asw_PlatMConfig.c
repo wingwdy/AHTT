@@ -75,6 +75,8 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncTransformChargeRecord = IotYKC21_TransformChargeRecord,
         .pFuncSetToken = IotYKC21_SetToken,
         .pFuncSetCipherKey = IotYKC21_SetRsaPublicKey,
+        .pFuncGetToken = IotYKC21_GetToken,
+        .pFuncGetCipherKey = IotYKC21_GetRsaPublicKey,
     },
 
     [eAswPlatType_XDT] =
