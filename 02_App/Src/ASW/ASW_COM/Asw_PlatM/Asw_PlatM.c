@@ -100,6 +100,8 @@ void AswPlatM_PrintAllConfigInfo(void)
     const AswPlatCardDescriptor_Struct * pCardDescriptor = AswPlatM_GetCardDescriptor();
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
     MSNvmPlatParam_Struct *pParam = &g_stAswPlatMCtx.stPlatParam;
+    char tempStr[128 + 1] = { 0 };
+    uint8_t tempLen = 0;
 
     ASWPLATM_CFG_LogPrint("---------------------------------配置信息------------------------------------\r\n");
     ASWPLATM_CFG_LogPrint("平台编码：%s\r\n", pParam->platPileDn);
@@ -113,11 +115,48 @@ void AswPlatM_PrintAllConfigInfo(void)
     ASWPLATM_CFG_LogPrint("运营平台IP端口：%s, %d\r\n", pParam->platMainIp, pParam->platMainPort);
     ASWPLATM_CFG_LogPrint("运维平台IP端口：%s, %d\r\n", pParam->platAuxiliaryIp, pParam->platAuxiliaryPort);
 
-    if(0 == strcmp(pProtocolDescriptor->pName, "ykc2.1"))
+    if (pProtocolDescriptor->pFuncGetDevOperator != NULL )
     {
-        IotYKC21_PrintfYKC21KeyAndToken();
+        memset(tempStr, 0x00, sizeof(tempStr));
+        pProtocolDescriptor->pFuncGetDevOperator(tempStr, &tempLen);
+        ASWPLATM_CFG_LogPrint("设备运营商：%s\r\n", tempStr);
     }
 
+    if (pProtocolDescriptor->pFuncGetProductKey != NULL )
+    {
+        memset(tempStr, 0x00, sizeof(tempStr));
+        pProtocolDescriptor->pFuncGetProductKey(tempStr, &tempLen);
+        ASWPLATM_CFG_LogPrint("产品密钥：%s\r\n", tempStr);
+    }
+
+    if (pProtocolDescriptor->pFuncGetProductSecret != NULL )
+    {
+        memset(tempStr, 0x00, sizeof(tempStr));
+        pProtocolDescriptor->pFuncGetProductSecret(tempStr, &tempLen);
+        ASWPLATM_CFG_LogPrint("产品密码：%s\r\n", tempStr);
+    }
+
+    if (pProtocolDescriptor->pFuncGetToken != NULL )
+    {
+        memset(tempStr, 0x00, sizeof(tempStr));
+        pProtocolDescriptor->pFuncGetToken(tempStr, &tempLen);
+        ASWPLATM_CFG_LogPrint("Token：%s\r\n", tempStr);
+    }
+
+    if (pProtocolDescriptor->pFuncGetCipherKey != NULL )
+    {
+        memset(tempStr, 0x00, sizeof(tempStr));
+        pProtocolDescriptor->pFuncGetCipherKey(tempStr, &tempLen);
+        ASWPLATM_CFG_LogPrint("加密密钥：%s\r\n", tempStr);
+    }
+
+    if (pProtocolDescriptor->pFuncGetIv != NULL )
+    {
+        memset(tempStr, 0x00, sizeof(tempStr));
+        pProtocolDescriptor->pFuncGetIv(tempStr, &tempLen);
+        ASWPLATM_CFG_LogPrint("初始向量：%s\r\n", tempStr);
+    }
+    
     ASWPLATM_CFG_LogPrint("----------------------------------------------------------------------------\r\n");
 }
 
@@ -289,42 +328,6 @@ uint8_t AswPlatM_SetPlatType(char *platName)
 
     return ret;
 }
-uint8_t AswPlatM_Setykc21key(char *pykc21key, uint8_t len) 
-{
-    //128位密钥
-    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
-    uint8_t ret = FALSE;
-
-    if (currentPlatType == eAswPlatType_YKC21)
-    {
-        if (len <= MSNVM_YKC21_RSA_PUBLIC_KEY_LEN)
-        {
-            IotYKC21_RfreshYKC21key(pykc21key,len);
-            ret = TRUE;
-        }
-    }
-
-    return ret;
-}
-
-uint8_t AswPlatM_Setykc21token(char *pykc21token, uint8_t len)
-{
-    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
-    uint8_t ret = FALSE;
-
-    if (currentPlatType != eAswPlatType_YKC21)
-    {
-        return ret;
-    }
-
-    if (len <= MSNVM_YKC21_TOKEN_LEN)
-    {
-        IotYKC21_RfreshYKC21token(pykc21token,len);
-        ret = TRUE;
-    }
-
-    return ret;
-}
 
 uint8_t AswPlatM_SetPlatCardType(char *platCardName)
 {
@@ -349,23 +352,6 @@ uint8_t AswPlatM_SetPlatCardType(char *platCardName)
 
             ret = TRUE;
             break;
-        }
-    }
-
-    return ret;
-}
-
-uint8_t AswPlatM_SetDevOperator(char *devOperator)
-{
-    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
-    uint8_t ret = FALSE;
-
-    if (devOperator != NULL)
-    {
-        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetDevOperator != NULL)
-        {
-            c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetDevOperator(devOperator);
-            ret = TRUE;
         }
     }
 
@@ -438,6 +424,199 @@ MSNvmPlatParam_Struct * AswPlatM_GetPlatParamPtr(void)
 MSNvmPlatPrivateParam_Union *AswPlatM_GetPlatPrivateParamPtr(void)
 {
     return &g_stAswPlatMCtx.stPrivateParam;
+}
+
+uint8_t AswPlatM_SetDevOperator(char *devOperator, uint8_t len)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (devOperator != NULL)
+    {
+        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetDevOperator != NULL)
+        {
+            c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetDevOperator(devOperator, len);
+            ret = TRUE;
+        }
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_GetDevOperator(char *pDevOperator, uint8_t *pOutLen) 
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (pDevOperator != NULL && pOutLen != NULL)
+    {
+        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncGetDevOperator != NULL)
+        {
+            ret = c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncGetDevOperator(pDevOperator, pOutLen);
+        }
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_SetProductKey(char *pkey, uint8_t len)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (pkey != NULL)
+    {
+        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetProductKey != NULL)
+        {
+            ret = c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetProductKey(pkey, len);
+        }
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_GetProductKey(char *pKey, uint8_t *pOutLen)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (pKey != NULL && pOutLen != NULL)
+    {
+        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncGetProductKey != NULL)
+        {
+            ret = c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncGetProductKey(pKey, pOutLen);
+        }
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_SetProductSecret(char *pSecret, uint8_t len)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (pSecret != NULL)
+    {
+        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetProductSecret != NULL)
+        {
+            ret = c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetProductSecret(pSecret, len);
+        }
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_GetProductSecret(char *pSecret, uint8_t *pOutLen)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (pSecret != NULL && pOutLen != NULL)
+    {
+        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncGetProductSecret != NULL)
+        {
+            ret = c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncGetProductSecret(pSecret, pOutLen);
+        }
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_SetToken(char *pToken, uint8_t len)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (pToken != NULL)
+    {
+        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetToken != NULL)
+        {
+            ret = c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetToken(pToken, len);
+        }
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_GetToken(char *pToken, uint8_t *pOutLen)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (pToken != NULL && pOutLen != NULL)
+    {
+        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncGetToken != NULL)
+        {
+            ret = c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncGetToken(pToken, pOutLen);
+        }
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_SetCipherKey(char *pkey, uint8_t len)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (pkey != NULL)
+    {
+        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetCipherKey != NULL)
+        {
+            ret = c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetCipherKey(pkey, len);
+        }
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_GetCipherKey(char *pKey, uint8_t *pOutLen)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (pKey != NULL && pOutLen != NULL)
+    {
+        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncGetCipherKey != NULL)
+        {
+            ret = c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncGetCipherKey(pKey, pOutLen);
+        }
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_SetIv(char *pIv, uint8_t len)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (pIv != NULL)
+    {
+        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetIv != NULL)
+        {
+            ret = c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetIv(pIv, len);
+        }
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_GetIv(char *pIv, uint8_t *pOutLen)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (pIv != NULL && pOutLen != NULL)
+    {
+        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncGetIv != NULL)
+        {
+            ret = c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncGetIv(pIv, pOutLen);
+        }
+    }
+
+    return ret;
 }
 
 void AswPlatM_DefaultPlatParam(void *param)
@@ -525,12 +704,12 @@ void AswPlatM_InitMemory(void)
 }
 
 void AswPlatM_MainFunction(void)
-{  
+{
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
     const AswPlatMProtocolDescriptor_Struct *pOMProtocolDescriptor = AswPlatM_GetOMProtocolDescriptor();
 
     if (TRUE != CddModeM_IsFactoryMode())
-    { 
+    {
         if (pProtocolDescriptor->pMainFunction != NULL)
         {
             pProtocolDescriptor->pMainFunction();
@@ -542,4 +721,6 @@ void AswPlatM_MainFunction(void)
         pOMProtocolDescriptor->pMainFunction();
     }
 }
+
+
 

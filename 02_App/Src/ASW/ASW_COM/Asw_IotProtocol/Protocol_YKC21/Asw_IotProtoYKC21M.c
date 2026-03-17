@@ -794,37 +794,54 @@ uint8_t IotYKC21_SwipCardCharge(uint8_t port)
     return ret;
 }
  
- /*更新密钥或token*/
-uint8_t IotYKC21_RfreshYKC21key(char *YKC21key, uint16_t YKC21key_len)
+uint8_t IotYKC21_SetRsaPublicKey(char *pCipherKey, uint8_t len)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    uint8_t ret = FALSE;
 
-    IOTYKC21_CFG_LogPrint("ykc2.1平台RSA密钥长度变化：[\"%d\"]-->[\"%d\"]\r\n", pPlatInfo->rsa_Keylength, YKC21key_len);
-    IOTYKC21_CFG_LogPrint("ykc2.1平台RSA密钥变化：[\"%.128s\"]-->[\"%s\"]\r\n", pPlatInfo->rsa_Key, YKC21key);
-    pPlatInfo->rsa_Keylength = YKC21key_len;
-    memset(pPlatInfo->rsa_Key,0,128);
-    memcpy(pPlatInfo->rsa_Key,YKC21key,pPlatInfo->rsa_Keylength);
+    if (len <= MSNVM_YKC21_RSA_PUBLIC_KEY_LEN)
+    {
+        if ((len != pPlatInfo->rsa_Keylength) || memcmp(pCipherKey, pPlatInfo->rsa_Key, len) != 0)
+        {
+            IOTYKC21_CFG_LogPrint("ykc2.1平台RSA公钥变化：[%.128s]-->[%s]\r\n", pPlatInfo->rsa_Key, pCipherKey);
+            memset(pPlatInfo->rsa_Key, 0, MSNVM_YKC21_RSA_PUBLIC_KEY_LEN);
+            memcpy(pPlatInfo->rsa_Key, pCipherKey, len);
+            pPlatInfo->rsa_Keylength = len;
+            MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+        }
 
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+        ret = TRUE;
+    }
 
-    return TRUE;
+    return ret;
 }
 
-
-uint8_t IotYKC21_RfreshYKC21token(char *YKC21token,uint16_t YKC21token_len)
+uint8_t IotYKC21_SetToken(char *pToken, uint8_t len)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
-   
-    IOTYKC21_CFG_LogPrint("ykc2.1平台token变化：[\"%s\"]-->[\"%s\"]\r\n", pPlatInfo->token, YKC21token);
-    memset(pPlatInfo->token, 0, 14);
-    memcpy(pPlatInfo->token, YKC21token, YKC21token_len); 
+    uint8_t ret = FALSE;
 
-    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
- 
-    return TRUE;
+    if (len <= MSNVM_YKC21_TOKEN_LEN)
+    {
+        if ((len != pPlatInfo->tokenLen) || memcmp(pToken, pPlatInfo->token, len) != 0)
+        {
+            IOTYKC21_CFG_LogPrint("ykc2.1平台token变化：[%s]-->[%s]\r\n", pPlatInfo->token, pToken);
+            memset(pPlatInfo->token, 0, MSNVM_YKC21_TOKEN_LEN);
+            memcpy(pPlatInfo->token, pToken, len);
+            pPlatInfo->tokenLen = len;
+            MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+        }
+
+        ret = TRUE;
+    }
+
+    return ret;
 }
+
+
+
 
 void IotYKC21_PrintfYKC21KeyAndToken(void)
 {
@@ -947,6 +964,38 @@ void IotYKC21_MainFunction(void)
             pIotYKC21Ctx->eWorkState = eIOTYKC21WorkState_Init;
         }
     }
+}
+
+uint8_t IotYKC21_GetRsaPublicKey(char *pKey, uint8_t *pOutLen)
+{
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    uint8_t ret = FALSE;
+
+    if (pKey != NULL && pOutLen != NULL)
+    {
+        memcpy(pKey, pPlatInfo->rsa_Key, pPlatInfo->rsa_Keylength);
+        *pOutLen = pPlatInfo->rsa_Keylength;
+        ret = TRUE;
+    }
+
+    return ret;
+}
+
+uint8_t IotYKC21_GetToken(char *pToken, uint8_t *pOutLen)
+{
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    uint8_t ret = FALSE;
+
+    if (pToken != NULL && pOutLen != NULL)
+    {
+        memcpy(pToken, pPlatInfo->token, pPlatInfo->tokenLen);
+        *pOutLen = pPlatInfo->tokenLen;
+        ret = TRUE;
+    }
+
+    return ret;
 }
 
 

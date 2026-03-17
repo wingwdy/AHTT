@@ -63,7 +63,7 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
 
     [eAswPlatType_YKC21] =
     {
-       .pName = "ykc2.1",
+        .pName = "ykc2.1",
         .cProtoMeaning = "云快充2.1",
         .eSocketType = eCddNetMSocketType_TCP,
         .pFuncFillLinkPara = IotYKC21_FillLinkPara,
@@ -73,6 +73,8 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncPackChargeRecord = IotYKC21_PackChargeRecord,
         .pFuncSwipCardCharge = IotYKC21_SwipCardCharge,
         .pFuncTransformChargeRecord = IotYKC21_TransformChargeRecord,
+        .pFuncSetToken = IotYKC21_SetToken,
+        .pFuncSetCipherKey = IotYKC21_SetRsaPublicKey,
     },
 
     [eAswPlatType_XDT] =

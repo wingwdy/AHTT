@@ -81,8 +81,18 @@ void AswPlatM_MainFunction(void);
 void AswPlatM_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason);
 void AswPlatM_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pBillMode);
 
-uint8_t AswPlatM_Setykc21key(char *pykc21key, uint8_t len);
-uint8_t AswPlatM_Setykc21token(char *pykc21key, uint8_t len);
+uint8_t AswPlatM_SetDevOperator(char *devOperator, uint8_t len);
+uint8_t AswPlatM_GetDevOperator(char *pDevOperator, uint8_t *pOutLen);
+uint8_t AswPlatM_SetProductKey(char *pkey, uint8_t len);
+uint8_t AswPlatM_GetProductKey(char *pKey, uint8_t *pOutLen);
+uint8_t AswPlatM_SetProductSecret(char *pSecret, uint8_t len);
+uint8_t AswPlatM_GetProductSecret(char *pSecret, uint8_t *pOutLen);
+uint8_t AswPlatM_SetToken(char *pToken, uint8_t len);
+uint8_t AswPlatM_GetToken(char *pToken, uint8_t *pOutLen);
+uint8_t AswPlatM_SetCipherKey(char *pkey, uint8_t len);
+uint8_t AswPlatM_GetCipherKey(char *pKey, uint8_t *pOutLen);
+uint8_t AswPlatM_SetIv(char *pIv, uint8_t len);
+uint8_t AswPlatM_GetIv(char *pIv, uint8_t *pOutLen);
 #endif
 
 

@@ -326,29 +326,26 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
             else
             {}
         }
-
-        /* 设置YKC21密钥 */
-        else if (0 == strcmp(argv[1], "ykc21key"))
+        else if (0 == strcmp(argv[1], "cipherKey"))
         {
-            if (TRUE == AswPlatM_Setykc21key(argv[2], strlen(argv[2])))
+            if (TRUE == AswPlatM_SetCipherKey(argv[2], strlen(argv[2])))
             {
-                DSCONSOLE_CFG_LogPrint("Set ykc21key \"%s\" ok!\r\n", argv[2]);
+                DSCONSOLE_CFG_LogPrint("Set cipherKey \"%s\" ok!\r\n", argv[2]);
             }
             else
             {
-                DSCONSOLE_CFG_LogPrint("Set ykc21key failed! error plat or len > 128\r\n");
+                DSCONSOLE_CFG_LogPrint("Set cipherKey failed!\r\n");
             }
         }
-        /* 设置YKC21token  */
-        else if (0 == strcmp(argv[1], "ykc21token"))
+        else if (0 == strcmp(argv[1], "token"))
         {
-            if (TRUE == AswPlatM_Setykc21token(argv[2], strlen(argv[2])))
+            if (TRUE == AswPlatM_SetToken(argv[2], strlen(argv[2])))
             {
-                DSCONSOLE_CFG_LogPrint("Set ykc21token \"%s\" ok!\r\n", argv[2]);
+                DSCONSOLE_CFG_LogPrint("Set token \"%s\" ok!\r\n", argv[2]);
             }
             else
             {
-                DSCONSOLE_CFG_LogPrint("Set ykc21token failed! erroplat or len > 14\r\n");
+                DSCONSOLE_CFG_LogPrint("Set token failed!\r\n");
             }
         }
         else if (0 == strcmp(argv[1], "mntr"))

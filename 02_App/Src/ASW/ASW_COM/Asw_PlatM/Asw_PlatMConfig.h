@@ -49,24 +49,18 @@ typedef struct
     uint8_t (*pFuncSwipCardCharge)(uint8_t port);
     void (*pFuncTransformChargeRecord)(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t *pProtocolRecord, uint16_t *pRecordLen);
 
-    uint8_t (*pFuncSetDevOperator)(char *pDevOperator);
-    uint8_t (*pFuncGetDevOperatorPwd)(char *pDevOperator, uint8_t *pOutLen);
-
-    uint8_t (*pFuncSetProductKey)(char *pkey);
+    uint8_t (*pFuncSetDevOperator)(char *pDevOperator, uint8_t len);
+    uint8_t (*pFuncGetDevOperator)(char *pDevOperator, uint8_t *pOutLen);
+    uint8_t (*pFuncSetProductKey)(char *pkey, uint8_t len);
     uint8_t (*pFuncGetProductKey)(char *pKey, uint8_t *pOutLen);
-    
-    uint8_t (*pFuncSetProductSecret)(char *pSecret);
+    uint8_t (*pFuncSetProductSecret)(char *pSecret, uint8_t len);
     uint8_t (*pFuncGetProductSecret)(char *pSecret, uint8_t *pOutLen);
-    
-    uint8_t (*pFuncSetToken)(char *pToken);
+    uint8_t (*pFuncSetToken)(char *pToken, uint8_t len); 
     uint8_t (*pFuncGetToken)(char *pToken, uint8_t *pOutLen);
-
-    uint8_t (*pFuncSetCipherKey)(char *pkey);
+    uint8_t (*pFuncSetCipherKey)(char *pkey, uint8_t len);
     uint8_t (*pFuncGetCipherKey)(char *pKey, uint8_t *pOutLen);
-
-    uint8_t (*pFuncSetIv)(char *pIv);
+    uint8_t (*pFuncSetIv)(char *pIv, uint8_t len);
     uint8_t (*pFuncGetIv)(char *pIv, uint8_t *pOutLen);
-
 }AswPlatMProtocolDescriptor_Struct;
 
 

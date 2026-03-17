@@ -139,12 +139,13 @@ void IotYKC21_MainFunction(void);
 void IotYKC21_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardBillMode);
 void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason);
 uint8_t IotYKC21_SwipCardCharge(uint8_t port);
-uint8_t IotYKC21_RfreshYKC21key(char *YKC21key, uint16_t YKC21key_len);
-uint8_t IotYKC21_RfreshYKC21token(char *YKC21token,uint16_t YKC21token_len);
 void IotYKC21_PrintfYKC21KeyAndToken(void);
-void IotYkc21_powercontrol(uint8_t port,uint16_t power);
 void IotYKC21_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t *pProtocolRecord, uint16_t *pRecordLen);
 
+uint8_t IotYKC21_SetToken(char *pToken, uint8_t len);
+uint8_t IotYKC21_GetToken(char *pToken, uint8_t *pOutLen);
+uint8_t IotYKC21_SetRsaPublicKey(char *pCipherKey, uint8_t len);
+uint8_t IotYKC21_GetRsaPublicKey(char *pKey, uint8_t *pOutLen);
 /* 内部适用 */
 uint8_t IotYKC21_GetGunState(uint8_t port);
 void IotYKC21_OfflineHandle(void);
