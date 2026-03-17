@@ -107,7 +107,8 @@ static void CddMeterM_PeriodCalcEnergy(uint8_t port, CddMeterM_Struct *pstMeterM
                         saveFlag = TRUE;
                     }
                     
-                    if (Common_JudgeTimeoutMs(pstMeterM->periodSaveTick, CDD_METERM_CFG_ENERGY_SAVE_PERIOD))
+                    if (Common_JudgeTimeoutMs(pstMeterM->periodSaveTick, CDD_METERM_CFG_ENERGY_SAVE_PERIOD) && 
+                        (deltaEnergy >= CDD_METERM_CFG_ENERGY_MIN_SAVE_VALUE))
                     {
                         saveFlag = TRUE;
                     }

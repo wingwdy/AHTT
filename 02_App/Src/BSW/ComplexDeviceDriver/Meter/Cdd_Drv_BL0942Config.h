@@ -36,11 +36,11 @@
 #define CDDDRV_BL0942_CFG_HEAD_WRITE                (0xA8u)  
 #define CDDDRV_BL0942_CFG_HEAD_READ                 (0x58u)
 
-#define CDDDRV_BL0942_CFG_VOLTAGE_K                 (7595U)     
-#define CDDDRV_BL0942_CFG_CURRENT_K                 (188410U)     
-#define CDDDRV_BL0942_CFG_POWER_K                   (224.8723)    
+#define CDDDRV_BL0942_CFG_VOLTAGE_K                 (7638U)     
+#define CDDDRV_BL0942_CFG_CURRENT_K                 (129378U)     
+#define CDDDRV_BL0942_CFG_POWER_K                   (153.51)    
 
-#define CDDDRV_BL0942_CFG_PULSE_CONSTANT            (1930U)
+#define CDDDRV_BL0942_CFG_PULSE_CONSTANT            (1312U)
 
 #define CDDDRV_BL0942_CFG_MAX_TIMES                 (20U)
 

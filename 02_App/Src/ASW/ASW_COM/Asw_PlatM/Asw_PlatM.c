@@ -104,7 +104,7 @@ void AswPlatM_PrintAllConfigInfo(void)
     ASWPLATM_CFG_LogPrint("---------------------------------配置信息------------------------------------\r\n");
     ASWPLATM_CFG_LogPrint("平台编码：%s\r\n", pParam->platPileDn);
     ASWPLATM_CFG_LogPrint("资产编码：%s\r\n", pParam->fixPileDn);
-    ASWPLATM_CFG_LogPrint("软件版本：%s(%s)\r\n", APP_SW_VERSION_STRING, APP_SW_VERSION_TYPE);
+    ASWPLATM_CFG_LogPrint("软件版本：(%s) %s_%s\r\n", APP_SW_VERSION_TYPE, APP_SW_VERSION_STRING, APP_SW_VERSION_DATE);
     ASWPLATM_CFG_LogPrint("硬件信息：%s\r\n", HW_VERSION_INFO);
     ASWPLATM_CFG_LogPrint("是否厂内模式：%s\r\n", (TRUE == CddModeM_IsFactoryMode()) ? "是" : "否");
     ASWPLATM_CFG_LogPrint("是否国标模式：%s\r\n", (TRUE == CddModeM_IsGBMode()) ? "是" : "否");

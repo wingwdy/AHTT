@@ -37,6 +37,8 @@
 
 #define CDD_METERM_CFG_ENERGY_IMMEDIATE_SAVE_VALUE  (400)      /* 0.04度，立即存储 */
 
+#define CDD_METERM_CFG_ENERGY_MIN_SAVE_VALUE        (10)       /* 0.001度，周期存储的最小电量 */
+
 #define CDD_METERM_CFG_ENERGY_ABNORMAL_VALUE        (10000)      /* 1度 */
 
 #define CDD_METERM_CFG_ENERGY_PERIOD                (1000U)
