@@ -436,7 +436,7 @@ static uint8_t IotYKC21_ReportCycleCheck(uint8_t port, uint32_t cmd, uint32_t	se
 static uint16_t IotYKC21_SendLoginReq(uint8_t port, uint8_t *pBuf)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
     uint8_t cSimID[20] = {0};
     uint16_t dataLen = 0;
     CddNetMOperator_Enum eOperator = CddNetM_GetOperatorType();

@@ -188,6 +188,27 @@ uint8_t AswPlatM_SetPlatMainIpPort(char *pIp, uint8_t ipLen, uint16_t port)
     return ret;
 }
 
+uint8_t AswPlatM_SetPlatMainIp(char *pIp, uint8_t ipLen)
+{
+    uint8_t ret = FALSE;
+
+    if (ipLen < CDD_NETM_CFG_IP_LEN)
+    {
+        if (strcmp(pIp, g_stAswPlatMCtx.stPlatParam.platMainIp) != 0)
+        {
+            ASWPLATM_CFG_LogPrint("运营平台IP变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platMainIp, pIp);
+
+            memset(g_stAswPlatMCtx.stPlatParam.platMainIp, 0x00, CDD_NETM_CFG_IP_LEN);
+            memcpy(g_stAswPlatMCtx.stPlatParam.platMainIp, pIp, ipLen);
+            MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));            
+        }
+
+        ret = TRUE;
+    }
+
+    return ret;
+}
+
 uint8_t AswPlatM_SetPlatMainPort(uint16_t port)
 {
     if (g_stAswPlatMCtx.stPlatParam.platMainPort != port)
@@ -271,12 +292,12 @@ uint8_t AswPlatM_SetPlatType(char *platName)
 uint8_t AswPlatM_Setykc21key(char *pykc21key, uint8_t len) 
 {
     //128位密钥
-   uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
-   uint8_t ret = FALSE;
- 
-   if (currentPlatType == eAswPlatType_YKC21)
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (currentPlatType == eAswPlatType_YKC21)
     {
-        if (len <= MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN)
+        if (len <= MSNVM_YKC21_RSA_PUBLIC_KEY_LEN)
         {
             IotYKC21_RfreshYKC21key(pykc21key,len);
             ret = TRUE;
@@ -288,15 +309,15 @@ uint8_t AswPlatM_Setykc21key(char *pykc21key, uint8_t len)
 
 uint8_t AswPlatM_Setykc21token(char *pykc21token, uint8_t len)
 {
-uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
-   uint8_t ret = FALSE;
- 
-   if (currentPlatType != eAswPlatType_YKC21)
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (currentPlatType != eAswPlatType_YKC21)
     {
-         return ret;
+        return ret;
     }
 
-    if (len <= MSNVM_PLAT_YKC21_TOKEN_LEN)
+    if (len <= MSNVM_YKC21_TOKEN_LEN)
     {
         IotYKC21_RfreshYKC21token(pykc21token,len);
         ret = TRUE;
@@ -328,6 +349,23 @@ uint8_t AswPlatM_SetPlatCardType(char *platCardName)
 
             ret = TRUE;
             break;
+        }
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_SetDevOperator(char *devOperator)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (devOperator != NULL)
+    {
+        if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetDevOperator != NULL)
+        {
+            c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetDevOperator(devOperator);
+            ret = TRUE;
         }
     }
 

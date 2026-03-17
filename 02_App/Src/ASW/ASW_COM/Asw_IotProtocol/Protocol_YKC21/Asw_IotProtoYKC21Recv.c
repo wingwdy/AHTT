@@ -340,7 +340,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .pRecvParse = IotYKC21_RecvSetFTP,
         .maxTimeout = 0,
         .maxTryCnt = 1,
-        .matchCmd = IOT_YKC21_CMD_REBOOT_RSP,
+        .matchCmd = IOT_YKC21_CMD_SET_FTP_RSP,
         .printFlag = TRUE,
         .cMeaning = "平台设远程升级程序",
     },
@@ -546,7 +546,7 @@ static void IotYKC21_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
 static uint8_t IotYKC21_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
 
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
@@ -559,7 +559,7 @@ static uint8_t IotYKC21_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t le
 
         /* 更新Rsa参数 */
         revRsakeylen = pRecvData[index + 1];
-        pPlatInfo->rsa_Keylength = revRsakeylen > MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN ? MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN : revRsakeylen;
+        pPlatInfo->rsa_Keylength = revRsakeylen > MSNVM_YKC21_RSA_PUBLIC_KEY_LEN ? MSNVM_YKC21_RSA_PUBLIC_KEY_LEN : revRsakeylen;
         memcpy(&pPlatInfo->rsa_Key, &pRecvData[index + 2], pPlatInfo->rsa_Keylength);
 
         Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, gunNo, IOT_YKC21_CMD_HEARTBEAT_REQ, TRUE);
@@ -879,7 +879,7 @@ static uint8_t IotYKC21_RecvSetParam(uint8_t *port, uint8_t *r_data, uint16_t le
 static uint8_t IotYKC21_RecvSetDefaultMaxPower(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
     uint8_t index = 7;
     uint16_t tempMaxDefaultPower = 0;
     uint32_t tempDefaultPowerStartTimeStamp = 0;
@@ -979,7 +979,7 @@ static uint8_t IotYKC21_CheckChargeStart(uint8_t port, uint8_t *pFailReason)
 static uint8_t IotYKC21_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
     AswMonitorChargeCtrl_Struct *pChargeCtrl = NULL;
     uint8_t index = 0;
     uint8_t *pRecvData = r_data;
@@ -1070,7 +1070,7 @@ static uint8_t IotYKC21_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, ui
 static uint8_t IotYKC21_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
     AswMonitorChargeCtrl_Struct *pChargeCtrl = NULL;
     uint8_t index = 0;
     uint8_t *pRecvData = r_data;
@@ -1165,7 +1165,7 @@ static uint8_t IotYKC21_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, u
 static uint8_t IotYKC21_RecvSetKey(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
     uint8_t index = 7;
     uint8_t *pRecvData = r_data;
     uint8_t refreshFlag = TRUE;
@@ -1182,7 +1182,7 @@ static uint8_t IotYKC21_RecvSetKey(uint8_t *port, uint8_t *r_data, uint16_t len)
     /* 执行控制 */
     excuteCtrl = pRecvData[index];
 
-    if (keyLen <= MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN)
+    if (keyLen <= MSNVM_YKC21_RSA_PUBLIC_KEY_LEN)
     {
         /* 空闲执行 */
         if (excuteCtrl == 0x02)
@@ -1198,7 +1198,7 @@ static uint8_t IotYKC21_RecvSetKey(uint8_t *port, uint8_t *r_data, uint16_t len)
         }
 
         pPlatInfo->rsa_Keylength = keyLen;
-        memset(pPlatInfo->rsa_Key, 0, MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN);
+        memset(pPlatInfo->rsa_Key, 0, MSNVM_YKC21_RSA_PUBLIC_KEY_LEN);
         memcpy(pPlatInfo->rsa_Key, pKey, pPlatInfo->rsa_Keylength);
         IotYKC21_PrintfYKC21KeyAndToken();
         MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));

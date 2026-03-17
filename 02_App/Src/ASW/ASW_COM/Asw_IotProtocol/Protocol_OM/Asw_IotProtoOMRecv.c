@@ -21,6 +21,7 @@
 #include "FrameQueue.h"
 #include "Asw_Monitor.h"
 #include "SS_Ucm.h"
+#include "Asw_PlatM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -513,6 +514,7 @@ static uint8_t IotOM_RecvRemoteSetParam(uint8_t *r_data, uint16_t len)
     uint8_t paramIndex = 0;
     uint8_t key[17] = {0}; 
     uint8_t valueLen = 0;
+    uint8_t handleResult = TRUE;
 
     /* 设置参数个数 */
     paramCount = pRecvData[dataIndex++];
@@ -532,19 +534,19 @@ static uint8_t IotOM_RecvRemoteSetParam(uint8_t *r_data, uint16_t len)
             /* 根据key处理设置逻辑 */
             if (strcmp((const char *)key, "platDn") == 0)
             {
-
+                AswPlatM_SetPileDn((char *)&pRecvData[dataIndex], valueLen);
             }
             else if (strcmp((const char *)key, "platType") == 0)
             {
-
+                AswPlatM_SetPlatType((char *)&pRecvData[dataIndex]);
             }
             else if (strcmp((const char *)key, "ipAddr") == 0)
             {
-   
+                AswPlatM_SetPlatMainIp((char *)&pRecvData[dataIndex], valueLen);
             }
             else if (strcmp((const char *)key, "port") == 0)
             {
-  
+                AswPlatM_SetPlatMainPort(*(uint16_t *)&pRecvData[dataIndex]);
             }
             else if (strcmp((const char *)key, "cardType") == 0)
             {

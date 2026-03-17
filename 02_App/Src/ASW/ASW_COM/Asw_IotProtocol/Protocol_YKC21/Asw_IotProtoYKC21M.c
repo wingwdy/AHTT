@@ -60,47 +60,47 @@ const char Default_TokenStr[] = {"54260225221003"};
 static const IotYKC21errMap_Struct Iot_Ykc21Error_map[] = 
 {
     {eErr_CpVoltAbnor,        eIotYKC21ErrorState_Pile,	0x0324}, 
-    {eErr_CpGroundFault,      eIotYKC21ErrorState_Pile,	0x0440},
+    {eErr_CpGroundFault,      eIotYKC21ErrorState_Other,0x0444},
     {eErr_PEBreakFault,       eIotYKC21ErrorState_Pile,	0x02E2},
     {eErr_EmergencyStop,      eIotYKC21ErrorState_Pile,	0x02C3},
-    {eErr_InputLineReversed,  eIotYKC21ErrorState_Pile,	0x0441},
+    {eErr_InputLineReversed,  eIotYKC21ErrorState_Other,0x0443},
     {eErr_LeakageCurrErr,     eIotYKC21ErrorState_Pile,	0x031E},
-    {eErr_ShortCircleErr,     eIotYKC21ErrorState_Pile,	0x0313},
+    {eErr_ShortCircleErr,     eIotYKC21ErrorState_Pile,	0x02DA},
     {eErr_RCDSelfcheckErr,    eIotYKC21ErrorState_Pile, 0x031E}, 
-    {eErr_AphaseInputOverVol, eIotYKC21ErrorState_Pile,	0x02DE},
+    {eErr_AphaseInputOverVol, eIotYKC21ErrorState_Pile,	0x0302},
 
-    {eErr_AphaseInputLessVol, eIotYKC21ErrorState_Pile,	0x02DE},
+    {eErr_AphaseInputLessVol, eIotYKC21ErrorState_Pile,	0x0304},
 
     {eErr_OutputOverCurr,     eIotYKC21ErrorState_Pile,	0x0303},
     {eErr_JcqMaloperation,    eIotYKC21ErrorState_Pile,	0x0326},
     {eErr_JcqSynechiaFault,   eIotYKC21ErrorState_Pile,	0x02C8},
-    {eErr_HmiCommErr,         eIotYKC21ErrorState_Pile,	0x0332},
+    {eErr_HmiCommErr,         eIotYKC21ErrorState_Pile,	0x030C},
 	{eErr_ReaderCommErr,      eIotYKC21ErrorState_Pile,	0x02C5},
 
     {eErr_MeterCommErr,   	  eIotYKC21ErrorState_Pile,	0x02C6},  
     {eErr_EnvOverTempErr,     eIotYKC21ErrorState_Pile,	0x02C9},
-    {eErr_GunOverTempErr,     eIotYKC21ErrorState_Pile,	0x02C9},
-    {eErr_POverTempErr,       eIotYKC21ErrorState_Pile,	0x02CA},
-    {eErr_DatabaseErr,        eIotYKC21ErrorState_Other,0x0440},             
+    {eErr_GunOverTempErr,     eIotYKC21ErrorState_Pile,	0x02CA},
+    {eErr_POverTempErr,       eIotYKC21ErrorState_Other,0x0442},
+    {eErr_DatabaseErr,        eIotYKC21ErrorState_Other,0x0441},
     {eErr_MeterCalcErr,   	  eIotYKC21ErrorState_Pile,	0x02C7},  
-    {eErr_ChgStartTimeout,    eIotYKC21ErrorState_Pile,	0x0003},
-    {eErr_DiodeStop,      	  eIotYKC21ErrorState_Pile,	0x02DA},
+    {eErr_ChgStartTimeout,    eIotYKC21ErrorState_Pile,	0x02D6},
+    {eErr_DiodeStop,      	  eIotYKC21ErrorState_Other,0x0440},
  
-    {eSrc_LittleCurr,         eIotYKC21ErrorState_Null,	0x0441},
-    {eSrc_S2BreakOff,         eIotYKC21ErrorState_Null,	0x0442},
-    {eSrc_AppStop,      	  eIotYKC21ErrorState_Null,	0x0443},
-    {eSrc_MannulStop,         eIotYKC21ErrorState_Null,	0x0444},
-    {eSrc_CardStop,      	  eIotYKC21ErrorState_Null,	0x0445},
-    {eSrc_InsuffBalance,      eIotYKC21ErrorState_Null,	0x0446},
-    {eSrc_StopbyMoney,        eIotYKC21ErrorState_Null,	0x0447},
-    {eSrc_StopbyTime,         eIotYKC21ErrorState_Null,	0x0448},
-    {eSrc_StopbyEnergy,       eIotYKC21ErrorState_Null,	0x0449},
-    {eErr_GunDisConn,         eIotYKC21ErrorState_Null,	0x044A},
+    {eSrc_LittleCurr,         eIotYKC21ErrorState_Null,	0x0},
+    {eSrc_S2BreakOff,         eIotYKC21ErrorState_Null,	0x0},
+    {eSrc_AppStop,      	  eIotYKC21ErrorState_Null,	0x0},
+    {eSrc_MannulStop,         eIotYKC21ErrorState_Null,	0x0},
+    {eSrc_CardStop,      	  eIotYKC21ErrorState_Null,	0x0},
+    {eSrc_InsuffBalance,      eIotYKC21ErrorState_Null,	0x0},
+    {eSrc_StopbyMoney,        eIotYKC21ErrorState_Null,	0x0},
+    {eSrc_StopbyTime,         eIotYKC21ErrorState_Null,	0x0},
+    {eSrc_StopbyEnergy,       eIotYKC21ErrorState_Null,	0x0},
+    {eErr_GunDisConn,         eIotYKC21ErrorState_Null,	0x0},
    
-    {eErr_CPBreakOff,         eIotYKC21ErrorState_Pile,	0x0440 },
+    {eErr_CPBreakOff,         eIotYKC21ErrorState_Null,	0x0},
 
-    {eErr_NetNoSIMErr,        eIotYKC21ErrorState_Pile,	0x02E8 },  
-    {eErr_PlatformOffline,    eIotYKC21ErrorState_Plat,	0x01B4 },
+    {eErr_NetNoSIMErr,        eIotYKC21ErrorState_Null,	0x0},  
+    {eErr_PlatformOffline,    eIotYKC21ErrorState_Null,	0x0},
 
 };
 
@@ -344,7 +344,7 @@ static void IotYKC21_UpError(void)
 static void IotYKC21_DetectPowerLimit(void)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
     uint32_t currentTimeStamp = SSTM_GetSecTimestamp();
     uint8_t port = 0;
     uint8_t adjustFlag = FALSE;
@@ -453,7 +453,7 @@ static void IotYKC21_WSInitHandle(void)
 {
     uint8_t port = 0;
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
     
     // 检测长度超过128，默认数值
     if (pPlatInfo->rsa_Keylength > 128)
@@ -798,7 +798,7 @@ uint8_t IotYKC21_SwipCardCharge(uint8_t port)
 uint8_t IotYKC21_RfreshYKC21key(char *YKC21key, uint16_t YKC21key_len)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
 
     IOTYKC21_CFG_LogPrint("ykc2.1平台RSA密钥长度变化：[\"%d\"]-->[\"%d\"]\r\n", pPlatInfo->rsa_Keylength, YKC21key_len);
     IOTYKC21_CFG_LogPrint("ykc2.1平台RSA密钥变化：[\"%.128s\"]-->[\"%s\"]\r\n", pPlatInfo->rsa_Key, YKC21key);
@@ -815,7 +815,7 @@ uint8_t IotYKC21_RfreshYKC21key(char *YKC21key, uint16_t YKC21key_len)
 uint8_t IotYKC21_RfreshYKC21token(char *YKC21token,uint16_t YKC21token_len)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
    
     IOTYKC21_CFG_LogPrint("ykc2.1平台token变化：[\"%s\"]-->[\"%s\"]\r\n", pPlatInfo->token, YKC21token);
     memset(pPlatInfo->token, 0, 14);
@@ -829,7 +829,7 @@ uint8_t IotYKC21_RfreshYKC21token(char *YKC21token,uint16_t YKC21token_len)
 void IotYKC21_PrintfYKC21KeyAndToken(void)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    MSNvmYKC21_FlashPlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
+    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
 
     if (pIotYKC21Ctx != NULL)
     {

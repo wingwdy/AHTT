@@ -28,7 +28,6 @@
 /* 订单长度 */
 #define MSNVM_ORDER_MAX_LEN                   512
 
-
 /* 故障信息长度 */
 #define MSNVM_ERROR_INFO_MAX_LEN              288
 
@@ -41,21 +40,31 @@
 /* 各平台私有参数长度 */
 #define MSNVM_PLAT_PRIVATE_PARAM_LEN          (512 + 128)
 
-/* RSA 密钥长度 token长度 */
-#define MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN   128
-#define MSNVM_PLAT_YKC21_TOKEN_LEN            14
-
 /* 平台IP长度 */
 #define MSNVM_PLAT_IP_LEN                     72
 
+/************************* GN(公牛) ****************************************/
 /* 计费模型 */
 #define MSNVM_GN_BILLMODE_MULTRATE_COUNT      9
 #define MSNVM_GN_BILLMODE_4RATE_COUNT         4
 #define MSNVM_GN_BILLMIDE_PERIOD_COUNT        48
 
-//YKC21
+/************************* YKC21（云快充2.1） ******************************/
+/* 费率数、时段数 */
 #define MSNVM_YKC21_BILLMIDE_MULTRATE_COUNT   48
 #define MSNVM_YKC21_BILLMIDE_PERIOD_COUNT     48
+
+/* RSA 密钥长度 token长度 */
+#define MSNVM_YKC21_RSA_PUBLIC_KEY_LEN        128
+#define MSNVM_YKC21_TOKEN_LEN                 14
+
+/************************* LXXDT（朗新新电途） ******************************/
+#define MSNVM_LXXDT_DEV_OPERATOR_LEN          16
+#define MSNVM_LXXDT_PRODUCT_KEY_LEN           32
+#define MSNVM_LXXDT_PRODUCT_SECRET_LEN        32
+
+#define MSNVM_LXXDT_BILLMODE_PERIOD_COUNT     16
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -170,9 +179,46 @@ typedef struct
     uint32_t time_power[48];                  /* 48时段电量 小数点后四位 */
 }MSNvmYKC21OrderInfo_Struct;
 
+typedef struct
+{
+	uint8_t valid;
+	uint8_t sn;
+	uint8_t pq[4];
+}MSNvmLXXDTPeriodInfo_Struct;
+
+typedef struct 
+{
+	uint8_t orderState;
+	char    orderNo[32 + 1];
+	uint8_t gunNo;
+	uint8_t ts[4];
+	uint8_t indexRec[4];
+	uint8_t typeRec;
+	uint8_t type;
+	uint8_t initiator;
+	char    user[17 + 1];
+	uint8_t typePlan;
+	uint8_t typeStart;
+	uint8_t tsStart[4];
+	uint8_t value[4];
+	uint8_t pricingID[4]; 
+	uint8_t beginTs[4];
+	uint8_t endTs[4];
+	uint8_t beginMr[4];
+	uint8_t endMr[4];
+	uint8_t tPq[4];
+	uint8_t elecAmt[4];
+	uint8_t serMt[4];
+	uint8_t amt[4];
+	uint8_t stopReason;
+	uint8_t typeRule;
+	uint8_t pqTotal[4];
+	MSNvmLXXDTPeriodInfo_Struct periodInfoArray[MSNVM_LXXDT_BILLMODE_PERIOD_COUNT];
+}MSNvmLXXDTOrderInfo_Struct;
 
 typedef union 
 {
+    MSNvmLXXDTOrderInfo_Struct stLXXDTOrderInfo;
     MSNvmGNOrderInfo_Struct stGNOrderInfo;
     MSNvmYKC21OrderInfo_Struct stYKC21OrderInfo;
     uint8_t userData[MSNVM_ORDER_MAX_LEN];
@@ -203,6 +249,7 @@ typedef struct
 
 /*********************************************************************************************** */
 /* 各平台私有参数定义 */
+/*********************************** GN */
 typedef struct 
 {
     uint8_t billType;                                           /* 4类电价或者多类电价 */
@@ -215,12 +262,18 @@ typedef struct
 
 typedef struct 
 {
+    MSNvmGNParamBillMode_Struct stBillMode;
+}MSNvmGNParam_Struct;
+
+/*********************************** YKC21 */
+typedef struct 
+{
     uint8_t  billModeID[2];                                        /* 计费模型编号 */
     uint8_t  billnum;                                              /* 费率数量 */  
     uint8_t  elecLossRate;                                         /* 计量损耗费率，目前平台不支持计损功能，计损比例置 0 */        
     uint32_t elecPriceRate[MSNVM_YKC21_BILLMIDE_MULTRATE_COUNT];   /* 电费费率，小数点后5位 */ 
     uint32_t servePriceRate[MSNVM_YKC21_BILLMIDE_MULTRATE_COUNT];  /* 服务费费率，小数点后5位 */ 
-    uint8_t  period_rate[MSNVM_YKC21_BILLMIDE_PERIOD_COUNT];        /* 48个30分钟，每个30分钟对应的费率号 */
+    uint8_t  period_rate[MSNVM_YKC21_BILLMIDE_PERIOD_COUNT];       /* 48个30分钟，每个30分钟对应的费率号 */
 }MSNvmYKC21ParamBillMode_Struct;
 
 typedef struct YKC21platinfo
@@ -230,31 +283,72 @@ typedef struct YKC21platinfo
     uint32_t  deaultMaxPowerStartTimeStamp[SYSCFG_CFG_GUN_NUM];    /* 默认最大功率开始时间戳 */
     uint32_t  deaultMaxPowerEndTimeStamp[SYSCFG_CFG_GUN_NUM];      /* 默认最大功率结束时间戳 */
 	uint8_t   rsa_Keylength;	                                   /* 云快充2.1 rsa公钥长度 */
-    uint8_t   rsa_Key[MSNVM_PLAT_YKC21_RSA_PUBLIC_KEY_LEN];	       /* 云快充2.1 rsa公钥 */
-    uint8_t   token[MSNVM_PLAT_YKC21_TOKEN_LEN];	               /* 云快充2.1 token */
-} MSNvmYKC21_FlashPlatInfo_Struct;
-
-
-
-typedef struct 
-{
-    MSNvmGNParamBillMode_Struct stBillMode;
-}MSNvmGNParam_Struct;
+    uint8_t   rsa_Key[MSNVM_YKC21_RSA_PUBLIC_KEY_LEN];	           /* 云快充2.1 rsa公钥 */
+    uint8_t   token[MSNVM_YKC21_TOKEN_LEN];	                       /* 云快充2.1 token */
+} MSNvmYKC21PlatInfo_Struct;
 
 typedef struct 
 {
     MSNvmYKC21ParamBillMode_Struct stBillMode;
-    MSNvmYKC21_FlashPlatInfo_Struct platinfo;
+    MSNvmYKC21PlatInfo_Struct platinfo;
 }MSNvmYKC21Param_Struct;
+
+/*********************************** LXXDT */
+typedef struct
+{
+	uint8_t validFlag;
+	uint8_t startTime;
+	uint8_t stopTime;
+	uint8_t flag;
+}MSNvmLXXDTRatePeriodInfo_Struct;
+
+typedef struct
+{
+    uint8_t billModeID[4];
+    uint8_t sharp_ele_fee[4];
+    uint8_t sharp_ser_fee[4];
+    uint8_t peak_ele_fee[4];
+    uint8_t peak_ser_fee[4];
+	uint8_t flat_ele_fee[4];
+    uint8_t flat_ser_fee[4];
+	uint8_t valley_ele_fee[4];
+    uint8_t valley_ser_fee[4];
+    uint8_t deep_ele_fee[4];
+	uint8_t deep_ser_fee[4];
+    uint8_t measure_wastage_rates;
+    uint8_t segmentation_rate[48];
+    uint8_t period_count;
+	MSNvmLXXDTRatePeriodInfo_Struct period[MSNVM_LXXDT_BILLMODE_PERIOD_COUNT];
+    uint8_t typeRule;
+    uint8_t std_ele_fee[4];
+	uint8_t std_ser_fee[4];
+	uint8_t validFlag[4];
+}MSNvmLXXDTParamBillMode_Struct;
+
+typedef struct 
+{
+    uint32_t resetCount;                                           /* 复位次数 */
+	uint8_t  pileDataCycleReportEnable;                            /* 数据周期上报使能 */
+	uint16_t pileDataReportCycle;                                  /* 数据上报周期，单位：秒 */
+	uint32_t  amountChangeThreshold;                               /* 金额变化阈值  */
+	char     cOperator[MSNVM_LXXDT_DEV_OPERATOR_LEN];              /* 设备运营商  */
+	char     cProductKey[MSNVM_LXXDT_PRODUCT_KEY_LEN];             /* 产品密钥  */
+	char     cProductSecret[MSNVM_LXXDT_PRODUCT_SECRET_LEN];       /* 产品密码  */
+}MSNvmLXXDTPlatInfo_Struct;
+
+typedef struct 
+{
+    MSNvmLXXDTParamBillMode_Struct stBillMode;
+    MSNvmLXXDTPlatInfo_Struct platinfo;
+}MSNvmLXXDTParam_Struct;
 
 typedef union 
 {
-    MSNvmGNParam_Struct stGNParam;
+    MSNvmLXXDTParam_Struct stLXXDTParam;
+    MSNvmGNParam_Struct    stGNParam;
     MSNvmYKC21Param_Struct stYKC21Param;
     uint8_t paramArr[MSNVM_PLAT_PRIVATE_PARAM_LEN];
 }MSNvmPlatPrivateParam_Union;
-
-
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/

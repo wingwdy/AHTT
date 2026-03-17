@@ -61,6 +61,7 @@ typedef enum
 ******************************************************************************/
 uint8_t AswPlatM_SetPileDn(char *pPileDn, uint8_t len);
 uint8_t AswPlatM_SetFixPileDn(char *pFixPileDn, uint8_t len);
+uint8_t AswPlatM_SetPlatMainIp(char *pIp, uint8_t ipLen);
 uint8_t AswPlatM_SetPlatMainIpPort(char *pIp, uint8_t ipLen, uint16_t port);
 uint8_t AswPlatM_SetPlatMainPort(uint16_t port);
 uint8_t AswPlatM_SetPlatAuxiliaryIpPort(char *pIp, uint8_t ipLen, uint16_t port);

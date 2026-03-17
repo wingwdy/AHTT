@@ -35,8 +35,8 @@
 #define ASWMONITOR_CFG_CHARGE_MIN_CHARGE_MONEY     (50)
 /* 按金额充电，最小充电时间：1秒， */
 #define ASWMONITOR_CFG_CHARGE_MIN_CHARGE_TIME      (1)
-/* 按电量充电，最小充电电量：0.01度，保留2位小数 */
-#define ASWMONITOR_CFG_CHARGE_MIN_CHARGE_ENERGY    (1)
+/* 按电量充电，最小充电电量：0.05度，保留2位小数 */
+#define ASWMONITOR_CFG_CHARGE_MIN_CHARGE_ENERGY    (5)
 
 #define ASWMONITOR_CFG_ReadBlockOrderInfo(port, orderInfo, size, ret)  do \
                                                             {\
