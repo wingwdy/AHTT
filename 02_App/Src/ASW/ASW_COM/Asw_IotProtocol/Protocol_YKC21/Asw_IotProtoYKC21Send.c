@@ -1001,7 +1001,7 @@ static uint16_t IotYKC21_PackHead(uint8_t port, uint16_t cmd, uint8_t encryptflg
 
     if (TRUE == printflg)
     {
-        IOTYKC21_CFG_LogPrint("[枪：%d]发送未加密消息体数据[cmd: 0x%02X][%d]: ",port ,cmd, dataLen);
+        IOTYKC21_CFG_LogPrint("[枪：%d]发送明文消息体[cmd: 0x%02X][%d]: ",port ,cmd, dataLen);
         DSLogM_HexOutput(&pBuf[1 + 2 + IOT_YKC21_ECRPTHEAD_LENGTH], dataLen);
     }
 

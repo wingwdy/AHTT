@@ -24,6 +24,7 @@
 #include "Asw_Monitor.h"
 #include "Asw_ChargeIf.h"
 #include "Asw_PlatM.h"
+#include "Cdd_ModeM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -638,6 +639,7 @@ static uint16_t IotOM_SendOrderRecord(uint8_t port, uint8_t *pBuf)
 
 static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
 {
+    MSNvmPlatParam_Struct *pPlatParam = AswPlatM_GetPlatParamPtr();
     uint16_t dataLen = 0;
     uint8_t valueLen = 0;
     uint8_t *pParamCount = NULL;
@@ -664,8 +666,9 @@ static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
             memset(&pBuf[dataLen], 0, 16);
             snprintf((char *)&pBuf[dataLen], 16, "%s", "platDn");
             dataLen += 16;
-            /* todo 填内容 */
-
+            pParamLen[0] = strlen(pPlatParam->platPileDn);
+            memcpy(&pBuf[dataLen], pPlatParam->platPileDn, pParamLen[0]);
+            dataLen += pParamLen[0];
             pParamCount[0]++;
         }
 
@@ -675,8 +678,9 @@ static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
             memset(&pBuf[dataLen], 0, 16);
             snprintf((char *)&pBuf[dataLen], 16, "%s", "platType");
             dataLen += 16;
-            /* todo 填内容 */
-
+            AswPlatM_GetPlatName((char *)&pBuf[dataLen], &valueLen);
+            dataLen += valueLen;
+            pParamLen[0] = valueLen;
             pParamCount[0]++;
         }
 
@@ -686,8 +690,9 @@ static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
             memset(&pBuf[dataLen], 0, 16);
             snprintf((char *)&pBuf[dataLen], 16, "%s", "ipAddr");
             dataLen += 16;
-            /* todo 填内容 */
-
+            pParamLen[0] = strlen(pPlatParam->platMainIp);
+            memcpy(&pBuf[dataLen], pPlatParam->platMainIp, pParamLen[0]);
+            dataLen += pParamLen[0];
             pParamCount[0]++;
         }
 
@@ -697,7 +702,9 @@ static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
             memset(&pBuf[dataLen], 0, 16);
             snprintf((char *)&pBuf[dataLen], 16, "%s", "port");
             dataLen += 16;
-            /* todo 填内容 */
+            pParamLen[0] = 2;
+            Common_Uint16ToTwoUint8(&pBuf[dataLen], pPlatParam->platMainPort);
+            dataLen += 2;
             pParamCount[0]++;
         }
 
@@ -707,7 +714,9 @@ static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
             memset(&pBuf[dataLen], 0, 16);
             snprintf((char *)&pBuf[dataLen], 16, "%s", "cardType");
             dataLen += 16;
-            /* todo 填内容 */
+            AswPlatM_GetCardName((char *)&pBuf[dataLen], &valueLen);
+            dataLen += valueLen;
+            pParamLen[0] = valueLen;
             pParamCount[0]++;
         }
 
@@ -717,7 +726,19 @@ static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
             memset(&pBuf[dataLen], 0, 16);
             snprintf((char *)&pBuf[dataLen], 16, "%s", "devOperator");
             dataLen += 16;
-            /* todo 填内容 */
+
+            if (AswPlatM_GetDevOperator((char *)&pBuf[dataLen], &valueLen))
+            {
+                dataLen += valueLen;
+                pParamLen[0] = valueLen;
+            }
+            else
+            {
+                strcpy((char *)&pBuf[dataLen], "null");
+                dataLen += strlen("null");
+                pParamLen[0] = strlen("null");
+            }
+
             pParamCount[0]++;
         }
 
@@ -727,7 +748,19 @@ static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
             memset(&pBuf[dataLen], 0, 16);
             snprintf((char *)&pBuf[dataLen], 16, "%s", "iv");
             dataLen += 16;
-            /* todo 填内容 */
+
+            if (AswPlatM_GetIv((char *)&pBuf[dataLen], &valueLen))
+            {
+                dataLen += valueLen;
+                pParamLen[0] = valueLen;
+            }
+            else
+            {
+                strcpy((char *)&pBuf[dataLen], "null");
+                dataLen += strlen("null");
+                pParamLen[0] = strlen("null");
+            }
+
             pParamCount[0]++;
         }
 
@@ -737,7 +770,19 @@ static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
             memset(&pBuf[dataLen], 0, 16);
             snprintf((char *)&pBuf[dataLen], 16, "%s", "cipherKey");
             dataLen += 16;
-            /* todo 填内容 */
+
+            if (AswPlatM_GetCipherKey((char *)&pBuf[dataLen], &valueLen))
+            {
+                dataLen += valueLen;
+                pParamLen[0] = valueLen;
+            }
+            else
+            {
+                strcpy((char *)&pBuf[dataLen], "null");
+                dataLen += strlen("null");
+                pParamLen[0] = strlen("null");
+            }
+
             pParamCount[0]++;
         }
 
@@ -747,7 +792,19 @@ static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
             memset(&pBuf[dataLen], 0, 16);
             snprintf((char *)&pBuf[dataLen], 16, "%s", "productKey");
             dataLen += 16;
-            /* todo 填内容 */
+            
+            if (AswPlatM_GetProductKey((char *)&pBuf[dataLen], &valueLen))
+            {
+                dataLen += valueLen;
+                pParamLen[0] = valueLen;
+            }
+            else
+            {
+                strcpy((char *)&pBuf[dataLen], "null");
+                dataLen += strlen("null");
+                pParamLen[0] = strlen("null");
+            }
+
             pParamCount[0]++;
         }
 
@@ -757,7 +814,19 @@ static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
             memset(&pBuf[dataLen], 0, 16);
             snprintf((char *)&pBuf[dataLen], 16, "%s", "token");
             dataLen += 16;
-            /* todo 填内容 */
+            
+            if (AswPlatM_GetToken((char *)&pBuf[dataLen], &valueLen))
+            {
+                dataLen += valueLen;
+                pParamLen[0] = valueLen;
+            }
+            else
+            {
+                strcpy((char *)&pBuf[dataLen], "null");
+                dataLen += strlen("null");
+                pParamLen[0] = strlen("null");
+            }
+
             pParamCount[0]++;
         }
 
@@ -767,7 +836,19 @@ static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
             memset(&pBuf[dataLen], 0, 16);
             snprintf((char *)&pBuf[dataLen], 16, "%s", "productSecret");
             dataLen += 16;
-            /* todo 填内容 */
+            
+            if (AswPlatM_GetProductSecret((char *)&pBuf[dataLen], &valueLen))
+            {
+                dataLen += valueLen;
+                pParamLen[0] = valueLen;
+            }
+            else
+            {
+                strcpy((char *)&pBuf[dataLen], "null");
+                dataLen += strlen("null");
+                pParamLen[0] = strlen("null");
+            }
+
             pParamCount[0]++;
         }
 
@@ -777,7 +858,9 @@ static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
             memset(&pBuf[dataLen], 0, 16);
             snprintf((char *)&pBuf[dataLen], 16, "%s", "workmode");
             dataLen += 16;
-            /* todo 填内容 */
+            pBuf[dataLen] = (CddModeM_IsGBMode()) ? 0x00 : 0x01;
+            dataLen += 1;
+            pParamLen[0] = 1;
             pParamCount[0]++;
         }
     }

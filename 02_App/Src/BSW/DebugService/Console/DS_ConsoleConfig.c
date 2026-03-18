@@ -226,7 +226,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
 
             if (sscanf(argv[2], "%16s", platName) == 1)
             {
-                if (TRUE == AswPlatM_SetPlatType(platName))
+                if (TRUE == AswPlatM_SetPlatType(platName, strlen(platName)))
                 {
                     setResult = TRUE;
                     DSCONSOLE_CFG_LogPrint("Set plat: \"%s\" ok!\r\n", platName);
@@ -244,7 +244,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
 
             if (sscanf(argv[2], "%16s", platCardName) == 1)
             {
-                if (TRUE == AswPlatM_SetPlatCardType(platCardName))
+                if (TRUE == AswPlatM_SetPlatCardType(platCardName, strlen(platCardName)))
                 {
                     setResult = TRUE;
                     DSCONSOLE_CFG_LogPrint("Set card: \"%s\" ok!\r\n", platCardName);

@@ -156,7 +156,7 @@ void AswPlatM_PrintAllConfigInfo(void)
         pProtocolDescriptor->pFuncGetIv(tempStr, &tempLen);
         ASWPLATM_CFG_LogPrint("初始向量：%s\r\n", tempStr);
     }
-    
+
     ASWPLATM_CFG_LogPrint("----------------------------------------------------------------------------\r\n");
 }
 
@@ -166,7 +166,7 @@ uint8_t AswPlatM_SetPileDn(char *pPileDn, uint8_t len)
 
     if (len < MSNVM_PILE_DN_LEN)
     {
-        if (strcmp(pPileDn, g_stAswPlatMCtx.stPlatParam.platPileDn) != 0)
+        if (len != strlen(g_stAswPlatMCtx.stPlatParam.platPileDn) || memcmp(pPileDn, g_stAswPlatMCtx.stPlatParam.platPileDn, len) != 0)
         {
             ASWPLATM_CFG_LogPrint("桩平台编码变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platPileDn, pPileDn);
             memset(g_stAswPlatMCtx.stPlatParam.platPileDn, 0x00, MSNVM_PILE_DN_LEN);
@@ -191,7 +191,7 @@ uint8_t AswPlatM_SetFixPileDn(char *pFixPileDn, uint8_t len)
 
     if (len < MSNVM_PILE_DN_LEN)
     {
-        if (strcmp(pFixPileDn, g_stAswPlatMCtx.stPlatParam.fixPileDn) != 0)
+        if (len != strlen(g_stAswPlatMCtx.stPlatParam.fixPileDn) || memcmp(pFixPileDn, g_stAswPlatMCtx.stPlatParam.fixPileDn, len) != 0)
         {
             ASWPLATM_CFG_LogPrint("桩固定编码变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.fixPileDn, pFixPileDn);
             memset(g_stAswPlatMCtx.stPlatParam.fixPileDn, 0x00, MSNVM_PILE_DN_LEN);
@@ -211,7 +211,7 @@ uint8_t AswPlatM_SetPlatMainIpPort(char *pIp, uint8_t ipLen, uint16_t port)
 
     if (ipLen < CDD_NETM_CFG_IP_LEN)
     {
-        if (strcmp(pIp, g_stAswPlatMCtx.stPlatParam.platMainIp) != 0)
+        if (ipLen != strlen(g_stAswPlatMCtx.stPlatParam.platMainIp) || memcmp(pIp, g_stAswPlatMCtx.stPlatParam.platMainIp, ipLen) != 0)
         {
             ASWPLATM_CFG_LogPrint("运营平台IP变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platMainIp, pIp);
 
@@ -233,7 +233,7 @@ uint8_t AswPlatM_SetPlatMainIp(char *pIp, uint8_t ipLen)
 
     if (ipLen < CDD_NETM_CFG_IP_LEN)
     {
-        if (strcmp(pIp, g_stAswPlatMCtx.stPlatParam.platMainIp) != 0)
+        if (ipLen != strlen(g_stAswPlatMCtx.stPlatParam.platMainIp) || memcmp(pIp, g_stAswPlatMCtx.stPlatParam.platMainIp, ipLen) != 0)
         {
             ASWPLATM_CFG_LogPrint("运营平台IP变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platMainIp, pIp);
 
@@ -267,7 +267,7 @@ uint8_t AswPlatM_SetPlatAuxiliaryIpPort(char *pIp, uint8_t ipLen, uint16_t port)
 
     if (ipLen < CDD_NETM_CFG_IP_LEN)
     {
-        if (strcmp(pIp, g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp) != 0)
+        if (ipLen != strlen(g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp) || memcmp(pIp, g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp, ipLen) != 0)
         {
             ASWPLATM_CFG_LogPrint("运维平台IP变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp, pIp);
 
@@ -296,7 +296,7 @@ uint8_t AswPlatM_SetPlatAuxiliaryPort(uint16_t port)
 }
 
 
-uint8_t AswPlatM_SetPlatType(char *platName)
+uint8_t AswPlatM_SetPlatType(char *platName, uint8_t platNameLen)
 {
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = NULL;
     uint8_t index = 0;
@@ -307,7 +307,7 @@ uint8_t AswPlatM_SetPlatType(char *platName)
     {
         pProtocolDescriptor = &c_stAswPlatMProtocolDescriptorTable[index];
 
-        if (strcmp(platName, pProtocolDescriptor->pName) == 0)
+        if (memcmp(platName, pProtocolDescriptor->pName, platNameLen) == 0)
         {
             if (index != g_stAswPlatMCtx.stPlatParam.platMainType)
             {
@@ -329,7 +329,7 @@ uint8_t AswPlatM_SetPlatType(char *platName)
     return ret;
 }
 
-uint8_t AswPlatM_SetPlatCardType(char *platCardName)
+uint8_t AswPlatM_SetPlatCardType(char *platCardName, uint8_t cardNameLen)
 {
     const AswPlatCardDescriptor_Struct *pPlatCardDescriptor = NULL;
     uint8_t index = 0;
@@ -340,7 +340,7 @@ uint8_t AswPlatM_SetPlatCardType(char *platCardName)
     {
         pPlatCardDescriptor = &c_stAswPlatMCardDescriptorTable[index];
 
-        if (strcmp(platCardName, pPlatCardDescriptor->pName) == 0)
+        if (memcmp(platCardName, pPlatCardDescriptor->pName, cardNameLen) == 0)
         {
             if (index != g_stAswPlatMCtx.stPlatParam.platMainCardType)
             {
@@ -380,6 +380,36 @@ uint16_t AswPlatM_TransformRecord(MSNvmOrderInfo_Struct *pNvmOrderInfo, uint8_t 
 AswPlatType_Enum AswPlatM_GetPlatType(void)
 {
     return (AswPlatType_Enum)g_stAswPlatMCtx.stPlatParam.platMainType;
+}
+
+uint8_t AswPlatM_GetPlatName(char *pPlatName, uint8_t *pLen)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+    uint8_t ret = FALSE;
+
+    if (currentPlatType < eAswPlatType_Count && pPlatName != NULL && pLen != NULL)
+    {
+        *pLen = strlen(c_stAswPlatMProtocolDescriptorTable[currentPlatType].pName);
+        strcpy(pPlatName, c_stAswPlatMProtocolDescriptorTable[currentPlatType].pName);
+        ret = TRUE;
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_GetCardName(char *pCardName, uint8_t *pLen)
+{
+    uint8_t currentPlatCardType = g_stAswPlatMCtx.stPlatParam.platMainCardType;
+    uint8_t ret = FALSE;
+
+    if (currentPlatCardType < eAswPlatCardType_Count && pCardName != NULL && pLen != NULL)
+    {
+        *pLen = strlen(c_stAswPlatMCardDescriptorTable[currentPlatCardType].pName);
+        strcpy(pCardName, c_stAswPlatMCardDescriptorTable[currentPlatCardType].pName);
+        ret = TRUE;
+    }
+
+    return ret;
 }
 
 void AswPlatM_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason)
@@ -652,7 +682,8 @@ void AswPlatM_InitMemory(void)
     CddNetMSocketPara_Union stSocketPara = { 0 };
     FrameQueueType_Enum eFrame;
 
-    if (MSNvm_ReadParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)pParam, sizeof(MSNvmPlatParam_Struct)) != eGlobalRet_OK)
+    if ((MSNvm_ReadParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)pParam, sizeof(MSNvmPlatParam_Struct)) != eGlobalRet_OK) ||
+        (pParam->platMainType >= eAswPlatType_Count))
     {
         AswPlatM_DefaultPlatParam(pParam);
     }

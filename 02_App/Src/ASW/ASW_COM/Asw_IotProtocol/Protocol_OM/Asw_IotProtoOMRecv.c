@@ -22,6 +22,7 @@
 #include "Asw_Monitor.h"
 #include "SS_Ucm.h"
 #include "Asw_PlatM.h"
+#include "Cdd_ModeM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -420,7 +421,7 @@ static uint8_t IotOM_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t
 static uint8_t IotOM_RecvRemoteQueryParam(uint8_t *r_data, uint16_t len)
 {
     uint8_t result = TRUE;
-    uint8_t dataIndex = 32 + 1;
+    uint16_t dataIndex = 32 + 1;
     uint8_t *pRecvData = r_data;
     uint8_t paramCount = 0;
     uint8_t paramIndex = 0;
@@ -508,7 +509,7 @@ static uint8_t IotOM_RecvRemoteQueryParam(uint8_t *r_data, uint16_t len)
 static uint8_t IotOM_RecvRemoteSetParam(uint8_t *r_data, uint16_t len)
 {
     uint8_t result = TRUE;
-    uint8_t dataIndex = 32 + 1;
+    uint16_t dataIndex = 32 + 1;
     uint8_t *pRecvData = r_data;
     uint8_t paramCount = 0;
     uint8_t paramIndex = 0;
@@ -531,59 +532,75 @@ static uint8_t IotOM_RecvRemoteSetParam(uint8_t *r_data, uint16_t len)
             memcpy(key, &pRecvData[dataIndex], 16);
             dataIndex += 16;
 
+            handleResult = TRUE;
+
             /* 根据key处理设置逻辑 */
             if (strcmp((const char *)key, "platDn") == 0)
             {
-                AswPlatM_SetPileDn((char *)&pRecvData[dataIndex], valueLen);
+                handleResult = AswPlatM_SetPileDn((char *)&pRecvData[dataIndex], valueLen);
             }
             else if (strcmp((const char *)key, "platType") == 0)
             {
-                AswPlatM_SetPlatType((char *)&pRecvData[dataIndex]);
+                handleResult = AswPlatM_SetPlatType((char *)&pRecvData[dataIndex], valueLen);
             }
             else if (strcmp((const char *)key, "ipAddr") == 0)
             {
-                AswPlatM_SetPlatMainIp((char *)&pRecvData[dataIndex], valueLen);
+                handleResult = AswPlatM_SetPlatMainIp((char *)&pRecvData[dataIndex], valueLen);
             }
             else if (strcmp((const char *)key, "port") == 0)
             {
-                AswPlatM_SetPlatMainPort(*(uint16_t *)&pRecvData[dataIndex]);
+                handleResult = AswPlatM_SetPlatMainPort(*(uint16_t *)&pRecvData[dataIndex]);
             }
             else if (strcmp((const char *)key, "cardType") == 0)
             {
-
+                handleResult = AswPlatM_SetPlatCardType((char *)&pRecvData[dataIndex], valueLen);
             }
             else if (strcmp((const char *)key, "devOperator") == 0)
             {
-   
+                handleResult = AswPlatM_SetDevOperator((char *)&pRecvData[dataIndex], valueLen);   
             }
             else if (strcmp((const char *)key, "iv") == 0)
             {
-
+                handleResult = AswPlatM_SetIv((char *)&pRecvData[dataIndex], valueLen);
             }
             else if (strcmp((const char *)key, "cipherKey") == 0)
             {
- 
+                 handleResult = AswPlatM_SetCipherKey((char *)&pRecvData[dataIndex], valueLen);
             }
             else if (strcmp((const char *)key, "productKey") == 0)
             {
-   
+                handleResult = AswPlatM_SetProductKey((char *)&pRecvData[dataIndex], valueLen);
             }
             else if (strcmp((const char *)key, "token") == 0)
             {
-  
+                handleResult = AswPlatM_SetToken((char *)&pRecvData[dataIndex], valueLen);
             }
             else if (strcmp((const char *)key, "productSecret") == 0)
             {
- 
+                handleResult = AswPlatM_SetProductSecret((char *)&pRecvData[dataIndex], valueLen);
             }
             else if (strcmp((const char *)key, "workmode") == 0)
             {
+                if (pRecvData[dataIndex + 1] == 0x01)
+                {
+                    CddModeM_ExitGBMode();
+                }
+                else
+                {
+                    CddModeM_EnterGBMode();
+                }
 
+                handleResult = TRUE;
             }
             else
             {
                 result = FALSE;
                 IOTOM_CFG_LogPrint("设置参数: %s (未知参数)\r\n", key);
+            }
+
+            if (handleResult == FALSE)
+            {
+                result = FALSE;
             }
 
             dataIndex += valueLen;
@@ -594,6 +611,7 @@ static uint8_t IotOM_RecvRemoteSetParam(uint8_t *r_data, uint16_t len)
         result = FALSE;
     }
 
+    AswMonitor_SetReboot(eAswMonitorRebootType_Immediate);
     return result;
 }
 
@@ -601,14 +619,15 @@ static uint8_t IotOM_RecvRemoteQuerySetParam(uint8_t *port, uint8_t *r_data, uin
 {
     uint8_t optResult = TRUE;
 
-    /* 读取参数 */
+    /* 查询参数 */
     if (r_data[32] == 0x00)
     {
         optResult = IotOM_RecvRemoteQueryParam(r_data, len);
         pIotOMCtx->stProtoData[0].optParamAction = 0x00;
         pIotOMCtx->stProtoData[0].optParamResult = optResult ? 0x00 : 0x01;
     }
-    else  /* 查询参数 */
+    /* 设置参数 */
+    else  
     {
         optResult = IotOM_RecvRemoteSetParam(r_data, len);
         pIotOMCtx->stProtoData[0].optParamAction = 0x01;

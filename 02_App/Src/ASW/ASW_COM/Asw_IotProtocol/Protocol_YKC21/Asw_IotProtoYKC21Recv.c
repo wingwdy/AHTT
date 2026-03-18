@@ -485,11 +485,12 @@ static void IotYKC21_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
                 frameLen = pFrameHead->dataLen[0] << 8 | pFrameHead->dataLen[1];
                 /* 解密数据 */
                 memset(IotYKC21Decryptbuf, 0, IOT_YKC21_RX_ECRPTBUFFER_MAXSIZE);  
-                if(pCmdRecvCtrl->encryptionFlag)
+                if (pCmdRecvCtrl->encryptionFlag)
                 {
 					memcpy(IotYKC21Decryptbuf, (uint8_t *)pFrameHead + sizeof(IotYKC21FrameHead_Struct),IOTYKC21_RX_EcrptMessageBodylength(frameLen));
 
-                    IOTYKC21_CFG_LogPrint("[枪：%d]接收未解密消息体数据[cmd: 0x%02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, IOTYKC21_RX_EcrptMessageBodylength(frameLen));
+                    IOTYKC21_CFG_LogPrint("[枪：%d]接收密文消息体[cmd: 0x%02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, 
+                        pCmdRecvCtrl->cMeaning, IOTYKC21_RX_EcrptMessageBodylength(frameLen));
                     DSLogM_HexOutput((uint8_t *)IotYKC21Decryptbuf, IOTYKC21_RX_EcrptMessageBodylength(frameLen));
 
                     decrypted_len =  YKC21_Recv_Data_Decrypt(IotYKC21Decryptbuf,IOTYKC21_RX_EcrptMessageBodylength(frameLen));
@@ -504,7 +505,7 @@ static void IotYKC21_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTYKC21_CFG_LogPrint("[枪：%d]接收解密后消息体数据[cmd: 0x%02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, decrypted_len);
+                        IOTYKC21_CFG_LogPrint("[枪：%d]接收明文消息体[cmd: 0x%02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, decrypted_len);
                         DSLogM_HexOutput((uint8_t *)IotYKC21Decryptbuf, decrypted_len);
                     }
 
@@ -539,9 +540,6 @@ static void IotYKC21_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
         }
     }
 }
-
-
-
 
 static uint8_t IotYKC21_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
@@ -581,7 +579,7 @@ static uint8_t IotYKC21_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t le
 
 static uint8_t IotYKC21_RecvHeartBeatRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
-     uint8_t index = 7;
+    uint8_t index = 7;
     uint8_t *pRecvData = r_data;
 
     if (pRecvData[index] > 0)
