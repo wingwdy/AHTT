@@ -38,7 +38,7 @@ int encrypt_and_decrypt_data(unsigned char *rsa_key, unsigned char *output, unsi
     // unsigned char base64_der_pub_key;
     unsigned char base64_der_pub_key[128];
 
-    memcpy(base64_der_pub_key, rsa_key, RSA_KEY_LEN);
+    memcpy(base64_der_pub_key, rsa_key, IOTYKC21_CFG_RSA_KEY_LEN);
 
     unsigned char encrypt_output[128]; // 根据实际情况调整大小
 
@@ -58,7 +58,7 @@ int encrypt_and_decrypt_data(unsigned char *rsa_key, unsigned char *output, unsi
 
     // 解码 Base64 数据
     ret = mbedtls_base64_decode(der_pub_key, sizeof(der_pub_key), &der_len,
-                                (unsigned char *)base64_der_pub_key, RSA_KEY_LEN);
+                                (unsigned char *)base64_der_pub_key, IOTYKC21_CFG_RSA_KEY_LEN);
     if (ret != 0)
     {
         IOTYKC21_CFG_LogPrint("Failed to decode Base64: -0x%04X\n", -ret);

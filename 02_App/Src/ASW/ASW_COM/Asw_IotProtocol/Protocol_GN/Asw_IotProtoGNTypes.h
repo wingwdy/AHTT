@@ -52,7 +52,7 @@
 /* 协议CMD 定义 */
 #define IOT_GN_CMDTYPE_REQUSET			        (0x00U)
 #define IOT_GN_CMDTYPE_RESPONSE                 (0x01U)
-#define IOT_GN_CMD_NULL                         (0x00U)             /* 无效 */
+#define IOT_GN_CMD_NULL                         (0xFFU)             /* 无效 */
 
 /* 协议CMD 发送定义 */
 #define IOT_GN_CMD_LOGIN_REQ                    (0x01U)             /* 登陆 */

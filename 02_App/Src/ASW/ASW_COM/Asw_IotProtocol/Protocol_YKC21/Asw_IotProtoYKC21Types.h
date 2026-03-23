@@ -24,21 +24,21 @@
 *    Macro Definition
 ******************************************************************************/
 /* 通信协议版本 */
-#define IOT_YKC21_PROTOCOL_VERSION_H                 (2U) /* 2.1.0 */
-#define IOT_YKC21_PROTOCOL_VERSION_M                 (1U)  
-#define IOT_YKC21_PROTOCOL_VERSION_L                 (0U)  
+#define IOT_YKC21_PROTOCOL_VERSION_H                (2U) /* 2.1.0 */
+#define IOT_YKC21_PROTOCOL_VERSION_M                (1U)  
+#define IOT_YKC21_PROTOCOL_VERSION_L                (0U)  
 
 /* 通信协议头定义--YKC21协议 */
-#define IOT_YKC21_PLUS_HEAD                       (0x68U)        
-#define IOT_YKC21_ECRPTHEAD_LENGTH                (2+7+1+1)         /* 2(序列号域)+7(发送时间)+1(加密标志)+1(帧类型标志)*/ 
-#define IOT_YKC21_RX_Totallength(X)               (x + 1 + 2 + 2)   /*  x+ 1(起始标志)+ 2(数据长度）+ 2(帧校验域)*/ 
-#define IOTYKC21_RX_EcrptMessageBodylength(x)     (x - IOT_YKC21_ECRPTHEAD_LENGTH)   /* 云快充2.1 收到加密消息体长度*/             
+#define IOT_YKC21_PLUS_HEAD                         (0x68U)        
+#define IOT_YKC21_ECRPTHEAD_LENGTH                  (2+7+1+1)         /* 2(序列号域)+7(发送时间)+1(加密标志)+1(帧类型标志)*/ 
+#define IOT_YKC21_RX_Totallength(X)                 (x + 1 + 2 + 2)   /*  x+ 1(起始标志)+ 2(数据长度）+ 2(帧校验域)*/ 
+#define IOTYKC21_RX_EcrptMessageBodylength(x)       (x - IOT_YKC21_ECRPTHEAD_LENGTH)   /* 云快充2.1 收到加密消息体长度*/             
 /* 通信buff缓存定义 */
-#define IOT_YKC21_TXRX_BUFFER_SIZE                (2048U)
-#define IOT_YKC21_RX_ECRPTBUFFER_MAXSIZE           (384U) 
+#define IOT_YKC21_TXRX_BUFFER_SIZE                  (2048U)
+#define IOT_YKC21_RX_ECRPTBUFFER_MAXSIZE            (384U) 
 
 /* 计费模型类型定义 */
-#define IOT_YKC21_BILLMODE_RATE_TYPE_MULT          48
+#define IOT_YKC21_BILLMODE_RATE_TYPE_MULT           48
 
 /* 实时数据上报周期定义 */
 #define IOTYKC21_CFG_IDLE_REALDATA_CYCLE           (5 * 60 * 1000)
@@ -50,10 +50,14 @@
 /* 充电最小余额，1元，保留2位小数 */
 #define IOTYKC21_CFG_CHARGE_MIN_ACCOUNT_MONEY      (100)   
 
+
+#define IOTYKC21_CFG_RSA_KEY_LEN			       128
+
+
 /* 协议CMD 定义 */
 #define IOT_YKC21_CMDTYPE_REQUSET			       (0x00U)
 #define IOT_YKC21_CMDTYPE_RESPONSE                 (0x01U)
-#define IOT_YKC21_CMD_NULL                         (0x00U)             /* 无效 */
+#define IOT_YKC21_CMD_NULL                         (0xFFU)             /* 无效 */
 
 /* 协议CMD 发送定义 */
 #define IOT_YKC21_CMD_LOGIN_REQ                    (0x01U)             /* 登陆 */
@@ -247,7 +251,7 @@ typedef enum
 ******************************************************************************/
 extern struct AES_ctx g_ex;
 extern uint8_t random_key_A[16];            	// 随机密钥A
-#define RSA_KEY_LEN			128
+
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/

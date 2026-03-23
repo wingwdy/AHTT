@@ -113,7 +113,7 @@ void portTask_ShowStackInfo(void)
     BaseType_t xResult = pdFALSE;
     uint32_t uxHighWaterMark = 0;
 
-    PORTTASK_CFG_LogPrint("---------------------------------堆栈信息------------------------------------\r\n");
+    PORTTASK_CFG_LogPrint("---------------------------------堆栈信息----------------------------------------\r\n");
 
     PORTTASK_CFG_LogPrint("freeRTOS 总堆栈空间: %d K 字节, 剩余空间: %d K 字节\r\n", SYSCFG_CFG_OS_HEAP_SIZE / 1024, xPortGetFreeHeapSize() / 1024);
   
@@ -122,11 +122,11 @@ void portTask_ShowStackInfo(void)
 		pTaskCtr = &g_stTaskCtrBlkTable[index];
 
         uxHighWaterMark = uxTaskGetStackHighWaterMark(pTaskCtr->taskHandle);
-        PORTTASK_CFG_LogPrint("线程名: %-10s, \t总分配: %4d 字节, \t剩余: %4d 字节, \t空置率: %d%% \r\n", 
+        PORTTASK_CFG_LogPrint("线程名: %-13s  \t总分配: %4d 字节 \t剩余: %4d 字节 \t空置率: %d%% \r\n", 
             pTaskCtr->cTaskName, pTaskCtr->usStackDepth * 4, uxHighWaterMark * 4, uxHighWaterMark * 100 / pTaskCtr->usStackDepth);
     }
 
-    PORTTASK_CFG_LogPrint("------------------------------------------------------------------------------\r\n");
+    PORTTASK_CFG_LogPrint("----------------------------------------------------------------------------------\r\n");
 }
 
 void portTask_CreatAllTask(void)

@@ -58,12 +58,12 @@
 #define MSNVM_YKC21_RSA_PUBLIC_KEY_LEN        128
 #define MSNVM_YKC21_TOKEN_LEN                 14
 
-/************************* LXXDT（朗新新电途） ******************************/
-#define MSNVM_LXXDT_DEV_OPERATOR_LEN          16
-#define MSNVM_LXXDT_PRODUCT_KEY_LEN           32
-#define MSNVM_LXXDT_PRODUCT_SECRET_LEN        32
+/************************* XDT（朗新新电途） ******************************/
+#define MSNVM_XDT_DEV_OPERATOR_LEN            16
+#define MSNVM_XDT_PRODUCT_KEY_LEN             32
+#define MSNVM_XDT_PRODUCT_SECRET_LEN          32
 
-#define MSNVM_LXXDT_BILLMODE_PERIOD_COUNT     16
+#define MSNVM_XDT_BILLMODE_PERIOD_COUNT       16
 
 /******************************************************************************
 *    Enum Definition
@@ -184,7 +184,7 @@ typedef struct
 	uint8_t valid;
 	uint8_t sn;
 	uint8_t pq[4];
-}MSNvmLXXDTPeriodInfo_Struct;
+}MSNvmXDTPeriodInfo_Struct;
 
 typedef struct 
 {
@@ -213,12 +213,12 @@ typedef struct
 	uint8_t stopReason;
 	uint8_t typeRule;
 	uint8_t pqTotal[4];
-	MSNvmLXXDTPeriodInfo_Struct periodInfoArray[MSNVM_LXXDT_BILLMODE_PERIOD_COUNT];
-}MSNvmLXXDTOrderInfo_Struct;
+	MSNvmXDTPeriodInfo_Struct periodInfoArray[MSNVM_XDT_BILLMODE_PERIOD_COUNT];
+}MSNvmXDTOrderInfo_Struct;
 
 typedef union 
 {
-    MSNvmLXXDTOrderInfo_Struct stLXXDTOrderInfo;
+    MSNvmXDTOrderInfo_Struct stXDTOrderInfo;
     MSNvmGNOrderInfo_Struct stGNOrderInfo;
     MSNvmYKC21OrderInfo_Struct stYKC21OrderInfo;
     uint8_t userData[MSNVM_ORDER_MAX_LEN];
@@ -294,14 +294,14 @@ typedef struct
     MSNvmYKC21PlatInfo_Struct platinfo;
 }MSNvmYKC21Param_Struct;
 
-/*********************************** LXXDT */
+/*********************************** XDT */
 typedef struct
 {
 	uint8_t validFlag;
 	uint8_t startTime;
 	uint8_t stopTime;
 	uint8_t flag;
-}MSNvmLXXDTRatePeriodInfo_Struct;
+}MSNvmXDTRatePeriodInfo_Struct;
 
 typedef struct
 {
@@ -319,12 +319,12 @@ typedef struct
     uint8_t measure_wastage_rates;
     uint8_t segmentation_rate[48];
     uint8_t period_count;
-	MSNvmLXXDTRatePeriodInfo_Struct period[MSNVM_LXXDT_BILLMODE_PERIOD_COUNT];
+	MSNvmXDTRatePeriodInfo_Struct period[MSNVM_XDT_BILLMODE_PERIOD_COUNT];
     uint8_t typeRule;
     uint8_t std_ele_fee[4];
 	uint8_t std_ser_fee[4];
 	uint8_t validFlag[4];
-}MSNvmLXXDTParamBillMode_Struct;
+}MSNvmXDTParamBillMode_Struct;
 
 typedef struct 
 {
@@ -332,20 +332,20 @@ typedef struct
 	uint8_t  pileDataCycleReportEnable;                            /* 数据周期上报使能 */
 	uint16_t pileDataReportCycle;                                  /* 数据上报周期，单位：秒 */
 	uint32_t  amountChangeThreshold;                               /* 金额变化阈值  */
-	char     cOperator[MSNVM_LXXDT_DEV_OPERATOR_LEN];              /* 设备运营商  */
-	char     cProductKey[MSNVM_LXXDT_PRODUCT_KEY_LEN];             /* 产品密钥  */
-	char     cProductSecret[MSNVM_LXXDT_PRODUCT_SECRET_LEN];       /* 产品密码  */
-}MSNvmLXXDTPlatInfo_Struct;
+	char     cOperator[MSNVM_XDT_DEV_OPERATOR_LEN];              /* 设备运营商  */
+	char     cProductKey[MSNVM_XDT_PRODUCT_KEY_LEN];             /* 产品密钥  */
+	char     cProductSecret[MSNVM_XDT_PRODUCT_SECRET_LEN];       /* 产品密码  */
+}MSNvmXDTPlatInfo_Struct;
 
 typedef struct 
 {
-    MSNvmLXXDTParamBillMode_Struct stBillMode;
-    MSNvmLXXDTPlatInfo_Struct platinfo;
-}MSNvmLXXDTParam_Struct;
+    MSNvmXDTParamBillMode_Struct stBillMode;
+    MSNvmXDTPlatInfo_Struct platinfo;
+}MSNvmXDTParam_Struct;
 
 typedef union 
 {
-    MSNvmLXXDTParam_Struct stLXXDTParam;
+    MSNvmXDTParam_Struct stXDTParam;
     MSNvmGNParam_Struct    stGNParam;
     MSNvmYKC21Param_Struct stYKC21Param;
     uint8_t paramArr[MSNVM_PLAT_PRIVATE_PARAM_LEN];
