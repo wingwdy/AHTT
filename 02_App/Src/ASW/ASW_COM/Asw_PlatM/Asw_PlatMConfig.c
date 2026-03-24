@@ -21,6 +21,7 @@
 #include "Asw_IotProtoGNM.h"
 #include "Asw_IotProtoOMM.h"
 #include "Asw_IotProtoYKC21M.h"
+#include "Asw_IotProtoXDTM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -84,9 +85,15 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pName = "lxxdt",
         .cProtoMeaning = "朗新新电途",
         .eSocketType = eCddNetMSocketType_MQTT,
-        .pFuncFillLinkPara = NULL,
-        .pFuncInit = NULL,
-        .pMainFunction = NULL,
+        .pFuncFillLinkPara = IotXDT_FillLinkPara,
+        .pFuncInit = IotXDT_InitMemory,
+        .pMainFunction = IotXDT_MainFunction,
+        .pFuncSetProductKey = IotXDT_SetProductKey,
+        .pFuncSetProductSecret = IotXDT_SetProductSecret,
+        .pFuncSetDevOperator = IotXDT_SetDevOperator,
+        .pFuncGetProductKey = IotXDT_GetProductKey,
+        .pFuncGetProductSecret = IotXDT_GetProductSecret,
+        .pFuncGetDevOperator = IotXDT_GetDevOperator,
     },
 };
 

@@ -60,8 +60,10 @@
 
 /************************* XDT（朗新新电途） ******************************/
 #define MSNVM_XDT_DEV_OPERATOR_LEN            16
-#define MSNVM_XDT_PRODUCT_KEY_LEN             32
-#define MSNVM_XDT_PRODUCT_SECRET_LEN          32
+#define MSNVM_XDT_PRODUCT_KEY_LEN             64
+#define MSNVM_XDT_PRODUCT_SECRET_LEN          64
+#define MSNVM_XDT_USER_NAME_LEN               64
+#define MSNVM_XDT_PASSWORD_LEN                64
 
 #define MSNVM_XDT_BILLMODE_PERIOD_COUNT       16
 
@@ -331,10 +333,14 @@ typedef struct
     uint32_t resetCount;                                           /* 复位次数 */
 	uint8_t  pileDataCycleReportEnable;                            /* 数据周期上报使能 */
 	uint16_t pileDataReportCycle;                                  /* 数据上报周期，单位：秒 */
-	uint32_t  amountChangeThreshold;                               /* 金额变化阈值  */
-	char     cOperator[MSNVM_XDT_DEV_OPERATOR_LEN];              /* 设备运营商  */
-	char     cProductKey[MSNVM_XDT_PRODUCT_KEY_LEN];             /* 产品密钥  */
-	char     cProductSecret[MSNVM_XDT_PRODUCT_SECRET_LEN];       /* 产品密码  */
+	uint32_t amountChangeThreshold;                                /* 金额变化阈值  */
+	char     cOperator[MSNVM_XDT_DEV_OPERATOR_LEN + 1];            /* 设备运营商  */
+	char     cProductKey[MSNVM_XDT_PRODUCT_KEY_LEN + 1];           /* 产品密钥  */
+	char     cProductSecret[MSNVM_XDT_PRODUCT_SECRET_LEN + 1];     /* 产品密码  */
+    uint8_t  credentialSaveFlag;                                   /* 凭据已获取标记 */
+    uint8_t  credentialValidFlag;                                  /* 凭据有效标记（连接成功生效） */
+    char     cUserName[MSNVM_XDT_USER_NAME_LEN + 1];               /* 用户名  */
+    char     cPassword[MSNVM_XDT_PASSWORD_LEN + 1];                /* 密码  */
 }MSNvmXDTPlatInfo_Struct;
 
 typedef struct 
@@ -345,7 +351,7 @@ typedef struct
 
 typedef union 
 {
-    MSNvmXDTParam_Struct stXDTParam;
+    MSNvmXDTParam_Struct   stXDTParam;
     MSNvmGNParam_Struct    stGNParam;
     MSNvmYKC21Param_Struct stYKC21Param;
     uint8_t paramArr[MSNVM_PLAT_PRIVATE_PARAM_LEN];

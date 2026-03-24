@@ -114,7 +114,7 @@ const ATCmdDescribtor_Struct c_stMQTTATCmdDescribtor[eATMQTTCmd_Count] =
     ATMQTT_PackOpen,                              ATMQTT_RecvOpen,                     ATMQTT_FailHandle },
 
     [eATMQTTCmd_Connect] =
-    { "AT+QMTCONN=[ID],\"[PID]\",\"[NAME]\",\"[SECRET]\"\r\n","+QMTCONN=",  3,   30000,     3000,  TRUE,    "连接客户端服务器",
+    { "AT+QMTCONN=[ID],\"[PID]\",\"[NAME]\",\"[PASSWORD]\"\r\n","+QMTCONN=",  3,   30000,  3000,  TRUE,    "连接客户端服务器",
     ATMQTT_PackConnect,                           ATMQTT_RecvConnect,                  ATMQTT_FailHandle },
 
     [eATMQTTCmd_Subscribe] =
@@ -221,8 +221,8 @@ static uint16_t ATMQTT_PackConnect(uint8_t socketIndex, void * socketPara, uint8
 
     nATLen = Common_ReplaceNum(pData, nATLen, "[ID]", socketIndex, socketIndex);
     nATLen = Common_ReplaceStr(pData, nATLen, "[PID]", pSocketPara->pid, strlen(pSocketPara->pid), "00000000000000");
-    nATLen = Common_ReplaceStr(pData, nATLen, "[NAME]", pSocketPara->productKey, strlen(pSocketPara->productKey), "00000000000000");
-    nATLen = Common_ReplaceStr(pData, nATLen, "[SECRET]", pSocketPara->productSecret, strlen(pSocketPara->productSecret), "00000000000000");
+    nATLen = Common_ReplaceStr(pData, nATLen, "[NAME]", pSocketPara->userName, strlen(pSocketPara->userName), "00000000000000");
+    nATLen = Common_ReplaceStr(pData, nATLen, "[PASSWORD]", pSocketPara->password, strlen(pSocketPara->password), "00000000000000");
     return nATLen;
 }
 
@@ -500,6 +500,7 @@ void ATMQTT_UrcQMTOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
                     if (pPrivate->waitMqttOpenOkFlag == TRUE)
                     {
                         pPrivate->waitMqttOpenOkFlag = FALSE;
+                        CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATMQTTCmd_Connect);
                     }
                 }
                 else

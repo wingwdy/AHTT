@@ -348,6 +348,39 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                 DSCONSOLE_CFG_LogPrint("Set token failed!\r\n");
             }
         }
+        else if (0 == strcmp(argv[1], "devOperator"))
+        {
+            if (TRUE == AswPlatM_SetDevOperator(argv[2], strlen(argv[2])))
+            {
+                DSCONSOLE_CFG_LogPrint("Set devOperator \"%s\" ok!\r\n", argv[2]);
+            }
+            else
+            {
+                DSCONSOLE_CFG_LogPrint("Set devOperator failed!\r\n");
+            }
+        }
+        else if (0 == strcmp(argv[1], "productKey"))
+        {
+            if (TRUE == AswPlatM_SetProductKey(argv[2], strlen(argv[2])))
+            {
+                DSCONSOLE_CFG_LogPrint("Set productKey \"%s\" ok!\r\n", argv[2]);
+            }
+            else
+            {
+                DSCONSOLE_CFG_LogPrint("Set productKey failed!\r\n");
+            }
+        }
+        else if (0 == strcmp(argv[1], "productSecret"))
+        {
+            if (TRUE == AswPlatM_SetProductSecret(argv[2], strlen(argv[2])))
+            {
+                DSCONSOLE_CFG_LogPrint("Set productSecret \"%s\" ok!\r\n", argv[2]);
+            }
+            else
+            {
+                DSCONSOLE_CFG_LogPrint("Set productSecret failed!\r\n");
+            }
+        }
         else if (0 == strcmp(argv[1], "mntr"))
         {
             /* 设置IP端口 */

@@ -11,11 +11,17 @@
 *2025/10/10      V1.0.0      chenls    初版创建
 *
 ******************************************************************************/
-
+#ifndef ASW_IOT_PROTO_XDTM_H_
+#define ASW_IOT_PROTO_XDTM_H_
 /******************************************************************************
 *    Header File Inclusion
 ******************************************************************************/
-
+#include "Common.h"
+#include "Asw_IotProtoXDTTypes.h"
+#include "SysCfg.h"
+#include "Cdd_NetM.h"
+#include "Ms_Nvm.h"
+#include "Asw_Monitor.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -25,12 +31,50 @@
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
-
-
+typedef enum
+{
+	eIotXDTWorkState_Init,
+	eIotXDTWorkState_Offline,
+	eIotXDTWorkState_Login,
+	eIotXDTWorkState_Normal,
+}IotXDTWorkState_Enum;
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+typedef struct 
+{
+    MSNvmOrderInfo_Struct stOrderInfo;
 
+}IotXDTProtoData_Struct;
+
+typedef struct 
+{
+    IotXDTWorkState_Enum eWorkState;
+    MSNvmPlatPrivateParam_Union param;
+    typeFuncSendCtrl pFuncSendCtrl;
+    typeFuncRecvCtrl pFuncRecvCtrl;
+    uint8_t frameQueueChannelID;
+
+    uint8_t platDn[16 + 1];
+    IotXDTProtoData_Struct stProtoData[SYSCFG_CFG_GUN_NUM];
+    MSNvmOrderInfo_Struct stOrderInfo;
+    uint32_t time;
+
+    /* 离线后需清除数据 */
+    uint8_t loginSucc;
+    uint8_t queueBusyFlag;
+    uint32_t waitQueueIdleTick;
+    
+    uint8_t sendIndex;
+	uint8_t sendPort;
+    uint16_t reqSeq;
+
+	uint8_t t1SetFlag;
+	uint8_t t2SetFlag;
+
+    CommonSendCtrl_Struct stSendCtrl[SYSCFG_CFG_GUN_NUM][IOT_XDT_CMD_SEND_COUNT];
+    CommonRecvCtrl_Struct stRecvCtrl[SYSCFG_CFG_GUN_NUM][IOT_XDT_CMD_RECV_COUNT];
+}IotXDTCtx_Struct;
 
 
 /******************************************************************************
@@ -42,6 +86,17 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
+uint8_t IotXDT_SetProductSecret(char *pProductSecret, uint8_t len);
+uint8_t IotXDT_SetDevOperator(char *pDevOperator, uint8_t len); 
+uint8_t IotXDT_SetProductKey(char *pProductKey, uint8_t len);
+uint8_t IotXDT_GetProductKey(char *pProductKey, uint8_t *pOutLen);
+uint8_t IotXDT_GetProductSecret(char *pProductSecret, uint8_t *pOutLen);
+uint8_t IotXDT_GetDevOperator(char *pDevOperator, uint8_t *pOutLen);
+
+
+void IotXDT_FillLinkPara(CddNetMSocketPara_Union *pLinkPara);
+void IotXDT_InitMemory(void);
+void IotXDT_MainFunction(void);
 
 
 
@@ -49,10 +104,7 @@
 
 
 
-
-
-
-
+#endif /* ASW_IOT_PROTO_XDTM_H_ */
 
 
 

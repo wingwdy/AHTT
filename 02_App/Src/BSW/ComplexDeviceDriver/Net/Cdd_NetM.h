@@ -44,12 +44,12 @@
 #define CDD_NETM_CFG_FTP_USERNAME_LEN            24
 #define CDD_NETM_CFG_FTP_PASSWD_LEN              24
 
-/* config for FTP */
+/* config for MQTT*/
 #define CDD_NETM_CFG_MQTT_TOPIC_COUNT            5
 #define CDD_NETM_CFG_MQTT_TOPIC_LEN              16
 #define CDD_NETM_CFG_MQTT_DEVICE_NAME_LEN        32
-#define CDD_NETM_CFG_MQTT_PRODUCT_SECRET_LEN     32
-#define CDD_NETM_CFG_MQTT_PRODUCT_KEY_LEN        32
+#define CDD_NETM_CFG_MQTT_USER_NAME_LEN          64
+#define CDD_NETM_CFG_MQTT_PASSWORD_LEN           64
 #define CDD_NETM_CFG_MQTT_PID_LEN                20
 
 /******************************************************************************
@@ -151,9 +151,10 @@ typedef struct
     uint8_t topicCount;
     char topic[CDD_NETM_CFG_MQTT_TOPIC_COUNT][CDD_NETM_CFG_MQTT_TOPIC_LEN + 1];
     char deviceName[CDD_NETM_CFG_MQTT_DEVICE_NAME_LEN + 1];
-    char productKey[CDD_NETM_CFG_MQTT_PRODUCT_SECRET_LEN + 1];
-    char productSecret[CDD_NETM_CFG_MQTT_PRODUCT_SECRET_LEN + 1];
+    char userName[CDD_NETM_CFG_MQTT_USER_NAME_LEN + 1];
+    char password[CDD_NETM_CFG_MQTT_PASSWORD_LEN + 1];
     char pid[CDD_NETM_CFG_MQTT_PID_LEN + 1];
+    void (*pFuncMqttConnectCallback)(uint8_t connectResult);
 }CddNetMMqttPara_Struct;
 
 typedef union 
