@@ -77,7 +77,8 @@ void ATMQTT_UrcQMTConnect(uint8_t *pData, void * modulePara, uint16_t dataLen);
 void ATMQTT_UrcQMTPubex(uint8_t *pData, void * modulePara, uint16_t dataLen);
 void ATMQTT_UrcQMTStat(uint8_t *pData, void * modulePara, uint16_t dataLen);
 void ATMQTT_UrcQMTRecv(uint8_t *pData, void * modulePara, uint16_t dataLen);
-
+void ATMQTT_UpdateIpPort(void *socketPara, char *pIp, uint16_t port);
+void ATMQTT_UpdateMqttUserNamePassword(void *socketPara, char *pUserName, char *pPassword);
 #endif
 
 

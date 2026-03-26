@@ -816,6 +816,38 @@ void CddDrvEG800AK_GetModuleTypeInfo(char *pModuleType, uint16_t readLen)
     }
 }
 
+void CddDrvEG800AK_UpdateIpPort(uint8_t socketIndex, char *pIp, uint16_t port)
+{
+    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex];
+
+    if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
+    {
+        if (pSocketCtrl->usedFlag == TRUE)
+        {
+            if (c_stCddDrvEG800AKSocketConfigTable[pSocketCtrl->eSocketType].updateIpPort != NULL)
+            {
+                c_stCddDrvEG800AKSocketConfigTable[pSocketCtrl->eSocketType].updateIpPort(pSocketCtrl, pIp, port);
+            }
+        }
+    }
+}
+
+void CddDrvEG800AK_UpdateMqttUserNamePassword(uint8_t socketIndex, char *pUserName, char *pPassword)
+{
+    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex];
+
+    if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
+    {
+        if (pSocketCtrl->usedFlag == TRUE)
+        {
+            if (c_stCddDrvEG800AKSocketConfigTable[pSocketCtrl->eSocketType].updateMqttUserNamePassword != NULL)
+            {
+                c_stCddDrvEG800AKSocketConfigTable[pSocketCtrl->eSocketType].updateMqttUserNamePassword(pSocketCtrl, pUserName, pPassword);
+            }
+        }
+    }
+}
+
 static void CddDrvEG800AK_SocketDisconnectCallback(void)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = NULL;

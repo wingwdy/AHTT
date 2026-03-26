@@ -131,10 +131,11 @@ const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
 /* 高频的往上放 */
 const ATUrcDescribtor_Struct c_stATUrcDescribtor[14] =
 {
+    { "+QMTPUBEX:",           ATMQTT_UrcQMTPubex,       TRUE,    "MQTT数据发送完成"},
     { "+QMTRECV: ",           ATMQTT_UrcQMTRecv,        TRUE,    "MQTT接收数据"},
     { "SEND OK",              ATTCP_UrcSendOK,          FALSE,   "数据发送成功"},
     { "+QIURC: \"recv\"",     ATTCP_UrcRecv,            FALSE,   "新数据通知"},
-    { "+QMTPUBEX: ",          ATMQTT_UrcQMTPubex,       TRUE,    "MQTT数据发送完成"},
+
 
     { "+QFWRITE:",            ATFTP_UrcRecvWrite,       TRUE,    "写文件应答"},
 

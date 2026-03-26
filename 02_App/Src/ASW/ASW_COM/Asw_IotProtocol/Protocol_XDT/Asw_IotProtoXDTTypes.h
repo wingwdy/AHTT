@@ -18,10 +18,17 @@
 *    Header File Inclusion
 ******************************************************************************/
 #include "DS_LogM.h"
-
+#include "cJSON.h"
+#include "myMalloc.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+
+#define IOT_XDT_TOPIC_LEN                         (32)
+
+
+/* 通信buff缓存定义 */
+#define IOT_XDT_TXRX_BUFFER_SIZE                 (3072U)
 
 /* 协议Topic 定义 */
 #define IOT_XDT_TOPIC_PROVISION_REQUEST      	  "/provision/request"
@@ -41,6 +48,12 @@
 #define IOT_XDT_PRE_TOPIC_V2A_RESPONSE      	  "v2/a/res/"
 #define IOT_XDT_PRE_TOPIC_TSDATA                  "tsdata/run_process"
 #define IOT_XDT_PRE_TOPIC_V2T                     "v2/t"
+
+
+#define IOT_XDT_CREDENTIAL_TYPE                   "MQTT_BASIC"
+
+
+
 
 /* 协议CMD 定义 */
 #define IOT_XDT_CMDTYPE_REQUSET			         (0x00U)
@@ -118,6 +131,40 @@
 #define IOTXDT_CFG_LogPrint(fmt, ...)             DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
 
 
+#define IOT_XDT_CheckKeyIsNull(key, keyName, ret, pAns)                   \
+{\
+	if (key == NULL)\
+	{\
+		if (pAns != NULL)\
+		{\
+			pAns[0] = eIotXDTErrCode_ParaMissing;\
+		}\
+		cJSON_Delete(cRoot);\
+		IOTXDT_CFG_LogPrint("[%s()]: Failed to find the key [%s]\r\n", __FUNCTION__, keyName);\
+		return ret;\
+	} \
+}
+
+#define IOT_XDT_CheckObjIsNull(obj, ret)                   \
+{\
+	if (obj == NULL)\
+	{\
+		cJSON_Delete(cRoot);\
+		IOTXDT_CFG_LogPrint("[%s()]: Failed to Creat JSON object\r\n", __FUNCTION__);\
+		return ret;\
+	} \
+}
+
+#define  IOT_XDT_CheckJsonPrint(cRoot, pJson, ret)    \
+{\
+	if (pJson == NULL)\
+	{\
+		IOTXDT_CFG_LogPrint("[%s()]: Failed to print JSON object\r\n", __FUNCTION__);\
+		cJSON_Delete(cRoot);\
+		return ret;\
+	} \
+}
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -185,6 +232,38 @@ typedef enum
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+typedef struct
+{
+	char *topic;
+    uint16_t cmd;
+	uint8_t cmdType;
+    uint32_t sendCycle;
+    uint16_t (*pSendFunc)(uint8_t u8Port, void *pBuf);
+	uint16_t matchCmd;
+    char *cMeaning;
+}IotXDTSendCtrl_Struct;
+
+typedef struct 
+{
+	uint16_t cmd;
+	char *matchStr;
+	uint8_t cmdType; 
+    uint8_t (*pRecvParse)(uint8_t u8Port, uint8_t *r_data, uint16_t len);
+	uint16_t maxTimeout;
+	uint16_t maxTryCnt;
+	uint16_t matchCmd;
+    char *cMeaning;
+}IotXDTRecvCtrl_Struct;
+
+typedef struct
+{
+	char *topic;
+	uint8_t memberCnt;
+	uint8_t cmdType;
+	IotXDTRecvCtrl_Struct *pStrRecvCtrlTable;
+}IotXDTRecvTopic_Struct;
+
+
 
 
 

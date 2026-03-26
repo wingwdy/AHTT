@@ -73,6 +73,7 @@ static uint16_t ATMQTT_PackPublish(uint8_t socketIndex, void * socketPara, uint8
 static uint8_t ATMQTT_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATMQTT_RecvOpen(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATMQTT_RecvConnect(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
+static uint8_t ATMQTT_RecvSubscribe(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATMQTT_RecvQueryState(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATMQTT_RecvClose(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
 static uint8_t ATMQTT_RecvPublish(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
@@ -118,8 +119,8 @@ const ATCmdDescribtor_Struct c_stMQTTATCmdDescribtor[eATMQTTCmd_Count] =
     ATMQTT_PackConnect,                           ATMQTT_RecvConnect,                  ATMQTT_FailHandle },
 
     [eATMQTTCmd_Subscribe] =
-    { "AT+QMTSUB=[ID],[MID],\"[TOPIC]\",1\r\n",   "+QMTSUB:",              3,   5000,      3000,  TRUE,    "订阅主题",
-    ATMQTT_PackSubscribe,                         ATMQTT_RecvOKACK,                    ATMQTT_FailHandle },
+    { "AT+QMTSUB=[ID],[MID],\"[TOPIC]\",1\r\n",   "+QMTSUB:",              10,   2000,     1000,  TRUE,    "订阅主题",
+    ATMQTT_PackSubscribe,                         ATMQTT_RecvSubscribe,               ATMQTT_FailHandle },
 
     [eATMQTTCmd_Publish] =
     { "AT+QMTPUBEX=[ID],3,1,0,\"[TOPIC]\",[LEN]\r\n", "> ",                3,   5000,      3000,  TRUE,    "发布消息",
@@ -130,7 +131,7 @@ const ATCmdDescribtor_Struct c_stMQTTATCmdDescribtor[eATMQTTCmd_Count] =
     NULL,                                         ATMQTT_RecvQueryState,                ATMQTT_FailHandle },
 
     [eATMQTTCmd_Close] =
-    { "AT+QMTCLOSE=[ID]\r\n",                     "+QMTCLOSE:",           3,   5000,      3000,  TRUE,    "关闭客户端网络",
+    { "AT+QMTCLOSE=[ID]\r\n",                     "+QMTCLOSE",             3,   5000,      3000,  TRUE,    "关闭客户端网络",
     ATMQTT_PackConfig,                            ATMQTT_RecvClose,                    ATMQTT_FailHandle },
 };
 
@@ -321,6 +322,42 @@ static uint8_t ATMQTT_RecvConnect(uint8_t socketIndex, void * socketPara, uint8_
     return ret;
 }
 
+static uint8_t ATMQTT_RecvSubscribe(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
+{
+    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
+    CddNetMMqttPara_Struct *pSocketPara = (CddNetMMqttPara_Struct *)pSocketCtrl->specificPara;
+    ATMQTTPrivate_Struct *pPrivate = (ATMQTTPrivate_Struct *)pSocketCtrl->user_data;
+    uint8_t *pTemp = NULL;
+    uint8_t ret = FALSE;
+    int32_t clientIndex = 0, msgId = 0, result = 0;
+
+    pTemp = Common_SearchData(pData, dataLen, "+QMTSUB:", strlen("+QMTSUB:"));
+    
+    if (pTemp != NULL)
+    {
+        if (sscanf((char*)pTemp, "+QMTSUB: %d,%d,%d,", &clientIndex, &msgId, &result) == 3)
+        {
+            if (result == 0 && clientIndex == socketIndex)
+            {
+                pPrivate->topicSubscribeIndex++;
+                
+                if (pPrivate->topicSubscribeIndex >= pSocketPara->topicCount)
+                {
+                    pPrivate->topicSubscribeIndex = 0;
+                    ATMQTT_SetSocketState(pSocketCtrl->socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
+                    ret = TRUE;
+                }
+                else
+                {
+                    ret = FALSE;
+                }
+            }
+        }
+    }
+
+    return ret;
+}
+
 static uint8_t ATMQTT_RecvQueryState(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
@@ -339,7 +376,7 @@ static uint8_t ATMQTT_RecvQueryState(uint8_t socketIndex, void * socketPara, uin
             if (connectState == 3)
             {
                 pPrivate->waitMqttConnectOkFlag = FALSE;
-                ATMQTT_SetSocketState(pSocketCtrl->socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);  
+                ATMQTT_SetSocketState(pSocketCtrl->socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
             }
 
             ret = TRUE;
@@ -417,13 +454,6 @@ static void ATMQTT_SocketStateMange(uint8_t socketIndex, CddDrvEG800AKSocketCtrl
             {
                 ATMQTT_CloseSocket(pSocketCtrl);
             }
-            else if (Common_JudgeTimeoutMs(pPrivate->cycleDetectSocketStateTickStart, ATMQTT_DECTECT_STATE_PERIOD))
-            {
-                pPrivate->cycleDetectSocketStateTickStart = Common_GetSystick();
-                CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATMQTTCmd_QueryState);
-            }
-            else
-            {}
         }
         else
         {}
@@ -473,6 +503,24 @@ static void ATMQTT_SocketStateMange(uint8_t socketIndex, CddDrvEG800AKSocketCtrl
     }
     else
     {}
+}
+
+void ATMQTT_UpdateIpPort(void *socketPara, char *pIp, uint16_t port)
+{
+    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
+    CddNetMMqttPara_Struct *pSocketPara = (CddNetMMqttPara_Struct *)pSocketCtrl->specificPara;
+
+    strncpy(pSocketPara->ip, pIp, CDD_NETM_CFG_IP_LEN);
+    pSocketPara->port = port;
+}
+
+void ATMQTT_UpdateMqttUserNamePassword(void *socketPara, char *pUserName, char *pPassword)
+{
+    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
+    CddNetMMqttPara_Struct *pSocketPara = (CddNetMMqttPara_Struct *)pSocketCtrl->specificPara;
+
+    strncpy(pSocketPara->userName, pUserName, CDD_NETM_CFG_MQTT_USER_NAME_LEN);
+    strncpy(pSocketPara->password, pPassword, CDD_NETM_CFG_MQTT_PASSWORD_LEN);
 }
 
 void ATMQTT_UrcQMTOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
@@ -526,11 +574,13 @@ void ATMQTT_UrcQMTConnect(uint8_t *pData, void * modulePara, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = NULL;
     CddDrvEG800AKCtrl_Struct *pModulePara = (CddDrvEG800AKCtrl_Struct *)modulePara;
+    CddNetMMqttPara_Struct *pMqttPara = NULL;
     ATMQTTPrivate_Struct *pPrivate = NULL;
     int32_t socketIndex = 0;
     int32_t result = 0;
     int32_t connectState = 0;
     uint8_t *pTemp = NULL;
+    uint8_t credentialFlag = TRUE;
 
     pTemp = Common_SearchData(pData, dataLen, "+QMTCONN:", strlen("+QMTCONN:"));
 
@@ -542,18 +592,46 @@ void ATMQTT_UrcQMTConnect(uint8_t *pData, void * modulePara, uint16_t dataLen)
             {
                 pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
                 pPrivate = (ATMQTTPrivate_Struct *)pSocketCtrl->user_data;
+                pMqttPara = (CddNetMMqttPara_Struct *)pSocketCtrl->specificPara;
 
                 if (connectState == 0 && result == 0)
                 {
                     if (pPrivate->waitMqttConnectOkFlag == TRUE)
                     {
                         pPrivate->waitMqttConnectOkFlag = FALSE;
-                        ATMQTT_SetSocketState(pSocketCtrl->socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);    
+
+                        if (pMqttPara->pFuncMqttConnectCallback != NULL)
+                        {
+                            pMqttPara->pFuncMqttConnectCallback(TRUE, &credentialFlag);
+                        }
+
+                        /* 如果凭据有效，那么订阅主题  */
+                        if (credentialFlag == TRUE)
+                        {
+                            if (pMqttPara->topicCount > 0)
+                            {
+                                pPrivate->topicSubscribeIndex = 0;
+                                CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATMQTTCmd_Subscribe);
+                            }
+                            else
+                            {
+                                ATMQTT_SetSocketState(pSocketCtrl->socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
+                            }
+                        }
+                        else
+                        {
+                            ATMQTT_SetSocketState(pSocketCtrl->socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
+                        }
                     }
                 }
                 else
                 {
                     CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]连接失败，errcode: %d !\r\n", socketIndex, connectState);
+
+                    if (pMqttPara->pFuncMqttConnectCallback != NULL)
+                    {
+                        pMqttPara->pFuncMqttConnectCallback(FALSE, NULL);
+                    }
 
                     if (connectState == 2)
                     {
@@ -573,6 +651,8 @@ void ATMQTT_UrcQMTConnect(uint8_t *pData, void * modulePara, uint16_t dataLen)
 void ATMQTT_UrcQMTPubex(uint8_t *pData, void * modulePara, uint16_t dataLen) 
 {
     CddDrvEG800AK_ExitTransparentMode();
+
+    ATMQTT_UrcQMTRecv(pData, modulePara, dataLen);
 }
 
 void ATMQTT_UrcQMTStat(uint8_t *pData, void * modulePara, uint16_t dataLen) 
@@ -621,15 +701,16 @@ void ATMQTT_UrcQMTRecv(uint8_t *pData, void * modulePara, uint16_t dataLen)
 
     if (pTemp != NULL)
     {
-        if (4 == sscanf((char *)pData, "+QMTRECV: %d,%d,\"%16[^\"]\",%d,%n",&socketIndex, &msgId, topic_buf, &payloadLen, &parsed_chars))
+        if (4 == sscanf((char *)pTemp, "+QMTRECV: %d,%d,\"%32[^\"]\",%d,%n",&socketIndex, &msgId, topic_buf, &payloadLen, &parsed_chars))
         {
             pPayload = pTemp + parsed_chars;
+            pPayload += 1;
 
             if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT && (parsed_chars + payloadLen) <= dataLen)
             {
                 pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
                 pSocketPara = (CddNetMMqttPara_Struct *)pSocketCtrl->specificPara;
-                FrameQueue_PushRx(pSocketPara->frameQueueChannelID, topic_buf, strlen(topic_buf), pPayload, payloadLen);
+                FrameQueue_PushRx(pSocketPara->frameQueueChannelID, topic_buf, strlen(topic_buf), pPayload, payloadLen + 1);
             }
         }
     }

@@ -231,7 +231,57 @@ void CddNetM_GetIccid(uint8_t *pICCID)
     }
 }
 
+void CddNetM_UpdateMqttUserNamePassword(CddNetMPlatType_Enum ePlatType, char *pUserName, char *pPassword)
+{
+	CddNetMLinkPara_Struct *pChannelDCB = NULL;
+	uint8_t curNetDev = g_stCddNetMCtx.curNetDev;
+	uint8_t ret = FALSE;
+	uint8_t index = 0; 
 
+	if (g_stCddNetMCtx.curNetDevChooseSuccess == TRUE)
+	{
+        for (index = 0; index < CCDD_NETM_CFG_LINK_COUNT; index++)
+        {
+            pChannelDCB = &g_stCddNetMCtx.stLinkPara[curNetDev][index];
+            
+            if (pChannelDCB->ePlatType == ePlatType)
+            {
+                if (c_NetMModuleOpsTable[curNetDev].updateMqttUserNamePassword != NULL)
+                {
+                    c_NetMModuleOpsTable[curNetDev].updateMqttUserNamePassword(pChannelDCB->socketIndex, pUserName, pPassword);
+                }
+
+                break;
+            }
+        }
+	}
+}
+
+void CddNetM_UpdateIpPort(CddNetMPlatType_Enum ePlatType, char *pIp, uint16_t port)
+{
+	CddNetMLinkPara_Struct *pChannelDCB = NULL;
+	uint8_t curNetDev = g_stCddNetMCtx.curNetDev;
+	uint8_t ret = FALSE;
+	uint8_t index = 0;
+
+	if (g_stCddNetMCtx.curNetDevChooseSuccess == TRUE)
+	{
+        for (index = 0; index < CCDD_NETM_CFG_LINK_COUNT; index++)
+        {
+            pChannelDCB = &g_stCddNetMCtx.stLinkPara[curNetDev][index];
+            
+            if (pChannelDCB->ePlatType == ePlatType)
+            {
+                if (c_NetMModuleOpsTable[curNetDev].updateIpPort != NULL)
+                {
+                    c_NetMModuleOpsTable[curNetDev].updateIpPort(pChannelDCB->socketIndex, pIp, port);
+                }
+
+                break;
+            }
+        }
+	}
+}
 
 void CddNetM_DeleteLink(CddNetMPlatType_Enum ePlatType)
 {

@@ -81,6 +81,8 @@ typedef struct
  	void (*stateHandle)(uint8_t socketIndex, void *socketCtrl);
     void (*socketDisconnectCallback)(void);
     void (*socketCloseHandle)(void *socketCtrl);
+    void (*updateMqttUserNamePassword)(uint8_t socketIndex, char *pUserName, char *pPassword);
+    void (*updateIpPort)(uint8_t socketIndex, char *pIp, uint16_t port);
 } CddDrvEG800AKSocketCtrl_Struct;
 
 typedef struct
@@ -153,6 +155,8 @@ uint8_t CddDrvEG800AK_AddCmd(uint8_t socketIndex, uint8_t cmd);
 void CddDrvEG800AK_DeleteCmd(uint8_t socketIndex);
 void CddDrvEG800AK_ClearSocketCmd(uint8_t socketIndex);
 void CddDrvEG800AK_SetAbnormalType(CddDrvEG800AKAbnormalHandle_Enum eAbnormalType);
+void CddDrvEG800AK_UpdateIpPort(uint8_t socketIndex, char *pIp, uint16_t port);
+void CddDrvEG800AK_UpdateMqttUserNamePassword(uint8_t socketIndex, char *pUserName, char *pPassword);
 #endif
 
 

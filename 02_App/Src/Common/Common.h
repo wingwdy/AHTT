@@ -154,7 +154,7 @@ void Common_CvtHex2Ascii(uint8_t hexData, uint8_t* pAsciiData);
 int32_t Common_ExtractPathAndFileName(const char *input, 
                                        char *path, uint32_t pathSize,
                                        char *filename, uint32_t nameSize);
-
+uint16_t Common_CalcCharCount(char *pInString, uint16_t StringLen, char cData);
 #endif /* COMMON_H_ */
 
 

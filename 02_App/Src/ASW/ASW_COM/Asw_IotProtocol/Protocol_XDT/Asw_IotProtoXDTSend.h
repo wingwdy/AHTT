@@ -44,8 +44,8 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-
-
+void IotXDT_UpCtrlSendDeal(void);
+uint32_t IotXDT_GetSendCmdSendCycle(uint32_t cmd);
 #endif /* ASW_IOT_PROTO_XDT_SEND_H_ */
 
 

@@ -50,6 +50,8 @@ typedef struct
 	uint8_t (*getCsq)(void);
 	CddNetMOperator_Enum (*getOperator)(void);
 	void (*getModuleTypeInfo)(char *ModuleType, uint16_t readLen);
+	void (*updateMqttUserNamePassword)(uint8_t socketIndex, char *pUserName, char *pPassword);
+	void (*updateIpPort)(uint8_t socketIndex, char *pIp, uint16_t port);
 }CddNetMModuleOps_Struct;
 
 

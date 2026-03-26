@@ -79,6 +79,8 @@ const CddDrvEG800AKSocketConfig_Struct c_stCddDrvEG800AKSocketConfigTable[eCddNe
         .stateHandle = ATMQTT_StateHandle,
         .socketCloseHandle = ATMQTT_CloseSocket,
         .recvTransparentData = NULL,
+        .updateIpPort = ATMQTT_UpdateIpPort,
+        .updateMqttUserNamePassword = ATMQTT_UpdateMqttUserNamePassword,
     },
 
     [eCddNetMSocketType_FTP] = 

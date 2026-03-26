@@ -90,8 +90,9 @@ typedef struct
  	void (*stateHandle)(uint8_t socketIndex, void *socketCtrl);
     void (*socketCloseHandle)(void *socketCtrl);
     void (*recvTransparentData)(void *modulePara, uint8_t *pData, uint16_t dataLen);
+    void (*updateIpPort)(void *socketPara, char *pIp, uint16_t port);
+    void (*updateMqttUserNamePassword)(void *socketPara, char *pUserName, char *pPassword);
 }CddDrvEG800AKSocketConfig_Struct;
-
 
 /******************************************************************************
 *    Global variables Declaration

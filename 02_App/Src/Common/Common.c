@@ -1008,3 +1008,22 @@ int32_t Common_ExtractPathAndFileName(const char *input,
 
     return ret;
 }
+
+uint16_t Common_CalcCharCount(char *pInString, uint16_t StringLen, char cData)
+{
+	uint16_t index = 0;
+	uint16_t count = 0;
+
+	if ((pInString != NULL) && (StringLen != 0) && (cData != '\0'))
+	{
+		for (index = 0; index < StringLen; index++)
+		{
+			if (pInString[index] == cData)
+			{
+				count++;
+			}
+		}
+	}
+
+	return count;
+}

@@ -98,9 +98,8 @@ void IotXDT_FillLinkPara(CddNetMSocketPara_Union *pLinkPara);
 void IotXDT_InitMemory(void);
 void IotXDT_MainFunction(void);
 
-
-
-
+/* 模块内部调用函数 */
+void IotXDT_OfflineHandle(void);
 
 
 

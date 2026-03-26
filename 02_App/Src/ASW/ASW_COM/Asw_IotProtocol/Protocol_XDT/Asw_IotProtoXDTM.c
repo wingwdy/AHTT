@@ -17,10 +17,11 @@
 *    Header File Inclusion
 *******************************************************************************/
 #include "Asw_IotProtoXDTM.h"
+#include "Asw_IotProtoXDTSend.h"
+#include "Asw_IotProtoXDTRecv.h"
 #include "Asw_PlatM.h"
 #include "FrameQueue.h"
 #include "Asw_ChargeIf.h"
-#include "myMalloc.h"
 
 
 /*******************************************************************************
@@ -170,32 +171,89 @@ static void IotXDT_WSOfflineHandle(void)
     FrameQueue_Reset(pIotXDTCtx->frameQueueChannelID);
     memcpy(pIotXDTCtx->platDn, pParam->platPileDn, 16);
 
+
     AswErrhandle_SetErrExsitCallback(0, eErr_PlatformOffline);
     pIotXDTCtx->eWorkState = eIotXDTWorkState_Login;
 }
 
 static void IotXDT_WSLoginHandle(void)
 {
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmXDTPlatInfo_Struct *pPlatInfo = &pPrivateParam->stXDTParam.platinfo;
 
+    if (TRUE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_O))
+    {
+        if (pPlatInfo->credentialSaveFlag != TRUE)
+        {
+            Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_QUERY_ATTACH_CREDENTIAL, TRUE);
+        }
 
-
+        pIotXDTCtx->eWorkState = eIotXDTWorkState_Normal;
+    }
 }
 
 static void IotXDT_WSNormalHandle(void)
 {
+    if (FALSE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_O))
+    {
+        IotXDT_WSOfflineHandle();
+    }
+    else
+    {
+        if (pIotXDTCtx->loginSucc == TRUE)
+        {
+ //           IotXDT_CycleDetect();
+        }
 
+        IotXDT_UpCtrlSendDeal();
 
+        IotXDT_UpCtrlRecvDeal();
 
+  //      IotXDT_TimeoutDetect();
+    }
 }
 
-static void IotXDT_MqttConnectCallback(uint8_t connectResult)
+static void IotXDT_MqttConnectCallback(uint8_t connectResult, uint8_t *pCredential)
 {
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmXDTPlatInfo_Struct *pPlatInfo = &pPrivateParam->stXDTParam.platinfo;
+    uint8_t flag = FALSE;
 
+    if (connectResult == TRUE)
+    {
+        /* 如果已获取到凭据,且拿着新凭据连接成功 */
+        if (pPlatInfo->credentialSaveFlag == TRUE)
+        {
+            if (pPlatInfo->credentialValidFlag != TRUE)
+            {
+                pPlatInfo->credentialValidFlag = TRUE;
+                MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+            }
+        }
 
+        flag = pPlatInfo->credentialSaveFlag;
+    }
+    else
+    {
+        if (pPlatInfo->credentialSaveFlag == TRUE || pPlatInfo->credentialValidFlag == TRUE)
+        {
+            pPlatInfo->credentialSaveFlag = FALSE;
+            pPlatInfo->credentialValidFlag = FALSE;
+            MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+        }
+    }
 
+    if (pCredential != NULL)
+    {
+        pCredential[0] = flag;
+    }
+}
 
-
-
+void IotXDT_OfflineHandle(void)
+{
+    CddNetM_SetLinkDisconnect(eCddNetMPlatType_O);
+    pIotXDTCtx->loginSucc = FALSE;
+    pIotXDTCtx->eWorkState = eIotXDTWorkState_Offline;
 }
 
 uint8_t IotXDT_SetProductKey(char *pProductKey, uint8_t len)
