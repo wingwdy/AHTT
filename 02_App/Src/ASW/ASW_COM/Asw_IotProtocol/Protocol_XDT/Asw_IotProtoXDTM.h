@@ -20,7 +20,6 @@
 #include "Asw_IotProtoXDTTypes.h"
 #include "SysCfg.h"
 #include "Cdd_NetM.h"
-#include "Ms_Nvm.h"
 #include "Asw_Monitor.h"
 
 /******************************************************************************
@@ -43,8 +42,27 @@ typedef enum
 ******************************************************************************/
 typedef struct 
 {
-    MSNvmOrderInfo_Struct stOrderInfo;
+    IotXDTRecvData_Struct stRecvData[SYSCFG_CFG_GUN_NUM];
 
+    MSNvmOrderInfo_Struct stOrderInfo[SYSCFG_CFG_GUN_NUM];
+
+    IotXDTGunStatus_Enum eGunStatus[SYSCFG_CFG_GUN_NUM];
+    IotXDTPileStatus_Enum ePileStatus;
+
+    uint32_t totalChargeEnergy;         /* 累计充电电量  单位：度，保留4位小数 */
+    uint32_t totalChargeTimes;          /* 累计充电次数 */
+    uint32_t totalChargeTimeSec;        /* 累计充电时间，单位：秒 */
+    uint32_t powerOnTick;               /* 上电时刻 */
+    uint32_t runTime;                   /* 运行时间，单位：秒 */
+
+    uint8_t t1SetFlag;
+	uint8_t t2SetFlag;
+
+    uint8_t rebootFlag;
+    uint32_t rebootTick;
+
+    char mainIp[MSNVM_PLAT_IP_LEN + 1];
+    char mainPort[6];
 }IotXDTProtoData_Struct;
 
 typedef struct 
@@ -55,11 +73,11 @@ typedef struct
     typeFuncRecvCtrl pFuncRecvCtrl;
     uint8_t frameQueueChannelID;
 
-    uint8_t platDn[16 + 1];
-    IotXDTProtoData_Struct stProtoData[SYSCFG_CFG_GUN_NUM];
+    char platDn[16 + 1];
+    IotXDTProtoData_Struct stProtoData;
     MSNvmOrderInfo_Struct stOrderInfo;
     uint32_t time;
-
+    
     /* 离线后需清除数据 */
     uint8_t loginSucc;
     uint8_t queueBusyFlag;
@@ -68,9 +86,6 @@ typedef struct
     uint8_t sendIndex;
 	uint8_t sendPort;
     uint16_t reqSeq;
-
-	uint8_t t1SetFlag;
-	uint8_t t2SetFlag;
 
     CommonSendCtrl_Struct stSendCtrl[SYSCFG_CFG_GUN_NUM][IOT_XDT_CMD_SEND_COUNT];
     CommonRecvCtrl_Struct stRecvCtrl[SYSCFG_CFG_GUN_NUM][IOT_XDT_CMD_RECV_COUNT];
@@ -100,9 +115,9 @@ void IotXDT_MainFunction(void);
 
 /* 模块内部调用函数 */
 void IotXDT_OfflineHandle(void);
-
-
-
+IotXDTPileStatus_Enum IotXDT_GetPileStatus(void);
+IotXDTGunStatus_Enum IotXDT_GetGunStatus(uint8_t port);
+uint8_t IotXDT_IsPileOnCharging(void);
 #endif /* ASW_IOT_PROTO_XDTM_H_ */
 
 

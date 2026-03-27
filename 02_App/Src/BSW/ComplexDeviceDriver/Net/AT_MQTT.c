@@ -119,16 +119,16 @@ const ATCmdDescribtor_Struct c_stMQTTATCmdDescribtor[eATMQTTCmd_Count] =
     ATMQTT_PackConnect,                           ATMQTT_RecvConnect,                  ATMQTT_FailHandle },
 
     [eATMQTTCmd_Subscribe] =
-    { "AT+QMTSUB=[ID],[MID],\"[TOPIC]\",1\r\n",   "+QMTSUB:",              10,   2000,     1000,  TRUE,    "订阅主题",
-    ATMQTT_PackSubscribe,                         ATMQTT_RecvSubscribe,               ATMQTT_FailHandle },
+    { "AT+QMTSUB=[ID],[MID],\"[TOPIC]\",1\r\n",   "+QMTSUB:",              10,   1000,     500,  TRUE,    "订阅主题",
+    ATMQTT_PackSubscribe,                         ATMQTT_RecvSubscribe,                ATMQTT_FailHandle },
 
     [eATMQTTCmd_Publish] =
     { "AT+QMTPUBEX=[ID],3,1,0,\"[TOPIC]\",[LEN]\r\n", "> ",                3,   5000,      3000,  TRUE,    "发布消息",
-    ATMQTT_PackPublish,                            ATMQTT_RecvPublish,     ATMQTT_FailHandle },
+    ATMQTT_PackPublish,                            ATMQTT_RecvPublish,                 ATMQTT_FailHandle },
 
     [eATMQTTCmd_QueryState] =
     { "AT+QMTCONN?\r\n",                          "+QMTCONN:",             3,   5000,      3000,  TRUE,    "查询连接状态",
-    NULL,                                         ATMQTT_RecvQueryState,                ATMQTT_FailHandle },
+    NULL,                                         ATMQTT_RecvQueryState,                                ATMQTT_FailHandle },
 
     [eATMQTTCmd_Close] =
     { "AT+QMTCLOSE=[ID]\r\n",                     "+QMTCLOSE",             3,   5000,      3000,  TRUE,    "关闭客户端网络",
@@ -361,11 +361,13 @@ static uint8_t ATMQTT_RecvSubscribe(uint8_t socketIndex, void * socketPara, uint
 static uint8_t ATMQTT_RecvQueryState(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
+    CddNetMMqttPara_Struct *pMqttPara = (CddNetMMqttPara_Struct *)pSocketCtrl->specificPara;
     ATMQTTPrivate_Struct *pPrivate = (ATMQTTPrivate_Struct *)pSocketCtrl->user_data;
     uint8_t *pTemp = NULL;
     uint8_t ret = FALSE;
     int32_t clinetIndex = 0;
     int32_t connectState = 0;
+    uint8_t credentialFlag = TRUE;
 
     pTemp = Common_SearchData(pData, dataLen, "+QMTCONN:", strlen("+QMTCONN:"));
 
@@ -375,8 +377,33 @@ static uint8_t ATMQTT_RecvQueryState(uint8_t socketIndex, void * socketPara, uin
         {
             if (connectState == 3)
             {
-                pPrivate->waitMqttConnectOkFlag = FALSE;
-                ATMQTT_SetSocketState(pSocketCtrl->socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
+                if (pPrivate->waitMqttConnectOkFlag == TRUE)
+                {
+                    pPrivate->waitMqttConnectOkFlag = FALSE;
+
+                    if (pMqttPara->pFuncMqttConnectCallback != NULL)
+                    {
+                        pMqttPara->pFuncMqttConnectCallback(TRUE, &credentialFlag);
+                    }
+
+                    /* 如果凭据有效，那么订阅主题  */
+                    if (credentialFlag == TRUE)
+                    {
+                        if (pMqttPara->topicCount > 0)
+                        {
+                            pPrivate->topicSubscribeIndex = 0;
+                            CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATMQTTCmd_Subscribe);
+                        }
+                        else
+                        {
+                            ATMQTT_SetSocketState(pSocketCtrl->socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
+                        }
+                    }
+                    else
+                    {
+                        ATMQTT_SetSocketState(pSocketCtrl->socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
+                    }
+                }
             }
 
             ret = TRUE;
@@ -454,6 +481,13 @@ static void ATMQTT_SocketStateMange(uint8_t socketIndex, CddDrvEG800AKSocketCtrl
             {
                 ATMQTT_CloseSocket(pSocketCtrl);
             }
+            else if (Common_JudgeTimeoutMs(pPrivate->cycleDetectSocketStateTickStart, ATMQTT_DECTECT_STATE_PERIOD))
+            {
+                pPrivate->cycleDetectSocketStateTickStart = Common_GetSystick();
+                CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATMQTTCmd_QueryState);
+            }
+            else
+            {}
         }
         else
         {}

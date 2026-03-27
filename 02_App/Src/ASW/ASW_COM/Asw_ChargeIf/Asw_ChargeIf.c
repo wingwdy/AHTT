@@ -72,6 +72,19 @@ uint8_t AswChargeIf_CheckGunConnected(uint8_t port)
     return ret;
 }
 
+uint8_t AswChargeIf_CheckS2Closed(uint8_t port)
+{
+    CddCPVolState_Enum eCpVolState = CddCP_GetVolState(port);
+    uint8_t ret = FALSE;    
+
+    if (eCpVolState == eCddCPVolState_6V)
+    {
+        ret = TRUE;
+    }
+
+    return ret;
+}
+
 uint32_t AswChargeIf_GetOutputVoltage(uint8_t port)
 {
     uint32_t outputVol = 0;

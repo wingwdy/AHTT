@@ -75,6 +75,8 @@ void AswChargeIf_ChargeStart(uint8_t port);
 AswErrorType_Enum AswChargeIf_GetStopReason(uint8_t port);
 uint8_t AswChargeIf_GetAuthFlag(uint8_t port);
 void AswChargeIf_AdjustOutputCurrent(uint8_t port, uint8_t adjustMode, uint32_t val);
+uint8_t AswChargeIf_CheckS2Closed(uint8_t port);
+
 #endif /* ASW_CHARGEIF_H_ */    
 
 

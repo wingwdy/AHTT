@@ -46,6 +46,7 @@
 *    Global Function Prototypes
 ******************************************************************************/
 void IotXDT_UpCtrlRecvDeal(void);
+void IotXDT_TimeoutDetect(void);
 #endif /* ASW_IOT_PROTO_XDT_RECV_H_ */
 
 

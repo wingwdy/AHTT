@@ -22,6 +22,8 @@
 #include "Asw_PlatM.h"
 #include "FrameQueue.h"
 #include "Asw_ChargeIf.h"
+#include "SS_Ucm.h"
+#include "Asw_Monitor.h"
 
 
 /*******************************************************************************
@@ -77,24 +79,20 @@ static CommonSendCtrl_Struct* IotXDT_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_XDT_CMD_CALL_REALDATA:                pSendCtrl = &pIotXDTCtx->stSendCtrl[port][11];  break;
         case IOT_XDT_CMD_REQUEST_CARDAUTH:             pSendCtrl = &pIotXDTCtx->stSendCtrl[port][12];  break;
         case IOT_XDT_SET_CATEGORY:                     pSendCtrl = &pIotXDTCtx->stSendCtrl[port][13];  break;
-        case IOT_XDT_REQUEST_ERCODE:                   pSendCtrl = &pIotXDTCtx->stSendCtrl[port][14];  break;
-        case IOT_XDT_SET_ERCODE_RSP:                   pSendCtrl = &pIotXDTCtx->stSendCtrl[port][15];  break;
-        case IOT_XDT_SET_ERCODE_RSP_EVENT:             pSendCtrl = &pIotXDTCtx->stSendCtrl[port][16];  break;
-        case IOT_XDT_QUERY_ERCODE_RSP:                 pSendCtrl = &pIotXDTCtx->stSendCtrl[port][17];  break;
-        case IOT_XDT_CHARGE_START_RSP:                 pSendCtrl = &pIotXDTCtx->stSendCtrl[port][18];  break;
-        case IOT_XDT_CHARGE_START_EVNET:               pSendCtrl = &pIotXDTCtx->stSendCtrl[port][19];  break;
-        case IOT_XDT_CHARGE_STOP_RSP:                  pSendCtrl = &pIotXDTCtx->stSendCtrl[port][20];  break;
-        case IOT_XDT_CHARGE_STOP_EVNET:                pSendCtrl = &pIotXDTCtx->stSendCtrl[port][21];  break;
-        case IOT_XDT_CHARGE_CONTINUE_CHARGE_RSP:       pSendCtrl = &pIotXDTCtx->stSendCtrl[port][22];  break;
-        case IOT_XDT_CHARGE_START_EVNETA:              pSendCtrl = &pIotXDTCtx->stSendCtrl[port][23];  break;
-        case IOT_XDT_QUERY_BOARDINFO_RSP:              pSendCtrl = &pIotXDTCtx->stSendCtrl[port][24];  break;
-        case IOT_XDT_PARA_SET_RSP:                     pSendCtrl = &pIotXDTCtx->stSendCtrl[port][25];  break;
-        case IOT_XDT_PARA_QUERY_RSP:                   pSendCtrl = &pIotXDTCtx->stSendCtrl[port][26];  break;
-        case IOT_XDT_CHARGE_PWRCTRL_RSP:               pSendCtrl = &pIotXDTCtx->stSendCtrl[port][27];  break;
-        case IOT_XDT_CHARGE_RECORD:                    pSendCtrl = &pIotXDTCtx->stSendCtrl[port][28];  break;
-        case IOT_XDT_QUERY_CHARGE_RECORD_RSP:          pSendCtrl = &pIotXDTCtx->stSendCtrl[port][29];  break;
-        case IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE:        pSendCtrl = &pIotXDTCtx->stSendCtrl[port][30];  break;
-        case IOT_XDT_CMD_FIRMWARE_STATE:               pSendCtrl = &pIotXDTCtx->stSendCtrl[port][31];  break;
+        case IOT_XDT_CHARGE_START_RSP:                 pSendCtrl = &pIotXDTCtx->stSendCtrl[port][14];  break;
+        case IOT_XDT_CHARGE_START_EVNET:               pSendCtrl = &pIotXDTCtx->stSendCtrl[port][15];  break;
+        case IOT_XDT_CHARGE_STOP_RSP:                  pSendCtrl = &pIotXDTCtx->stSendCtrl[port][16];  break;
+        case IOT_XDT_CHARGE_STOP_EVNET:                pSendCtrl = &pIotXDTCtx->stSendCtrl[port][17];  break;
+        case IOT_XDT_CHARGE_CONTINUE_CHARGE_RSP:       pSendCtrl = &pIotXDTCtx->stSendCtrl[port][18];  break;
+        case IOT_XDT_CHARGE_START_EVNETA:              pSendCtrl = &pIotXDTCtx->stSendCtrl[port][19];  break;
+        case IOT_XDT_QUERY_BOARDINFO_RSP:              pSendCtrl = &pIotXDTCtx->stSendCtrl[port][20];  break;
+        case IOT_XDT_PARA_SET_RSP:                     pSendCtrl = &pIotXDTCtx->stSendCtrl[port][21];  break;
+        case IOT_XDT_PARA_QUERY_RSP:                   pSendCtrl = &pIotXDTCtx->stSendCtrl[port][22];  break;
+        case IOT_XDT_CHARGE_PWRCTRL_RSP:               pSendCtrl = &pIotXDTCtx->stSendCtrl[port][23];  break;
+        case IOT_XDT_CHARGE_RECORD:                    pSendCtrl = &pIotXDTCtx->stSendCtrl[port][24];  break;
+        case IOT_XDT_QUERY_CHARGE_RECORD_RSP:          pSendCtrl = &pIotXDTCtx->stSendCtrl[port][25];  break;
+        case IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE:        pSendCtrl = &pIotXDTCtx->stSendCtrl[port][26];  break;
+        case IOT_XDT_CMD_FIRMWARE_STATE:               pSendCtrl = &pIotXDTCtx->stSendCtrl[port][27];  break;
         default:
         {
             break;
@@ -122,20 +120,17 @@ static CommonRecvCtrl_Struct* IotXDT_GetRecvCtrl(uint8_t port, uint16_t cmd)
         case IOT_XDT_CMD_CALL_REALDATA_RSP:            pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][9];   break;
         case IOT_XDT_CMD_REQUEST_CARDAUTH_RSP:         pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][10];  break;
         case IOT_XDT_SET_CATEGORY_RSP:                 pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][11];  break;
-        case IOT_XDT_REQUEST_ERCODE_RSP:               pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][12];  break;
-        case IOT_XDT_SET_ERCODE:                       pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][13];  break;
-        case IOT_XDT_QUERY_ERCODE:                     pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][14];  break;
-        case IOT_XDT_CHARGE_START:                     pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][15];  break;
-        case IOT_XDT_CHARGE_STOP:                      pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][16];  break;
-        case IOT_XDT_QUERY_BOARDINFO:                  pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][17];  break;
-        case IOT_XDT_PARA_SET:                         pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][18];  break;
-        case IOT_XDT_PARA_QUERY:                       pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][19];  break;
-        case IOT_XDT_CHARGE_PWRCTRL:                   pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][20];  break;
-        case IOT_XDT_CHARGE_RECORD_RSP:                pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][21];  break;
-        case IOT_XDT_QUERY_CHARGE_RECORD:              pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][22];  break;
-        case IOT_XDT_CMD_OTA_ATTRIBUTE_SET:            pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][23];  break;
-        case IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE_RSP:    pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][24];  break;
-        case IOT_XDT_CHARGE_CONTINUE_CHARGE:           pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][25];  break;
+        case IOT_XDT_CHARGE_START:                     pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][12];  break;
+        case IOT_XDT_CHARGE_STOP:                      pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][13];  break;
+        case IOT_XDT_QUERY_BOARDINFO:                  pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][14];  break;
+        case IOT_XDT_PARA_SET:                         pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][15];  break;
+        case IOT_XDT_PARA_QUERY:                       pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][16];  break;
+        case IOT_XDT_CHARGE_PWRCTRL:                   pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][17];  break;
+        case IOT_XDT_CHARGE_RECORD_RSP:                pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][18];  break;
+        case IOT_XDT_QUERY_CHARGE_RECORD:              pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][19];  break;
+        case IOT_XDT_CMD_OTA_ATTRIBUTE_SET:            pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][20];  break;
+        case IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE_RSP:    pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][21];  break;
+        case IOT_XDT_CHARGE_CONTINUE_CHARGE:           pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][22];  break;
         default:
         {
             break;
@@ -147,6 +142,14 @@ static CommonRecvCtrl_Struct* IotXDT_GetRecvCtrl(uint8_t port, uint16_t cmd)
 
 static void IotXDT_WSInitHandle(void)
 {
+    MSNvmPlatParam_Struct * pParam =  AswPlatM_GetPlatParamPtr();
+    IotXDTProtoData_Struct *pProtoData = &pIotXDTCtx->stProtoData;
+
+    pIotXDTCtx->stProtoData.powerOnTick = Common_GetSystick();
+
+    memcpy(pProtoData->mainIp, pParam->platMainIp, MSNVM_PLAT_IP_LEN);
+    snprintf(pProtoData->mainPort, sizeof(pProtoData->mainPort), "%d", pParam->platMainPort);
+
     pIotXDTCtx->eWorkState = eIotXDTWorkState_Offline;
 }
 
@@ -162,15 +165,14 @@ static void IotXDT_WSOfflineHandle(void)
     pIotXDTCtx->sendPort = 0;    
     pIotXDTCtx->reqSeq = 0;
 
-    pIotXDTCtx->t1SetFlag = FALSE;
-    pIotXDTCtx->t2SetFlag = FALSE;
+    pIotXDTCtx->stProtoData.t1SetFlag = FALSE;
+    pIotXDTCtx->stProtoData.t2SetFlag = FALSE;
 
     memset(pIotXDTCtx->stSendCtrl, 0x00, sizeof(pIotXDTCtx->stSendCtrl));
     memset(pIotXDTCtx->stRecvCtrl, 0x00, sizeof(pIotXDTCtx->stRecvCtrl));
 
     FrameQueue_Reset(pIotXDTCtx->frameQueueChannelID);
     memcpy(pIotXDTCtx->platDn, pParam->platPileDn, 16);
-
 
     AswErrhandle_SetErrExsitCallback(0, eErr_PlatformOffline);
     pIotXDTCtx->eWorkState = eIotXDTWorkState_Login;
@@ -187,9 +189,62 @@ static void IotXDT_WSLoginHandle(void)
         {
             Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_QUERY_ATTACH_CREDENTIAL, TRUE);
         }
+        else
+        {
+            Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_REQUEST_TIMESYNC, TRUE);
+            Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_REQUEST_TIMESYNC, TRUE);
+            Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_REQUEST_LINK, TRUE);
+            Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_REQUEST_LINK, TRUE);
+
+            if (IotXDT_IsPileOnCharging() != TRUE)
+            {
+                Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_REQUEST_RATEMODE, TRUE);
+                Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_REQUEST_RATEMODE, TRUE);
+            }
+
+            Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_PILE_STATE, TRUE);
+            Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_PILE_STATE, TRUE);
+        }
 
         pIotXDTCtx->eWorkState = eIotXDTWorkState_Normal;
     }
+}
+
+static void IotXDT_CycleDetectPileStatus(void)
+{
+    IotXDTPileStatus_Enum ePileStatus = IotXDT_GetPileStatus();
+    IotXDTGunStatus_Enum eGunStatus;
+    uint8_t statusChangeFlag = FALSE;
+    uint8_t port = 0;
+
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+    {
+        eGunStatus = IotXDT_GetGunStatus(port);
+        
+        if (eGunStatus != pIotXDTCtx->stProtoData.eGunStatus[port])
+        {
+            pIotXDTCtx->stProtoData.eGunStatus[port] = eGunStatus;
+            statusChangeFlag = TRUE;
+            break;
+        }
+    }
+
+    if (ePileStatus != pIotXDTCtx->stProtoData.ePileStatus)
+    {
+        pIotXDTCtx->stProtoData.ePileStatus = ePileStatus;
+        statusChangeFlag = TRUE;
+    }
+
+    if (statusChangeFlag == TRUE)
+    {
+        Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_PILE_STATE, TRUE);
+        Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_PILE_STATE, TRUE);
+    }
+}
+
+static void IotXDT_CycleDetect(void)
+{
+    IotXDT_CycleDetectPileStatus();
 }
 
 static void IotXDT_WSNormalHandle(void)
@@ -201,15 +256,15 @@ static void IotXDT_WSNormalHandle(void)
     else
     {
         if (pIotXDTCtx->loginSucc == TRUE)
-        {
- //           IotXDT_CycleDetect();
+        {           
+            IotXDT_CycleDetect();
         }
 
         IotXDT_UpCtrlSendDeal();
 
         IotXDT_UpCtrlRecvDeal();
 
-  //      IotXDT_TimeoutDetect();
+        IotXDT_TimeoutDetect();
     }
 }
 
@@ -249,12 +304,239 @@ static void IotXDT_MqttConnectCallback(uint8_t connectResult, uint8_t *pCredenti
     }
 }
 
+uint8_t IotXDT_IsPileOnCharging(void)
+{
+    uint8_t port = 0;
+    uint8_t ret = FALSE;
+
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+    {
+        if (AswMonitor_IsOrderIdle(port) != TRUE)
+        {
+            ret = TRUE;
+            break;
+        }
+    }
+
+    return ret;
+}
+
+ 
+IotXDTGunStatus_Enum IotXDT_GetGunStatus(uint8_t port)
+{
+    uint8_t chargeState = AswChargeIf_GetChargeState(port);
+	IotXDTGunStatus_Enum eXDTGunStatus;
+
+	if (TRUE == AswErrHandle_IsExsistError(port))
+	{
+		eXDTGunStatus = eIotXDTGunStatus_Error;
+	}
+	else
+	{
+		if (chargeState == ASWCHARGEIF_WORKSTATE_IDLE)
+		{
+			eXDTGunStatus = eIotXDTGunStatus_Idle;
+		}
+		else if (chargeState == ASWCHARGEIF_WORKSTATE_READY)
+		{
+			eXDTGunStatus = eIotXDTGunStatus_Connected;
+		}
+		else if (chargeState == ASWCHARGE_WORKSTATE_STARTING ||
+				 chargeState == ASWCHARGE_WORKSTATE_WAKEUP ||
+				 chargeState == ASWCHARGE_WORKSTATE_CHARGING ||
+				 chargeState == ASWCHARGE_WORKSTATE_PAUSEA ||
+                 chargeState == ASWCHARGE_WORKSTATE_PAUSEB ||
+                 chargeState == ASWCHARGE_WORKSTATE_STOPPING)
+		{
+			eXDTGunStatus = eIotXDTGunStatus_Charging;
+		}
+		else if (chargeState == ASWCHARGE_WORKSTATE_FINISH)
+		{
+			eXDTGunStatus = eIotXDTGunStatus_ChargeFinish;
+		}
+		else
+		{
+			eXDTGunStatus = eIotXDTGunStatus_Idle;
+		}		 
+	}
+
+	return eXDTGunStatus;
+}
+
+
+IotXDTPileStatus_Enum IotXDT_GetPileStatus(void)
+{
+	IotXDTPileStatus_Enum ePileStatus;
+	uint8_t index = 0;
+	uint8_t gunChargeStatus[SYSCFG_CFG_GUN_NUM];
+    uint8_t gunErrStatus[SYSCFG_CFG_GUN_NUM];
+	uint8_t errorFlag = FALSE;
+	uint8_t workFlag = FALSE;
+    uint8_t fixFlag = FALSE;
+
+	for (index = 0; index < SYSCFG_CFG_GUN_NUM; index++)
+	{
+		gunChargeStatus[index] = AswChargeIf_GetChargeState(index);
+        gunErrStatus[index] = AswErrHandle_IsExsistError(index);
+
+        if (SSUcm_IsUpdating() == TRUE || AswMonitor_CheckForbidState() == TRUE)
+        {
+            fixFlag = TRUE;
+        }
+        else if (gunErrStatus[index] == TRUE)
+		{
+			errorFlag = TRUE;
+		}
+        else if (gunChargeStatus[index] != ASWCHARGEIF_WORKSTATE_IDLE)
+        {
+            workFlag = TRUE;
+        }
+        else
+        {}
+	}
+
+    if (fixFlag == TRUE)
+    {
+        ePileStatus = eIotXDTPileStatus_Fix;
+    }
+	else if (errorFlag == TRUE)
+	{
+		ePileStatus = eIotXDTPileStatus_Error;
+	}
+	else if (workFlag == TRUE)
+	{
+		ePileStatus = eIotXDTPileStatus_Work;
+	}
+	else
+	{
+		ePileStatus = eIotXDTPileStatus_Idle;
+	}
+
+	return ePileStatus;
+}
+
 void IotXDT_OfflineHandle(void)
 {
     CddNetM_SetLinkDisconnect(eCddNetMPlatType_O);
     pIotXDTCtx->loginSucc = FALSE;
     pIotXDTCtx->eWorkState = eIotXDTWorkState_Offline;
 }
+
+static void IotXDT_RebootCheck(void)
+{
+    MSNvmPlatParam_Struct * pParam =  AswPlatM_GetPlatParamPtr();
+    IotXDTProtoData_Struct *pProtoData = &pIotXDTCtx->stProtoData;
+	uint8_t index = 0;
+	uint8_t rebootFlag = FALSE;
+
+	if (pProtoData->rebootFlag == TRUE)
+	{
+		if (IotXDT_IsPileOnCharging() == TRUE)
+		{
+			if (Common_JudgeTimeoutMs(pProtoData->rebootTick, 6000))
+			{
+				rebootFlag = TRUE;
+			}
+		}
+		else
+		{
+			rebootFlag = TRUE;
+		}
+	}
+
+	if (rebootFlag == TRUE)
+	{
+        if (pProtoData->rebootFlag == TRUE)
+        {
+            pProtoData->rebootFlag = FALSE;
+
+			if (pProtoData->t1SetFlag == TRUE || pProtoData->t2SetFlag == TRUE)
+			{
+				if (pProtoData->t1SetFlag == TRUE)
+				{
+					memcpy(pParam->platMainIp, pProtoData->mainIp, MSNVM_PLAT_IP_LEN);
+				}
+
+				if (pProtoData->t2SetFlag == TRUE)
+				{
+					pParam->platMainPort = atoi(pProtoData->mainPort);
+				}
+
+                MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)pParam, sizeof(MSNvmPlatParam_Struct));
+			}
+
+            AswMonitor_SetReboot(eAswMonitorRebootType_Immediate);
+        }
+	}
+}
+
+static void IotXDT_CalcStaticInfo(void)
+{
+    AswMonitorChargeData_Struct *pChargeData = NULL;
+	IotXDTGunStatus_Enum gunStatus;
+	uint8_t index = 0;
+	uint32_t delta = 0;
+	uint32_t chargeEnergy = 0, chargeTimeSec = 0;
+    uint32_t currentSysTick = Common_GetSystick();
+	static uint32_t s_lastChargeEnergy[SYSCFG_CFG_GUN_NUM] = {0};
+	static uint32_t s_lastChargeTimeSec[SYSCFG_CFG_GUN_NUM] = {0};
+	static IotXDTGunStatus_Enum s_lastGunStatus[SYSCFG_CFG_GUN_NUM] = {0};
+
+	for (index = 0; index < SYSCFG_CFG_GUN_NUM; index++)
+	{
+        pChargeData = AswMonitor_GetChargeDataPtr(index);
+		gunStatus = IotXDT_GetGunStatus(index);
+	
+		if (gunStatus == eIotXDTGunStatus_Charging)
+		{
+			chargeEnergy = pChargeData->totalLossEnergy;
+			
+			if (chargeEnergy > s_lastChargeEnergy[index])
+			{
+				delta = chargeEnergy - s_lastChargeEnergy[index];
+
+				if (delta < 10000)
+				{
+					pIotXDTCtx->stProtoData.totalChargeEnergy += delta;
+				}
+			}
+
+			s_lastChargeEnergy[index] = chargeEnergy;
+
+			chargeTimeSec = pChargeData->chargeTime;
+			
+			if (chargeTimeSec > s_lastChargeTimeSec[index])
+			{
+				delta = chargeTimeSec - s_lastChargeTimeSec[index];
+				pIotXDTCtx->stProtoData.totalChargeTimeSec += delta;
+			}
+
+			s_lastChargeTimeSec[index] = chargeTimeSec;
+
+			if (s_lastGunStatus[index] != gunStatus)
+			{
+				pIotXDTCtx->stProtoData.totalChargeTimes++; 
+			}
+		}
+		else
+		{
+			s_lastChargeEnergy[index] = 0;
+			s_lastChargeTimeSec[index] = 0;
+		}
+
+		s_lastGunStatus[index] = gunStatus;
+	}
+
+	if (currentSysTick > pIotXDTCtx->stProtoData.powerOnTick)
+	{
+		pIotXDTCtx->stProtoData.runTime = (currentSysTick - pIotXDTCtx->stProtoData.powerOnTick) / 1000;
+	}
+	else
+	{
+		pIotXDTCtx->stProtoData.runTime = (0xFFFFFFFF - pIotXDTCtx->stProtoData.powerOnTick + currentSysTick + 1) / 1000;
+	}
+}
+
 
 uint8_t IotXDT_SetProductKey(char *pProductKey, uint8_t len)
 {
@@ -446,6 +728,10 @@ void IotXDT_MainFunction(void)
             pIotXDTCtx->eWorkState = eIotXDTWorkState_Init;
         }
     }
+
+    IotXDT_CalcStaticInfo();
+
+    IotXDT_RebootCheck();
 }
 
 
