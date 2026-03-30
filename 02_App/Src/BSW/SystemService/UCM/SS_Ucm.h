@@ -52,6 +52,15 @@ typedef enum
     eSSUcmResult_UnexpectedError,        /* 未知错误 */
 }SSUcmResult_Enum;
 
+typedef enum
+{
+    eSSUcmWorkState_Idle,
+    eSSUcmWorkState_WaitIdle,
+    eSSUcmWorkState_Connecting,
+    eSSUcmWorkState_Downloading,
+    eSSUcmWorkState_Finish,
+}SSUcmWorkState_Enum;
+
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
@@ -75,6 +84,7 @@ void SSUcm_ReqStartOTA(CddNetMSocketPara_Union *pNetPara, eSSUcmChannelType_Enum
 uint8_t SSUcm_GetPackIndex(uint8_t *pPackIndex);
 uint8_t SSUcm_GetReadLenAndOffSet(uint16_t *pReadLen, uint32_t* pReadOffset);
 void SSUcm_SetResult(SSUcmResult_Enum eResult);
+SSUcmWorkState_Enum SSUcm_GetWorkState(void);
 SSUcmResult_Enum SSUcm_GetResult(void);
 uint8_t SSUcm_CheckUpdateCondition(void);
 void SSUcm_InitMemory(void);

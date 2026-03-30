@@ -111,7 +111,7 @@ const ATCmdDescribtor_Struct c_stMQTTATCmdDescribtor[eATMQTTCmd_Count] =
     ATMQTT_PackConfig,                            ATMQTT_RecvOKACK,                    ATMQTT_FailHandle },
 
     [eATMQTTCmd_Open] =
-    { "AT+QMTOPEN=[ID],\"[IP]\",[PORT]\r\n",      "+QMTOPEN=",             3,   30000,     3000,  TRUE,    "打开客户端网络",
+    { "AT+QMTOPEN=[ID],\"[IP]\",[PORT]\r\n",      "+QMTOPEN:",             3,   30000,   10000,  TRUE,    "打开客户端网络",
     ATMQTT_PackOpen,                              ATMQTT_RecvOpen,                     ATMQTT_FailHandle },
 
     [eATMQTTCmd_Connect] =
@@ -208,10 +208,18 @@ static uint16_t ATMQTT_PackOpen(uint8_t socketIndex, void * socketPara, uint8_t 
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
     CddNetMMqttPara_Struct *pSocketPara = (CddNetMMqttPara_Struct *)pSocketCtrl->specificPara;
+    ATMQTTPrivate_Struct *pPrivate = (ATMQTTPrivate_Struct *)pSocketCtrl->user_data;
 
     nATLen = Common_ReplaceNum(pData, nATLen, "[ID]", socketIndex, socketIndex);
     nATLen = Common_ReplaceStr(pData, nATLen, "[IP]", pSocketPara->ip, strlen(pSocketPara->ip), "00000000000000");
     nATLen = Common_ReplaceNum(pData, nATLen, "[PORT]", pSocketPara->port, 0);
+
+    if (pPrivate->waitMqttOpenOkFlag == FALSE)
+    {
+        pPrivate->waitMqttOpenOkFlag = TRUE;
+        pPrivate->waitMqttOpenOkTickStart = Common_GetSystick();
+    }
+
     return nATLen;
 }
 
@@ -290,14 +298,45 @@ static uint8_t ATMQTT_RecvOpen(uint8_t socketIndex, void * socketPara, uint8_t *
     ATMQTTPrivate_Struct *pPrivate = (ATMQTTPrivate_Struct *)pSocketCtrl->user_data;
     uint8_t *pTemp = NULL;
     uint8_t ret = FALSE;
+    int32_t connectState = 0;
+    int32_t clientIndex = 0;
 
-    pTemp = Common_SearchData(pData, dataLen, "OK", strlen("OK"));
+    pTemp = Common_SearchData(pData, dataLen, "+QMTOPEN: ", strlen("+QMTOPEN: "));
 
-    if (pTemp != NULL)
+    if (NULL != pTemp)
     {
-        pPrivate->waitMqttOpenOkFlag = TRUE;
-        pPrivate->waitMqttOpenOkTickStart = Common_GetSystick();
-        ret = TRUE;
+        if (2 == sscanf((char*)pTemp, "+QMTOPEN: %d,%d\r\n", &clientIndex, &connectState))
+        {
+            if (clientIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT && clientIndex == socketIndex)
+            {
+                if (connectState == 0)
+                {
+                    if (pPrivate->waitMqttOpenOkFlag == TRUE)
+                    {
+                        pPrivate->waitMqttOpenOkFlag = FALSE;
+                        CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATMQTTCmd_Connect);
+                    }
+
+                    ret = TRUE;
+                }
+                else
+                {
+                    CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]连接失败，errcode: %d !\r\n", socketIndex, connectState);
+
+                    if (connectState == 2 || connectState == 3)
+                    {
+                        CddDrvEG800AK_SetModuleState(eCddNetMModuleState_AbNormal);
+                        CddDrvEG800AK_SetAbnormalType(eCddDrvEG800AKAbnormalHandle_CFun);
+                        ret = TRUE;
+                    }
+                    else
+                    {
+                        ATMQTT_CloseSocket(pSocketCtrl);
+                        ret = FALSE;
+                    }
+                }
+            }
+        }
     }
 
     return ret;

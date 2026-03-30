@@ -41,15 +41,6 @@ const char* c_UcmResultStr[] =
 *******************************************************************************/
 typedef enum
 {
-    eSSUcmWorkState_Idle,
-    eSSUcmWorkState_WaitIdle,
-    eSSUcmWorkState_Connecting,
-    eSSUcmWorkState_Downloading,
-    eSSUcmWorkState_Finish,
-}SSUcmWorkState_Enum;
-
-typedef enum
-{
     eSSUcmBootState_Idle,
     eSSUcmBootState_FileCheck,
     eSSUcmBootState_Backup,    
@@ -398,7 +389,7 @@ uint8_t SSUcm_FileDataHandle(uint8_t *data, uint32_t dataLen)
             writeAddr = g_stSSUcmCtx.currentFrameIndex * SSUCM_CONFIG_SINGLE_FRAME_LEN;
             SSUcm_program_part(FAL_NULL_NAME_UPDATE_PROGRAM, writeAddr,  data, dataLen);
 
-            g_stSSUcmCtx.currentFrameIndex++;    
+            g_stSSUcmCtx.currentFrameIndex++;
 
             if (g_stSSUcmCtx.currentFrameIndex >= g_stSSUcmCtx.totalFrameCnt)
             {
@@ -456,6 +447,11 @@ uint8_t SSUcm_CheckUpdateCondition(void)
     }
 
     return ret;
+}
+
+SSUcmWorkState_Enum SSUcm_GetWorkState(void)
+{
+    return g_stSSUcmCtx.eUcmWorkState;
 }
 
 uint8_t SSUcm_GetReadLenAndOffSet(uint16_t *pReadLen, uint32_t* pReadOffset)

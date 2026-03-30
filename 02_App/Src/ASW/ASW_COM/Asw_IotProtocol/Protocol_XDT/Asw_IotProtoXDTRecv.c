@@ -22,6 +22,8 @@
 #include "SS_Tm.h"
 #include "FrameQueue.h"
 #include "Asw_ErrorHandle.h"
+#include "Version.h"
+#include "SS_Ucm.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -53,7 +55,10 @@ static uint8_t IotXDT_RecvRequestRateModeRsp_ITEM832(uint8_t port, uint8_t *r_da
 static uint8_t IotXDT_RecvQueryRateMode_ITEM833(uint8_t port, uint8_t *r_data, uint16_t len);
 static uint8_t IotXDT_RecvRateModeSet_ITEM834(uint8_t port, uint8_t *r_data, uint16_t len);
 static uint8_t IotXDT_RecvPlieStateRsp_ITEM842(uint8_t port, uint8_t *r_data, uint16_t len);
-
+static uint8_t IotXDT_RecvParaSet_ITEM873(uint8_t port, uint8_t *r_data, uint16_t len);
+static uint8_t IotXDT_RecvParaGet_ITEM875(uint8_t port, uint8_t *r_data, uint16_t len);
+static uint8_t IotXDT_RecvOTAAttribute_ITEM881(uint8_t port, uint8_t *r_data, uint16_t len);
+static uint8_t IotXDT_RecvOTAAttributeRsp_ITEM883(uint8_t port, uint8_t *r_data, uint16_t len);
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
@@ -77,8 +82,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2aTable[] =
 	[0] ={
 		.cmd = IOT_XDT_CMD_OTA_ATTRIBUTE_SET,
 		.matchStr = "fw_tag",
-		.pRecvParse = NULL,
-//		.pRecvParse = IotXDT_RecvOTAAttribute_ITEM881,
+		.pRecvParse = IotXDT_RecvOTAAttribute_ITEM881,
 		.maxTimeout = 0,
 		.maxTryCnt = 0,
 		.matchCmd = IOT_XDT_CMD_NULL,
@@ -114,7 +118,25 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rReqTable[] =
 		.matchCmd = IOT_XDT_CMD_QUERY_RATEMODE_RSP,
 	},
 
-	// [3] ={
+	[3] ={
+		.cmd = IOT_XDT_PARA_SET,
+		.matchStr = "param_set",
+		.pRecvParse = IotXDT_RecvParaSet_ITEM873,
+		.maxTimeout = 0,
+		.maxTryCnt = 0,
+		.matchCmd = IOT_XDT_PARA_SET_RSP,
+	},	
+
+	[4] ={
+		.cmd = IOT_XDT_PARA_QUERY,
+		.matchStr = "param_get",
+		.pRecvParse = IotXDT_RecvParaGet_ITEM875,
+		.maxTimeout = 0,
+		.maxTryCnt = 0,
+		.matchCmd = IOT_XDT_PARA_QUERY_RSP,
+	},
+
+	// [5] ={
 	// 	.cmd = IOT_XDT_CMD_CALL_REALDATA,
 	// 	.matchStr = "req_real_data",
 	// 	.pRecvParse = IotXDT_RecvCallRealData_ITEM846,
@@ -123,7 +145,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rReqTable[] =
 	// 	.matchCmd = IOT_XDT_CMD_CALL_REALDATA_RSP,
 	// },
 
-	// [4] ={
+	// [6] ={
 	// 	.cmd = IOT_XDT_CHARGE_START,
 	// 	.matchStr = "start_cmd",
 	// 	.pRecvParse = IotXDT_RecvChargeStart_ITEM861,
@@ -132,7 +154,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rReqTable[] =
 	// 	.matchCmd = IOT_XDT_CHARGE_START_RSP,
 	// },	
 
-	// [5] ={
+	// [7] ={
 	// 	.cmd = IOT_XDT_CHARGE_STOP,
 	// 	.matchStr = "stop_cmd",
 	// 	.pRecvParse = IotXDT_RecvChargeStop_ITEM864,
@@ -141,7 +163,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rReqTable[] =
 	// 	.matchCmd = IOT_XDT_CHARGE_STOP_RSP,
 	// },
 
-	// [6] ={
+	// [8] ={
 	// 	.cmd = IOT_XDT_QUERY_CHARGE_RECORD,
 	// 	.matchStr = "record_get",
 	// 	.pRecvParse = IotXDT_RecvQueryChargeRecord_ITEM8615,
@@ -150,7 +172,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rReqTable[] =
 	// 	.matchCmd = IOT_XDT_QUERY_CHARGE_RECORD_RSP,
 	// },	
 
-	// [7] ={
+	// [9] ={
 	// 	.cmd = IOT_XDT_CHARGE_PWRCTRL,
 	// 	.matchStr = "control_power",
 	// 	.pRecvParse = IotXDT_RecvPowerCtrl_ITEM8611,
@@ -159,7 +181,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rReqTable[] =
 	// 	.matchCmd = IOT_XDT_CHARGE_PWRCTRL_RSP,
 	// },	
 
-	// [8] ={
+	// [10] ={
 	// 	.cmd = IOT_XDT_CHARGE_CONTINUE_CHARGE,
 	// 	.matchStr = "topup_cmd",
 	// 	.pRecvParse = IotXDT_RecvContinueCharge_ITEM867,
@@ -168,7 +190,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rReqTable[] =
 	// 	.matchCmd = IOT_XDT_CHARGE_CONTINUE_CHARGE_RSP,
 	// },	
 
-	// [9] ={
+	// [11] ={
 	// 	.cmd = IOT_XDT_QUERY_BOARDINFO,
 	// 	.matchStr = "control_info_get",
 	// 	.pRecvParse = IotXDT_RecvQueryBoardInfo_ITEM871,
@@ -176,24 +198,6 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rReqTable[] =
 	// 	.maxTryCnt = 0,
 	// 	.matchCmd = IOT_XDT_QUERY_BOARDINFO_RSP,
 	// },	
-
-	// [10] ={
-	// 	.cmd = IOT_XDT_PARA_SET,
-	// 	.matchStr = "param_set",
-	// 	.pRecvParse = IotXDT_RecvParaSet_ITEM873,
-	// 	.maxTimeout = 0,
-	// 	.maxTryCnt = 0,
-	// 	.matchCmd = IOT_XDT_PARA_SET_RSP,
-	// },	
-
-	// [11] ={
-	// 	.cmd = IOT_XDT_PARA_QUERY,
-	// 	.matchStr = "param_get",
-	// 	.pRecvParse = IotXDT_RecvParaGet_ITEM875,
-	// 	.maxTimeout = 0,
-	// 	.maxTryCnt = 0,
-	// 	.matchCmd = IOT_XDT_PARA_QUERY_RSP,
-	// },
 };
 
 static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rResTable[] = 
@@ -283,17 +287,18 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rResTable[] =
 	// },
 };
 
-// static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2aResTable[] = 
-// {
-// 	[0] ={
-// 		.cmd = IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE_RSP,
-// 		.matchStr = "fw_tag",
-// 		.pRecvParse = IotXDT_RecvOTAAttributeRsp_ITEM883,
-// 		.maxTimeout = 10 * 1000,
-// 		.maxTryCnt = 3,
-// 		.matchCmd = IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE
-// 	},
-// };
+static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2aResTable[] = 
+{
+	[0] ={
+		.cmd = IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE_RSP,
+		.matchStr = "fw_tag",
+		.pRecvParse = IotXDT_RecvOTAAttributeRsp_ITEM883,
+		.maxTimeout = 10 * 1000,
+		.maxTryCnt = 3,
+		.matchCmd = IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE,
+		.cMeaning = "升级属性请求响应",
+	},
+};
 
 static IotXDTRecvTopic_Struct c_StrIotlXRecvTopicTable[] = 
 {
@@ -325,12 +330,12 @@ static IotXDTRecvTopic_Struct c_StrIotlXRecvTopicTable[] =
 		.pStrRecvCtrlTable = c_IotXDTRecvctrlV2rResTable,
 	},
 
-	// [4] ={
-	// 	.topic = IOT_XDT_PRE_TOPIC_V2A_RESPONSE,
-	// 	.cmdType = IOT_XDT_CMDTYPE_RESPONSE,
-	// 	.memberCnt = ARRAY_SIZE(c_IotXDTRecvctrlV2aResTable),
-	// 	.pStrRecvCtrlTable = c_IotXDTRecvctrlV2aResTable,
-	// },
+	[4] ={
+		.topic = IOT_XDT_PRE_TOPIC_V2A_RESPONSE,
+		.cmdType = IOT_XDT_CMDTYPE_RESPONSE,
+		.memberCnt = ARRAY_SIZE(c_IotXDTRecvctrlV2aResTable),
+		.pStrRecvCtrlTable = c_IotXDTRecvctrlV2aResTable,
+	},
 };
 
 /*******************************************************************************
@@ -855,6 +860,298 @@ static uint8_t IotXDT_RecvQueryRateMode_ITEM833(uint8_t port, uint8_t *r_data, u
 	return TRUE;
 }
 
+static uint8_t IotXDT_RecvParaSet_ITEM873(uint8_t port, uint8_t *r_data, uint16_t len)
+{
+	MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmXDTPlatInfo_Struct *pPlatInfo = &pPrivateParam->stXDTParam.platinfo;
+	cJSON *cRoot, *cSnPlat, *cParams;
+	cJSON *cKvList, *cKv[eIotXDTParamType_Count], *cKey, *cValue;
+	uint8_t keyListCnt = 0, index = 0;
+	IOTXDTParamOpt_Struct *pParamOpt = pIotXDTCtx->stProtoData.stRecvData[0].offlineClearData.paramOpt;
+	IOTXDTParamOpt_Struct *pTempParamOpt = NULL;
+	IotXDTErrCodeList_Enum *pAns = NULL;
+	uint8_t ret = TRUE;
+	uint8_t rank = 0;
+	IotXDTParamType_Enum tempType = 0;
+	uint8_t findSucc = FALSE;
+	IotXDTErrCodeList_Enum tempAns;
+	uint32_t tempVal = 0;
+	uint8_t paraChange = FALSE;
+	float tempf;
+
+	cRoot = cJSON_Parse((const char *)r_data);
+	IOT_XDT_CheckObjIsNull(cRoot, FALSE);
+
+	cParams = cJSON_GetObjectItem(cRoot, "params");
+	IOT_XDT_CheckKeyIsNull(cParams, "params", FALSE, pAns);
+
+	cSnPlat = cJSON_GetObjectItem(cParams, "snPlat");
+	IOT_XDT_CheckKeyIsNull(cSnPlat, "snPlat", FALSE, pAns);
+
+	cKvList = cJSON_GetObjectItem(cParams, "kvList");
+	IOT_XDT_CheckKeyIsNull(cKvList, "kvList", FALSE, pAns);
+	keyListCnt = cJSON_GetArraySize(cKvList);
+
+	memset(pParamOpt, 0x00, sizeof(IOTXDTParamOpt_Struct) * eIotXDTParamType_Count);
+
+	if (keyListCnt == 0 || keyListCnt > eIotXDTParamType_Count)
+	{
+		ret = FALSE;
+	}
+	else
+	{
+		for (index = 0; index < keyListCnt; index++)
+		{
+			pTempParamOpt = &pParamOpt[rank];
+			cKv[index] = cJSON_GetArrayItem(cKvList, index);
+
+			if (cKv[index] != NULL)
+			{
+				cKey =  cJSON_GetObjectItem(cKv[index], "key");
+				cValue = cJSON_GetObjectItem(cKv[index], "value");
+
+				if (cKey != NULL && cValue != NULL)
+				{
+					if (0 == strcmp(cKey->valuestring, "t1"))
+					{
+						findSucc = TRUE;
+						tempType = eIotXDTParamType_t1;
+
+						if (strlen(cValue->valuestring) > IOT_XDT_PARAM_MAX_LEN)
+						{
+							tempAns = eIotXDTErrCode_ParaInvalid;
+						}
+						else if (eIotXDTPileStatus_Idle == IotXDT_GetPileStatus())
+						{
+							strncpy(pIotXDTCtx->stProtoData.mainIp, cValue->valuestring, IOT_XDT_PARAM_MAX_LEN);
+							pIotXDTCtx->stProtoData.t1SetFlag = TRUE;
+							tempAns = eIotXDTErrCode_Success;
+						}
+						else
+						{
+							tempAns = eIotXDTErrCode_OnCharging;
+						}
+						
+					}
+					else if (0 == strcmp(cKey->valuestring, "t2"))
+					{
+						findSucc = TRUE;
+						tempType = eIotXDTParamType_t2;
+
+						if (strlen(cValue->valuestring) > 6)
+						{
+							tempAns = eIotXDTErrCode_ParaInvalid;
+						}
+						else if (eIotXDTPileStatus_Idle == IotXDT_GetPileStatus())
+						{
+							strncpy(pIotXDTCtx->stProtoData.mainPort, cValue->valuestring, sizeof(pIotXDTCtx->stProtoData.mainPort) - 1);
+							pIotXDTCtx->stProtoData.t2SetFlag = TRUE;
+							tempAns = eIotXDTErrCode_Success;
+						}
+						else
+						{
+							tempAns = eIotXDTErrCode_OnCharging;
+						}
+					}
+					else if (0 == strcmp(cKey->valuestring, "t18"))
+					{
+						findSucc = TRUE;
+						tempType = eIotXDTParamType_t18;
+						tempAns = eIotXDTErrCode_ParaInvalid;
+
+					}
+					else if (0 == strcmp(cKey->valuestring, "t40"))
+					{
+						findSucc = TRUE;
+						tempType = eIotXDTParamType_t40;
+						tempAns = eIotXDTErrCode_Success;
+						tempVal = atoi(cValue->valuestring);
+
+						if (strcmp(cValue->valuestring, "true") == 0)
+						{
+							tempVal = 1;
+						}
+						else if (strcmp(cValue->valuestring, "false") == 0)
+						{
+							tempVal = 0;
+						}
+						else
+						{
+							tempVal = pPlatInfo->pileDataCycleReportEnable;
+							tempAns = eIotXDTErrCode_ParaInvalid;
+						}
+
+						if (tempVal != pPlatInfo->pileDataCycleReportEnable)
+						{
+							pPlatInfo->pileDataCycleReportEnable = tempVal;
+							paraChange = TRUE;
+						}
+					}
+					else if (0 == strcmp(cKey->valuestring, "t41"))
+					{
+						findSucc = TRUE;
+						tempType = eIotXDTParamType_t41;
+						tempVal = atoi(cValue->valuestring);
+
+						if (tempVal == 0)
+						{
+							tempAns = eIotXDTErrCode_ParaInvalid;
+						}
+						else
+						{
+							tempAns = eIotXDTErrCode_Success;
+							
+							if (tempVal != pPlatInfo->pileDataReportCycle)
+							{
+								paraChange = TRUE;
+								pPlatInfo->pileDataReportCycle = tempVal;
+							}
+						}
+					}
+					else if (0 == strcmp(cKey->valuestring, "t42"))
+					{
+						findSucc = TRUE;
+						tempType = eIotXDTParamType_t42;
+
+						tempf = round(atof(cValue->valuestring) * 10000) / 10000.0;
+
+						if (tempf < 0.1)
+						{
+							tempAns = eIotXDTErrCode_ParaInvalid;
+						}
+						else
+						{
+							tempAns = eIotXDTErrCode_Success;
+
+							if (pPlatInfo->amountChangeThreshold != tempf)
+							{
+								pPlatInfo->amountChangeThreshold = tempf;
+								paraChange = TRUE;
+							}
+						}	
+					}
+					else
+					{
+						findSucc = FALSE;
+						tempAns = eIotXDTErrCode_ParaInvalid;
+					}
+
+					if (findSucc == TRUE)
+					{
+						snprintf(pTempParamOpt->keyName, sizeof(pTempParamOpt->keyName), "%s", cKey->valuestring);
+						pTempParamOpt->optFlag = TRUE;
+						pTempParamOpt->eParaType = tempType;
+						pTempParamOpt->eAns = tempAns;
+						strncpy(pTempParamOpt->paramString, cValue->valuestring, IOT_XDT_PARAM_MAX_LEN);
+						rank++;
+					}
+				}
+			}
+		}
+
+		if (paraChange == TRUE)
+		{
+			MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+		}
+	}
+
+	cJSON_Delete(cRoot);
+	return ret;
+}
+
+static uint8_t IotXDT_RecvParaGet_ITEM875(uint8_t port, uint8_t *r_data, uint16_t len)
+{
+	cJSON *cRoot, *cSnPlat, *cParams;
+	IOTXDTParamOpt_Struct *pParamOpt = pIotXDTCtx->stProtoData.stRecvData[0].offlineClearData.paramOpt;
+	cJSON *cKvList, *cKv[eIotXDTParamType_Count], *cKey;
+	IOTXDTParamOpt_Struct *pTempParamOpt = NULL;
+	IotXDTErrCodeList_Enum *pAns = NULL;
+	IotXDTParamType_Enum tempParaType;
+	uint8_t ret = TRUE;
+	uint8_t rank = 0;
+	uint8_t findSucc = FALSE;
+	uint8_t keyListCnt = 0, index = 0;
+
+	cRoot = cJSON_Parse((const char *)r_data);
+	IOT_XDT_CheckObjIsNull(cRoot, FALSE);
+
+	cParams = cJSON_GetObjectItem(cRoot, "params");
+	IOT_XDT_CheckKeyIsNull(cParams, "params", FALSE, pAns);
+
+	cSnPlat = cJSON_GetObjectItem(cParams, "snPlat");
+	IOT_XDT_CheckKeyIsNull(cSnPlat, "snPlat", FALSE, pAns);
+
+	cKvList = cJSON_GetObjectItem(cParams, "keys");
+	IOT_XDT_CheckKeyIsNull(cKvList, "keys", FALSE, pAns);
+	keyListCnt = cJSON_GetArraySize(cKvList);
+
+	if (keyListCnt == 0 || keyListCnt > eIotXDTParamType_Count)
+	{
+		ret = FALSE;
+	}
+	else
+	{
+		memset(pParamOpt, 0x00, sizeof(IOTXDTParamOpt_Struct) * eIotXDTParamType_Count);
+		
+		for (index = 0; index < keyListCnt; index++)
+		{
+			cKv[index] = cJSON_GetArrayItem(cKvList, index);
+
+			if (cKv[index] != NULL)
+			{
+				pTempParamOpt = &pParamOpt[rank];
+
+				if (0 == strcmp(cKv[index]->valuestring, "t1"))
+				{
+					findSucc = TRUE;
+					tempParaType = eIotXDTParamType_t1;
+				}
+				else if (0 == strcmp(cKv[index]->valuestring, "t2"))
+				{
+					findSucc = TRUE;
+					tempParaType = eIotXDTParamType_t2;
+				}
+				else if (0 == strcmp(cKv[index]->valuestring, "t18"))
+				{
+					findSucc = TRUE;
+					tempParaType = eIotXDTParamType_t18;
+				}
+				else if (0 == strcmp(cKv[index]->valuestring, "t40"))
+				{
+					findSucc = TRUE;
+					tempParaType = eIotXDTParamType_t40;
+				}					
+				else if (0 == strcmp(cKv[index]->valuestring, "t41"))
+				{
+					findSucc = TRUE;
+					tempParaType = eIotXDTParamType_t41;
+				}
+				else if (0 == strcmp(cKv[index]->valuestring, "t42"))
+				{
+					findSucc = TRUE;
+					tempParaType = eIotXDTParamType_t42;
+				}
+				else
+				{
+					findSucc = FALSE;
+				}
+
+				if (findSucc == TRUE)
+				{
+					snprintf(pTempParamOpt->keyName, sizeof(pTempParamOpt->keyName), "%s", cKv[index]->valuestring);
+					pTempParamOpt->optFlag = TRUE;
+					pTempParamOpt->eParaType = tempParaType;
+					rank++;
+				}
+			}
+		}
+	}
+
+	cJSON_Delete(cRoot);
+	return ret;
+}
+
+
 static uint8_t IotXDT_RecvPlieStateRsp_ITEM842(uint8_t port, uint8_t *r_data, uint16_t len)
 {
 	cJSON *cRoot, *cStatus;
@@ -880,6 +1177,193 @@ static uint8_t IotXDT_RecvPlieStateRsp_ITEM842(uint8_t port, uint8_t *r_data, ui
 	return ret;
 }
 
+static uint8_t IotXDT_ParseFtpUrl(char *fw_url, CddNetMFtpPara_Struct *pFtpPara)
+{
+    uint8_t parseSuccFlag = 0;
+    int parseCnt = 0;
+    char full_path[CDD_NETM_CFG_FTP_PATH_LEN + CDD_NETM_CFG_FTP_FILENAME_LEN + 2] = {'/'};
+    char *last_slash = NULL;
+    int path_len = 0;
+    size_t len = 0;
+    
+    /* 第一步：解析基础信息 + 剩余的整个路径+文件名 */
+    parseCnt = sscanf(fw_url, "ftp://%24[^:]:%24[^@]@%72[^:]:%hu/%s",
+                      pFtpPara->user, pFtpPara->passwd, pFtpPara->ip,
+                      &pFtpPara->port, &full_path[1]);
+    
+    if (parseCnt == 5)
+    {
+        /* 第二步：从 full_path 中分离路径和文件名 */
+        last_slash = strrchr(full_path, '/');
+        
+        if (last_slash != NULL)
+        {
+            /* 分离路径和文件名 */
+            path_len = last_slash - full_path;
+            
+            if (path_len > 0)
+            {
+                /* 复制路径（包含开头的/） */
+                strncpy(pFtpPara->path, full_path, path_len);
+                pFtpPara->path[path_len] = '\0';
+                
+                /* 确保路径以 '/' 结尾 */
+                len = strlen(pFtpPara->path);
+                if (len > 0 && pFtpPara->path[len - 1] != '/')
+                {
+                    strcat(pFtpPara->path, "/");
+                }
+            }
+            else
+            {
+                /* 只有根目录的情况：/filename */
+                strcpy(pFtpPara->path, "/");
+            }
+            
+            /* 文件名 */
+            strcpy(pFtpPara->fileName, last_slash + 1);
+        }
+        else
+        {
+            /* 没有路径，只有文件名 */
+            strcpy(pFtpPara->path, "/");
+            strcpy(pFtpPara->fileName, full_path);
+        }
+        
+        parseSuccFlag = 1;
+    }
+    
+    return parseSuccFlag;
+}
+
+static void IotXDT_OTAAttributeCheck(char *fw_url, char *fw_version, uint8_t activeFlag)
+{
+	MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmXDTPlatInfo_Struct *pPlatInfo = &pPrivateParam->stXDTParam.platinfo;
+	CddNetMSocketPara_Union socketPara = {0};
+	uint8_t checkResult = FALSE;
+
+	if (fw_url != NULL && fw_version != NULL)
+	{
+		if (IotXDT_ParseFtpUrl(fw_url, &socketPara.stFtpPara) == FALSE)
+		{
+			IOTXDT_CFG_LogPrint("[%s()]Parse ftp url failed...\r\n", __FUNCTION__);
+		}
+		else if (strcmp(fw_version, APP_SW_VERSION_STRING) == 0)
+		{
+			IOTXDT_CFG_LogPrint("[%s()]The received fw_version is same as the current software version...\r\n", __FUNCTION__);
+		}
+		else if (CddNetM_CheckFileLinkExsit() == TRUE)
+		{
+			IOTXDT_CFG_LogPrint("[%s()]The file link busy...\r\n", __FUNCTION__);
+		}
+		else if (SSUcm_IsOngoging() == TRUE)
+		{
+			IOTXDT_CFG_LogPrint("[%s()]the device is updating...\r\n", __FUNCTION__);
+		}
+		else 
+		{
+			if (strcmp(fw_version, pPlatInfo->lastOtaSoftwareVersion) == 0)
+			{
+				if (activeFlag == TRUE)
+				{
+					IOTXDT_CFG_LogPrint("[%s()]the device is forced to update...\r\n", __FUNCTION__);
+					checkResult = TRUE;
+					SSUcm_ReqStartOTA(&socketPara, eSSUcmChannelType_FTP, eSSUcmExcuteMode_Immediate, 0);
+				}
+				else
+				{
+					IOTXDT_CFG_LogPrint("[%s()]The fireware version is same as the last update version...\r\n", __FUNCTION__);
+				}
+			}
+			else
+			{
+				checkResult = TRUE;
+			}
+		}
+	}
+
+	if (checkResult == TRUE)
+	{
+		IOTXDT_CFG_LogPrint("[%s()]The received Info as followed:\r\n""***********************************\r\n"
+		"ip = %s\r\nport = %d\r\npath = %s\r\n""fileName = %s\r\nUserName = %s\r\nPasswd = %s\r\nVersion:%s--->%s\r\n"
+		"***********************************\r\n", __FUNCTION__, socketPara.stFtpPara.ip, socketPara.stFtpPara.port, 
+		socketPara.stFtpPara.path, socketPara.stFtpPara.fileName, socketPara.stFtpPara.user, socketPara.stFtpPara.passwd, 
+		APP_SW_VERSION_STRING, fw_version);
+
+		SSUcm_ReqStartOTA(&socketPara, eSSUcmChannelType_FTP, eSSUcmExcuteMode_Immediate, 0);
+		pIotXDTCtx->stProtoData.otaStartFlag = TRUE;
+		pPlatInfo->otaState = eIotXDTOtaState_Starting;
+		memset(pPlatInfo->otaSoftwareVersion, 0, sizeof(pPlatInfo->otaSoftwareVersion));
+		strcpy(pPlatInfo->otaSoftwareVersion, fw_version);
+		MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+		SSUcm_GetResult();
+	}
+}
+
+
+static uint8_t IotXDT_RecvOTAAttribute_ITEM881(uint8_t port, uint8_t *r_data, uint16_t len)
+{
+	cJSON *cRoot, *cFw_tag, *cFw_Title, *cFw_Url, *cFw_Version;
+	char fw_url[256] = { 0 };
+	char fw_version[32] = { 0 };
+	IotXDTErrCodeList_Enum *pAns = NULL;
+
+	cRoot = cJSON_Parse((const char *)r_data);
+	IOT_XDT_CheckObjIsNull(cRoot, FALSE);
+
+	cFw_tag = cJSON_GetObjectItem(cRoot, "fw_tag");
+	IOT_XDT_CheckKeyIsNull(cFw_tag, "fw_tag", FALSE, pAns);
+	
+	cFw_Title = cJSON_GetObjectItem(cRoot, "fw_title");
+	IOT_XDT_CheckKeyIsNull(cFw_Title, "fw_title", FALSE, pAns);
+
+	cFw_Url = cJSON_GetObjectItem(cRoot, "fw_url");
+	IOT_XDT_CheckKeyIsNull(cFw_Url, "fw_url", FALSE, pAns);
+
+	cFw_Version = cJSON_GetObjectItem(cRoot, "fw_version");
+	IOT_XDT_CheckKeyIsNull(cFw_Version, "fw_version", FALSE, pAns);
+
+	strncpy(fw_url, cFw_Url->valuestring, sizeof(fw_url) - 1);
+	strncpy(fw_version, cFw_Version->valuestring, sizeof(fw_version) - 1);
+
+	IotXDT_OTAAttributeCheck(fw_url, fw_version, TRUE);
+	cJSON_Delete(cRoot);
+	return FALSE;
+}
+
+static uint8_t IotXDT_RecvOTAAttributeRsp_ITEM883(uint8_t port, uint8_t *r_data, uint16_t len)
+{
+	cJSON *cShared, *cRoot, *cFw_tag, *cFw_Title, *cFw_Url, *cFw_Version;
+	char fw_url[256] = { 0 };
+	char fw_version[32] = { 0 };
+	IotXDTErrCodeList_Enum *pAns = NULL;
+
+	cRoot = cJSON_Parse((const char *)r_data);
+	IOT_XDT_CheckObjIsNull(cRoot, FALSE);
+
+	cShared = cJSON_GetObjectItem(cRoot, "shared");
+	IOT_XDT_CheckKeyIsNull(cShared, "shared", TRUE, pAns);
+
+	cFw_tag = cJSON_GetObjectItem(cShared, "fw_tag");
+	IOT_XDT_CheckKeyIsNull(cFw_tag, "fw_tag", TRUE, pAns);
+	
+	cFw_Title = cJSON_GetObjectItem(cShared, "fw_title");
+	IOT_XDT_CheckKeyIsNull(cFw_Title, "fw_title", TRUE, pAns);
+
+	cFw_Url = cJSON_GetObjectItem(cShared, "fw_url");
+	IOT_XDT_CheckKeyIsNull(cFw_Url, "fw_url", TRUE, pAns);
+
+	cFw_Version = cJSON_GetObjectItem(cShared, "fw_version");
+	IOT_XDT_CheckKeyIsNull(cFw_Version, "fw_version", TRUE, pAns);
+
+	strncpy(fw_url, cFw_Url->valuestring, sizeof(fw_url) - 1);
+	strncpy(fw_version, cFw_Version->valuestring, sizeof(fw_version) - 1);
+
+	IotXDT_OTAAttributeCheck(fw_url, fw_version, FALSE);
+	cJSON_Delete(cRoot);
+	return TRUE;
+}
 
 static uint32_t IotXDT_ParseRecvRpc(char * recvTopic, uint8_t preTopicLen)
 {
@@ -1016,7 +1500,7 @@ static uint8_t IotXDT_GetMatchRecvCtrlTable(uint8_t *pPort, IotXDTRecvTopic_Stru
 	return ret;
 }
 
-static IotXDTRecvTopic_Struct* IotXDT_FindRecvTopicTablePointer(char *topic)
+static IotXDTRecvTopic_Struct* IotXDT_FindRecvTopicTablePointer(char *topic, uint8_t topicLen)
 {
 	IotXDTRecvTopic_Struct *pRecvTopicTable = NULL;
 	IotXDTRecvCtrl_Struct *pRecvCtrl = NULL;
@@ -1028,7 +1512,7 @@ static IotXDTRecvTopic_Struct* IotXDT_FindRecvTopicTablePointer(char *topic)
 		
 		if (0 == memcmp(pRecvTopicTable->topic, topic, strlen(pRecvTopicTable->topic)))
 		{
-			if (Common_CalcCharCount(pRecvTopicTable->topic, strlen(pRecvTopicTable->topic), '/') == Common_CalcCharCount(topic, strlen(topic), '/'))
+			if (Common_CalcCharCount(pRecvTopicTable->topic, strlen(pRecvTopicTable->topic), '/') == Common_CalcCharCount(topic, topicLen, '/'))
 			{
 				break;
 			}
@@ -1049,14 +1533,20 @@ static void IotXDT_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLe
 	uint32_t rpc = 0;
 	uint8_t port = 0;
 	uint8_t ensureGunNoFlag = FALSE;
+	char topic[32] = {0};
 
     if (dataLen > 0 && topicLen > 0)
     {
-        pRecvTopicTable = IotXDT_FindRecvTopicTablePointer((char *)pTopic);
+		if (topicLen < (sizeof(topic) - 1))
+		{
+			memcpy(topic, pTopic, topicLen);
+		}
+
+        pRecvTopicTable = IotXDT_FindRecvTopicTablePointer(topic, topicLen);
         
         if (pRecvTopicTable != NULL)
         {
-            rpc = IotXDT_ParseRecvRpc((char *)pTopic, strlen(pRecvTopicTable->topic));
+            rpc = IotXDT_ParseRecvRpc(topic, strlen(pRecvTopicTable->topic));
             port = IotXDT_ParseRecvPort(pData, dataLen, &ensureGunNoFlag);
 
             if (IotXDT_GetMatchRecvCtrlTable(&port, pRecvTopicTable, pData, dataLen, rpc, &index, ensureGunNoFlag))
@@ -1100,7 +1590,7 @@ static void IotXDT_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLe
         }
         else
         {
-            IOTXDT_CFG_LogPrint("\"%s\" topic parse failed...\r\n", pTopic);
+            IOTXDT_CFG_LogPrint("\"%s\" topic parse failed...\r\n", topic);
         }
     }
 }

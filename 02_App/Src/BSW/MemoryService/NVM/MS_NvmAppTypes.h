@@ -64,6 +64,7 @@
 #define MSNVM_XDT_PRODUCT_SECRET_LEN          64
 #define MSNVM_XDT_USER_NAME_LEN               64
 #define MSNVM_XDT_PASSWORD_LEN                64
+#define MSNVM_XDT_VERSION_LEN                 32
 
 #define MSNVM_XDT_BILLMODE_PERIOD_COUNT       16
 
@@ -341,6 +342,10 @@ typedef struct
     uint8_t  credentialValidFlag;                                  /* 凭据有效标记（连接成功生效） */
     char     cUserName[MSNVM_XDT_USER_NAME_LEN + 1];               /* 用户名  */
     char     cPassword[MSNVM_XDT_PASSWORD_LEN + 1];                /* 密码  */
+
+    char     lastOtaSoftwareVersion[MSNVM_XDT_VERSION_LEN + 1];    /* 上一次升级的OTA软件版本 */
+    char     otaSoftwareVersion[MSNVM_XDT_VERSION_LEN + 1];        /* 当前正在升级的OTA软件版本 */
+    uint8_t  otaState;                                             /* OTA状态 */
 }MSNvmXDTPlatInfo_Struct;
 
 typedef struct 

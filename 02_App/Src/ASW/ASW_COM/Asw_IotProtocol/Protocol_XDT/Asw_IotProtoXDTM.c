@@ -24,6 +24,7 @@
 #include "Asw_ChargeIf.h"
 #include "SS_Ucm.h"
 #include "Asw_Monitor.h"
+#include "Version.h"
 
 
 /*******************************************************************************
@@ -151,6 +152,14 @@ static void IotXDT_WSInitHandle(void)
     snprintf(pProtoData->mainPort, sizeof(pProtoData->mainPort), "%d", pParam->platMainPort);
 
     pIotXDTCtx->eWorkState = eIotXDTWorkState_Offline;
+
+
+
+
+
+
+
+
 }
 
 static void IotXDT_WSOfflineHandle(void)
@@ -204,6 +213,27 @@ static void IotXDT_WSLoginHandle(void)
 
             Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_PILE_STATE, TRUE);
             Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_PILE_STATE, TRUE);
+
+            Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE, TRUE);
+            Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE, TRUE);
+
+            if (pPlatInfo->otaState == eIotXDTOtaState_Starting && pIotXDTCtx->stProtoData.otaStartFlag == FALSE)
+            {
+                if (strcmp(APP_SW_VERSION_STRING, pPlatInfo->otaSoftwareVersion) == 0)
+                {
+                    pPlatInfo->otaState = eIotXDTOtaState_Succ;
+                }
+                else
+                {
+                    pPlatInfo->otaState = eIotXDTOtaState_Fail;
+                }
+
+                memcpy(pPlatInfo->lastOtaSoftwareVersion, pPlatInfo->otaSoftwareVersion, MSNVM_XDT_VERSION_LEN);
+                MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+            }
+
+            Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_FIRMWARE_STATE, TRUE);
+            Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_FIRMWARE_STATE, TRUE);
         }
 
         pIotXDTCtx->eWorkState = eIotXDTWorkState_Normal;
@@ -470,6 +500,32 @@ static void IotXDT_RebootCheck(void)
 	}
 }
 
+static void IotXDT_OtaCheck(void)
+{
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmXDTPlatInfo_Struct *pPlatInfo = &pPrivateParam->stXDTParam.platinfo;
+    SSUcmResult_Enum otaResult;
+
+    if (pPlatInfo->otaState == eIotXDTOtaState_Starting && pIotXDTCtx->stProtoData.otaStartFlag == TRUE)
+    {
+        otaResult = SSUcm_GetResult();
+
+        if (otaResult != eSSUcmResult_None && otaResult != eSSUcmResult_Succ)
+        {
+            pPlatInfo->otaState = eIotXDTOtaState_Fail;
+            memcpy(pPlatInfo->lastOtaSoftwareVersion, pPlatInfo->otaSoftwareVersion, MSNVM_XDT_VERSION_LEN);
+            MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+            pIotXDTCtx->stProtoData.otaStartFlag = FALSE;
+
+             if (pIotXDTCtx->loginSucc == TRUE)
+             {
+                Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_FIRMWARE_STATE, TRUE);
+                Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_FIRMWARE_STATE, TRUE);
+             }
+        }
+    }
+}
+
 static void IotXDT_CalcStaticInfo(void)
 {
     AswMonitorChargeData_Struct *pChargeData = NULL;
@@ -732,6 +788,8 @@ void IotXDT_MainFunction(void)
     IotXDT_CalcStaticInfo();
 
     IotXDT_RebootCheck();
+
+    IotXDT_OtaCheck();
 }
 
 

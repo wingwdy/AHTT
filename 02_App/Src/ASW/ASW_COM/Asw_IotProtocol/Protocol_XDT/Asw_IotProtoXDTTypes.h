@@ -25,6 +25,8 @@
 *    Macro Definition
 ******************************************************************************/
 
+#define IOT_XDT_PROTOCOL_VER                      "v1.6.9"
+
 /* 通信buff缓存定义 */
 #define IOT_XDT_TXRX_BUFFER_SIZE                 (3072U)
 
@@ -38,8 +40,6 @@
 #define IOT_XDT_FWVERSION_LEN                      32
 #define IOT_XDT_PARAM_MAX_LEN                      64
 #define IOT_XDT_FWSTATE_LEN                        16
-
-
 
 /* 协议Topic 定义 */
 #define IOT_XDT_TOPIC_PROVISION_REQUEST      	  "/provision/request"
@@ -64,7 +64,6 @@
 #define IOT_XDT_CREDENTIAL_TYPE                   "MQTT_BASIC"
 
 #define IOT_XDT_MAGIC_NUM                         (0x55AAAA55U)
-
 
 /* 协议CMD 定义 */
 #define IOT_XDT_CMDTYPE_REQUSET			         (0x00U)
@@ -250,6 +249,14 @@ typedef enum
 	eIotXDTGunStatus_AppointMent = 7,
 	eIotXDTGunStatus_Error = 255,
 }IotXDTGunStatus_Enum;
+
+typedef enum
+{
+	eIotXDTOtaState_Idle,
+	eIotXDTOtaState_Starting,
+	eIotXDTOtaState_Succ,
+	eIotXDTOtaState_Fail,
+}IotXDTOtaState_Enum;
 
 /******************************************************************************
 *    Typedef Definition

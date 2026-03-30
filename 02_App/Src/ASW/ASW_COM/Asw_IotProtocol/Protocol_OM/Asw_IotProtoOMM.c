@@ -256,10 +256,12 @@ static void IotOM_CycleDetectUnreporteRecord(void)
 
 static void IotOM_CycleDetectUnreportedUcmResult(void)
 {
-    SSUcmResult_Enum UcmResult = SSUcm_GetResult();
+    SSUcmResult_Enum UcmResult;
 
     if (pIotOMCtx->stProtoData[0].recvUpdateFlag == TRUE)
     {
+        UcmResult = SSUcm_GetResult();
+
         if (UcmResult != eSSUcmResult_None && UcmResult != eSSUcmResult_Succ)
         {
             if (TRUE != Common_GetSendEnable(pIotOMCtx->pFuncSendCtrl, 0, IOT_OM_CMD_UPDATE_RSP))

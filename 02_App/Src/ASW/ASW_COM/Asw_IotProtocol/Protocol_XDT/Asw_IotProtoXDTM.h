@@ -61,6 +61,8 @@ typedef struct
     uint8_t rebootFlag;
     uint32_t rebootTick;
 
+    uint8_t otaStartFlag;
+
     char mainIp[MSNVM_PLAT_IP_LEN + 1];
     char mainPort[6];
 }IotXDTProtoData_Struct;
