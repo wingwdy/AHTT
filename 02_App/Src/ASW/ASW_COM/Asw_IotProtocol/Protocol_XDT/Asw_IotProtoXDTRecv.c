@@ -1186,6 +1186,10 @@ static uint8_t IotXDT_ParseFtpUrl(char *fw_url, CddNetMFtpPara_Struct *pFtpPara)
     int path_len = 0;
     size_t len = 0;
     
+    /* 初始化FTP参数 */
+    pFtpPara->eFileFormat = eCddNetMFileType_BIN;
+    pFtpPara->eMode = eCddNetMFtpMode_Download;
+    
     /* 第一步：解析基础信息 + 剩余的整个路径+文件名 */
     parseCnt = sscanf(fw_url, "ftp://%24[^:]:%24[^@]@%72[^:]:%hu/%s",
                       pFtpPara->user, pFtpPara->passwd, pFtpPara->ip,
@@ -1269,7 +1273,6 @@ static void IotXDT_OTAAttributeCheck(char *fw_url, char *fw_version, uint8_t act
 				{
 					IOTXDT_CFG_LogPrint("[%s()]the device is forced to update...\r\n", __FUNCTION__);
 					checkResult = TRUE;
-					SSUcm_ReqStartOTA(&socketPara, eSSUcmChannelType_FTP, eSSUcmExcuteMode_Immediate, 0);
 				}
 				else
 				{
@@ -1291,7 +1294,7 @@ static void IotXDT_OTAAttributeCheck(char *fw_url, char *fw_version, uint8_t act
 		socketPara.stFtpPara.path, socketPara.stFtpPara.fileName, socketPara.stFtpPara.user, socketPara.stFtpPara.passwd, 
 		APP_SW_VERSION_STRING, fw_version);
 
-		SSUcm_ReqStartOTA(&socketPara, eSSUcmChannelType_FTP, eSSUcmExcuteMode_Immediate, 0);
+		SSUcm_ReqStartOTA(&socketPara, eSSUcmChannelType_FTP, eSSUcmExcuteMode_WaitIdle, 0);
 		pIotXDTCtx->stProtoData.otaStartFlag = TRUE;
 		pPlatInfo->otaState = eIotXDTOtaState_Starting;
 		memset(pPlatInfo->otaSoftwareVersion, 0, sizeof(pPlatInfo->otaSoftwareVersion));

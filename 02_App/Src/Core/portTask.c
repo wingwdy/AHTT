@@ -152,7 +152,7 @@ void portTask_CreatAllTask(void)
         }
         else
         {
-            SSWdgM_RegisterModule(pTaskCtr->cTaskName, 5000, &pTaskCtr->wdgId);
+            SSWdgM_RegisterModule(pTaskCtr->cTaskName, 10000, &pTaskCtr->wdgId);
         }
 	}
 }
