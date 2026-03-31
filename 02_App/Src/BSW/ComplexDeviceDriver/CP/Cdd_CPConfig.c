@@ -90,7 +90,7 @@ static float CddCPCfg_GetCPVol(uint8_t port)
     }
 
     averageAdcData = Common_MedianU16Filter(adcData, CDDCP_CFG_ADC_BUFF_POINT, CDDCP_CFG_ADC_BUFF_POINT / 2);
-    cpVol = (averageAdcData / 4096.0 * 3.3  - 1.595) / 0.119 - 0.1;
+    cpVol = (averageAdcData / 4096.0 * 3.3) * 8.32439 - 13.2805;
 
     return cpVol;
 }
