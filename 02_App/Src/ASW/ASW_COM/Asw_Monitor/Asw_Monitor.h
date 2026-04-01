@@ -147,6 +147,11 @@ typedef struct
 	uint32_t periodTotalMoney[ASWMONITOR_BILLMODE_PERIOD_COUNT];        /* (计损后)时段的总金额 小数点后四位 */
 }AswMonitorChargeData_Struct;
 
+typedef struct
+{
+    uint32_t minAccountMoney;    /* 最小账户余额 0.01 元 */
+}AswMonitorCtrlPara_Struct;
+
 
 
 /******************************************************************************
@@ -174,7 +179,7 @@ void AswMonitor_PrintChargeData(void);
 void AswMonitor_SaveChargeRecord(uint8_t port, uint8_t orderSaveReason);
 uint8_t AswMonitor_CheckSwipCardSuccEvent(void);
 uint8_t AswMonitor_CheckSwipCardFailEvent(void);
-
+void AswMonitor_SetMinAccountMoney(uint32_t minAccountMoney);
 uint8_t AswMonitor_CheckForbidState(void);
 void AswMonitor_SetForbidState(uint8_t lockState, uint8_t lockReason);
 void AswMonitor_GetForbidState(uint8_t *pLockState, uint8_t *pLockReason);

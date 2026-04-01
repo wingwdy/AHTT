@@ -246,6 +246,9 @@ static void IotXDT_WSInitHandle(void)
 
     pPlatInfo->resetCount++;
     MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+
+    AswMonitor_SetMinAccountMoney(IOT_XDT_MIN_ACCOUNT_MONEY);
+    AswChargeIf_SetProfile(ASWCHARGEIF_PROFILE_XDT);
 }
 
 static void IotXDT_WSOfflineHandle(void)

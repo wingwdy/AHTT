@@ -254,6 +254,7 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportChargeRecord_ITEM8613,
 		.matchCmd = IOT_XDT_CHARGE_RECORD_RSP,
+		.cMeaning = "充电记录",
 	},
 
 	[18] = {
@@ -263,6 +264,7 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportQueryChargeRecordRsp_ITEM8616,
 		.matchCmd = IOT_XDT_QUERY_CHARGE_RECORD,
+		.cMeaning = "查询充电记录响应",
 	},		
 
 	[19] = {
@@ -272,6 +274,7 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportPowerControlResponse_ITEM8612,
 		.matchCmd = IOT_XDT_CHARGE_PWRCTRL,
+		.cMeaning = "功率控制响应",
 	},		
 
 	[20] = {
@@ -281,6 +284,7 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportContinueChargeResponse_ITEM868,
 		.matchCmd = IOT_XDT_CHARGE_CONTINUE_CHARGE,
+		.cMeaning = "续充命令",
 	},	
 
 	[21] = {
@@ -290,6 +294,7 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_RequestAuth_ITEM851,
 		.matchCmd = IOT_XDT_CMD_REQUEST_CARDAUTH_RSP,
+		.cMeaning = "鉴权请求",
 	},	
 
 	[22] = {
@@ -299,6 +304,7 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportCategory_ITEM853,
 		.matchCmd = IOT_XDT_SET_CATEGORY_RSP,
+		.cMeaning = "策略设置",
 	},	
 
 	[23] = {
@@ -308,6 +314,7 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportQueryBoardInfoRsp_ITEM872,
 		.matchCmd = IOT_XDT_QUERY_BOARDINFO,
+		.cMeaning = "控制板信息请求",
 	},	
 
 	[24] = {
@@ -317,7 +324,8 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_CallRealDataResponse_ITEM847,
 		.matchCmd = IOT_XDT_CMD_CALL_REALDATA,
-	},
+		.cMeaning = "召测实时数据",
+		},
  
 	[25] = {
 		.topic = IOT_XDT_PRE_TOPIC_V2R_REQUEST,
@@ -326,7 +334,8 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportPileErrInfo_ITEM843,
 		.matchCmd = IOT_XDT_CMD_ERRINFO_RSP,
-	},
+		.cMeaning = "故障信息",
+		},
 
 	[26] = {
 		.topic = IOT_XDT_PRE_TOPIC_V2R_RESPONSE,
@@ -335,12 +344,9 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportChargeStartReponse_ITEM862,
 		.matchCmd = IOT_XDT_CHARGE_START,
+		.cMeaning = "充电启动响应",
 	},
 };
-
-
-
-
 
 
 /*******************************************************************************

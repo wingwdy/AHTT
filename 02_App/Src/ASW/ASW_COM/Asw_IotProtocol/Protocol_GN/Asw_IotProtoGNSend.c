@@ -761,9 +761,11 @@ static uint16_t IotGN_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uint16
     IotGNFrameHead_Struct *pFrameHead = (IotGNFrameHead_Struct *)pBuf;
     uint16_t totalLen = dataLen + sizeof(IotGNFrameHead_Struct);
     uint16_t crc16 = 0;
+    uint8_t head1 = (AswPlatM_GetPlatType() == eAswPlatType_GNP) ? IOT_GN_PLUS_HEAD1 : IOT_GN_HEAD1; 
+    uint8_t head2 = (AswPlatM_GetPlatType() == eAswPlatType_GNP) ? IOT_GN_PLUS_HEAD2 : IOT_GN_HEAD2; 
 
-    pFrameHead->head[0] = IOT_GN_HEAD1;
-    pFrameHead->head[1] = IOT_GN_HEAD2;
+    pFrameHead->head[0] = head1;
+    pFrameHead->head[1] = head2;
     Common_Uint16ToTwoUint8(pFrameHead->version, IOT_GN_PROTOCOL_VERSION);
     Common_Uint16ToTwoUint8(pFrameHead->seq, seq);
     pFrameHead->encryptFlag = 0;

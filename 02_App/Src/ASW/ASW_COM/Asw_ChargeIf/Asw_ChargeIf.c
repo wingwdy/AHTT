@@ -191,8 +191,10 @@ void AswChargeIf_AdjustOutputCurrent(uint8_t port, uint8_t adjustMode, uint32_t 
     }
 }
 
-
-
+void AswChargeIf_SetProfile(uint8_t profile)
+{
+    AswCharge_SetProfile((AswChargeCtrlProfile_Enum)profile);
+}
 
 
 

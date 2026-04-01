@@ -71,7 +71,22 @@
 
 #define CDDDRV_EG800AK_CFG_ICCID_LEN                    20
 
-#define CDDDRV_EG800AK_CFG_RECONECT_TIMEOUT(x)          (10000 * x)
+#define CDDDRV_EG800AK_CFG_RECONECT_TIMEOUT(x, reconnectInterval)  do\
+                                                        {\
+                                                            if (x <= 1)\
+                                                            {\
+                                                                reconnectInterval = 5000;\
+                                                            }\
+                                                            else if (x == 2)\
+                                                            {\
+                                                                reconnectInterval = 10000;\
+                                                            }\
+                                                            else\
+                                                            {\
+                                                                reconnectInterval = 300000;\
+                                                            }\
+                                                        } while (0);
+
 #define CDDDRV_EG800AK_CFG_RECONECT_MAX_TIMES           5
 
 #define CDDDRV_EG800AK_CFG_MODULE_TYPE                  "EG800AK"

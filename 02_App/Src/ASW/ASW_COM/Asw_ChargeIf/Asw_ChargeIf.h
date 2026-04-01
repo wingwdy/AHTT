@@ -40,6 +40,9 @@
 #define ASWCHARGEIF_ADJUST_POWER_ABSOLUTE    eAswVoltCurAdjustMode_PowerAbsolute
 #define ASWCHARGEIF_ADJUST_POWER_RELATIVE    eAswVoltCurAdjustMode_PowerPercent
 
+#define ASWCHARGEIF_PROFILE_GN               eAswChargeCtrlProfile_GN
+#define ASWCHARGEIF_PROFILE_XDT              eAswChargeCtrlProfile_XDT
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -76,7 +79,7 @@ AswErrorType_Enum AswChargeIf_GetStopReason(uint8_t port);
 uint8_t AswChargeIf_GetAuthFlag(uint8_t port);
 void AswChargeIf_AdjustOutputCurrent(uint8_t port, uint8_t adjustMode, uint32_t val);
 uint8_t AswChargeIf_CheckS2Closed(uint8_t port);
-
+void AswChargeIf_SetProfile(uint8_t profile);
 #endif /* ASW_CHARGEIF_H_ */    
 
 

@@ -191,6 +191,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rReqTable[] =
 		.maxTimeout = 0,
 		.maxTryCnt = 0,
 		.matchCmd = IOT_XDT_QUERY_CHARGE_RECORD_RSP,
+		.cMeaning = "查询充电记录",
 	},	
 
 	[9] ={
@@ -200,6 +201,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rReqTable[] =
 		.maxTimeout = 0,
 		.maxTryCnt = 0,
 		.matchCmd = IOT_XDT_CHARGE_PWRCTRL_RSP,
+		.cMeaning = "功率控制",
 	},	
 
 	[10] ={
@@ -209,6 +211,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rReqTable[] =
 		.maxTimeout = 0,
 		.maxTryCnt = 0,
 		.matchCmd = IOT_XDT_CHARGE_CONTINUE_CHARGE_RSP,
+		.cMeaning = "续充响应",
 	},
 
 	[11] ={
@@ -218,6 +221,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rReqTable[] =
 		.maxTimeout = 0,
 		.maxTryCnt = 0,
 		.matchCmd = IOT_XDT_QUERY_BOARDINFO_RSP,
+		.cMeaning = "查询控制板信息",
 	},	
 };
 
@@ -270,6 +274,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rResTable[] =
 		.maxTimeout = 5 * 1000,
 		.maxTryCnt = 21,
 		.matchCmd = IOT_XDT_CMD_ERRINFO,
+		.cMeaning = "故障响应",
 	},	
 
 	[5] ={
@@ -289,6 +294,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rResTable[] =
 		.maxTimeout = 10 * 1000,
 		.maxTryCnt = 3,
 		.matchCmd = IOT_XDT_CMD_REQUEST_CARDAUTH,
+		.cMeaning = "鉴权响应",
 	},
 
 	[7] ={
@@ -298,6 +304,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rResTable[] =
 		.maxTimeout = 10 * 1000,
 		.maxTryCnt = 3,
 		.matchCmd = IOT_XDT_SET_CATEGORY,
+		.cMeaning = "策略设置应",
 	},
 };
 
@@ -1271,9 +1278,9 @@ static uint8_t IotXDT_RecvParaSet_ITEM873(uint8_t port, uint8_t *r_data, uint16_
 						{
 							tempAns = eIotXDTErrCode_Success;
 
-							if (pPlatInfo->amountChangeThreshold != tempf)
+							if (memcmp(&pPlatInfo->amountChangeThreshold, &tempf, 4) != 0)
 							{
-								pPlatInfo->amountChangeThreshold = tempf;
+								memcpy(&pPlatInfo->amountChangeThreshold, &tempf, 4);
 								paraChange = TRUE;
 							}
 						}	
@@ -1566,13 +1573,13 @@ static uint8_t IotXDT_RecvChargeStart_ITEM861(uint8_t port, uint8_t *r_data, uin
 			if (cTypePlan->valueint == 2)
 			{
 				pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeMoney;
-				pChargeCtrl->chargeCtrlVal = cComsume->valuedouble * 100;
+				pChargeCtrl->chargeCtrlVal = cValue->valuedouble * 100;
 			}
 			/* 按电量 */
 			else if (cTypePlan->valueint == 3)
 			{
 				pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_JudgeEnergy;
-				pChargeCtrl->chargeCtrlVal = cComsume->valuedouble * 100;
+				pChargeCtrl->chargeCtrlVal = cValue->valuedouble * 100;
 			}
 			/* 按时间 */
 			else if (cTypePlan->valueint == 4)

@@ -45,6 +45,9 @@
 
 #define IOT_XDT_SINGLE_FRAME_MAX_ERROR_COUNT       10
 
+/* 最小账户余额 0.5元，预留5分钱 */
+#define IOT_XDT_MIN_ACCOUNT_MONEY                  (50 + 5)
+
 /* 协议Topic 定义 */
 #define IOT_XDT_TOPIC_PROVISION_REQUEST      	  "/provision/request"
 #define IOT_XDT_TOPIC_PROVISION_RESPONSE     	  "/provision/response"

@@ -30,11 +30,19 @@
 
 #define ASWCHARGE_CFG_STOP_TIMEOUT                     10000
 
-#define ASWCHARGE_CFG_PAUSE_TIMEOUT                    30000
+#define ASWCHARGE_CFG_PAUSE_TIMEOUT1                   (30 * 1000)
 
-#define ASWCHARGE_CFG_LITTLE_CURRENT_FILTER_COUNT      ((30 * 60 * 1000) / ASWCHARGE_CFG_CALL_CYCLE)
+#define ASWCHARGE_CFG_PAUSE_TIMEOUT2                   (30 * 60 * 1000)
 
-#define ASWCHARGE_CFG_LITTLE_CURRENT_THRESHOLD         1000
+#define ASWCHARGE_CFG_LITTLE_CURRENT_FILTER1_COUNT      ((30 * 60 * 1000) / ASWCHARGE_CFG_CALL_CYCLE)
+
+#define ASWCHARGE_CFG_LITTLE_CURRENT_FILTER2_COUNT      ((10 * 60 * 1000) / ASWCHARGE_CFG_CALL_CYCLE)
+
+#define ASWCHARGE_CFG_LITTLE_CURRENT_THRESHOLD1        1000
+
+#define ASWCHARGE_CFG_LITTLE_CURRENT_THRESHOLD2        500
+
+#define ASWCHARGE_CFG_LITTLE_CURRENT_THRESHOLD3        5000
 
 #define ASWCHARGE_CFG_GetCurRateCurrent(port)          AswVoltCurHandle_GetMaxOutputCurrent(port)
 
@@ -43,6 +51,8 @@
 #define ASWCHARGE_CFG_GetOutputCurrent(port)           CddMeterM_GetRmsCurrent(port)
 
 #define ASWCHARGE_CFG_QUIT_FINISH_TIMEOUT              500
+
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

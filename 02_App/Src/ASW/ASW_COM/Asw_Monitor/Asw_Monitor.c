@@ -79,6 +79,7 @@ typedef struct
 *******************************************************************************/
 static AswMonitorData_Struct g_stAswMonitorData[SYSCFG_CFG_GUN_NUM] = { 0 };
 static AswMonitorCtx_Struct  g_stAswMonitorCtx = { 0 };
+static AswMonitorCtrlPara_Struct g_stAswMonitorCtrlPara = { 0 };
 
 /*******************************************************************************
 *    Static Local Functions Declaration
@@ -220,7 +221,7 @@ static uint8_t AswMonitor_DetectAccountMoney(uint8_t port, AswMonitorChargeCtrl_
     {
         diff = pstChargeCtrl->accountMoney - totalMoney;
 
-        if (diff < ASWMONITOR_CFG_CHARGE_MIN_ACCOUNT_MONEY)
+        if (diff < g_stAswMonitorCtrlPara.minAccountMoney)
         {
             ret = TRUE;
         }
@@ -627,6 +628,11 @@ static void AswMonitor_SwipCardManage(void)
     {}
 }
 
+void AswMonitor_SetMinAccountMoney(uint32_t minAccountMoney)
+{
+    g_stAswMonitorCtrlPara.minAccountMoney = minAccountMoney;
+}
+
 uint8_t AswMonitor_CheckSwipCardSuccEvent(void)
 {
     uint8_t ret = g_stAswMonitorCtx.swipCardSuccLedFlag;
@@ -869,6 +875,8 @@ void AswMonitor_InitMemory(void)
     }
 
     ASWMONITOR_CFG_LogPrint("设备锁机状态：%s\r\n", (g_stAswMonitorCtx.forbidParam.forbidState == 0) ? "未锁机" : "已锁机");
+
+    g_stAswMonitorCtrlPara.minAccountMoney = ASWMONITOR_CFG_CHARGE_MIN_ACCOUNT_MONEY;
 }
 
 void AswMonitor_MainFunction(void)

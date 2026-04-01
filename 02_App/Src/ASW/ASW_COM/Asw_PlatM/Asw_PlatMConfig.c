@@ -73,7 +73,7 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncTransformBillMode = IotYKC21_TransformBillMode,
         .pFuncPackChargeRecord = IotYKC21_PackChargeRecord,
         .pFuncSwipCardCharge = IotYKC21_SwipCardCharge,
-        
+
         .pFuncTransformChargeRecord = IotYKC21_TransformChargeRecord,
         .pFuncSetToken = IotYKC21_SetToken,
         .pFuncSetCipherKey = IotYKC21_SetRsaPublicKey,
@@ -99,6 +99,20 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncGetProductKey = IotXDT_GetProductKey,
         .pFuncGetProductSecret = IotXDT_GetProductSecret,
         .pFuncGetDevOperator = IotXDT_GetDevOperator,
+    },
+
+    [eAswPlatType_GNP] =
+    {
+        .pName = "gn+",
+        .cProtoMeaning = "公牛+",
+        .eSocketType = eCddNetMSocketType_TCP,
+        .pFuncFillLinkPara = IotGN_FillLinkPara,
+        .pFuncInit = IotGN_InitMemory,
+        .pMainFunction = IotGN_MainFunction,
+        .pFuncTransformBillMode = IotGN_TransformBillMode,
+        .pFuncPackChargeRecord = IotGN_PackChargeRecord,
+        .pFuncSwipCardCharge = IotGN_SwipCardCharge,
+        .pFuncTransformChargeRecord = IotGN_TransformChargeRecord,
     },
 };
 
@@ -133,7 +147,14 @@ const AswPlatCardDescriptor_Struct c_stAswPlatMCardDescriptorTable[eAswPlatCardT
         .pName = "lxxdt",
         .cMeaning = "通用卡",
         .cardType = eCddCardType_UUID,
-    }
+    },
+
+    [eAswPlatCardType_GNP] =
+    {
+        .pName = "gn+",
+        .cMeaning = "通用卡",
+        .cardType = eCddCardType_UUID,
+    },
 };
 
 

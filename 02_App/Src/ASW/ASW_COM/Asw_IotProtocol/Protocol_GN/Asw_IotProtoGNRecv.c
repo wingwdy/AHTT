@@ -316,12 +316,14 @@ static IotGNFrameHead_Struct *IotGN_FindValidFrameLen(uint8_t *pData, uint16_t d
     IotGNFrameHead_Struct *pHead = NULL;
     uint16_t calcCrc16, recvCrc16;
     uint16_t frameLen = 0;
+    uint8_t head1 = (AswPlatM_GetPlatType() == eAswPlatType_GNP) ? IOT_GN_PLUS_HEAD1 : IOT_GN_HEAD1; 
+    uint8_t head2 = (AswPlatM_GetPlatType() == eAswPlatType_GNP) ? IOT_GN_PLUS_HEAD2 : IOT_GN_HEAD2; 
 
     while (remainLen > (sizeof(IotGNFrameHead_Struct) + 2))
     {
         pHead = (IotGNFrameHead_Struct *)pStart;
 
-        if ((pHead->head[0] == IOT_GN_HEAD1) && (pHead->head[1] == IOT_GN_HEAD2))
+        if ((pHead->head[0] == head1) && (pHead->head[1] == head2))
         { 
             frameLen = Common_TwoUint8ToUint16(pHead->dataLen);
 

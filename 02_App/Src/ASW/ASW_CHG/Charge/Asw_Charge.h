@@ -41,6 +41,7 @@ typedef enum
        case1:当充电电流大于等于5A，且持续10min，S2闭合的情况下，那么当充电电流小于0.5A，持续30min，则停止充电，结算。
        case2:当充电电流大于等于5A，且持续10min，S2断开的情况下，那么当充电电流小于0.5A，持续30min，则停止充电，结算。*/
     eAswChargeCtrlProfile_XDT,
+    eAswChargeCtrlProfile_Count,
 }AswChargeCtrlProfile_Enum;
 
 /******************************************************************************
