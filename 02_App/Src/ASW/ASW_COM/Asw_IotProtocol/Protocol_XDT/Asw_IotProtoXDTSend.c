@@ -54,6 +54,7 @@ static uint16_t IotXDT_QueryRateModeRsp_ITEM837(uint8_t port, void *pBuf);
 static uint16_t IotXDT_ReportPileState_ITEM841(uint8_t port, void *pBuf);
 static uint16_t IotXDT_ReportPileErrInfo_ITEM843(uint8_t port, void *pBuf);
 static uint16_t IotXDT_ReportPileData_ITEM845(uint8_t port, void *pBuf);
+static uint16_t IotXDT_CallRealDataResponse_ITEM847(uint8_t port, void *pBuf);
 static uint16_t IotXDT_RequestAuth_ITEM851(uint8_t port, void *pBuf);
 static uint16_t IotXDT_ReportCategory_ITEM853(uint8_t port, void *pBuf);
 static uint16_t IotXDT_ReportChargeStartReponse_ITEM862(uint8_t port, void *pBuf);
@@ -309,14 +310,14 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.matchCmd = IOT_XDT_QUERY_BOARDINFO,
 	},	
 
-	// [24] = {
-	// 	.topic = IOT_XDT_PRE_TOPIC_V2R_RESPONSE,
-	// 	.cmd = IOT_XDT_CMD_CALL_REALDATA_RSP,
-	// 	.cmdType = IOT_XDT_CMDTYPE_RESPONSE,
-	// 	.sendCycle = 0,
-	// 	.pSendFunc = IotXDT_CallRealDataResponse_ITEM847,
-	// 	.matchCmd = IOT_XDT_CMD_CALL_REALDATA,
-	// },
+	[24] = {
+		.topic = IOT_XDT_PRE_TOPIC_V2R_RESPONSE,
+		.cmd = IOT_XDT_CMD_CALL_REALDATA_RSP,
+		.cmdType = IOT_XDT_CMDTYPE_RESPONSE,
+		.sendCycle = 0,
+		.pSendFunc = IotXDT_CallRealDataResponse_ITEM847,
+		.matchCmd = IOT_XDT_CMD_CALL_REALDATA,
+	},
  
 	[25] = {
 		.topic = IOT_XDT_PRE_TOPIC_V2R_REQUEST,
@@ -1224,7 +1225,30 @@ static uint16_t IotXDT_ReportPileData_ITEM845(uint8_t port, void *pBuf)
 	return dataLen;
 }
 
+static uint16_t IotXDT_CallRealDataResponse_ITEM847(uint8_t port, void *pBuf)
+{
+	IotXDTRecvData_Struct *pRecvData = &pIotXDTCtx->stProtoData.stRecvData[port];
+	cJSON *cRoot = NULL;
+	char *pJson = NULL;
+	uint16_t dataLen = 0;
 
+	cRoot = cJSON_CreateObject();
+	IOT_XDT_CheckObjIsNull(cRoot, 0);
+
+	cJSON_AddStringToObject(cRoot, "snPlat", pIotXDTCtx->platDn);
+	cJSON_AddNumberToObject(cRoot, "type", pRecvData->offlineClearData.type_ITEM846);
+	cJSON_AddNumberToObject(cRoot, "mode", pRecvData->offlineClearData.mode_ITEM846);
+	cJSON_AddNumberToObject(cRoot, "status", pRecvData->offlineClearData.eAns_ITEM846);
+
+	pJson = cJSON_Print(cRoot);
+	IOT_XDT_CheckJsonPrint(cRoot, pJson, 0);
+
+	dataLen = strlen(pJson);
+	memcpy(pBuf, pJson, dataLen);
+	cJSON_Delete(cRoot);
+	myFree(pJson);
+	return dataLen;
+}
 
 static uint16_t IotXDT_RequestAuth_ITEM851(uint8_t port, void *pBuf)
 {

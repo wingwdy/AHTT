@@ -282,7 +282,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rResTable[] =
 		.matchCmd = IOT_XDT_CHARGE_RECORD,
 	},
 
-	[7] ={
+	[6] ={
 		.cmd = IOT_XDT_CMD_REQUEST_CARDAUTH_RSP,
 		.matchStr = NULL,
 		.pRecvParse = IotXDT_RecvCardAuthRsp_ITEM852,
@@ -291,7 +291,7 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rResTable[] =
 		.matchCmd = IOT_XDT_CMD_REQUEST_CARDAUTH,
 	},
 
-	[8] ={
+	[7] ={
 		.cmd = IOT_XDT_SET_CATEGORY_RSP,
 		.matchStr = NULL,
 		.pRecvParse = IotXDT_RecvSetCategoryRsp_ITEM854,

@@ -135,7 +135,7 @@ static CommonSendCtrl_Struct* IotXDT_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_XDT_CMD_PILE_STATE:                   pSendCtrl = &pIotXDTCtx->stSendCtrl[port][8];   break;
         case IOT_XDT_CMD_ERRINFO:                      pSendCtrl = &pIotXDTCtx->stSendCtrl[port][9];   break;
         case IOT_XDT_CMD_PILE_DATA:                    pSendCtrl = &pIotXDTCtx->stSendCtrl[port][10];  break;
-        case IOT_XDT_CMD_CALL_REALDATA:                pSendCtrl = &pIotXDTCtx->stSendCtrl[port][11];  break;
+        case IOT_XDT_CMD_CALL_REALDATA_RSP:            pSendCtrl = &pIotXDTCtx->stSendCtrl[port][11];  break;
         case IOT_XDT_CMD_REQUEST_CARDAUTH:             pSendCtrl = &pIotXDTCtx->stSendCtrl[port][12];  break;
         case IOT_XDT_SET_CATEGORY:                     pSendCtrl = &pIotXDTCtx->stSendCtrl[port][13];  break;
         case IOT_XDT_CHARGE_START_RSP:                 pSendCtrl = &pIotXDTCtx->stSendCtrl[port][14];  break;
@@ -175,7 +175,7 @@ static CommonRecvCtrl_Struct* IotXDT_GetRecvCtrl(uint8_t port, uint16_t cmd)
         case IOT_XDT_CMD_RATEMODE_SET:                 pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][6];   break;
         case IOT_XDT_CMD_PILE_STATE_RSP:               pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][7];   break;
         case IOT_XDT_CMD_ERRINFO_RSP:                  pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][8];   break;
-        case IOT_XDT_CMD_CALL_REALDATA_RSP:            pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][9];   break;
+        case IOT_XDT_CMD_CALL_REALDATA:                pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][9];   break;
         case IOT_XDT_CMD_REQUEST_CARDAUTH_RSP:         pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][10];  break;
         case IOT_XDT_SET_CATEGORY_RSP:                 pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][11];  break;
         case IOT_XDT_CHARGE_START:                     pRecvCtrl = &pIotXDTCtx->stRecvCtrl[port][12];  break;
@@ -1342,7 +1342,6 @@ void IotXDT_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandard
         pStandardBillMode->rateCount = pRecvBillingModel->period_count;
 		pStandardBillMode->periodCount = pRecvBillingModel->period_count;
 		pStandardBillMode->elecLossRate = pRecvBillingModel->measure_wastage_rates;
-    	memcpy(pStandardBillMode->periodRate, pRecvBillingModel->segmentation_rate, 48);
 
 		if (pRecvBillingModel->typeRule == 0)
 		{
@@ -1372,37 +1371,38 @@ void IotXDT_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandard
 					tempTimeL = (pRecvBillingModel->period[index].stopTime % 2) * 30;
                     pStandardBillMode->stopTime[index][0] = tempTimeH;
                     pStandardBillMode->stopTime[index][1] = tempTimeL;
+                    pStandardBillMode->periodRate[index] = pRecvBillingModel->period[index].flag;
 
 					switch (pRecvBillingModel->period[index].flag)
 					{
 						case 0:  // 尖
 						{
-							pStandardBillMode->rateElecPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->sharp_ele_fee);
-							pStandardBillMode->rateSeverPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->sharp_ser_fee);
+							pStandardBillMode->rateElecPrice[0] = Common_FourUint8ToUint32(pRecvBillingModel->sharp_ele_fee);
+							pStandardBillMode->rateSeverPrice[0] = Common_FourUint8ToUint32(pRecvBillingModel->sharp_ser_fee);
 							break;
 						}
 						case 1:  // 峰 
 						{
-							pStandardBillMode->rateElecPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->peak_ele_fee);
-							pStandardBillMode->rateSeverPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->peak_ser_fee);
+							pStandardBillMode->rateElecPrice[1] = Common_FourUint8ToUint32(pRecvBillingModel->peak_ele_fee);
+							pStandardBillMode->rateSeverPrice[1] = Common_FourUint8ToUint32(pRecvBillingModel->peak_ser_fee);
 							break;
 						}
 						case 2:  // 平
 						{
-							pStandardBillMode->rateElecPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->flat_ele_fee);
-							pStandardBillMode->rateSeverPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->flat_ser_fee);
+							pStandardBillMode->rateElecPrice[2] = Common_FourUint8ToUint32(pRecvBillingModel->flat_ele_fee);
+							pStandardBillMode->rateSeverPrice[2] = Common_FourUint8ToUint32(pRecvBillingModel->flat_ser_fee);
 							break;				
 						}
 						case 3:  // 谷
 						{
-							pStandardBillMode->rateElecPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->valley_ele_fee);
-							pStandardBillMode->rateSeverPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->valley_ser_fee);
+							pStandardBillMode->rateElecPrice[3] = Common_FourUint8ToUint32(pRecvBillingModel->valley_ele_fee);
+							pStandardBillMode->rateSeverPrice[3] = Common_FourUint8ToUint32(pRecvBillingModel->valley_ser_fee);
 							break;			
 						}
 						case 4:  // 深
 						{
-							pStandardBillMode->rateElecPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->deep_ele_fee);
-							pStandardBillMode->rateSeverPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->deep_ser_fee);
+							pStandardBillMode->rateElecPrice[4] = Common_FourUint8ToUint32(pRecvBillingModel->deep_ele_fee);
+							pStandardBillMode->rateSeverPrice[4] = Common_FourUint8ToUint32(pRecvBillingModel->deep_ser_fee);
 							break;
 						}
 						default:
