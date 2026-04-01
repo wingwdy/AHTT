@@ -56,6 +56,7 @@ static uint8_t IotXDT_RecvRequestRateModeRsp_ITEM832(uint8_t port, uint8_t *r_da
 static uint8_t IotXDT_RecvQueryRateMode_ITEM833(uint8_t port, uint8_t *r_data, uint16_t len);
 static uint8_t IotXDT_RecvRateModeSet_ITEM834(uint8_t port, uint8_t *r_data, uint16_t len);
 static uint8_t IotXDT_RecvPlieStateRsp_ITEM842(uint8_t port, uint8_t *r_data, uint16_t len);
+static uint8_t IotXDT_RecvPlieErrInfoRsp_ITEM844(uint8_t port, uint8_t *r_data, uint16_t len);
 static uint8_t IotXDT_RecvCallRealData_ITEM846(uint8_t port, uint8_t *r_data, uint16_t len);
 static uint8_t IotXDT_RecvChargeStart_ITEM861(uint8_t port, uint8_t *r_data, uint16_t len);
 static uint8_t IotXDT_RecvChargeStop_ITEM864(uint8_t port, uint8_t *r_data, uint16_t len);
@@ -256,14 +257,14 @@ static IotXDTRecvCtrl_Struct c_IotXDTRecvctrlV2rResTable[] =
 		.matchCmd = IOT_XDT_CMD_PILE_STATE,
 	},
 
-	// [4] ={
-	// 	.cmd = IOT_XDT_CMD_ERRINFO_RSP,
-	// 	.matchStr = NULL,
-	// 	.pRecvParse = IotXDT_RecvPlieErrInfoRsp_ITEM844,
-	// 	.maxTimeout = 5 * 1000,
-	// 	.maxTryCnt = 21,
-	// 	.matchCmd = IOT_XDT_CMD_ERRINFO,
-	// },	
+	[4] ={
+		.cmd = IOT_XDT_CMD_ERRINFO_RSP,
+		.matchStr = NULL,
+		.pRecvParse = IotXDT_RecvPlieErrInfoRsp_ITEM844,
+		.maxTimeout = 5 * 1000,
+		.maxTryCnt = 21,
+		.matchCmd = IOT_XDT_CMD_ERRINFO,
+	},	
 
 	// [5] ={
 	// 	.cmd = IOT_XDT_REQUEST_ERCODE_RSP,
@@ -902,6 +903,42 @@ static uint8_t IotXDT_RecvPlieStateRsp_ITEM842(uint8_t port, uint8_t *r_data, ui
 	cJSON_Delete(cRoot);
 	return ret;
 }
+
+static uint8_t IotXDT_RecvPlieErrInfoRsp_ITEM844(uint8_t port, uint8_t *r_data, uint16_t len)
+{
+	IotXDTRecvData_Struct *pRecvData = &pIotXDTCtx->stProtoData.stRecvData[port];
+	cJSON *cRoot, *cStatus;
+	uint8_t ret = FALSE;
+	IotXDTErrCodeList_Enum *pAns = NULL;
+	
+	cRoot = cJSON_Parse((const char *)r_data);
+	IOT_XDT_CheckObjIsNull(cRoot, FALSE);
+	
+	cStatus = cJSON_GetObjectItem(cRoot, "status");
+	IOT_XDT_CheckKeyIsNull(cStatus, "status", FALSE, pAns);
+
+	if (cStatus->valueint == eIotXDTErrCode_Success)
+	{
+		if (pRecvData->offlineClearData.errClearInfoReportFlag == FALSE)
+		{
+			pRecvData->offlineClearData.errClearInfoReportFlag = TRUE;
+		}
+		else
+		{
+			IotXDT_DelErrInfoQueue(port);
+		}
+
+		ret = TRUE;
+	}
+	else
+	{
+		IOTXDT_CFG_LogPrint("[%s()]: Platform response error[%d]\r\n", __FUNCTION__, cStatus->valueint);
+	}
+	
+	cJSON_Delete(cRoot);
+	return ret;
+}
+
 
 static uint8_t IotXDT_RecvCallRealData_ITEM846(uint8_t port, uint8_t *r_data, uint16_t len)
 {
@@ -2005,6 +2042,7 @@ static void IotXDT_CmdTimeoutHandle3Times(uint8_t port, IotXDTRecvCtrl_Struct *p
 	{
 	case IOT_XDT_CMD_REQUEST_RATEMODE_RSP:
 	{
+		/* 如果本地有计费模型，那么只请求3次，如果本地无计费模型，那么需要持续请求 */
 		if (Common_FourUint8ToUint32(pBillMode->validFlag) == IOT_XDT_MAGIC_NUM)
 		{
             Common_SetRecvTimerEnable(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd, FALSE);
@@ -2013,6 +2051,10 @@ static void IotXDT_CmdTimeoutHandle3Times(uint8_t port, IotXDTRecvCtrl_Struct *p
 		else
 		{
             Common_ClearRptCount(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd);
+			Common_SetRecvTimerEnable(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd, FALSE);
+			Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, pRecvCtrl->matchCmd, TRUE);
+			Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, port, pRecvCtrl->matchCmd, TRUE);
+			Common_SetSendFlag(pIotXDTCtx->pFuncSendCtrl, port, pRecvCtrl->matchCmd, FALSE);
 		}
 
 		break;

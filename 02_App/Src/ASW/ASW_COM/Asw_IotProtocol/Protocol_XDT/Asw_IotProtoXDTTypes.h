@@ -43,6 +43,8 @@
 #define IOT_XDT_PARAM_MAX_LEN                      64
 #define IOT_XDT_FWSTATE_LEN                        16
 
+#define IOT_XDT_SINGLE_FRAME_MAX_ERROR_COUNT       10
+
 /* 协议Topic 定义 */
 #define IOT_XDT_TOPIC_PROVISION_REQUEST      	  "/provision/request"
 #define IOT_XDT_TOPIC_PROVISION_RESPONSE     	  "/provision/response"

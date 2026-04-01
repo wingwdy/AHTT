@@ -221,7 +221,6 @@ static void IotXDT_WSInitHandle(void)
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmXDTPlatInfo_Struct *pPlatInfo = &pPrivateParam->stXDTParam.platinfo;
     float amountChangeThreshold = 0.5f;
-    uint8_t paraSaveFlag = FALSE;
 
     pIotXDTCtx->stProtoData.powerOnTick = Common_GetSystick();
 
@@ -238,20 +237,15 @@ static void IotXDT_WSInitHandle(void)
         {
             pPlatInfo->pileDataCycleReportEnable = TRUE;
         }
-
-        paraSaveFlag = TRUE;
     }
 
     if (pPlatInfo->amountChangeThreshold == 0)
     {
         memcpy(&pPlatInfo->amountChangeThreshold, &amountChangeThreshold, 4);
-        paraSaveFlag = TRUE;
     }
 
-    if (paraSaveFlag == TRUE)
-    {
-        MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
-    }
+    pPlatInfo->resetCount++;
+    MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
 }
 
 static void IotXDT_WSOfflineHandle(void)
@@ -272,6 +266,8 @@ static void IotXDT_WSOfflineHandle(void)
     pIotXDTCtx->sendPort = 0;    
     pIotXDTCtx->reqSeq = 0;
 
+    memset(pIotXDTCtx->errVersion, 0x00, sizeof(pIotXDTCtx->errVersion));
+
     pIotXDTCtx->stProtoData.t1SetFlag = FALSE;
     pIotXDTCtx->stProtoData.t2SetFlag = FALSE;
 
@@ -281,6 +277,11 @@ static void IotXDT_WSOfflineHandle(void)
     FrameQueue_Reset(pIotXDTCtx->frameQueueChannelID);
     memcpy(pIotXDTCtx->platDn, pParam->platPileDn, 16);
 
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++) 
+    {
+        pIotXDTCtx->stProtoData.s2Status[port] = 0xFF;
+    }
+
     AswErrhandle_SetErrExsitCallback(0, eErr_PlatformOffline);
     pIotXDTCtx->eWorkState = eIotXDTWorkState_Login;
 }
@@ -289,6 +290,7 @@ static void IotXDT_WSLoginHandle(void)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmXDTPlatInfo_Struct *pPlatInfo = &pPrivateParam->stXDTParam.platinfo;
+    uint8_t port = 0;
 
     if (TRUE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_O))
     {
@@ -315,6 +317,15 @@ static void IotXDT_WSLoginHandle(void)
             Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE, TRUE);
             Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE, TRUE);
 
+            Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_FIRMWARE_STATE, TRUE);
+            Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_FIRMWARE_STATE, TRUE);
+
+            for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+            {
+                Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, IOT_XDT_CMD_ERRINFO, TRUE);
+                Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, port, IOT_XDT_CMD_ERRINFO, TRUE);
+            }
+
             if (pPlatInfo->otaState == eIotXDTOtaState_Starting && pIotXDTCtx->stProtoData.otaStartFlag == FALSE)
             {
                 if (strcmp(APP_SW_VERSION_STRING, pPlatInfo->otaSoftwareVersion) == 0)
@@ -323,16 +334,12 @@ static void IotXDT_WSLoginHandle(void)
                 }
                 else
                 {
-                    
                     pPlatInfo->otaState = eIotXDTOtaState_Fail;
                 }
 
                 memcpy(pPlatInfo->lastOtaSoftwareVersion, pPlatInfo->otaSoftwareVersion, MSNVM_XDT_VERSION_LEN);
                 MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
             }
-
-            Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_FIRMWARE_STATE, TRUE);
-            Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_FIRMWARE_STATE, TRUE);
         }
 
         pIotXDTCtx->eWorkState = eIotXDTWorkState_Normal;
@@ -343,6 +350,7 @@ static void IotXDT_CycleDetectPileStatus(void)
 {
     IotXDTPileStatus_Enum ePileStatus = IotXDT_GetPileStatus();
     IotXDTGunStatus_Enum eGunStatus;
+    uint8_t s2Status = 0;
     uint8_t statusChangeFlag = FALSE;
     uint8_t port = 0;
 
@@ -354,7 +362,14 @@ static void IotXDT_CycleDetectPileStatus(void)
         {
             pIotXDTCtx->stProtoData.eGunStatus[port] = eGunStatus;
             statusChangeFlag = TRUE;
-            break;
+        }
+
+        s2Status = AswChargeIf_CheckS2Closed(port);
+
+        if (s2Status != pIotXDTCtx->stProtoData.s2Status[port])
+        {
+            pIotXDTCtx->stProtoData.s2Status[port] = s2Status;
+            statusChangeFlag = TRUE;
         }
     }
 
@@ -472,8 +487,21 @@ static void IotXDT_CycleDetectErrInfo(void)
 {
     IotXDTRecvData_Struct *pRecvData = NULL;
     uint8_t port = 0;
+    uint8_t checkFlag = FALSE;
 
-    IotXDT_CheckErrStatus();
+    for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+    {
+        if (pIotXDTCtx->errVersion[port] != AswErrHandle_GetErrStatusVersion(port))
+        {
+            pIotXDTCtx->errVersion[port] = AswErrHandle_GetErrStatusVersion(port);
+            checkFlag = TRUE;
+        }
+    }
+
+    if (checkFlag == TRUE)
+    {
+        IotXDT_CheckErrStatus();
+    }
 
 	for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
 	{
@@ -840,16 +868,10 @@ void IotXDT_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, ui
         pPlatInfo->orderCount++;
         Common_Uint32ToFourUint8(pXDTOrder->indexRec, pPlatInfo->orderCount);
         MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+        pXDTOrder->typeRec = 1;
     }
     else if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
     {
-        pXDTOrder->typeRec = 1;
-
-        if (pIotXDTCtx->loginSucc == FALSE)
-        {
-            pXDTOrder->typeRec = 0;
-        }
-
         if (pXDTOrder->stopReason == eIotXDTStopReason_Other)
         {
             pXDTOrder->stopReason = IotXDT_ConvertStopReason(pChargeData->eChargeStopReason);
@@ -857,6 +879,7 @@ void IotXDT_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, ui
 
         if (pIotXDTCtx->loginSucc == TRUE)
         {
+            pXDTOrder->typeRec = 0;
             Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, IOT_XDT_CHARGE_STOP_EVNET, TRUE);
             Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CHARGE_STOP_EVNET, TRUE);
         }

@@ -44,6 +44,7 @@ typedef struct
 {
     IotXDTRecvData_Struct stRecvData[SYSCFG_CFG_GUN_NUM];
     IotXDTGunStatus_Enum eGunStatus[SYSCFG_CFG_GUN_NUM];
+    uint8_t s2Status[SYSCFG_CFG_GUN_NUM];   /* S2断开闭合状态 */
     IotXDTPileStatus_Enum ePileStatus;
 
     uint32_t totalChargeEnergy;         /* 累计充电电量  单位：度，保留4位小数 */
@@ -78,6 +79,7 @@ typedef struct
     uint32_t time;
     
     /* 离线后需清除数据 */
+    uint32_t errVersion[SYSCFG_CFG_GUN_NUM];
     uint8_t loginSucc;
     uint8_t queueBusyFlag;
     uint32_t waitQueueIdleTick;
