@@ -409,7 +409,7 @@ void IotOM_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
 
     if (pLinkPara != NULL && pIotOMCtx != NULL)
     {
-        strcpy(pLinkPara->stTcpPara.ip, pParam->platAuxiliaryIp);
+        strncpy(pLinkPara->stTcpPara.ip, pParam->platAuxiliaryIp, sizeof(pParam->platAuxiliaryIp) - 1);
         pLinkPara->stTcpPara.port = pParam->platAuxiliaryPort;
         FrameQueue_Creat(eFrameQueueType_TCP, 1024, 1024, &pIotOMCtx->frameQueueChannelID);
         pLinkPara->stTcpPara.frameQueueChannelID = pIotOMCtx->frameQueueChannelID;

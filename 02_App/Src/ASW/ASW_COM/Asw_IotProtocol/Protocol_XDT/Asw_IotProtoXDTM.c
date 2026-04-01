@@ -25,6 +25,7 @@
 #include "SS_Ucm.h"
 #include "Asw_Monitor.h"
 #include "Version.h"
+#include "SS_Tm.h"
 
 
 /*******************************************************************************
@@ -47,12 +48,69 @@
 *******************************************************************************/
 
 
-
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
 IotXDTCtx_Struct *pIotXDTCtx = NULL;
 
+const IotXDTStopReasonMap_Struct c_IotXDTStopReasonTable[] = 
+{
+    { eErr_CpVoltAbnor,                 eIotXDTStopReason_PileErr },
+    { eErr_CpGroundFault,               eIotXDTStopReason_PileErr },
+    { eErr_PEBreakFault,                eIotXDTStopReason_PileErr },
+    { eErr_EmergencyStop,               eIotXDTStopReason_EmergeStop },
+    { eErr_InputLineReversed,           eIotXDTStopReason_PileErr },
+    { eErr_LeakageCurrErr,              eIotXDTStopReason_PileErr },
+    { eErr_ShortCircleErr,              eIotXDTStopReason_PileErr },
+    { eErr_RCDSelfcheckErr,             eIotXDTStopReason_PileErr },
+    { eErr_AphaseInputOverVol,          eIotXDTStopReason_PileErr },
+    { eErr_AphaseInputLessVol,          eIotXDTStopReason_PileErr },
+    { eErr_OutputOverCurr,              eIotXDTStopReason_PileErr },
+    { eErr_JcqMaloperation,             eIotXDTStopReason_PileErr },
+    { eErr_JcqSynechiaFault,            eIotXDTStopReason_PileErr },
+    { eErr_MeterCommErr,                eIotXDTStopReason_PileErr },
+    { eErr_EnvOverTempErr,              eIotXDTStopReason_PileErr },
+    { eErr_GunOverTempErr,              eIotXDTStopReason_PileErr },
+    { eErr_POverTempErr,                eIotXDTStopReason_PileErr },
+    { eErr_DatabaseErr,                 eIotXDTStopReason_PileErr },
+    { eErr_MeterCalcErr,                eIotXDTStopReason_PileErr },
+    { eErr_ChgStartTimeout,             eIotXDTStopReason_Other },
+    { eErr_DiodeStop,                   eIotXDTStopReason_CarErr },
+    { eSrc_LittleCurr,                  eIotXDTStopReason_ChargeFull },
+    { eSrc_S2BreakOff,                  eIotXDTStopReason_ChargeFull },
+    { eSrc_AppStop,                     eIotXDTStopReason_PlatformStop },
+    { eSrc_MannulStop,                  eIotXDTStopReason_LocalStop },
+    { eSrc_CardStop,                    eIotXDTStopReason_CarStop },
+    { eSrc_InsuffBalance,               eIotXDTStopReason_InsuffcientFund },
+    { eSrc_StopbyMoney,                 eIotXDTStopReason_ReachMoney },
+    { eSrc_StopbyTime,                  eIotXDTStopReason_ReachTime },
+    { eSrc_StopbyEnergy,                eIotXDTStopReason_ReachElec },
+    { eErr_GunDisConn,                  eIotXDTStopReason_GunDisconnect },
+    { eErr_CPBreakOff,                  eIotXDTStopReason_GunDisconnect },
+};
+
+static IotXDTErrDesc_Struct c_IotXDTErrDescTable[] = 
+{
+	{eErr_RCDSelfcheckErr,	     eIotXDTEntityType_Gun,      1,   eIotXDTErrorLevel_Ctrtical,  "RCD自检故障"},
+	{eErr_LeakageCurrErr,	     eIotXDTEntityType_Gun,      2,   eIotXDTErrorLevel_Ctrtical,  "漏电故障"},
+	{eErr_EmergencyStop,	     eIotXDTEntityType_Pile,     3,   eIotXDTErrorLevel_Ctrtical,  "急停故障"},
+	{eErr_CpVoltAbnor,	         eIotXDTEntityType_Gun,      4,   eIotXDTErrorLevel_Major,     "CP电压异常"},
+	{eErr_CpGroundFault,	     eIotXDTEntityType_Gun,	     5,   eIotXDTErrorLevel_Major,	   "CP对地短路"},
+	{eErr_PEBreakFault,	         eIotXDTEntityType_Pile,	 6,   eIotXDTErrorLevel_Ctrtical,  "PE接地故障"},
+	{eErr_AphaseInputOverVol, 	 eIotXDTEntityType_Pile,     7,   eIotXDTErrorLevel_Major,	   "交流输入过压"},
+	{eErr_AphaseInputLessVol, 	 eIotXDTEntityType_Pile,     8,   eIotXDTErrorLevel_Major,	   "交流输入欠压"},
+	{eErr_OutputOverCurr, 	     eIotXDTEntityType_Gun,      9,   eIotXDTErrorLevel_Ctrtical,  "交流输出过流"},
+	{eErr_JcqSynechiaFault,	     eIotXDTEntityType_Gun,     10,   eIotXDTErrorLevel_Ctrtical,  "交流输出接触器粘连"},
+	{eErr_JcqMaloperation, 	     eIotXDTEntityType_Gun,     11,   eIotXDTErrorLevel_Ctrtical,  "交流输出接触器误动拒动"},
+	{eErr_EnvOverTempErr, 	     eIotXDTEntityType_Pile,    12,   eIotXDTErrorLevel_Major,	   "环境过温故障"},	
+	{eErr_POverTempErr,	         eIotXDTEntityType_Pile,    13,	  eIotXDTErrorLevel_Major,	   "插头过温故障"}, 
+	{eErr_GunOverTempErr,	     eIotXDTEntityType_Gun,     14,	  eIotXDTErrorLevel_Major,	   "枪过温故障"}, 
+	{eErr_DiodeStop,	         eIotXDTEntityType_Gun,     15,	  eIotXDTErrorLevel_Minor,	   "未检测到二极管"}, 
+	{eErr_InputLineReversed,     eIotXDTEntityType_Pile,    16,	  eIotXDTErrorLevel_Ctrtical,  "火零反接"}, 
+	{eErr_ShortCircleErr,	     eIotXDTEntityType_Gun,     17,	  eIotXDTErrorLevel_Ctrtical,  "充电前输出短路故障"},
+	{eErr_MeterCommErr,	         eIotXDTEntityType_Gun,	    18,	  eIotXDTErrorLevel_Major,     "电表通信故障"},
+	{eErr_DatabaseErr,	         eIotXDTEntityType_Pile,    19,	  eIotXDTErrorLevel_Ctrtical,  "数据库存储错误"},
+};
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
@@ -85,7 +143,7 @@ static CommonSendCtrl_Struct* IotXDT_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_XDT_CHARGE_STOP_RSP:                  pSendCtrl = &pIotXDTCtx->stSendCtrl[port][16];  break;
         case IOT_XDT_CHARGE_STOP_EVNET:                pSendCtrl = &pIotXDTCtx->stSendCtrl[port][17];  break;
         case IOT_XDT_CHARGE_CONTINUE_CHARGE_RSP:       pSendCtrl = &pIotXDTCtx->stSendCtrl[port][18];  break;
-        case IOT_XDT_CHARGE_START_EVNETA:              pSendCtrl = &pIotXDTCtx->stSendCtrl[port][19];  break;
+        case IOT_XDT_CMD_FIRMWARE_STATE:              pSendCtrl = &pIotXDTCtx->stSendCtrl[port][19];  break;
         case IOT_XDT_QUERY_BOARDINFO_RSP:              pSendCtrl = &pIotXDTCtx->stSendCtrl[port][20];  break;
         case IOT_XDT_PARA_SET_RSP:                     pSendCtrl = &pIotXDTCtx->stSendCtrl[port][21];  break;
         case IOT_XDT_PARA_QUERY_RSP:                   pSendCtrl = &pIotXDTCtx->stSendCtrl[port][22];  break;
@@ -93,7 +151,6 @@ static CommonSendCtrl_Struct* IotXDT_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_XDT_CHARGE_RECORD:                    pSendCtrl = &pIotXDTCtx->stSendCtrl[port][24];  break;
         case IOT_XDT_QUERY_CHARGE_RECORD_RSP:          pSendCtrl = &pIotXDTCtx->stSendCtrl[port][25];  break;
         case IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE:        pSendCtrl = &pIotXDTCtx->stSendCtrl[port][26];  break;
-        case IOT_XDT_CMD_FIRMWARE_STATE:               pSendCtrl = &pIotXDTCtx->stSendCtrl[port][27];  break;
         default:
         {
             break;
@@ -141,10 +198,30 @@ static CommonRecvCtrl_Struct* IotXDT_GetRecvCtrl(uint8_t port, uint16_t cmd)
     return pRecvCtrl;
 }
 
+static eIotXDTStopReason_Enum IotXDT_ConvertStopReason(AswErrorType_Enum eChargeStopReason)
+{
+	eIotXDTStopReason_Enum eXDTStopReason = eIotXDTStopReason_Other;
+	uint8_t index = 0;
+
+	for (index = 0; index < ARRAY_SIZE(c_IotXDTStopReasonTable); index++)
+	{
+		if (c_IotXDTStopReasonTable[index].eCommonStopReason == eChargeStopReason)
+		{
+			eXDTStopReason = c_IotXDTStopReasonTable[index].eXDTStopReason;
+			break;
+		}
+	}
+
+	return eXDTStopReason;
+}
 static void IotXDT_WSInitHandle(void)
 {
     MSNvmPlatParam_Struct * pParam =  AswPlatM_GetPlatParamPtr();
     IotXDTProtoData_Struct *pProtoData = &pIotXDTCtx->stProtoData;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmXDTPlatInfo_Struct *pPlatInfo = &pPrivateParam->stXDTParam.platinfo;
+    float amountChangeThreshold = 0.5f;
+    uint8_t paraSaveFlag = FALSE;
 
     pIotXDTCtx->stProtoData.powerOnTick = Common_GetSystick();
 
@@ -153,18 +230,39 @@ static void IotXDT_WSInitHandle(void)
 
     pIotXDTCtx->eWorkState = eIotXDTWorkState_Offline;
 
+    if (pPlatInfo->pileDataReportCycle == 0)
+    {
+        pPlatInfo->pileDataReportCycle = 60;
 
+        if (pPlatInfo->pileDataCycleReportEnable == FALSE)
+        {
+            pPlatInfo->pileDataCycleReportEnable = TRUE;
+        }
 
+        paraSaveFlag = TRUE;
+    }
 
+    if (pPlatInfo->amountChangeThreshold == 0)
+    {
+        memcpy(&pPlatInfo->amountChangeThreshold, &amountChangeThreshold, 4);
+        paraSaveFlag = TRUE;
+    }
 
-
-
-
+    if (paraSaveFlag == TRUE)
+    {
+        MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+    }
 }
 
 static void IotXDT_WSOfflineHandle(void)
 {
     MSNvmPlatParam_Struct * pParam =  AswPlatM_GetPlatParamPtr();
+    uint8_t port = 0;
+
+	for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+	{
+		memset(&pIotXDTCtx->stProtoData.stRecvData[port].offlineClearData, 0x00, sizeof(IotXDTDataOfflineClr_Struct));
+	}
 
     pIotXDTCtx->loginSucc = FALSE;
     pIotXDTCtx->queueBusyFlag = FALSE;
@@ -225,6 +323,7 @@ static void IotXDT_WSLoginHandle(void)
                 }
                 else
                 {
+                    
                     pPlatInfo->otaState = eIotXDTOtaState_Fail;
                 }
 
@@ -272,9 +371,134 @@ static void IotXDT_CycleDetectPileStatus(void)
     }
 }
 
+static void IotXDT_CycleDetectPileData(void)
+{
+    AswMonitorChargeData_Struct *pChargeData = NULL;
+    IotXDTRecvData_Struct *pRecvData = NULL;
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmXDTPlatInfo_Struct *pPlatInfo = &pPrivateParam->stXDTParam.platinfo;
+    uint8_t index = 0;
+    uint8_t item845Flag[SYSCFG_CFG_GUN_NUM] = {0};
+    uint32_t chargeTotalMoney[SYSCFG_CFG_GUN_NUM] = {0};
+    float fAmountThreshold = 0.0f;
+
+	/* detect the transmmit condition of pile data */
+	for (index = 0; index < SYSCFG_CFG_GUN_NUM; index++)
+	{
+		pRecvData = &pIotXDTCtx->stProtoData.stRecvData[index];
+        pChargeData = AswMonitor_GetChargeDataPtr(index);
+
+		if (AswMonitor_IsOrderIdle(index) != TRUE)
+		{
+			if (pPlatInfo->pileDataCycleReportEnable)
+			{
+                if (Common_JudgeTimeoutMs(Common_GetSendTick(pIotXDTCtx->pFuncSendCtrl, index, IOT_XDT_CMD_PILE_DATA), 
+                    pPlatInfo->pileDataReportCycle * 1000))
+                {
+                    item845Flag[index] = TRUE;
+                }
+			}
+
+            memcpy(&fAmountThreshold, &pPlatInfo->amountChangeThreshold, sizeof(float));
+
+			chargeTotalMoney[index] = pChargeData->totalMoney;
+
+			if ((chargeTotalMoney[index] > pRecvData->offlineClearData.chargeTotalMoney) &&
+				(chargeTotalMoney[index] - pRecvData->offlineClearData.chargeTotalMoney) > 
+				((uint32_t)(fAmountThreshold * 10000)))
+			{
+				pRecvData->offlineClearData.chargeTotalMoney = chargeTotalMoney[index];
+				item845Flag[index] = TRUE;
+			}
+
+			if (item845Flag[index] == TRUE)
+			{
+                Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, index, IOT_XDT_CMD_PILE_DATA, TRUE);
+                Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, index, IOT_XDT_CMD_PILE_DATA, TRUE);
+				item845Flag[index] = FALSE;
+			}
+		}
+		else
+		{
+			pRecvData->offlineClearData.chargeTotalMoney = 0;
+			chargeTotalMoney[index] = 0;
+			item845Flag[index] = TRUE;
+		}
+	}
+}
+
+static void IotXDT_CycleDetectUnreporteRecord(void)
+{
+    uint8_t port = 0;
+    uint8_t recordSendFlag = FALSE;
+
+    if (MSNvm_QueryUnreportedRecordCount(eMSNvmBlockID_OrderRecord) > 0)
+    {
+        for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+        {
+            if (Common_GetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, IOT_XDT_CHARGE_RECORD) ||
+                Common_GetRecvTimerEnable(pIotXDTCtx->pFuncRecvCtrl, port, IOT_XDT_CHARGE_RECORD_RSP))
+            {
+                recordSendFlag = TRUE;
+                break;
+            }
+        }
+
+        if (recordSendFlag == FALSE)
+        {
+            if (eGlobalRet_OK == MSNvm_QueryLatestUnreportedRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pIotXDTCtx->stOrderInfo, 
+                sizeof(MSNvmOrderInfo_Struct), &pIotXDTCtx->time))
+            {
+                port = pIotXDTCtx->stOrderInfo.port;
+
+                /* 避免当数据库存在脏数据时，脏数据有问题，持续进入到这边 */
+                if (port >= SYSCFG_CFG_GUN_NUM || 
+                    pIotXDTCtx->stOrderInfo.protocolType != eAswPlatCardType_XDT ||
+                    pIotXDTCtx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)
+                {
+                    MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotXDTCtx->time);
+                }
+                else
+                {
+                    Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, IOT_XDT_CHARGE_RECORD, TRUE);
+                    Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CHARGE_RECORD, TRUE);
+                }
+            }
+        }
+    }
+}
+
+static void IotXDT_CycleDetectErrInfo(void)
+{
+    IotXDTRecvData_Struct *pRecvData = NULL;
+    uint8_t port = 0;
+
+    IotXDT_CheckErrStatus();
+
+	for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+	{
+		pRecvData = &pIotXDTCtx->stProtoData.stRecvData[port];
+		
+		if (pRecvData->offlineClearData.errClearInfoReportFlag == TRUE)
+		{
+			if (TRUE == IotXDT_CheckPileErrInfoReport(port))
+			{
+                Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, IOT_XDT_CMD_ERRINFO, TRUE);
+                Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CMD_ERRINFO, TRUE);
+			}
+		}
+	}
+}
+
 static void IotXDT_CycleDetect(void)
 {
     IotXDT_CycleDetectPileStatus();
+
+    IotXDT_CycleDetectPileData();
+
+    IotXDT_CycleDetectUnreporteRecord();
+
+    IotXDT_CycleDetectErrInfo();
 }
 
 static void IotXDT_WSNormalHandle(void)
@@ -334,6 +558,332 @@ static void IotXDT_MqttConnectCallback(uint8_t connectResult, uint8_t *pCredenti
     }
 }
 
+
+uint8_t IotXDT_CheckPileErrInfoReport(uint8_t port)
+{
+	IotXDTRecvData_Struct *pRecvDataInfo = &pIotXDTCtx->stProtoData.stRecvData[port];
+	uint8_t index = 0,  ret = FALSE;
+
+	if (pRecvDataInfo->offlineClearData.errInfoReportQueue[0].eReportState != eXDTReportState_Null)
+	{
+		if (TRUE != Common_GetRecvTimerEnable(pIotXDTCtx->pFuncRecvCtrl, port, IOT_XDT_CMD_ERRINFO_RSP))
+		{
+			ret = TRUE;
+		}
+	}
+
+	return ret;
+}
+
+void IotXDT_AddErrInfoQueue(uint8_t port, uint8_t errIndex, IotXDTErrDesc_Struct *pErrDesc, uint8_t status, uint8_t callFlag)
+{
+	IotXDTRecvData_Struct *pRecvDataInfo = &pIotXDTCtx->stProtoData.stRecvData[port];
+	uint8_t index = 0;
+
+	for (index = 0; index < IOT_XDT_ERRINFO_REPORT_QUEUE_SIZE; index++)
+	{
+		if (pRecvDataInfo->offlineClearData.errInfoReportQueue[index].eReportState == eXDTReportState_Null)
+		{
+			pRecvDataInfo->offlineClearData.errInfoReportQueue[index].eReportState = eXDTReportState_ToReport;
+			pRecvDataInfo->offlineClearData.errInfoReportQueue[index].callFlag = callFlag;
+			pRecvDataInfo->offlineClearData.errInfoReportQueue[index].p = (uint8_t *)pErrDesc;
+			pRecvDataInfo->offlineClearData.errInfoReportQueue[index].errIndex = errIndex;
+			pRecvDataInfo->offlineClearData.errInfoReportQueue[index].status = status;
+			break;
+		}
+		
+		if (index == (IOT_XDT_ERRINFO_REPORT_QUEUE_SIZE - 1))
+		{
+			IOTXDT_CFG_LogPrint("[%s()]: Failed to push into the error info queue\r\n", __FUNCTION__);
+		}
+	}
+}
+
+void IotXDT_DelErrInfoQueue(uint8_t port)
+{
+	IotXDTRecvData_Struct *pRecvDataInfo = &pIotXDTCtx->stProtoData.stRecvData[port];
+	uint8_t index = 0;
+	uint8_t count = 0;
+
+	for (index = 0; index < IOT_XDT_ERRINFO_REPORT_QUEUE_SIZE; index++)
+	{
+		if (pRecvDataInfo->offlineClearData.errInfoReportQueue[index].eReportState == eXDTReportState_Reporting)
+		{
+			count++;
+		}
+	}
+
+	if (count > 0)
+	{
+		memmove(&pRecvDataInfo->offlineClearData.errInfoReportQueue[0], 
+			&pRecvDataInfo->offlineClearData.errInfoReportQueue[count], (IOT_XDT_ERRINFO_REPORT_QUEUE_SIZE - count) * sizeof(IotXDTErrInfoReport_Struct));
+		memset(&pRecvDataInfo->offlineClearData.errInfoReportQueue[IOT_XDT_ERRINFO_REPORT_QUEUE_SIZE - count], 0x00, sizeof(IotXDTErrInfoReport_Struct) * count);
+	}
+}
+
+uint8_t IotXDT_CheckErrInfoReportStatusFree(void)
+{
+	IotXDTRecvData_Struct *pRecvDataInfo = NULL;
+	uint8_t gunNo = 0;
+	uint8_t ret = TRUE;
+	
+	for (gunNo = 0; gunNo < SYSCFG_CFG_GUN_NUM; gunNo++)
+	{
+		pRecvDataInfo = &pIotXDTCtx->stProtoData.stRecvData[gunNo];
+
+		if (pRecvDataInfo->offlineClearData.errInfoReportQueue[0].eReportState != eXDTReportState_Null ||
+			TRUE == Common_GetRecvTimerEnable(pIotXDTCtx->pFuncRecvCtrl, gunNo, IOT_XDT_CMD_ERRINFO_RSP))
+		{
+			ret = FALSE;
+			break;
+		}
+	}
+
+	return ret;
+}
+
+IotXDTErrDesc_Struct *IotXDT_CheckFirstErr(uint8_t port)
+{
+	IotXDTErrDesc_Struct *pErrDesc = NULL;
+	uint8_t index = 0;
+
+	for (index = 0; index < ARRAY_SIZE(c_IotXDTErrDescTable); index++)
+	{
+		pErrDesc = &c_IotXDTErrDescTable[index];
+
+		if (AswErrHandle_CheckErrExit(port, pErrDesc->eErrorCode))
+		{
+			break;
+		}
+		
+		pErrDesc = NULL;
+	}
+
+	return pErrDesc;
+}
+
+static uint8_t IotXDT_CheckErrInfoReportForCall(void)
+{
+	IotXDTRecvData_Struct *pRecvDataInfo = NULL;
+	uint8_t gunNo = 0;
+	uint8_t ret = FALSE;
+	
+	for (gunNo = 0; gunNo < SYSCFG_CFG_GUN_NUM; gunNo++)
+	{
+		pRecvDataInfo = &pIotXDTCtx->stProtoData.stRecvData[gunNo];
+
+		if (pRecvDataInfo->offlineClearData.errInfoReportQueue[0].callFlag == TRUE)
+		{
+			ret = TRUE;
+			break;
+		}
+	}
+
+	return ret;
+}
+
+void IotXDT_CheckErrStatus(void)
+{
+	IotXDTErrDesc_Struct *pErrDesc = NULL;
+	uint8_t index = 0, gunNo = 0, status = 0;
+	uint8_t callFlag = IotXDT_CheckErrInfoReportForCall();;
+
+	for (index = 0; index < ARRAY_SIZE(c_IotXDTErrDescTable); index++)
+	{
+		for (gunNo = 0; gunNo < SYSCFG_CFG_GUN_NUM; gunNo++)
+		{
+			pErrDesc = &c_IotXDTErrDescTable[index];
+			status = AswErrHandle_CheckErrExit(gunNo, pErrDesc->eErrorCode);
+
+			if (status != pErrDesc->lastStatus[gunNo])
+			{
+				if (callFlag == TRUE)
+				{
+					if (status == TRUE)
+					{
+						if (TRUE != Common_GetSendFlag(pIotXDTCtx->pFuncSendCtrl, gunNo, IOT_XDT_CMD_ERRINFO))
+						{
+							IotXDT_AddErrInfoQueue(gunNo, pErrDesc->errNo, pErrDesc, status, TRUE);
+							pErrDesc->lastStatus[gunNo] = status;
+							IOTXDT_CFG_LogPrint("[%s()]: port: %d, status: %d, errdesc:%s\r\n", __FUNCTION__, index, status, pErrDesc->alarmDesc);
+						}
+					}
+				}
+				else
+				{
+					IotXDT_AddErrInfoQueue(gunNo, pErrDesc->errNo, pErrDesc, status, FALSE);
+					pErrDesc->lastStatus[gunNo] = status;
+					IOTXDT_CFG_LogPrint("[%s()]: port: %d, status: %d, errdesc:%s\r\n", __FUNCTION__, index, status, pErrDesc->alarmDesc);
+				}
+			}
+		}
+	}
+}
+
+void IotXDT_RefreshErrStatusForCall(void)
+{
+	IotXDTErrDesc_Struct *pErrDesc = NULL;
+	uint8_t index = 0, gunNo = 0, status = 0;
+
+	for (index = 0; index < ARRAY_SIZE(c_IotXDTErrDescTable); index++)
+	{
+		for (gunNo = 0; gunNo < SYSCFG_CFG_GUN_NUM; gunNo++)
+		{
+			pErrDesc = &c_IotXDTErrDescTable[index];
+
+			status = AswErrHandle_CheckErrExit(gunNo, pErrDesc->eErrorCode);
+
+			if (status == TRUE)
+			{
+				pErrDesc->lastStatus[gunNo] = status;
+				IotXDT_AddErrInfoQueue(gunNo, pErrDesc->errNo, pErrDesc, status, TRUE);
+			}
+		}
+	}
+}
+
+void IotXDT_CheckErrInfoQueueDuplicate(uint8_t port)
+{
+	IotXDTRecvData_Struct *pRecvDataInfo = &pIotXDTCtx->stProtoData.stRecvData[port];
+	uint8_t startCheckPos = 0, endCheckPos = 0;
+	uint8_t nullCount = 0;
+
+	while (startCheckPos < (IOT_XDT_ERRINFO_REPORT_QUEUE_SIZE - 1))
+	{
+		nullCount = 0;
+		
+		for (endCheckPos = startCheckPos + 1; endCheckPos < IOT_XDT_ERRINFO_REPORT_QUEUE_SIZE; endCheckPos++)
+		{
+			if (pRecvDataInfo->offlineClearData.errInfoReportQueue[startCheckPos].p != NULL)
+			{
+				if (pRecvDataInfo->offlineClearData.errInfoReportQueue[startCheckPos].errIndex ==
+					pRecvDataInfo->offlineClearData.errInfoReportQueue[endCheckPos].errIndex)
+				{
+					if (pRecvDataInfo->offlineClearData.errInfoReportQueue[startCheckPos].status !=
+						pRecvDataInfo->offlineClearData.errInfoReportQueue[endCheckPos].status)
+					{
+						memset(&pRecvDataInfo->offlineClearData.errInfoReportQueue[startCheckPos], 0x00, sizeof(IotXDTErrInfoReport_Struct));
+						memset(&pRecvDataInfo->offlineClearData.errInfoReportQueue[endCheckPos], 0x00, sizeof(IotXDTErrInfoReport_Struct));
+					}
+					else
+					{
+						memset(&pRecvDataInfo->offlineClearData.errInfoReportQueue[endCheckPos], 0x00, sizeof(IotXDTErrInfoReport_Struct));
+					}
+				}
+			}
+			else
+			{
+				nullCount++;
+			}
+		}
+		
+		if (nullCount >= (IOT_XDT_ERRINFO_REPORT_QUEUE_SIZE - startCheckPos - 1))
+		{
+			break;
+		}
+
+		startCheckPos++;
+	}
+
+	startCheckPos = 0;
+	endCheckPos = 0;
+
+	while (startCheckPos < (IOT_XDT_ERRINFO_REPORT_QUEUE_SIZE - 1))
+	{
+		if (pRecvDataInfo->offlineClearData.errInfoReportQueue[startCheckPos].p == NULL)
+		{
+			nullCount = 0;
+			
+			for (endCheckPos = startCheckPos + 1; endCheckPos < IOT_XDT_ERRINFO_REPORT_QUEUE_SIZE; endCheckPos++)
+			{
+				if (pRecvDataInfo->offlineClearData.errInfoReportQueue[endCheckPos].p != NULL)
+				{
+					memcpy(&pRecvDataInfo->offlineClearData.errInfoReportQueue[startCheckPos], 
+						&pRecvDataInfo->offlineClearData.errInfoReportQueue[endCheckPos], sizeof(IotXDTErrInfoReport_Struct));
+					memset(&pRecvDataInfo->offlineClearData.errInfoReportQueue[endCheckPos], 0x00, sizeof(IotXDTErrInfoReport_Struct));
+				}
+				else
+				{
+					nullCount++;
+				}
+			}
+			
+			if (nullCount == (IOT_XDT_ERRINFO_REPORT_QUEUE_SIZE- startCheckPos - 1))
+			{
+				break;
+			}
+		}
+
+		startCheckPos++;
+	}
+}
+
+
+void IotXDT_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason)
+{ 
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmXDTPlatInfo_Struct *pPlatInfo = &pPrivateParam->stXDTParam.platinfo;
+    AswMonitorBillMode_Struct *pBillMode = AswMonitor_GetCurUsedBillModePtr(port);
+    AswMonitorChargeCtrl_Struct *pstChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
+    AswMonitorChargeData_Struct *pChargeData = AswMonitor_GetChargeDataPtr(port);
+    MSNvmXDTOrderInfo_Struct *pXDTOrder = &pOrderData->platOrderInfo.stXDTOrderInfo;
+    uint8_t index = 0;
+
+    if (orderSaveReason == ASWMONITOR_ORDER_SAVE_START)
+    {
+        Common_Uint32ToFourUint8(pXDTOrder->beginTs, pChargeData->chargeStartTime - SSTM_BASE_TIMESTAMP_1970_BJT);
+        Common_Uint32ToFourUint8(pXDTOrder->beginMr, pChargeData->startMeterVal);
+        pOrderData->port = port;
+        pOrderData->protocolType = eAswPlatCardType_XDT;
+        pOrderData->orderLen = sizeof(MSNvmXDTOrderInfo_Struct);
+        pXDTOrder->stopReason = eIotXDTStopReason_Other;
+        pPlatInfo->orderCount++;
+        Common_Uint32ToFourUint8(pXDTOrder->indexRec, pPlatInfo->orderCount);
+        MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
+    }
+    else if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
+    {
+        pXDTOrder->typeRec = 1;
+
+        if (pIotXDTCtx->loginSucc == FALSE)
+        {
+            pXDTOrder->typeRec = 0;
+        }
+
+        if (pXDTOrder->stopReason == eIotXDTStopReason_Other)
+        {
+            pXDTOrder->stopReason = IotXDT_ConvertStopReason(pChargeData->eChargeStopReason);
+        }
+
+        if (pIotXDTCtx->loginSucc == TRUE)
+        {
+            Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, IOT_XDT_CHARGE_STOP_EVNET, TRUE);
+            Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CHARGE_STOP_EVNET, TRUE);
+        }
+    }
+    else
+    {}
+
+    Common_Uint32ToFourUint8(pXDTOrder->endTs, pChargeData->chargeStopTime - SSTM_BASE_TIMESTAMP_1970_BJT);
+    memcpy(pXDTOrder->ts, pXDTOrder->endTs, 4);
+    Common_Uint32ToFourUint8(pXDTOrder->endMr, pChargeData->stopMeterVal);
+    Common_Uint32ToFourUint8(pXDTOrder->tPq, pChargeData->totalLossEnergy);
+    Common_Uint32ToFourUint8(pXDTOrder->elecAmt, pChargeData->totalElecMoney);
+    Common_Uint32ToFourUint8(pXDTOrder->serMt, pChargeData->totalServeMoney);
+    Common_Uint32ToFourUint8(pXDTOrder->amt, pChargeData->totalMoney);
+    pXDTOrder->pqTotal = 0;
+
+    for (index = 0; index < MSNVM_XDT_BILLMODE_PERIOD_COUNT; index++)
+    {
+        if (pChargeData->periodValidFlag[index] == TRUE)
+        {
+            pXDTOrder->periodInfoArray[index].valid = TRUE;
+            pXDTOrder->periodInfoArray[index].sn = index + 1;
+            Common_Uint32ToFourUint8(pXDTOrder->periodInfoArray[index].pq, pChargeData->periodElePower[index]);
+        }
+    }
+}
+
 uint8_t IotXDT_IsPileOnCharging(void)
 {
     uint8_t port = 0;
@@ -351,7 +901,6 @@ uint8_t IotXDT_IsPileOnCharging(void)
     return ret;
 }
 
- 
 IotXDTGunStatus_Enum IotXDT_GetGunStatus(uint8_t port)
 {
     uint8_t chargeState = AswChargeIf_GetChargeState(port);
@@ -702,6 +1251,120 @@ uint8_t IotXDT_GetDevOperator(char *pDevOperator, uint8_t *pOutLen)
     return ret;
 }
 
+void IotXDT_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardBillMode)
+{
+    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
+    MSNvmXDTParamBillMode_Struct *pRecvBillingModel = &pPrivateParam->stXDTParam.stBillMode;
+	uint8_t tempTimeH = 0, tempTimeL = 0;
+	uint8_t ret = TRUE;
+	uint8_t index = 0;
+
+	if (Common_FourUint8ToUint32(pRecvBillingModel->validFlag) != IOT_XDT_MAGIC_NUM)
+	{
+		ret = FALSE;
+		IOTXDT_CFG_LogPrint("[%s()]magic num error\r\n", __FUNCTION__);
+	}
+	else if (pRecvBillingModel->period_count > MSNVM_XDT_BILLMODE_PERIOD_COUNT || 
+		pRecvBillingModel->period_count == 0)
+	{
+		ret = FALSE;
+		IOTXDT_CFG_LogPrint("[%s()]period count error1\r\n", __FUNCTION__);
+	}	
+	else if (pRecvBillingModel->typeRule != 0 && pRecvBillingModel->typeRule != 1)
+	{
+		ret = FALSE;
+		IOTXDT_CFG_LogPrint("[%s()]type rule error\r\n", __FUNCTION__);
+	}
+	else
+	{
+        /* 计费模型ID */
+        memcpy(pStandardBillMode->billModeID, pRecvBillingModel->billModeID, 4);
+        pStandardBillMode->billmodeType = pRecvBillingModel->typeRule;
+
+		// 48时段费率号
+		pStandardBillMode->periodCount = pRecvBillingModel->period_count;
+		pStandardBillMode->elecLossRate = pRecvBillingModel->measure_wastage_rates;
+    	memcpy(pStandardBillMode->periodRate, pRecvBillingModel->segmentation_rate, 48);
+
+		if (pRecvBillingModel->typeRule == 0)
+		{
+			pStandardBillMode->rateElecPrice[0] = Common_FourUint8ToUint32(pRecvBillingModel->sharp_ele_fee);
+			pStandardBillMode->rateSeverPrice[0] = Common_FourUint8ToUint32(pRecvBillingModel->sharp_ser_fee);
+			tempTimeH = 0 / 2;
+			tempTimeL = (0 % 2) * 30;
+            pStandardBillMode->startTime[0][0] = tempTimeH;
+            pStandardBillMode->startTime[0][1] = tempTimeL;
+            tempTimeH = 48 / 2;
+			tempTimeL = (48 % 2) * 30;
+            pStandardBillMode->stopTime[0][0] = tempTimeH;
+            pStandardBillMode->stopTime[0][1] = tempTimeL;
+		}
+		else
+		{
+			for (index = 0; index < pRecvBillingModel->period_count; index++)
+			{
+				if (pRecvBillingModel->period[index].validFlag == TRUE)
+				{
+					tempTimeH = pRecvBillingModel->period[index].startTime / 2;
+					tempTimeL = (pRecvBillingModel->period[index].startTime % 2) * 30;
+                    pStandardBillMode->startTime[index][0] = tempTimeH;
+                    pStandardBillMode->startTime[index][1] = tempTimeL;
+
+					tempTimeH = pRecvBillingModel->period[index].stopTime / 2;
+					tempTimeL = (pRecvBillingModel->period[index].stopTime % 2) * 30;
+                    pStandardBillMode->stopTime[index][0] = tempTimeH;
+                    pStandardBillMode->stopTime[index][1] = tempTimeL;
+
+					switch (pRecvBillingModel->period[index].flag)
+					{
+						case 0:  // 尖
+						{
+							pStandardBillMode->rateElecPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->sharp_ele_fee);
+							pStandardBillMode->rateSeverPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->sharp_ser_fee);
+							break;
+						}
+						case 1:  // 峰 
+						{
+							pStandardBillMode->rateElecPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->peak_ele_fee);
+							pStandardBillMode->rateSeverPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->peak_ser_fee);
+							break;
+						}
+						case 2:  // 平
+						{
+							pStandardBillMode->rateElecPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->flat_ele_fee);
+							pStandardBillMode->rateSeverPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->flat_ser_fee);
+							break;				
+						}
+						case 3:  // 谷
+						{
+							pStandardBillMode->rateElecPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->valley_ele_fee);
+							pStandardBillMode->rateSeverPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->valley_ser_fee);
+							break;			
+						}
+						case 4:  // 深
+						{
+							pStandardBillMode->rateElecPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->deep_ele_fee);
+							pStandardBillMode->rateSeverPrice[index] = Common_FourUint8ToUint32(pRecvBillingModel->deep_ser_fee);
+							break;
+						}
+						default:
+						{
+							ret = FALSE;
+							IOTXDT_CFG_LogPrint("[%s()]period flag erro\r\n", __FUNCTION__);
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+    if (ret == TRUE)
+    {
+        pStandardBillMode->validFlag = TRUE;
+    }
+}
+
 void IotXDT_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
 {
     MSNvmPlatParam_Struct *pParam = AswPlatM_GetPlatParamPtr();
@@ -709,7 +1372,7 @@ void IotXDT_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
 
     if (pLinkPara != NULL && pIotXDTCtx != NULL)
     {
-        strcpy(pLinkPara->stMqttPara.ip, pParam->platMainIp);
+        strncpy(pLinkPara->stMqttPara.ip, pParam->platMainIp, sizeof(pLinkPara->stMqttPara.ip));
         pLinkPara->stMqttPara.port = pParam->platMainPort;
 
         pLinkPara->stMqttPara.eVersion = eCddNetMMqttVersion_V3_1_1;
@@ -717,8 +1380,8 @@ void IotXDT_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
 
         if (pPrivateParam->stXDTParam.platinfo.credentialSaveFlag == TRUE)
         {
-            strcpy(pLinkPara->stMqttPara.userName, pPrivateParam->stXDTParam.platinfo.cUserName);
-            strcpy(pLinkPara->stMqttPara.password, pPrivateParam->stXDTParam.platinfo.cPassword);
+            strncpy(pLinkPara->stMqttPara.userName, pPrivateParam->stXDTParam.platinfo.cUserName, MSNVM_XDT_USER_NAME_LEN);
+            strncpy(pLinkPara->stMqttPara.password, pPrivateParam->stXDTParam.platinfo.cPassword, MSNVM_XDT_PASSWORD_LEN);
         }
         else
         {

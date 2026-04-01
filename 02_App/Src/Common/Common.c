@@ -872,6 +872,23 @@ void Common_CvtHex2Ascii(uint8_t hexData, uint8_t* pAsciiData)
     }
 }
 
+void Common_ConvertStringToHex(char *pString,  uint8_t *pHex,  uint16_t len)
+{
+	uint16_t index = 0;
+	char tempString[3] = { 0 };
+	uint8_t temp;
+	
+	if (pString != NULL && pHex != NULL && len != 0)
+	{
+		for (index = 0; index < len; index += 2)
+		{
+			memcpy(tempString, &pString[index], 2);
+			temp = atoi(tempString);
+			pHex[index / 2] = temp;
+		}
+	}
+}
+
 /*
  * @brief 从完整路径中提取目录路径和文件名
  * 

@@ -1051,7 +1051,7 @@ static uint8_t IotYKC21_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, ui
 
             pIotYKC21Ctx->stProtoData[port[0]].remoteStartResult = 1;
             pIotYKC21Ctx->stProtoData[port[0]].remoteStartFailReason = 0;
-            AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_APP);
+            AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_APP, TRUE);
         }
     }
     else
@@ -1144,7 +1144,7 @@ static uint8_t IotYKC21_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, u
                 pChargeCtrl->chargeCtrlVal = pChargeCtrl->accountMoney;
             }
 
-            AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_CARD);
+            AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_CARD, TRUE);
             IOTYKC21_CFG_LogPrint("[枪：%d]充电桩申请主动启动充电成功!\r\n", port[0]);
         }
         else

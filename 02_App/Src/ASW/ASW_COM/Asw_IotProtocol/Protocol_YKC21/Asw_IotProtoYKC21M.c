@@ -530,7 +530,7 @@ static void IotYKC21_WSNormalHandle(void)
 }
 
 
-static IotYKC21StopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType)
+static IotYKC21StopReason_Enum IotYKC21_ConverStopReason(AswErrorType_Enum errType)
 {
     uint8_t index = 0;
     IotYKC21StopReason_Enum eStopReason = eIotYKC21StopReason_NoExpectedErr;
@@ -761,7 +761,7 @@ void IotYKC21_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
 
     if (pLinkPara != NULL && pIotYKC21Ctx != NULL)
     {
-        strcpy(pLinkPara->stTcpPara.ip, pParam->platMainIp);
+        strncpy(pLinkPara->stTcpPara.ip, pParam->platMainIp, sizeof(pParam->platMainIp) - 1);
         pLinkPara->stTcpPara.port = pParam->platMainPort;
         FrameQueue_Creat(eFrameQueueType_TCP, 2048, 2048, &pIotYKC21Ctx->frameQueueChannelID);
         pLinkPara->stTcpPara.frameQueueChannelID = pIotYKC21Ctx->frameQueueChannelID;
@@ -866,7 +866,6 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
 
     if (orderSaveReason == ASWMONITOR_ORDER_SAVE_START)
     {
-        memset(pYkcOrder, 0x00, sizeof(MSNvmYKC21OrderInfo_Struct));
         memcpy(pYkcOrder->pileDnBCD, pIotYKC21Ctx->pileDnBCD, 7);
         pYkcOrder->port = port;
         memcpy(pYkcOrder->orderTransactionNum, 
@@ -919,7 +918,7 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
 
     if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
     {
-        pYkcOrder->stopReason = Iot_ConverStopReason(pChargeData->eChargeStopReason);
+        pYkcOrder->stopReason = IotYKC21_ConverStopReason(pChargeData->eChargeStopReason);
     }
 }
 

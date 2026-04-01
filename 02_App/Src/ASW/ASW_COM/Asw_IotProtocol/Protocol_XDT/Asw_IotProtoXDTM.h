@@ -43,9 +43,6 @@ typedef enum
 typedef struct 
 {
     IotXDTRecvData_Struct stRecvData[SYSCFG_CFG_GUN_NUM];
-
-    MSNvmOrderInfo_Struct stOrderInfo[SYSCFG_CFG_GUN_NUM];
-
     IotXDTGunStatus_Enum eGunStatus[SYSCFG_CFG_GUN_NUM];
     IotXDTPileStatus_Enum ePileStatus;
 
@@ -104,12 +101,13 @@ typedef struct
 *    Global Function Prototypes
 ******************************************************************************/
 uint8_t IotXDT_SetProductSecret(char *pProductSecret, uint8_t len);
-uint8_t IotXDT_SetDevOperator(char *pDevOperator, uint8_t len); 
+uint8_t IotXDT_SetDevOperator(char *pDevOperator, uint8_t len);
 uint8_t IotXDT_SetProductKey(char *pProductKey, uint8_t len);
 uint8_t IotXDT_GetProductKey(char *pProductKey, uint8_t *pOutLen);
 uint8_t IotXDT_GetProductSecret(char *pProductSecret, uint8_t *pOutLen);
 uint8_t IotXDT_GetDevOperator(char *pDevOperator, uint8_t *pOutLen);
-
+void IotXDT_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardBillMode);
+void IotXDT_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason);
 
 void IotXDT_FillLinkPara(CddNetMSocketPara_Union *pLinkPara);
 void IotXDT_InitMemory(void);
@@ -120,6 +118,16 @@ void IotXDT_OfflineHandle(void);
 IotXDTPileStatus_Enum IotXDT_GetPileStatus(void);
 IotXDTGunStatus_Enum IotXDT_GetGunStatus(uint8_t port);
 uint8_t IotXDT_IsPileOnCharging(void);
+void IotXDT_RefreshErrStatusForCall(void);
+
+uint8_t IotXDT_CheckErrInfoReportStatusFree(void);
+IotXDTErrDesc_Struct *IotXDT_CheckFirstErr(uint8_t port);
+void IotXDT_AddErrInfoQueue(uint8_t port, uint8_t errIndex, IotXDTErrDesc_Struct *pErrDesc, uint8_t status, uint8_t callFlag);
+void IotXDT_DelErrInfoQueue(uint8_t port);
+void IotXDT_CheckErrStatus(void);
+void IotXDT_RefreshErrStatusForCall(void);
+uint8_t IotXDT_CheckPileErrInfoReport(uint8_t port);
+void IotXDT_CheckErrInfoQueueDuplicate(uint8_t port);
 #endif /* ASW_IOT_PROTO_XDTM_H_ */
 
 

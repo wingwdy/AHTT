@@ -337,7 +337,7 @@ void CddCardM_NfcInitProcess(CddCardM_Struct *pCardM)
 	if (pCardM->eCardType != pCardM->eCardTypeSet)
 	{
 		pCardM->eCardType = pCardM->eCardTypeSet;
-        CDDCARDM_CFG_LogPrint("读卡类型 %d\r\n", pCardM->eCardType);
+        CDDCARDM_CFG_LogPrint("读卡类型：%s\r\n", (pCardM->eCardType == eCddCardType_BullCard) ? "公牛卡" : "通用卡");
 	}
 }
 

@@ -209,13 +209,13 @@ typedef struct
 	uint8_t endTs[4];
 	uint8_t beginMr[4];
 	uint8_t endMr[4];
-	uint8_t tPq[4];
+	 uint8_t tPq[4];
 	uint8_t elecAmt[4];
 	uint8_t serMt[4];
 	uint8_t amt[4];
-	uint8_t stopReason;
+    uint8_t stopReason;
 	uint8_t typeRule;
-	uint8_t pqTotal[4];
+	uint8_t pqTotal;
 	MSNvmXDTPeriodInfo_Struct periodInfoArray[MSNVM_XDT_BILLMODE_PERIOD_COUNT];
 }MSNvmXDTOrderInfo_Struct;
 
@@ -346,6 +346,8 @@ typedef struct
     char     lastOtaSoftwareVersion[MSNVM_XDT_VERSION_LEN + 1];    /* 上一次升级的OTA软件版本 */
     char     otaSoftwareVersion[MSNVM_XDT_VERSION_LEN + 1];        /* 当前正在升级的OTA软件版本 */
     uint8_t  otaState;                                             /* OTA状态 */
+
+    uint8_t  orderCount;                                           /* 订单数量 */
 }MSNvmXDTPlatInfo_Struct;
 
 typedef struct 

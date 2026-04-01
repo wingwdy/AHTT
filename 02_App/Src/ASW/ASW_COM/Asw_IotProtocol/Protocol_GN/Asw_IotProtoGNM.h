@@ -52,9 +52,6 @@ typedef struct
 
     uint8_t remoteStopResult;           /* 停止结果 */
     uint8_t remoteStopFailReason;       /* 停止失败原因 */
-
-    MSNvmOrderInfo_Struct stOrderInfo;
-
     uint8_t authCardID[8];              /* 授权卡号 刷卡启动生效后，填充 */
 
     uint8_t updateAccountMoneyCardID[8];

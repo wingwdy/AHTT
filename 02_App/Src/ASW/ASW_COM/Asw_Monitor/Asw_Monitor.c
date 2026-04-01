@@ -152,6 +152,8 @@ static void AswMonitor_ProcessCostData(uint8_t port, AswMonitorData_Struct *pstA
         pChargeData->chargeStopTime = curTime;
     }
 
+    pChargeData->periodValidFlag[periodNum] = TRUE;
+    
     if (incEnergy != 0)
     {
         periodNum = AswMonitor_GetBillModePeriod(pBillMode);
@@ -357,7 +359,7 @@ static void AswMonitor_IdleHandle(uint8_t port, AswMonitorData_Struct *pstAswMon
         {  
             if (eErrChargeCondition_Allow == AswErrHandle_GetChargeCondition(port))
             {
-                AswMonitor_ChargeStart(port, ASWMONITOR_ORDER_START_SRC_PNC);
+                AswMonitor_ChargeStart(port, ASWMONITOR_ORDER_START_SRC_PNC, TRUE);
             }
         }
     }
@@ -493,9 +495,14 @@ void AswMonitor_PrintChargeData(void)
     uint32_t money = 0;
     uint16_t cpVol = 0;
     uint16_t cpDuty = 0;
-    
+    uint64_t currMeterEnergyVal = 0;
+    uint32_t temp1 = 0, temp2 = 0;
+
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
+        currMeterEnergyVal = AswChargeIf_GetMeterEnergyVal(port);
+        temp1 = currMeterEnergyVal / 10000;
+        temp2 = currMeterEnergyVal % 10000;
         pChargeData = &g_stAswMonitorData[port].stChargeData;
         voltage = AswChargeIf_GetInputVoltage(port);
         current = AswChargeIf_GetOutputCurrent(port);
@@ -516,6 +523,7 @@ void AswMonitor_PrintChargeData(void)
                                 (gunTemp - 50), (envTemp - 50), chargeTime);                                
         ASWMONITOR_CFG_LogPrint("已充电量：%d.%04d kWh,\t\t\t已充金额：%d.%04d 元,\r\n",
                                 energy / 10000, energy % 10000, money / 10000, money % 10000);
+        ASWMONITOR_CFG_LogPrint("电表读数：%d.%04d kWh\r\n", temp1, temp2);
         ASWMONITOR_CFG_LogPrint("----------------------------------------------------------------------------------------------\r\n");             
     }
 }
@@ -642,6 +650,7 @@ uint8_t AswMonitor_CheckBillModeValid(uint8_t port)
     if (port < SYSCFG_CFG_GUN_NUM)
     {
         pstAswMonitorData = &g_stAswMonitorData[port];
+        pstAswMonitorData->stBillMode.validFlag = FALSE;
         AswPlatM_TransformBillMode(port, &pstAswMonitorData->stBillMode);
 
         if (pstAswMonitorData->stBillMode.validFlag == TRUE)
@@ -679,7 +688,7 @@ void AswMonitor_GetForbidState(uint8_t *pLockState, uint8_t *pLockReason)
     }
 }
 
-void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc)
+void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc, uint8_t clearFlag)
 {
     AswMonitorChargeData_Struct *pChargeData = NULL;
     AswMonitorData_Struct *pstAswMonitorData = NULL;
@@ -692,8 +701,13 @@ void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc)
         if (pstAswMonitorData->chargeStart == FALSE && pstAswMonitorData->orderCtrl == ASWMONITOR_ORDER_CTRL_IDLE)
         {
             memset(pChargeData, 0x00, sizeof(AswMonitorChargeData_Struct));
-            memset(&pstAswMonitorData->stOrderData, 0x00, sizeof(pstAswMonitorData->stOrderData));
 
+            /* 有的协议需要外部初始化，所以这里需要判断是否需要清空订单数据 */
+            if (clearFlag == TRUE)
+            {
+                memset(&pstAswMonitorData->stOrderData, 0x00, sizeof(pstAswMonitorData->stOrderData));
+            }
+            
             pstAswMonitorData->chargeStart = TRUE;
             pstAswMonitorData->stChargeCtrl.startSrc = startSrc;
 
@@ -756,6 +770,18 @@ void AswMonitor_SetReboot(AswMonitorRebootType_Enum eRebootType)
         else
         {}
     }
+}
+
+MSNvmOrderInfo_Struct *AswMonitor_GerOrderDataPtr(uint8_t port)
+{
+    AswMonitorData_Struct *pstAswMonitorData = NULL;
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        pstAswMonitorData = &g_stAswMonitorData[port];
+    }
+
+    return &pstAswMonitorData->stOrderData;
 }
 
 AswMonitorChargeCtrl_Struct *AswMonitor_GetChargeCtrlPtr(uint8_t port)
@@ -841,7 +867,7 @@ void AswMonitor_InitMemory(void)
         g_stAswMonitorCtx.forbidParam.forbidState = FALSE;
     }
 
-    ASWMONITOR_CFG_LogPrint("设备锁机状态：%d\r\n", g_stAswMonitorCtx.forbidParam.forbidState);
+    ASWMONITOR_CFG_LogPrint("设备锁机状态：%s\r\n", (g_stAswMonitorCtx.forbidParam.forbidState == 0) ? "未锁机" : "已锁机");
 }
 
 void AswMonitor_MainFunction(void)

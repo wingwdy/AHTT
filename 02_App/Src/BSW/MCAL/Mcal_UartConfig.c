@@ -65,7 +65,7 @@ McalUartConfig_Struct g_UartConfigTable[eMcalUartChanel_Count] =
         .uartIntCfg = 
         {
             .nvic_irq = USART5_IRQn,
-            .nvic_irq_pre_priority = 0,
+            .nvic_irq_pre_priority = 1,
             .nvic_irq_sub_priority = 1,
         },
         .DMATx_En = FALSE,
@@ -98,7 +98,7 @@ McalUartConfig_Struct g_UartConfigTable[eMcalUartChanel_Count] =
         .uartIntCfg = 
         {
             .nvic_irq = USART0_IRQn,
-            .nvic_irq_pre_priority = 0,
+            .nvic_irq_pre_priority = 1,
             .nvic_irq_sub_priority = 1,
         },
         .DMATx_En = TRUE,
@@ -149,7 +149,7 @@ McalUartConfig_Struct g_UartConfigTable[eMcalUartChanel_Count] =
         .uartIntCfg = 
         {
             .nvic_irq = USART1_IRQn,
-            .nvic_irq_pre_priority = 0,
+            .nvic_irq_pre_priority = 1,
             .nvic_irq_sub_priority = 1,
         },
         .DMATx_En = FALSE,

@@ -89,7 +89,7 @@ const McalPWMOC_Struct c_stTimerOCParaTable[eMcalPWMOCChannel_Count] =
             .DMA_int = {
                 .nvic_irq = DMA1_Channel0_IRQn,
                 .DMA_intSrc = DMA_INT_FTF,
-                .nvic_irq_pre_priority = 2,
+                .nvic_irq_pre_priority = 0,
                 .nvic_irq_sub_priority = 1
             },
         },

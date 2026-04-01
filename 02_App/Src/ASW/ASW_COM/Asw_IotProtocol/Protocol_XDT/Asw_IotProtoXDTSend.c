@@ -52,7 +52,12 @@ static uint16_t IotXDT_ReportRateMode_ITEM835(uint8_t port, void *pBuf);
 static uint16_t IotXDT_ReportRateModeSetResponseEvent_ITEM836(uint8_t port, void *pBuf);
 static uint16_t IotXDT_QueryRateModeRsp_ITEM837(uint8_t port, void *pBuf);
 static uint16_t IotXDT_ReportPileState_ITEM841(uint8_t port, void *pBuf);
-
+static uint16_t IotXDT_ReportPileData_ITEM845(uint8_t port, void *pBuf);
+static uint16_t IotXDT_ReportChargeStartReponse_ITEM862(uint8_t port, void *pBuf);
+static uint16_t IotXDT_ReportChargeStartEvent_ITEM863(uint8_t port, void *pBuf);
+static uint16_t IotXDT_ReportChargeStopReponse_ITEM865(uint8_t port, void *pBuf);
+static uint16_t IotXDT_ReportChargeStopEvent_ITEM866(uint8_t port, void *pBuf);
+static uint16_t IotXDT_ReportChargeRecord_ITEM8613(uint8_t port, void *pBuf);
 static uint16_t IotXDT_ReportParaSetRsp_ITEM874(uint8_t port, void *pBuf);
 static uint16_t IotXDT_ReportParaGetRsp_ITEM876(uint8_t port, void *pBuf);
 static uint16_t IotXDT_RequestOTAAttribute_ITEM882(uint8_t port, void *pBuf);
@@ -101,7 +106,7 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 20 * 60 * 1000,
 		.pSendFunc = IotXDT_ReportPileState_ITEM841,
 		.matchCmd = IOT_XDT_CMD_PILE_STATE_RSP,
-		.cMeaning = "电桩状态上报",
+		.cMeaning = "电桩状态",
 	},
 
 	[4] = {
@@ -161,6 +166,7 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportParaSetRsp_ITEM874,
 		.matchCmd = IOT_XDT_PARA_SET,
+		.cMeaning = "参数设置响应",
 	},	
 
 	[10] = {
@@ -170,6 +176,7 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportParaGetRsp_ITEM876,
 		.matchCmd = IOT_XDT_PARA_QUERY,
+		.cMeaning = "查询参数响应",
 	},
 
 	[11] = {
@@ -179,8 +186,9 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_RequestOTAAttribute_ITEM882,
 		.matchCmd = IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE_RSP,
+		.cMeaning = "升级属性请求",
 	},
-/*
+
 	[12] = {
 		.topic = IOT_XDT_PRE_TOPIC_V2R_REQUEST,
 		.cmd = IOT_XDT_CHARGE_START_EVNET,
@@ -188,24 +196,27 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportChargeStartEvent_ITEM863,
 		.matchCmd = IOT_XDT_CMD_NULL,
-	},	
+		.cMeaning = "充电启动事件",
+	},
 
-	[13] = {
-		.topic = IOT_XDT_PRE_TOPIC_V2R_REQUEST,
-		.cmd = IOT_XDT_CHARGE_START_EVNETA,
+	[23] = {
+		.topic = IOT_XDT_PRE_TOPIC_V2T,
+		.cmd = IOT_XDT_CMD_FIRMWARE_STATE,
 		.cmdType = IOT_XDT_CMDTYPE_REQUSET,
 		.sendCycle = 0,
-		.pSendFunc = IotXDT_ReportChargeStartEvent_ITEM86A,
+		.pSendFunc = IotXDT_ReportFwState_ITEM886,
 		.matchCmd = IOT_XDT_CMD_NULL,
-	},	
+		.cMeaning = "固件状态",
+	},
 
 	[14] = {
 		.topic = IOT_XDT_PRE_TOPIC_TSDATA,
-		.cmd = IOT_XDT_CMD_PILEDATA,
+		.cmd = IOT_XDT_CMD_PILE_DATA,
 		.cmdType = IOT_XDT_CMDTYPE_REQUSET,
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportPileData_ITEM845,
 		.matchCmd = IOT_XDT_CMD_NULL,
+		.cMeaning = "电桩数据",
 	},
 
 	[15] = {
@@ -215,6 +226,7 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportChargeStopReponse_ITEM865,
 		.matchCmd = IOT_XDT_CHARGE_STOP,
+		.cMeaning = "停止充电响应",
 	},
 
 	[16] = {
@@ -224,7 +236,8 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportChargeStopEvent_ITEM866,
 		.matchCmd = IOT_XDT_CMD_NULL,
-	},	
+		.cMeaning = "停止充电事件",
+	},
 
 	[17] = {
 		.topic = IOT_XDT_PRE_TOPIC_V2R_REQUEST,
@@ -233,8 +246,8 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportChargeRecord_ITEM8613,
 		.matchCmd = IOT_XDT_CHARGE_RECORD_RSP,
-	},	
-
+	},
+/*
 	[18] = {
 		.topic = IOT_XDT_PRE_TOPIC_V2R_RESPONSE,
 		.cmd = IOT_XDT_QUERY_CHARGE_RECORD_RSP,
@@ -306,7 +319,7 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.pSendFunc = IotXDT_ReportPileErrInfo_ITEM843,
 		.matchCmd = IOT_XDT_CMD_ERRINFO_RSP,
 	},
-
+ */ 
 	[26] = {
 		.topic = IOT_XDT_PRE_TOPIC_V2R_RESPONSE,
 		.cmd = IOT_XDT_CHARGE_START_RSP,
@@ -314,15 +327,6 @@ static IotXDTSendCtrl_Struct  c_IotXDTSendCtrlTable[] =
 		.sendCycle = 0,
 		.pSendFunc = IotXDT_ReportChargeStartReponse_ITEM862,
 		.matchCmd = IOT_XDT_CHARGE_START,
-	},
- */  
-	[27] = {
-		.topic = IOT_XDT_PRE_TOPIC_V2T,
-		.cmd = IOT_XDT_CMD_FIRMWARE_STATE,
-		.cmdType = IOT_XDT_CMDTYPE_REQUSET,
-		.sendCycle = 0,
-		.pSendFunc = IotXDT_ReportFwState_ITEM886,
-		.matchCmd = IOT_XDT_CMD_NULL,
 	},
 };
 
@@ -1066,6 +1070,292 @@ static uint16_t IotXDT_ReportParaGetRsp_ITEM876(uint8_t port, void *pBuf)
 	cJSON_Delete(cRoot);
 	myFree(pJson);
 	dataLen = (atLeastParaValid == TRUE) ? dataLen : 0;
+	return dataLen;
+}
+
+static uint16_t IotXDT_ReportPileData_ITEM845(uint8_t port, void *pBuf)
+{
+	MSNvmOrderInfo_Struct *pOrder = AswMonitor_GerOrderDataPtr(port);
+	MSNvmXDTOrderInfo_Struct *pOrderRecord = &pOrder->platOrderInfo.stXDTOrderInfo;
+	AswMonitorChargeData_Struct *pChargeData = AswMonitor_GetChargeDataPtr(port);
+	cJSON *cRoot = NULL, *pile = NULL, *gunArray = NULL, *gun = NULL;
+	uint16_t dataLen = 0;
+	uint8_t index = 0;
+	uint32_t tempI, tempU;
+	double tempP;
+	char *pJson = NULL;
+
+	cRoot = cJSON_CreateObject();
+	IOT_XDT_CheckObjIsNull(cRoot, 0);
+
+	cJSON_AddStringToObject(cRoot, "snPlat", pIotXDTCtx->platDn);
+	cJSON_AddNumberToObject(cRoot, "ts",  SSTM_GetSecTimestamp() - SSTM_BASE_TIMESTAMP_1970_BJT);
+
+	pile = cJSON_CreateObject();
+	IOT_XDT_CheckObjIsNull(pile, 0);
+
+	cJSON_AddNumberToObject(pile, "runtime", pIotXDTCtx->stProtoData.runTime);
+	cJSON_AddNumberToObject(pile, "cTime", pIotXDTCtx->stProtoData.totalChargeTimeSec);
+	cJSON_AddNumberToObject(pile, "cEnergy", pIotXDTCtx->stProtoData.totalChargeEnergy / 10000.0);
+	cJSON_AddNumberToObject(pile, "cCount", pIotXDTCtx->stProtoData.totalChargeTimes);
+	cJSON_AddNumberToObject(pile, "dTime", 0);
+	cJSON_AddNumberToObject(pile, "dEnergy", 0.00);
+	cJSON_AddNumberToObject(pile, "dCount", 0);
+	cJSON_AddNumberToObject(pile, "tIn", ((int16_t)AswChargeIf_GetEnvTemperature()  - 50) / 1.0);
+	cJSON_AddNumberToObject(pile, "tPcu", 0);
+	cJSON_AddNumberToObject(pile, "tMaxIndex", 0);
+	cJSON_AddItemToObject(cRoot, "pile", pile);
+
+	gunArray = cJSON_CreateArray();
+	IOT_XDT_CheckObjIsNull(gunArray, 0);
+	gun = cJSON_CreateObject();
+	IOT_XDT_CheckObjIsNull(gun, 0);
+
+	cJSON_AddNumberToObject(gun, "no", port + 1);
+	cJSON_AddNumberToObject(gun, "type", 0);
+	cJSON_AddNumberToObject(gun, "temp", ((int16_t)AswChargeIf_GetGunTemperature(port)  - 50) / 1.0);
+	cJSON_AddStringToObject(gun, "orderNo", pOrderRecord->orderNo);
+	cJSON_AddNumberToObject(gun, "voltA", AswChargeIf_GetInputVoltage(port) / 100.0); 
+	cJSON_AddNumberToObject(gun, "voltB", 0);
+	cJSON_AddNumberToObject(gun, "voltC", 0);
+	tempI = AswChargeIf_GetOutputCurrent(port);
+	cJSON_AddNumberToObject(gun, "curA",  tempI / 1000.0);
+	cJSON_AddNumberToObject(gun, "curB",  0);
+	cJSON_AddNumberToObject(gun, "curC",  0);
+	tempU = AswChargeIf_GetOutputVoltage(port);
+	cJSON_AddNumberToObject(gun, "outU",  tempU / 100.0);
+	cJSON_AddNumberToObject(gun, "outI",  tempI / 1000.0);
+	tempP = round(((double)(tempU * tempI)) / 1000) / 100000.0 ;
+	cJSON_AddNumberToObject(gun, "outP",  tempP);
+	cJSON_AddNumberToObject(gun, "pq",  pChargeData->totalLossEnergy / 10000.0);
+
+	cJSON_AddNumberToObject(gun, "elecAmt",  pChargeData->totalElecMoney / 10000.0);
+	cJSON_AddNumberToObject(gun, "serAmt",  pChargeData->totalServeMoney / 10000.0);
+	cJSON_AddNumberToObject(gun, "amt",  pChargeData->totalMoney / 10000.0);
+	cJSON_AddNumberToObject(gun, "chDu",  pChargeData->chargeTime);
+	cJSON_AddNumberToObject(gun, "surDu", 0);
+	cJSON_AddNumberToObject(gun, "sdU",   0);
+	cJSON_AddNumberToObject(gun, "sdI",  0);
+	cJSON_AddNumberToObject(gun, "soc",  0);
+	cJSON_AddItemToArray(gunArray, gun);
+	
+	cJSON_AddItemToObject(cRoot,"gun",gunArray);
+	pJson = cJSON_Print(cRoot);
+	IOT_XDT_CheckJsonPrint(cRoot, pJson, 0);
+	
+	dataLen = strlen(pJson);
+	memcpy(pBuf, pJson, dataLen);
+	cJSON_Delete(cRoot);
+	myFree(pJson);
+	return dataLen;
+}
+
+
+static uint16_t IotXDT_ReportChargeStartReponse_ITEM862(uint8_t port, void *pBuf)
+{
+	IotXDTRecvData_Struct *pRecvDataInfo = &pIotXDTCtx->stProtoData.stRecvData[port];
+	cJSON *cRoot = NULL;
+	char *pJson = NULL;
+	uint16_t dataLen = 0;
+
+	cRoot = cJSON_CreateObject();
+	IOT_XDT_CheckObjIsNull(cRoot, 0);
+
+	cJSON_AddStringToObject(cRoot, "snPlat", pIotXDTCtx->platDn);
+	cJSON_AddNumberToObject(cRoot, "gunNo", pRecvDataInfo->offlineClearData.gunNo_ITEM861);
+	cJSON_AddNumberToObject(cRoot, "type", pRecvDataInfo->offlineClearData.type_ITEM861);
+	cJSON_AddNumberToObject(cRoot, "status", pRecvDataInfo->offlineClearData.eAns_ITEM861);
+	cJSON_AddStringToObject(cRoot, "fDetail", pRecvDataInfo->offlineClearData.fDetail_ITEM861);
+	cJSON_AddStringToObject(cRoot, "orderNo", pRecvDataInfo->offlineClearData.orderNo_ITEM861);
+
+	pJson = cJSON_Print(cRoot);
+	IOT_XDT_CheckJsonPrint(cRoot, pJson, 0);
+	dataLen = strlen(pJson);
+	memcpy(pBuf, pJson, dataLen);
+	cJSON_Delete(cRoot);
+	myFree(pJson);
+
+	Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, IOT_XDT_CHARGE_START_EVNET, TRUE);
+	Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, port, IOT_XDT_CHARGE_START_EVNET, TRUE);
+	return dataLen;
+}
+
+static uint16_t IotXDT_ReportChargeStartEvent_ITEM863(uint8_t port, void *pBuf)
+{
+	IotXDTRecvData_Struct *pRecvDataInfo = &pIotXDTCtx->stProtoData.stRecvData[port];
+	cJSON *cRoot = NULL;
+	cJSON *params = NULL;
+	char *pJson = NULL;
+	uint16_t dataLen = 0;
+
+	cRoot = cJSON_CreateObject();
+	IOT_XDT_CheckObjIsNull(cRoot, 0);
+	cJSON_AddStringToObject(cRoot, "method", "event_start");
+	params = cJSON_CreateObject();
+	IOT_XDT_CheckObjIsNull(params, 0);
+
+	cJSON_AddStringToObject(params, "snPlat", pIotXDTCtx->platDn);
+	cJSON_AddNumberToObject(params, "gunNo", pRecvDataInfo->offlineClearData.gunNo_ITEM861);
+	cJSON_AddNumberToObject(params, "type",  pRecvDataInfo->offlineClearData.type_ITEM861);
+
+	if (pRecvDataInfo->offlineClearData.eAns_ITEM861 == eIotXDTErrCode_Success)
+	{
+		cJSON_AddNumberToObject(params, "status",  0);
+	}
+	else
+	{
+		cJSON_AddNumberToObject(params, "status",  1);
+	}
+
+	cJSON_AddStringToObject(params, "fDetail", pRecvDataInfo->offlineClearData.fDetail_ITEM861);
+	cJSON_AddStringToObject(params, "orderNo", pRecvDataInfo->offlineClearData.orderNo_ITEM861);
+	cJSON_AddNumberToObject(params, "tsStart",  SSTM_GetSecTimestamp() - SSTM_BASE_TIMESTAMP_1970_BJT);
+	cJSON_AddItemToObject(cRoot, "params", params);
+	pJson = cJSON_Print(cRoot);
+	IOT_XDT_CheckJsonPrint(cRoot, pJson, 0);
+	dataLen = strlen(pJson);
+	memcpy(pBuf, pJson, dataLen);
+	cJSON_Delete(cRoot);
+	myFree(pJson);
+	return dataLen;
+}
+
+static uint16_t IotXDT_ReportChargeStopReponse_ITEM865(uint8_t port, void *pBuf)
+{
+	IotXDTRecvData_Struct *pRecvDataInfo = &pIotXDTCtx->stProtoData.stRecvData[port];
+	cJSON *cRoot = NULL;
+	char *pJson = NULL;
+	uint16_t dataLen = 0;
+
+	cRoot = cJSON_CreateObject();
+	IOT_XDT_CheckObjIsNull(cRoot, 0);
+
+	cJSON_AddStringToObject(cRoot, "snPlat", pIotXDTCtx->platDn);
+	cJSON_AddNumberToObject(cRoot, "gunNo", pRecvDataInfo->offlineClearData.gunNo_ITEM864);
+	cJSON_AddNumberToObject(cRoot, "type",  0);
+	cJSON_AddNumberToObject(cRoot, "status", pRecvDataInfo->offlineClearData.eAns_ITEM864);
+	cJSON_AddStringToObject(cRoot, "fDetail", pRecvDataInfo->offlineClearData.fDetail_ITEM865);
+	cJSON_AddStringToObject(cRoot, "orderNo", pRecvDataInfo->offlineClearData.orderNo_ITEM864);
+
+	pJson = cJSON_Print(cRoot);
+	IOT_XDT_CheckJsonPrint(cRoot, pJson, 0);
+	dataLen = strlen(pJson);
+	memcpy(pBuf, pJson, dataLen);
+	cJSON_Delete(cRoot);
+	myFree(pJson);
+	return dataLen;
+}
+
+static uint16_t IotXDT_ReportChargeStopEvent_ITEM866(uint8_t port, void *pBuf)
+{
+	MSNvmOrderInfo_Struct *pOrder = AswMonitor_GerOrderDataPtr(port);
+	MSNvmXDTOrderInfo_Struct *pOrderRecord = &pOrder->platOrderInfo.stXDTOrderInfo;
+	cJSON *params = NULL;
+	cJSON *cRoot = NULL;
+	char *pJson = NULL;
+	uint16_t dataLen = 0;
+
+	cRoot = cJSON_CreateObject();
+	IOT_XDT_CheckObjIsNull(cRoot, 0);
+	cJSON_AddStringToObject(cRoot, "method", "event_stop");
+	params = cJSON_CreateObject();
+	IOT_XDT_CheckObjIsNull(params, 0);
+
+	cJSON_AddStringToObject(params, "snPlat", pIotXDTCtx->platDn);
+	cJSON_AddNumberToObject(params, "gunNo",   port + 1);
+	cJSON_AddNumberToObject(params, "fDetail", pOrderRecord->stopReason);
+	cJSON_AddStringToObject(params, "orderNo", pOrderRecord->orderNo);
+	cJSON_AddNumberToObject(params, "tsStart", Common_FourUint8ToUint32(pOrderRecord->endTs));
+	cJSON_AddItemToObject(cRoot, "params", params);
+
+	pJson = cJSON_Print(cRoot);
+	IOT_XDT_CheckJsonPrint(cRoot, pJson, 0);
+
+	dataLen = strlen(pJson);
+	memcpy(pBuf, pJson, dataLen);
+	cJSON_Delete(cRoot);
+	myFree(pJson);
+	return dataLen;
+}
+
+static uint16_t IotXDT_ReportChargeRecord_ITEM8613(uint8_t port, void *pBuf)
+{
+	MSNvmXDTOrderInfo_Struct *pRecord = &pIotXDTCtx->stOrderInfo.platOrderInfo.stXDTOrderInfo;
+	cJSON *cRoot, *params, *plan, *periodsList;
+	MSNvmXDTPeriodInfo_Struct *pPeriodInfo = NULL;
+	char *pJson = NULL;
+	uint16_t dataLen = 0;
+	uint8_t index = 0;
+	cJSON *period[IOT_XDT_RATE_MODE_MAX_PERIOD] = { 0 };
+
+	cRoot = cJSON_CreateObject();
+	IOT_XDT_CheckObjIsNull(cRoot, 0);
+	cJSON_AddStringToObject(cRoot, "method", "record_upload");
+	params = cJSON_CreateObject();
+	IOT_XDT_CheckObjIsNull(params, 0);
+
+	cJSON_AddStringToObject(params, "snPlat", pIotXDTCtx->platDn);
+	cJSON_AddStringToObject(params, "orderNo", pRecord->orderNo);
+	cJSON_AddNumberToObject(params, "gunNo", port + 1);
+	cJSON_AddNumberToObject(params, "ts", Common_FourUint8ToUint32(pRecord->ts));
+	cJSON_AddNumberToObject(params, "indexRec", Common_FourUint8ToUint32(pRecord->indexRec));
+	cJSON_AddNumberToObject(params, "typeRec", pRecord->typeRec);
+	cJSON_AddNumberToObject(params, "type", pRecord->type);	
+	cJSON_AddNumberToObject(params, "initiator", pRecord->initiator);
+	cJSON_AddStringToObject(params, "user", pRecord->user);
+
+	plan = cJSON_CreateObject();
+	IOT_XDT_CheckObjIsNull(plan, 0);
+	cJSON_AddNumberToObject(plan, "typePlan", pRecord->typePlan);
+	cJSON_AddNumberToObject(plan, "typeStart", pRecord->typeStart);
+	cJSON_AddNumberToObject(plan, "tsStart", Common_FourUint8ToUint32(pRecord->tsStart));
+	cJSON_AddNumberToObject(plan, "value", Common_FourUint8ToUint32(pRecord->value) / 10000.0);
+	cJSON_AddItemToObject(params, "plan", plan);
+	
+	cJSON_AddNumberToObject(params, "pricingId", Common_FourUint8ToUint32(pRecord->pricingID));
+	cJSON_AddNumberToObject(params, "beginTs", Common_FourUint8ToUint32(pRecord->beginTs));
+	cJSON_AddNumberToObject(params, "endTs", Common_FourUint8ToUint32(pRecord->endTs));	
+	cJSON_AddNumberToObject(params, "beginMr", round(Common_FourUint8ToUint32(pRecord->beginMr) / 10.0) / 1000.0);
+	cJSON_AddNumberToObject(params, "endMr", round(Common_FourUint8ToUint32(pRecord->endMr) / 10.0) / 1000.0);
+	cJSON_AddNumberToObject(params, "tPq", Common_FourUint8ToUint32(pRecord->tPq) / 10000.0);
+	cJSON_AddNumberToObject(params, "elecAmt", Common_FourUint8ToUint32(pRecord->elecAmt) / 10000.0);
+	cJSON_AddNumberToObject(params, "serAmt", Common_FourUint8ToUint32(pRecord->serMt) / 10000.0);
+	cJSON_AddNumberToObject(params, "amt", Common_FourUint8ToUint32(pRecord->amt) / 10000.0);
+	cJSON_AddNumberToObject(params, "beginSoc", 0);
+	cJSON_AddNumberToObject(params, "endSoc", 0);
+	cJSON_AddNumberToObject(params, "stopReason", pRecord->stopReason);
+	cJSON_AddNumberToObject(params, "typeRule", pRecord->typeRule);
+	cJSON_AddNumberToObject(params, "pq_total", pRecord->pqTotal / 10000.0);
+
+	if (pRecord->typeRule == 1)
+	{
+		periodsList = cJSON_CreateArray();
+		IOT_XDT_CheckObjIsNull(periodsList, 0);
+		
+		for (index = 0; index < IOT_XDT_RATE_MODE_MAX_PERIOD; index++)
+		{
+			pPeriodInfo = &pRecord->periodInfoArray[index];
+
+			if (pPeriodInfo->valid == TRUE)
+			{
+				period[index] = cJSON_CreateObject();
+				IOT_XDT_CheckObjIsNull(period[index], 0);
+				cJSON_AddNumberToObject(period[index], "sn", pPeriodInfo->sn);
+				cJSON_AddNumberToObject(period[index], "pq",Common_FourUint8ToUint32(pPeriodInfo->pq) / 10000.0);
+				cJSON_AddItemToArray(periodsList, period[index]);
+			}
+		}
+						
+		cJSON_AddItemToObject(params,"periodsList",periodsList);
+	}
+	
+	cJSON_AddItemToObject(cRoot, "params", params);
+	pJson = cJSON_Print(cRoot);
+	IOT_XDT_CheckJsonPrint(cRoot, pJson, 0);
+	dataLen = strlen(pJson);
+	memcpy(pBuf, pJson, dataLen);
+	cJSON_Delete(cRoot);
+	myFree(pJson);
 	return dataLen;
 }
 

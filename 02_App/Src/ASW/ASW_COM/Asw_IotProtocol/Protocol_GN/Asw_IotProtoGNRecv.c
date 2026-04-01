@@ -654,7 +654,7 @@ static uint8_t IotGN_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, uint1
 
             pIotGNCtx->stProtoData[port[0]].remoteStartResult = 1;
             pIotGNCtx->stProtoData[port[0]].remoteStartFailReason = 0;
-            AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_APP);
+            AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_APP, TRUE);
         }
     }
     else
@@ -756,7 +756,7 @@ static uint8_t IotGN_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, uint
                     pChargeCtrl->eChargeCtrlType = eAswMonitorChargeCtrlType_AutoCharge;
                 }
 
-                AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_CARD);
+                AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_CARD, TRUE);
                 IOTGN_CFG_LogPrint("[枪：%d]充电桩申请主动启动充电成功!\r\n", port[0]);
             }
         }

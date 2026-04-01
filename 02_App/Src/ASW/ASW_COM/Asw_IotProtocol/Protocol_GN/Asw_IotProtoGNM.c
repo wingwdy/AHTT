@@ -66,7 +66,7 @@ static void IotGN_WSInitHandle(void);
 static void IotGN_WSOfflineHandle(void);
 static void IotGN_WSLoginHandle(void);
 static void IotGN_WSNormalHandle(void);
-static IotGNStopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType);
+static IotGNStopReason_Enum IotGN_ConverStopReason(AswErrorType_Enum errType);
 
 
 /*******************************************************************************
@@ -287,7 +287,7 @@ static void IotGN_WSNormalHandle(void)
     }
 }
 
-static IotGNStopReason_Enum Iot_ConverStopReason(AswErrorType_Enum errType)
+static IotGNStopReason_Enum IotGN_ConverStopReason(AswErrorType_Enum errType)
 {
     uint8_t index = 0;
     IotGNStopReason_Enum eStopReason = eIotGNStopReason_NoExpectedErr;
@@ -620,7 +620,7 @@ void IotGN_FillLinkPara(CddNetMSocketPara_Union *pLinkPara)
 
     if (pLinkPara != NULL && pIotGNCtx != NULL)
     {
-        strcpy(pLinkPara->stTcpPara.ip, pParam->platMainIp);
+        strncpy(pLinkPara->stTcpPara.ip, pParam->platMainIp, sizeof(pParam->platMainIp) - 1);
         pLinkPara->stTcpPara.port = pParam->platMainPort;
         FrameQueue_Creat(eFrameQueueType_TCP, 3072, 3072, &pIotGNCtx->frameQueueChannelID);
         pLinkPara->stTcpPara.frameQueueChannelID = pIotGNCtx->frameQueueChannelID;
@@ -657,8 +657,6 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
 
     if (orderSaveReason == ASWMONITOR_ORDER_SAVE_START)
     {
-        memset(pGnOrder, 0x00, sizeof(MSNvmGNOrderInfo_Struct));
-
         if (pBillMode->billmodeType == ASWMONITOR_BILLMODE_TYPE_FOUR)
         {
             pGnOrder->billmodeType = IOT_GN_BILLMODE_RATE_TYPE_4;
@@ -712,7 +710,7 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
 
     if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
     {
-        pGnOrder->stopReason = Iot_ConverStopReason(pChargeData->eChargeStopReason);
+        pGnOrder->stopReason = IotGN_ConverStopReason(pChargeData->eChargeStopReason);
     }
 }
 

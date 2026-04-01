@@ -21,6 +21,8 @@
 #include "cJSON.h"
 #include "myMalloc.h"
 #include "Ms_Nvm.h"
+#include "Asw_ErrorHandle.h"
+
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -90,7 +92,6 @@
 #define IOT_XDT_CHARGE_STOP_RSP					 (0x865U)        /* 充电停止响应 */
 #define IOT_XDT_CHARGE_STOP_EVNET                (0x866U)        /* 充电停止事件 */
 #define IOT_XDT_CHARGE_CONTINUE_CHARGE_RSP       (0x868U)        /* 续充命令响应 */
-#define IOT_XDT_CHARGE_START_EVNETA          	 (0x86AU)        /* 充电启动事件 */
 #define IOT_XDT_QUERY_BOARDINFO_RSP              (0x872U)        /* 查询控制板信息响应 */
 #define IOT_XDT_PARA_SET_RSP                     (0x874U)        /* 参数设置响应 */
 #define IOT_XDT_PARA_QUERY_RSP                   (0x876U)        /* 参数查询响应 */
@@ -100,7 +101,7 @@
 #define IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE        (0x882U)        /* 升级属性请求 */
 #define IOT_XDT_CMD_FIRMWARE_STATE               (0x886U)        /* 固件过程数据 */
 
-#define IOT_XDT_CMD_SEND_COUNT                   (28U)
+#define IOT_XDT_CMD_SEND_COUNT                   (27U)
 
 /* 协议CMD 接收定义 */
 #define IOT_XDT_CMD_QUERY_ATTACH_CREDENTIAL_RSP  (0x812U)        /* 查询接入凭据响应 */
@@ -122,7 +123,7 @@
 #define IOT_XDT_PARA_SET                         (0x873U)        /* 参数设置 */
 #define IOT_XDT_PARA_QUERY                       (0x875U)        /* 参数查询 */
 #define IOT_XDT_CHARGE_PWRCTRL                   (0x8611U)       /* 功率控制请求 */
-#define IOT_XDT_CHARGE_RECORD_RSP                (0x8614U)
+#define IOT_XDT_CHARGE_RECORD_RSP                (0x8614U)       /* 充电记录响应 */
 #define IOT_XDT_QUERY_CHARGE_RECORD              (0x8615U)       /* 查询充电记录 */
 #define IOT_XDT_CMD_OTA_ATTRIBUTE_SET            (0x881U)        /* 升级属性订阅 */
 #define IOT_XDT_CMD_REQUEST_OTA_ATTRIBUTE_RSP    (0x883U)        /* 升级属性请求响应 */
@@ -257,6 +258,39 @@ typedef enum
 	eIotXDTOtaState_Succ,
 	eIotXDTOtaState_Fail,
 }IotXDTOtaState_Enum;
+
+typedef enum 
+{
+	eIotXDTErrorLevel_Ctrtical = 0,
+	eIotXDTErrorLevel_Major = 1,
+	eIotXDTErrorLevel_Minor = 2,
+	eIotXDTErrorLevel_Warning = 3,
+}IOTXDTErrorLevel_Enum;
+
+typedef enum 
+{
+	eIotXDTEntityType_Pile = 0,
+	eIotXDTEntityType_Gun = 1,
+}IOTXDTEntityType_Enum;
+
+typedef enum 
+{
+	eIotXDTStopReason_Null = 0,
+	eIotXDTStopReason_PlatformStop = 1,
+	eIotXDTStopReason_ChargeFull = 2,
+	eIotXDTStopReason_EmergeStop = 3,
+	eIotXDTStopReason_CarStop = 4,
+	eIotXDTStopReason_ReachMoney = 5,
+	eIotXDTStopReason_ReachElec = 6,
+	eIotXDTStopReason_ReachTime = 7,
+	eIotXDTStopReason_LocalStop = 8,
+	eIotXDTStopReason_PileErr = 9,
+	eIotXDTStopReason_InsuffcientFund = 10,
+	eIotXDTStopReason_ReachSOC = 11,
+	eIotXDTStopReason_CarErr = 12,
+	eIotXDTStopReason_Other = 13,
+	eIotXDTStopReason_GunDisconnect = 14,
+}eIotXDTStopReason_Enum;
 
 /******************************************************************************
 *    Typedef Definition
@@ -400,15 +434,8 @@ typedef struct
 	IOTXDTParamOpt_Struct  paramOpt[eIotXDTParamType_Count];
 }IotXDTDataOfflineClr_Struct;
 
-
-typedef struct 
+typedef struct
 {
-	uint8_t gunNo_ITEM863;
-	uint8_t type_ITEM863;
-	uint8_t status_ITEM863;
-	char fDetail_ITEM863[IOT_XDT_FAULTCODE_LEN + 1];
-	char orderNo_ITEM863[IOT_XDT_ORDERNUM_LEN + 1]; 
-	uint32_t tsStart_ITEM863;
 	char fw_state_ITEM886[IOT_XDT_FWSTATE_LEN + 1];
 }IotXDTDataOfflineNotClear_Struct;
 
@@ -418,6 +445,24 @@ typedef struct
 	IotXDTDataOfflineClr_Struct offlineClearData;
 	IotXDTDataOfflineNotClear_Struct offlineNotClearData;
 }IotXDTRecvData_Struct;
+
+typedef struct
+{
+	AswErrorType_Enum eErrorCode;
+	IOTXDTEntityType_Enum eEntity;
+	uint8_t errNo;
+	IOTXDTErrorLevel_Enum eLevel;
+	char * alarmDesc;
+	uint8_t lastStatus[SYSCFG_CFG_GUN_NUM];
+}IotXDTErrDesc_Struct;
+
+typedef struct 
+{
+	AswErrorType_Enum eCommonStopReason;
+	eIotXDTStopReason_Enum eXDTStopReason;
+}IotXDTStopReasonMap_Struct;
+
+
 
 /******************************************************************************
 *    Global variables Declaration

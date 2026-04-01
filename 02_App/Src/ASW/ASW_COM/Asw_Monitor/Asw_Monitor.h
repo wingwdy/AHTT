@@ -78,7 +78,9 @@ typedef enum
 ******************************************************************************/
 typedef struct 
 {
-    uint8_t billmodeType;                                      /* 计费模型4类电价或者多类电价*/
+    uint8_t billModeID[4];                                     /* 计费模型ID (选填)*/
+
+    uint8_t billmodeType;                                      /* 计费模型4类电价或者多类电价（选填）*/
     uint8_t validFlag;
     uint32_t totalPrice[ASWMONITOR_BILLMODE_RATE_COUNT];       /* 费率总单价 小数点后五位(电费+服务费) */
 
@@ -138,6 +140,7 @@ typedef struct
 	uint32_t rateTotalMoney[ASWMONITOR_BILLMODE_RATE_COUNT];	        /* (计损后)费率的总金额, 小数点后四位 */
 
     /* 各时段 */
+    uint8_t periodValidFlag[ASWMONITOR_BILLMODE_PERIOD_COUNT];          /* 置TRUE,表示该时段在本次充电经历过 */
 	uint32_t periodElePower[ASWMONITOR_BILLMODE_PERIOD_COUNT];          /* (计损前)时段的总电量, 小数点后四位 */
 	uint32_t periodEleMoney[ASWMONITOR_BILLMODE_PERIOD_COUNT];	        /* (计损后)时段的电费金额, 小数点后四位 */
 	uint32_t periodSerMoney[ASWMONITOR_BILLMODE_PERIOD_COUNT];	        /* (计损后)时段的服务费金额, 小数点后四位 */
@@ -162,9 +165,10 @@ uint8_t AswMonitor_IsOrderIdle(uint8_t port);
 AswMonitorChargeData_Struct *AswMonitor_GetChargeDataPtr(uint8_t port);
 AswMonitorChargeCtrl_Struct *AswMonitor_GetChargeCtrlPtr(uint8_t port);
 AswMonitorBillMode_Struct *AswMonitor_GetCurUsedBillModePtr(uint8_t port);
+MSNvmOrderInfo_Struct *AswMonitor_GerOrderDataPtr(uint8_t port);
 
 uint8_t AswMonitor_CheckBillModeValid(uint8_t port);
-void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc);
+void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc, uint8_t clearFlag);
 void AswMonitor_SetReboot(AswMonitorRebootType_Enum eRebootType);
 void AswMonitor_PrintChargeData(void);
 

@@ -145,6 +145,7 @@ void Common_AsciiToBCD(char *pASC, uint8_t *pBCD, uint16_t length);
 void Common_BCDToBIN(uint8_t *pBCD, uint8_t *pBIN, uint16_t length);
 void Common_BINToBCD(uint8_t *pBIN, uint8_t *pBCD, uint16_t length);
 uint64_t Common_uintBINToBCD(uint32_t bin);
+void Common_ConvertStringToHex(char *pString,  uint8_t *pHex,  uint16_t len);
 
 void Common_SetBitFlag(void *pflag, uint16_t bitPos);
 void Common_ClrBitFlag(void *pflag, uint16_t bitPos);

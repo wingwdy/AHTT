@@ -764,27 +764,52 @@ void ATMQTT_UrcQMTRecv(uint8_t *pData, void * modulePara, uint16_t dataLen)
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = NULL;
     CddDrvEG800AKCtrl_Struct *pModulePara = (CddDrvEG800AKCtrl_Struct *)modulePara;
     CddNetMMqttPara_Struct *pSocketPara = NULL;
-	uint8_t *pTemp = NULL, *pPayload = NULL;
+	uint8_t *pTemp = NULL, *pPayload = NULL, *pCurrent = pData;
 	int32_t topicLen = 0, payloadLen = 0, msgId = 0, parsed_chars = 0;
     int32_t socketIndex = 0;
+    int32_t remainingLen = dataLen;
     char topic_buf[CDD_NETM_CFG_MQTT_TOPIC_LEN + 1] = {0};
+    int32_t offset = 0;
 
-    /* 寻找接收到数据标志 */
-    pTemp = Common_SearchData(pData, dataLen, "+QMTRECV:", strlen("+QMTRECV:"));
-
-    if (pTemp != NULL)
+    /* 循环处理所有粘在一起的报文 */
+    while (remainingLen > 0)
     {
-        if (4 == sscanf((char *)pTemp, "+QMTRECV: %d,%d,\"%32[^\"]\",%d,%n",&socketIndex, &msgId, topic_buf, &payloadLen, &parsed_chars))
-        {
-            pPayload = pTemp + parsed_chars;
-            pPayload += 1;
+        /* 寻找接收到数据标志 */
+        pTemp = Common_SearchData(pCurrent, remainingLen, "+QMTRECV:", strlen("+QMTRECV:"));
 
-            if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT && (parsed_chars + payloadLen) <= dataLen)
+        if (pTemp != NULL)
+        {
+            /* 计算当前标志位置相对于起始位置的偏移 */
+            offset = pTemp - pCurrent;
+            
+            if (4 == sscanf((char *)pTemp, "+QMTRECV: %d,%d,\"%32[^\"]\",%d,%n",&socketIndex, &msgId, topic_buf, &payloadLen, &parsed_chars))
             {
-                pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
-                pSocketPara = (CddNetMMqttPara_Struct *)pSocketCtrl->specificPara;
-                FrameQueue_PushRx(pSocketPara->frameQueueChannelID, topic_buf, strlen(topic_buf), pPayload, payloadLen + 1);
+                pPayload = pTemp + parsed_chars;
+                pPayload += 1;
+
+                /* 检查解析的数据长度是否在剩余长度范围内 */
+                if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT && (parsed_chars + payloadLen) <= remainingLen - offset)
+                {
+                    pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
+                    pSocketPara = (CddNetMMqttPara_Struct *)pSocketCtrl->specificPara;
+                    FrameQueue_PushRx(pSocketPara->frameQueueChannelID, topic_buf, strlen(topic_buf), pPayload, payloadLen + 1);
+                }
+
+                /* 更新当前指针和剩余长度，准备处理下一个报文 */
+                pCurrent = pTemp + parsed_chars + payloadLen + 1;
+                remainingLen = dataLen - (pCurrent - pData);
             }
+            else
+            {
+                /* 解析失败，移动到下一个位置继续搜索 */
+                pCurrent = pTemp + 1;
+                remainingLen = dataLen - (pCurrent - pData);
+            }
+        }
+        else
+        {
+            /* 没有找到更多的报文标志，退出循环 */
+            break;
         }
     }
 }

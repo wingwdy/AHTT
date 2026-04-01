@@ -96,7 +96,7 @@ static portTask_CtrBlk  g_stTaskCtrBlkTable[] =
 {
     {"App10msA",        Task_10msA,          &g_stTaskCtrBlkTable[0],         384,       6 } ,
     {"App10msB",        Task_10msB,          &g_stTaskCtrBlkTable[1],         384,       7 } ,
-    {"App20msA",        Task_20msA,          &g_stTaskCtrBlkTable[2],         256,       6 } ,
+    {"App20msA",        Task_20msA,          &g_stTaskCtrBlkTable[2],         256,       8 } ,
     {"App20msB",        Task_20msB,          &g_stTaskCtrBlkTable[3],         2048,      5 } ,
     {"App100ms",        Task_100msA,         &g_stTaskCtrBlkTable[4],         768,       5 } ,
     {"App1Sec",         Task_1SecA,          &g_stTaskCtrBlkTable[5],         256,       9 } ,
