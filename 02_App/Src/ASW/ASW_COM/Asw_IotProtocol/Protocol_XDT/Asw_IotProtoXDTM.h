@@ -110,7 +110,7 @@ uint8_t IotXDT_GetProductSecret(char *pProductSecret, uint8_t *pOutLen);
 uint8_t IotXDT_GetDevOperator(char *pDevOperator, uint8_t *pOutLen);
 void IotXDT_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardBillMode);
 void IotXDT_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason);
-
+uint8_t IotXDT_SwipCardCharge(uint8_t port);
 void IotXDT_FillLinkPara(CddNetMSocketPara_Union *pLinkPara);
 void IotXDT_InitMemory(void);
 void IotXDT_MainFunction(void);
@@ -121,6 +121,7 @@ IotXDTPileStatus_Enum IotXDT_GetPileStatus(void);
 IotXDTGunStatus_Enum IotXDT_GetGunStatus(uint8_t port);
 uint8_t IotXDT_IsPileOnCharging(void);
 void IotXDT_RefreshErrStatusForCall(void);
+uint8_t IotXDT_CompareRecordOrderNum(uint8_t *record, uint8_t *pCompara, uint16_t paraSize);
 
 uint8_t IotXDT_CheckErrInfoReportStatusFree(void);
 IotXDTErrDesc_Struct *IotXDT_CheckFirstErr(uint8_t port);

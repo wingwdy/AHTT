@@ -72,8 +72,8 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pMainFunction = IotYKC21_MainFunction,
         .pFuncTransformBillMode = IotYKC21_TransformBillMode,
         .pFuncPackChargeRecord = IotYKC21_PackChargeRecord,
-        
         .pFuncSwipCardCharge = IotYKC21_SwipCardCharge,
+        
         .pFuncTransformChargeRecord = IotYKC21_TransformChargeRecord,
         .pFuncSetToken = IotYKC21_SetToken,
         .pFuncSetCipherKey = IotYKC21_SetRsaPublicKey,
@@ -91,7 +91,8 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pMainFunction = IotXDT_MainFunction,
         .pFuncTransformBillMode = IotXDT_TransformBillMode,
         .pFuncPackChargeRecord = IotXDT_PackChargeRecord,
-        
+        .pFuncSwipCardCharge = IotXDT_SwipCardCharge,
+
         .pFuncSetProductKey = IotXDT_SetProductKey,
         .pFuncSetProductSecret = IotXDT_SetProductSecret,
         .pFuncSetDevOperator = IotXDT_SetDevOperator,
@@ -130,8 +131,8 @@ const AswPlatCardDescriptor_Struct c_stAswPlatMCardDescriptorTable[eAswPlatCardT
     [eAswPlatCardType_XDT] =
     {
         .pName = "lxxdt",
-        .cMeaning = "公牛卡",
-        .cardType = eCddCardType_BullCard,
+        .cMeaning = "通用卡",
+        .cardType = eCddCardType_UUID,
     }
 };
 

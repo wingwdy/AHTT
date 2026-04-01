@@ -429,7 +429,7 @@ typedef struct
 	IotXDTErrCodeList_Enum eAns_ITEM8615;
 	uint8_t gunNo_ITEM8615;
 	char orderNo_ITEM8615[IOT_XDT_ORDERNUM_LEN + 1];
-	MSNvmXDTOrderInfo_Struct queryChargeRecord;
+	MSNvmOrderInfo_Struct queryChargeRecord;
 
 	IotXDTErrCodeList_Enum eAns_ITEM871;
 

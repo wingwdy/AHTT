@@ -35,7 +35,6 @@
 #define ASWVOLTCUR_CFG_SET_OC_THR                           (35200u)/*产生过流故障阈值*/
 #define ASWVOLTCUR_CFG_CLR_OC_THR                           (35190u)/*解除过流故障阈值*/
 
-
 #define ASWVOLTCUR_CFG_OV_SET_FILTER_COUNT                  (10000u / ASWVOLTCUR_CFG_CALLCYCLE)
 #define ASWVOLTCUR_CFG_OV_CLR_FILTER_COUNT                  (10000u / ASWVOLTCUR_CFG_CALLCYCLE)
 

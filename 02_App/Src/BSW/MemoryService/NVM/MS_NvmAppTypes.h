@@ -215,7 +215,7 @@ typedef struct
 	uint8_t amt[4];
     uint8_t stopReason;
 	uint8_t typeRule;
-	uint8_t pqTotal;
+	uint8_t pqTotal[4];
 	MSNvmXDTPeriodInfo_Struct periodInfoArray[MSNVM_XDT_BILLMODE_PERIOD_COUNT];
 }MSNvmXDTOrderInfo_Struct;
 

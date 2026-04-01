@@ -90,7 +90,6 @@ static uint8_t AswMonitor_DetectChargeCtrlMoney(uint8_t port, AswMonitorChargeCt
 static uint8_t AswMonitor_DetectChargeCtrlTime(uint8_t port, AswMonitorChargeCtrl_Struct *pstChargeCtrl, AswMonitorChargeData_Struct *pChargeData);
 static uint8_t AswMonitor_DetectChargeCtrlEnergy(uint8_t port, AswMonitorChargeCtrl_Struct *pstChargeCtrl, AswMonitorChargeData_Struct *pChargeData);
 static void AswMonitor_ChargeValDetect(uint8_t port, AswMonitorData_Struct *pstAswMonitorData);
-static void AswMonitor_SaveChargeRecord(uint8_t port, AswMonitorData_Struct *pstAswMonitorData, uint8_t orderSaveReason);
 static void AswMonitor_OrderOngoingHandle(uint8_t port, AswMonitorData_Struct *pstAswMonitorData);
 static void AswMonitor_OrderEndHandle(uint8_t port, AswMonitorData_Struct *pstAswMonitorData);
 static void AswMonitor_OrderManage(uint8_t port, AswMonitorData_Struct *pstAswMonitorData);
@@ -152,11 +151,11 @@ static void AswMonitor_ProcessCostData(uint8_t port, AswMonitorData_Struct *pstA
         pChargeData->chargeStopTime = curTime;
     }
 
+    periodNum = AswMonitor_GetBillModePeriod(pBillMode);
     pChargeData->periodValidFlag[periodNum] = TRUE;
     
     if (incEnergy != 0)
     {
-        periodNum = AswMonitor_GetBillModePeriod(pBillMode);
         rateNum = pBillMode->periodRate[periodNum];
 
         pChargeData->totalEnergy += incEnergy;
@@ -336,21 +335,6 @@ static void AswMonitor_ChargeValDetect(uint8_t port, AswMonitorData_Struct *pstA
     }
 }
 
-static void AswMonitor_SaveChargeRecord(uint8_t port, AswMonitorData_Struct *pstAswMonitorData, uint8_t orderSaveReason)
-{
-    if (pstAswMonitorData->stChargeCtrl.startSrc != ASWMONITOR_ORDER_START_SRC_PNC)
-    {
-        AswPlatM_PackChargeRecord(port, &pstAswMonitorData->stOrderData, orderSaveReason);
-        ASWMONITOR_CFG_WriteBlockOrderInfo(port, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
-
-        if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
-        {
-            MSNvm_InsertNewRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
-            MSNvm_InsertNewRecord(eMSNvmBlockID_OmOrderRecord, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
-        }
-    }
-}
-
 static void AswMonitor_IdleHandle(uint8_t port, AswMonitorData_Struct *pstAswMonitorData)
 {
     if (TRUE == CddModeM_IsFactoryMode())
@@ -378,7 +362,7 @@ static void AswMonitor_OrderOngoingHandle(uint8_t port, AswMonitorData_Struct *p
         pstAswMonitorData->chargeStart = FALSE;
         pstAswMonitorData->stOrderData.orderSaveState = ASWMONITOR_ORDER_SAVE_STOP;
         pstAswMonitorData->stChargeData.eChargeStopReason = AswChargeIf_GetStopReason(port);
-        AswMonitor_SaveChargeRecord(port, pstAswMonitorData, ASWMONITOR_ORDER_SAVE_STOP);
+        AswMonitor_SaveChargeRecord(port, ASWMONITOR_ORDER_SAVE_STOP);
         pstAswMonitorData->orderCtrl = ASWMONITOR_ORDER_CTRL_END;
     }
     else
@@ -387,7 +371,7 @@ static void AswMonitor_OrderOngoingHandle(uint8_t port, AswMonitorData_Struct *p
         /* 订单周期存储 */
         if (Common_JudgeTimeoutMs(pstAswMonitorData->orderDataSaveTick, ASWMONITOR_CFG_SAVE_CHARGE_RECORD_PERIOD))
         {
-            AswMonitor_SaveChargeRecord(port, pstAswMonitorData, ASWMONITOR_ORDER_SAVE_PERIOD);
+            AswMonitor_SaveChargeRecord(port, ASWMONITOR_ORDER_SAVE_PERIOD);
             pstAswMonitorData->orderDataSaveTick = Common_GetSystick();
         }
     }
@@ -477,6 +461,23 @@ static void AswMonitor_RebootManage(void)
             {
                 break;
             }
+        }
+    }
+}
+
+void AswMonitor_SaveChargeRecord(uint8_t port, uint8_t orderSaveReason)
+{
+    AswMonitorData_Struct *pstAswMonitorData = &g_stAswMonitorData[port];
+
+    if (pstAswMonitorData->stChargeCtrl.startSrc != ASWMONITOR_ORDER_START_SRC_PNC)
+    {
+        AswPlatM_PackChargeRecord(port, &pstAswMonitorData->stOrderData, orderSaveReason);
+        ASWMONITOR_CFG_WriteBlockOrderInfo(port, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
+
+        if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
+        {
+            MSNvm_InsertNewRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
+            MSNvm_InsertNewRecord(eMSNvmBlockID_OmOrderRecord, (uint8_t *)&pstAswMonitorData->stOrderData, sizeof(MSNvmOrderInfo_Struct));
         }
     }
 }
@@ -730,7 +731,7 @@ void AswMonitor_ChargeStart(uint8_t port, uint8_t startSrc, uint8_t clearFlag)
 
             pstAswMonitorData->stOrderData.orderSaveState = ASWMONITOR_ORDER_SAVE_START;
             AswChargeIf_ChargeStart(port);
-            AswMonitor_SaveChargeRecord(port, pstAswMonitorData, ASWMONITOR_ORDER_SAVE_START);
+            AswMonitor_SaveChargeRecord(port, ASWMONITOR_ORDER_SAVE_START);
         }
     }
 }

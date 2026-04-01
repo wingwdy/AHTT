@@ -894,7 +894,7 @@ void IotXDT_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, ui
     Common_Uint32ToFourUint8(pXDTOrder->elecAmt, pChargeData->totalElecMoney);
     Common_Uint32ToFourUint8(pXDTOrder->serMt, pChargeData->totalServeMoney);
     Common_Uint32ToFourUint8(pXDTOrder->amt, pChargeData->totalMoney);
-    pXDTOrder->pqTotal = 0;
+    memset(pXDTOrder->pqTotal, 0x00, 4);
 
     for (index = 0; index < MSNVM_XDT_BILLMODE_PERIOD_COUNT; index++)
     {
@@ -905,6 +905,40 @@ void IotXDT_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, ui
             Common_Uint32ToFourUint8(pXDTOrder->periodInfoArray[index].pq, pChargeData->periodElePower[index]);
         }
     }
+}
+
+uint8_t IotXDT_SwipCardCharge(uint8_t port)
+{
+    uint8_t ret = FALSE;
+
+    if (pIotXDTCtx->loginSucc == TRUE)
+    {
+        if (port < SYSCFG_CFG_GUN_NUM)
+        {
+            if ((TRUE != Common_GetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, IOT_XDT_CMD_REQUEST_CARDAUTH)) &&
+                (TRUE != Common_GetRecvTimerEnable(pIotXDTCtx->pFuncRecvCtrl, port, IOT_XDT_CMD_REQUEST_CARDAUTH_RSP)))
+            {
+                Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, IOT_XDT_CMD_REQUEST_CARDAUTH, TRUE);
+                ret = TRUE;
+            }
+        }
+    }
+
+    return ret;
+}
+
+uint8_t IotXDT_CompareRecordOrderNum(uint8_t *record, uint8_t *pCompara, uint16_t paraSize)
+{
+    MSNvmOrderInfo_Struct *pOrderInfo = (MSNvmOrderInfo_Struct *)record;
+    MSNvmXDTOrderInfo_Struct *pXDTOrderInfo = &pOrderInfo->platOrderInfo.stXDTOrderInfo;
+    uint8_t ret = FALSE;
+
+    if(0 == memcmp(pXDTOrderInfo->orderNo, pCompara, paraSize))
+    {
+        ret = TRUE;
+    }
+
+    return ret;
 }
 
 uint8_t IotXDT_IsPileOnCharging(void)
@@ -1305,6 +1339,7 @@ void IotXDT_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandard
         pStandardBillMode->billmodeType = pRecvBillingModel->typeRule;
 
 		// 48时段费率号
+        pStandardBillMode->rateCount = pRecvBillingModel->period_count;
 		pStandardBillMode->periodCount = pRecvBillingModel->period_count;
 		pStandardBillMode->elecLossRate = pRecvBillingModel->measure_wastage_rates;
     	memcpy(pStandardBillMode->periodRate, pRecvBillingModel->segmentation_rate, 48);
