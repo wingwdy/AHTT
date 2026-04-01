@@ -122,6 +122,7 @@ IotXDTGunStatus_Enum IotXDT_GetGunStatus(uint8_t port);
 uint8_t IotXDT_IsPileOnCharging(void);
 void IotXDT_RefreshErrStatusForCall(void);
 uint8_t IotXDT_CompareRecordOrderNum(uint8_t *record, uint8_t *pCompara, uint16_t paraSize);
+void IotXDT_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t *pProtocolRecord, uint16_t *pRecordLen);
 
 uint8_t IotXDT_CheckErrInfoReportStatusFree(void);
 IotXDTErrDesc_Struct *IotXDT_CheckFirstErr(uint8_t port);

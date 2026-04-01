@@ -628,9 +628,8 @@ static uint16_t IotOM_SendOrderRecord(uint8_t port, uint8_t *pBuf)
     /* 枪号 */
     pBuf[dataLen++] = port + 1;
 
-    /* 订单数据长度 */
+    /* 订单数据长度和内容 */
     orderLen = AswPlatM_TransformRecord(&pIotOMCtx->stOrderInfo, &pBuf[dataLen + 4]);
-    /* 订单数据内容 */
     Common_Uint32ToFourUint8(&pBuf[dataLen], orderLen);
     dataLen += 4;
     dataLen += orderLen;

@@ -589,6 +589,17 @@ static void IotXDT_MqttConnectCallback(uint8_t connectResult, uint8_t *pCredenti
     }
 }
 
+void IotXDT_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t *pProtocolRecord, uint16_t *pRecordLen)
+{
+    MSNvmXDTOrderInfo_Struct *pOrderData = &pFlashRecord->stXDTOrderInfo;
+
+    if (pFlashRecord != NULL && pProtocolRecord != NULL && pRecordLen != NULL)
+    {
+        memcpy(pProtocolRecord, pOrderData, sizeof(MSNvmXDTOrderInfo_Struct));
+        pRecordLen[0] = sizeof(MSNvmXDTOrderInfo_Struct);
+    }
+}
+
 
 uint8_t IotXDT_CheckPileErrInfoReport(uint8_t port)
 {

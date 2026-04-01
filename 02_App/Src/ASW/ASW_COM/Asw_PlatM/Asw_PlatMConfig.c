@@ -73,8 +73,8 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncTransformBillMode = IotYKC21_TransformBillMode,
         .pFuncPackChargeRecord = IotYKC21_PackChargeRecord,
         .pFuncSwipCardCharge = IotYKC21_SwipCardCharge,
-
         .pFuncTransformChargeRecord = IotYKC21_TransformChargeRecord,
+        
         .pFuncSetToken = IotYKC21_SetToken,
         .pFuncSetCipherKey = IotYKC21_SetRsaPublicKey,
         .pFuncGetToken = IotYKC21_GetToken,
@@ -92,6 +92,7 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncTransformBillMode = IotXDT_TransformBillMode,
         .pFuncPackChargeRecord = IotXDT_PackChargeRecord,
         .pFuncSwipCardCharge = IotXDT_SwipCardCharge,
+        .pFuncTransformChargeRecord = IotXDT_TransformChargeRecord,
 
         .pFuncSetProductKey = IotXDT_SetProductKey,
         .pFuncSetProductSecret = IotXDT_SetProductSecret,
