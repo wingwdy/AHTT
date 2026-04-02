@@ -1606,10 +1606,7 @@ void shellTask(void *param)
 {
     Shell *shell = (Shell *)param;
     char data;
-    static char buffer[256] = {0}; 
-    static uint16_t buffer_len = 0; 
-    static uint32_t last_data_time = 0;
-    uint16_t index = 0;
+    
 #if SHELL_TASK_WHILE == 1
     while(1)
     {
@@ -1622,41 +1619,17 @@ void shellTask(void *param)
                 {
                     break;
                 }
+                else
+                {
+                    shellHandler(shell, data);
+                }
+            }
+        }
 
-                if (buffer_len < sizeof(buffer) - 1)
-                {
-                    buffer[buffer_len++] = data;
-                    last_data_time = Common_GetSystick(); 
-                }
-            }
-        }
-        
-        if (buffer_len > 0 && Common_JudgeTimeoutMs(last_data_time, 50))
-        {
-            if (!(buffer_len > 2 && buffer[buffer_len-2] == '\r' && buffer[buffer_len-1] == '\n'))
-            {
-                // 没有\r\n，添加一个
-                if (buffer_len < sizeof(buffer) - 2)
-                {
-                    buffer[buffer_len++] = '\r';
-                    buffer[buffer_len++] = '\n';
-                }
-            }
-            
-            for (index = 0; index < buffer_len; index++)
-            {
-                shellHandler(shell, buffer[index]);
-            }
-            
-            buffer_len = 0;
-            memset(buffer, 0, sizeof(buffer));
-        }
 #if SHELL_TASK_WHILE == 1
     }
 #endif
 }
-
-
 /**
  * @brief shell 输出用户列表(shell调用)
  */
