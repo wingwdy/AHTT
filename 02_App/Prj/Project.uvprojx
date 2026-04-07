@@ -428,6 +428,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\ASW\ASW_CHG\VoltCur\Asw_VoltCurHandleConfig.c</FilePath>
             </File>
+            <File>
+              <FileName>Asw_ChargeConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_CHG\Charge\Asw_ChargeConfig.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

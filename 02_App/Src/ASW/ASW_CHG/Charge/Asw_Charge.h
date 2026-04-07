@@ -17,6 +17,7 @@
 *    Header File Inclusion
 ******************************************************************************/
 #include "Asw_ErrorHandle.h"
+#include "Filter.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -35,7 +36,7 @@
 ******************************************************************************/
 typedef enum
 {
-    /* 启动中超时15秒，车端暂停超时30秒，小电流小于1A，持续30分钟 */ 
+    /* 启动中超时15秒，车端暂停超时30秒，小电流小于1A，持续30分钟 */
     eAswChargeCtrlProfile_GN,
     /* 不作启动超时检测，不作车端暂停超时检测，
        case1:当充电电流大于等于5A，且持续10min，S2闭合的情况下，那么当充电电流小于0.5A，持续30min，则停止充电，结算。
@@ -47,8 +48,21 @@ typedef enum
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+typedef struct 
+{
+    uint8_t workState;            /* 工作状态 */
+    uint8_t tryWakeupFlag;        /* 尝试唤醒标记，TRUE-表示已唤醒过 */
+    uint8_t authFlag;             /* 授权标记，TRUE-表示已授权 */
+    AswErrorType_Enum eStopReason; /* 取消授权原因 */
+    uint32_t pwmStartTimer;       /* PWM发波超时计时器 */
+    FilterProfile1_Struct stFilterlittleCur; /* 小电流状态滤波 */
+    uint32_t vehiclePauseTimer;   /* 车端暂停超时计时器 */
+    uint32_t stopTimer;           /* 停止充电超时计时器 */
+    uint32_t quitStopFinishTimer; /* 退出停止完成状态延时计时器 */
 
-
+    FilterProfile1_Struct stFilterChargeStable; /* 充电稳定状态滤波 */
+    uint8_t chargeStableFlag;     /* 充电稳定标记，TRUE-表示已稳定,  充电电流大于等于5A，且持续10min*/
+}AswChargeCtrl_Struct;
 
 /******************************************************************************
 *    Global variables Declaration
@@ -69,6 +83,9 @@ void AswCharge_StopAuth(uint8_t port);
 uint8_t AswCharge_GetAuthFlag(uint8_t port);
 AswErrorType_Enum AswCharge_GetStopReason(uint8_t port);
 void AswCharge_SetStopReason(uint8_t port, AswErrorType_Enum eReason);
+
+/* 模块内部使用 */
+void AswCharge_SetWorkState(uint8_t port, uint8_t workState);
 #endif /* ASW_CHARGE_H_ */
 
 

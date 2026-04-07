@@ -19,38 +19,23 @@
 #include "DS_LogM.h"
 #include "Cdd_MeterM.h"
 #include "Asw_VoltCurHandle.h"
+
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
 #define ASWCHARGE_CFG_CALL_CYCLE                       (10)
 
-#define ASWCHARGE_CFG_START_TIMEOUT                    30000
-
-#define ASWCHARGE_CFG_PWM_TIMEOUT                      15000
-
+/* 当继电器无法断开时，延时10秒退出停止充电状态 */
 #define ASWCHARGE_CFG_STOP_TIMEOUT                     10000
 
-#define ASWCHARGE_CFG_PAUSE_TIMEOUT1                   (30 * 1000)
-
-#define ASWCHARGE_CFG_PAUSE_TIMEOUT2                   (30 * 60 * 1000)
-
-#define ASWCHARGE_CFG_LITTLE_CURRENT_FILTER1_COUNT      ((30 * 60 * 1000) / ASWCHARGE_CFG_CALL_CYCLE)
-
-#define ASWCHARGE_CFG_LITTLE_CURRENT_FILTER2_COUNT      ((10 * 60 * 1000) / ASWCHARGE_CFG_CALL_CYCLE)
-
-#define ASWCHARGE_CFG_LITTLE_CURRENT_THRESHOLD1        1000
-
-#define ASWCHARGE_CFG_LITTLE_CURRENT_THRESHOLD2        500
-
-#define ASWCHARGE_CFG_LITTLE_CURRENT_THRESHOLD3        5000
+/* 延时退出充电完成状态 */
+#define ASWCHARGE_CFG_QUIT_FINISH_TIMEOUT              500
 
 #define ASWCHARGE_CFG_GetCurRateCurrent(port)          AswVoltCurHandle_GetMaxOutputCurrent(port)
 
 #define ASWCHARGE_CFG_LogPrint(fmt, ...)               DSLOGM_Debug(DSLogMModule_Charge, fmt, ##__VA_ARGS__)
 
 #define ASWCHARGE_CFG_GetOutputCurrent(port)           CddMeterM_GetRmsCurrent(port)
-
-#define ASWCHARGE_CFG_QUIT_FINISH_TIMEOUT              500
 
 
 /******************************************************************************
@@ -61,13 +46,19 @@
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
+typedef struct 
+{
+    void (*pFuncStartingHandle)(uint8_t port, void *pCtrlCtx);
+    void (*pFuncChargingHandle)(uint8_t port, void *pCtrlCtx);
+    void (*pFuncChargingPauseAHandle)(uint8_t port, void *pCtrlCtx);
+}AswChargeProfileHandle_Struct;
 
 
 
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-
+extern const AswChargeProfileHandle_Struct c_AswChargeProfileConfigTable[eAswChargeCtrlProfile_Count];
 
 
 /******************************************************************************
