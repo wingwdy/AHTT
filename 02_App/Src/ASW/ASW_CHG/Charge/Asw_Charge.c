@@ -512,6 +512,7 @@ void AswCharge_SetWorkState(uint8_t port, uint8_t workState)
             else if (workState == ASWCHARGE_WORKSTATE_CHARGING)
             {
                 memset(&pChargeCtrl->stFilterlittleCur, 0x00, sizeof(FilterProfile1_Struct));
+                memset(&pChargeCtrl->stFilterChargeStable, 0x00, sizeof(FilterProfile1_Struct));
             }
             else if (workState == ASWCHARGE_WORKSTATE_FINISH || workState == ASWCHARGE_WORKSTATE_STOPPING)
             {

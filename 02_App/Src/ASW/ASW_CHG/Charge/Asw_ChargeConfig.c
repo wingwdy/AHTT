@@ -141,9 +141,9 @@ static void AswChargeCfg_XDT_ChargingHandle(uint8_t port, void *pCtrlCtx)
     AswChargeCtrl_Struct *pChargeCtrl = (AswChargeCtrl_Struct *)pCtrlCtx;
     uint32_t outputCurrent = ASWCHARGE_CFG_GetOutputCurrent(port);
 
-    /* 电流大于等于5A，判断为正常充电电流 */
-    if (pChargeCtrl->stFilterChargeStable.validStatus == FALSE)
+    if (pChargeCtrl->chargeStableFlag == FALSE)
     {
+        /* 电流大于等于5A，判断为正常充电电流 */
         if (outputCurrent >= 5000)
         {
             pChargeCtrl->stFilterChargeStable.status = TRUE;

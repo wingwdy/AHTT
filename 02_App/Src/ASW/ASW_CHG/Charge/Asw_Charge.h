@@ -61,7 +61,7 @@ typedef struct
     uint32_t quitStopFinishTimer; /* 退出停止完成状态延时计时器 */
 
     FilterProfile1_Struct stFilterChargeStable; /* 充电稳定状态滤波 */
-    uint8_t chargeStableFlag;     /* 充电稳定标记，TRUE-表示已稳定,  充电电流大于等于5A，且持续10min*/
+    uint8_t chargeStableFlag;     /* 充电稳定标记，TRUE-表示已稳定,  部分profile适用*/
 }AswChargeCtrl_Struct;
 
 /******************************************************************************

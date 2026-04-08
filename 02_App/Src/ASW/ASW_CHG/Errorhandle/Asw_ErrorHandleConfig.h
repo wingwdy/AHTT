@@ -29,7 +29,7 @@
 
 #define ASWERR_CFG_ErrStateChangeNotice(port, eErr, flag, errLevel)  do\
                                                              {\
-                                                                AswErrHandle_NoticeCallBack(port, eErr, flag, errLevel);\
+                                                                AswErrHandleCfg_NoticeCallBack(port, eErr, flag, errLevel);\
                                                              }while(0)
                                                              
 #define ASWERR_CFG_LogPrint(fmt, ...)                 DSLOGM_Debug(DSLogMModule_ErrorHandle, fmt, ##__VA_ARGS__)
@@ -83,7 +83,7 @@ extern const AswErrorHandleConfig_Struct c_AswErrorHandleConfigTable[eErr_Num];
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
-void AswErrHandle_NoticeCallBack(uint8_t port, AswErrorType_Enum errType, uint8_t flag, AswErrorLevel_Enum errLevel);
+void AswErrHandleCfg_NoticeCallBack(uint8_t port, AswErrorType_Enum errType, uint8_t flag, AswErrorLevel_Enum errLevel);
 
 #endif /* ASW_ERRORHANDLE_CONFIG_H_ */
 

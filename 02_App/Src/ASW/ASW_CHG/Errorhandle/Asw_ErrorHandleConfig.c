@@ -97,7 +97,7 @@ const AswErrorHandleConfig_Struct c_AswErrorHandleConfigTable[eErr_Num] =
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-void AswErrHandle_NoticeCallBack(uint8_t port, AswErrorType_Enum errType, uint8_t flag, AswErrorLevel_Enum errLevel)
+void AswErrHandleCfg_NoticeCallBack(uint8_t port, AswErrorType_Enum errType, uint8_t flag, AswErrorLevel_Enum errLevel)
 {
     if (flag == TRUE)
     {
