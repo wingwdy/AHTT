@@ -1,5 +1,5 @@
 /******************************************************************************
-* File Name          : Asw_EVSEConfig.h
+* File Name          : Asw_ChargeConfig.h
 * Description        : Code for Charge State Manage
  ------------------------------------------------------------------------------
 * (c) This software is the proprietary of Bull. All rights are reserved by Bull.

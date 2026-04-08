@@ -42,7 +42,7 @@ typedef enum
     eAswMonitorRebootStep_Null,
     eAswMonitorRebootStep_WaitIdle,
     eAswMonitorRebootStep_LastDelay,
-    eAswMonitorRebootStep_Finish,    
+    eAswMonitorRebootStep_Finish,
 }AswMonitorRebootStep_Enum;
 
 
@@ -67,7 +67,7 @@ typedef struct
     AswMonitorRebootType_Enum eAswMonitorRebootType; /* 复位类型 */
     AswMonitorRebootStep_Enum eAswMonitorRebootStep; /* 复位控制步骤 */
 
-    uint8_t swipCardSuccLedFlag;  /* 刷卡成功标记 */       
+    uint8_t swipCardSuccLedFlag;  /* 刷卡成功标记 */
     uint8_t swipCardFailLedFlag;  /* 刷卡失败标记 */
 
     MSNvmForbidState_Struct forbidParam;    /* 禁用状态 */

@@ -18,9 +18,8 @@
 *******************************************************************************/
 #include "DS_ConsoleConfig.h"
 
-#include "Asw_Charge.h"
+
 #include "Asw_PlatM.h"
-#include "Asw_ErrorHandle.h"
 #include "Asw_Monitor.h"
 
 #include "Cdd_ModeM.h"
@@ -67,7 +66,6 @@
 *    Static Local Functions Declaration
 *******************************************************************************/
 static int32_t DSConsoleCfg_Reboot(int32_t argc, char *argv[]);
-static int32_t DSConsoleCfg_ChargeCtrl(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_ShowStack(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_EnterFactoryMode(int32_t argc, char *argv[]);
 static int32_t DSConsoleCfg_ExsistFactoryMode(int32_t argc, char *argv[]);
@@ -80,7 +78,6 @@ static int32_t DSConsoleCfg_ClearFlash(int32_t argc, char *argv[]);
 *    Function Source Code
 *******************************************************************************/
 DSCONSOLE_CFG_ADD_CMD(reboot,        DSConsoleCfg_Reboot, "reboot" reboot system);
-DSCONSOLE_CFG_ADD_CMD(charge,        DSConsoleCfg_ChargeCtrl, "charge start/stop 0/1" start/stop charge);
 DSCONSOLE_CFG_ADD_CMD(showStack,     DSConsoleCfg_ShowStack, "showStack" show stack info);
 DSCONSOLE_CFG_ADD_CMD(testmode,      DSConsoleCfg_EnterFactoryMode, "testmode" Enter factoryMode);
 DSCONSOLE_CFG_ADD_CMD(workmode,      DSConsoleCfg_ExsistFactoryMode, "workmode" Exsist factoryMode);
@@ -95,29 +92,6 @@ static int32_t DSConsoleCfg_Reboot(int32_t argc, char *argv[])
     McalMcu_SystemReset();
     return 0;
 } 
-
-static int32_t DSConsoleCfg_ChargeCtrl(int32_t argc, char *argv[])
-{
-    uint8_t port = 0;
-
-    if (argc == 3)
-    {
-        port = atoi(argv[2]);
-
-        if (0 == strcmp(argv[1], "start"))
-        {
-            AswCharge_StartAuth(port);
-        }
-        else if (0 == strcmp(argv[1], "stop"))
-        {
-            AswErrhandle_SetErrExsitCallback(port, eSrc_MannulStop);
-        }
-        else
-        {}
-    }
-
-    return 0;
-}
 
 static int32_t DSConsoleCfg_ShowStack(int32_t argc, char *argv[])
 {
