@@ -104,7 +104,6 @@ static void SSSystemM_InitTwo(void)
     MSNvm_InitMemory();
     MSNvm_ReadAll();
     
-    SSWdgM_InitMemory();
     SSSnapshot_InitMemory();
     AswErrHandle_InitMemory();
     SSUcm_InitMemory();
