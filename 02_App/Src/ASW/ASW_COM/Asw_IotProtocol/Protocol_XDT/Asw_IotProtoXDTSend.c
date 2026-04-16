@@ -1364,6 +1364,7 @@ static uint16_t IotXDT_ReportChargeStartReponse_ITEM862(uint8_t port, void *pBuf
 
 static uint16_t IotXDT_ReportChargeStartEvent_ITEM863(uint8_t port, void *pBuf)
 {
+	MSNvmXDTOrderInfo_Struct *pRecord = &pIotXDTCtx->stOrderInfo.platOrderInfo.stXDTOrderInfo;
 	IotXDTRecvData_Struct *pRecvDataInfo = &pIotXDTCtx->stProtoData.stRecvData[port];
 	cJSON *cRoot = NULL;
 	cJSON *params = NULL;
@@ -1383,15 +1384,17 @@ static uint16_t IotXDT_ReportChargeStartEvent_ITEM863(uint8_t port, void *pBuf)
 	if (pRecvDataInfo->offlineClearData.eAns_ITEM861 == eIotXDTErrCode_Success)
 	{
 		cJSON_AddNumberToObject(params, "status",  0);
+		cJSON_AddNumberToObject(params, "tsStart",  Commonn_FourUint8ToUint32(pRecord->beginTs));
 	}
 	else
 	{
 		cJSON_AddNumberToObject(params, "status",  1);
+		cJSON_AddNumberToObject(params, "tsStart",  SSTM_GetSecTimestamp() - SSTM_BASE_TIMESTAMP_1970_BJT);
 	}
 
 	cJSON_AddStringToObject(params, "fDetail", pRecvDataInfo->offlineClearData.fDetail_ITEM861);
 	cJSON_AddStringToObject(params, "orderNo", pRecvDataInfo->offlineClearData.orderNo_ITEM861);
-	cJSON_AddNumberToObject(params, "tsStart",  SSTM_GetSecTimestamp() - SSTM_BASE_TIMESTAMP_1970_BJT);
+
 	cJSON_AddItemToObject(cRoot, "params", params);
 	pJson = cJSON_Print(cRoot);
 	IOT_XDT_CheckJsonPrint(cRoot, pJson, 0);
