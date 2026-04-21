@@ -475,7 +475,7 @@ static uint16_t IotYKC21_SendLoginReq(uint8_t port, uint8_t *pBuf)
     pBuf[dataLen++] = 0x00;
     /* Sim 卡 */
     CddNetM_GetIccid(&cSimID[0]);
-    Common_AsciiToBCD((char *)cSimID, &pBuf[dataLen], 10);
+    Common_AsciiToBCD((char *)cSimID, &pBuf[dataLen], 20);
     dataLen += 10;
 
     /* 运营商 */

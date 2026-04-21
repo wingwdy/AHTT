@@ -1384,7 +1384,7 @@ static uint16_t IotXDT_ReportChargeStartEvent_ITEM863(uint8_t port, void *pBuf)
 	if (pRecvDataInfo->offlineClearData.eAns_ITEM861 == eIotXDTErrCode_Success)
 	{
 		cJSON_AddNumberToObject(params, "status",  0);
-		cJSON_AddNumberToObject(params, "tsStart",  Commonn_FourUint8ToUint32(pRecord->beginTs));
+		cJSON_AddNumberToObject(params, "tsStart",  Common_FourUint8ToUint32(pRecord->beginTs));
 	}
 	else
 	{
