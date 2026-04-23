@@ -198,8 +198,8 @@ static void Common_DaysToDate(uint32_t days, CommonDateTime_Struct *dt)
 
 static uint8_t Common_GetCp56Time2aWeekday(uint32_t days)
 {
-    // 1970年1月1日是星期四, 在CP56TIME2A中索引为3 (在CP56TIME2A中是3，因为0表示周一)
-    return (days + 3) % 7; 
+    // 1970年1月1日是星期四, 在CP56TIME2A中索引为4 (在CP56TIME2A中是4，因为1表示周一)
+    return (days + 3) % 7+1; 
 }
 
 uint32_t Common_DateTimeToTimestamp(CommonDateTime_Struct *dt)
@@ -247,7 +247,7 @@ void Common_TimestampToCp56Time2a(uint32_t timestamp, uint8_t *cp56time2a)
 
      // 计算从1970年1月1日到指定日期的天数
     days = Common_DateToDays(dt.year, dt.month, dt.day);
-    
+    milliSec = dt.second * 1000;
     // 填充CP56TIME2A格式
     // 毫秒 (低字节)COMMON_
     cp56time2a[COMMON_CP56TIME2A_MS_LSB_OFFSET] = (uint8_t)(milliSec & 0xFF);

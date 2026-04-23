@@ -555,10 +555,6 @@ static uint16_t IotYKC21_SendHeartBeat(uint8_t port, uint8_t *pBuf)
  
 static void IotYKC21_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
 {
-    uint8_t dataLen = 0;
-
-    Common_SetBitFlag(pBuf, 15);
-
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_EmergencyStop))
     {
         Common_SetBitFlag(pBuf, 1);
@@ -836,20 +832,18 @@ static uint16_t IotYKC21_SendChargeStopRsp(uint8_t port, uint8_t *pBuf)
  {
      CommonDateTime_Struct dateTime;
      uint16_t dataLen = 0;
+     uint32_t SecTimestamp;
+     uint8_t weekday =0;
 
      /* 设备编码 */
      memcpy(&pBuf[dataLen], pIotYKC21Ctx->pileDnBCD, 7);
      dataLen += 7;
+    
+      SecTimestamp = SSTM_GetSecTimestamp();
+      Common_TimestampToCp56Time2a(SecTimestamp, &pBuf[dataLen]);
+      dataLen += 7;
 
-     SSTM_GetDateTime(&dateTime);
-     pBuf[dataLen++] = dateTime.millisecond & 0xFF;
-     pBuf[dataLen++] = (dateTime.millisecond >> 8) & 0xFF;
-     pBuf[dataLen++] = dateTime.minute;
-     pBuf[dataLen++] = dateTime.hour;
-     pBuf[dataLen++] = dateTime.day;
-     pBuf[dataLen++] = dateTime.month;
-     pBuf[dataLen++] = (dateTime.year - 2000) & 0xFF;
-
+    
      return dataLen;
  }
  static uint16_t IotYKC21_SendSetBillModeMultiRateRsp(uint8_t port, uint8_t *pBuf)
