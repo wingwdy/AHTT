@@ -879,6 +879,18 @@ static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf)
     return dataLen;
 }
 
+static uint16_t IotOM_SendReadLocalFileRsp(uint8_t port, uint8_t *pBuf)
+{
+    IotOMFrameReadLocalFileRsp_Struct *pRsp = (IotOMFrameReadLocalFileRsp_Struct *)pBuf;
+
+    /* 设备编码 */
+    memcpy(pRsp->dn, pIotOMCtx->pileFixDnAsc, 32);
+    /* 结果 */
+    pRsp->result = pIotOMCtx->stProtoData[port].readLocalFileResult;
+
+    return sizeof(IotOMFrameReadLocalFileRsp_Struct);
+}
+
 static uint16_t IotOM_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uint16_t dataLen)
 {
     IotOMFrameHead_Struct *pFrameHead = (IotOMFrameHead_Struct *)pBuf;

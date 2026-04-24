@@ -503,10 +503,10 @@ static void CddDrvEG800AK_ATTaskRecvHandle(uint8_t *recvbuf)
 
                 printFlag = FALSE;
                 remainLen -= dealLen;
-                
+
                 if (remainLen > 0)
                 {
-                    memmove(pData, &pData[dealLen], remainLen);
+                    memmove(recvbuf, &recvbuf[dealLen], remainLen);
                 }
             }
         }
