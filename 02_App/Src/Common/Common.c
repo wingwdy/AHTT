@@ -150,20 +150,20 @@ static uint32_t Common_DateToDays(uint16_t year, uint8_t month, uint8_t day)
     uint32_t days = 0;
     uint16_t y;
     
-    // 从1970年开始计算
+    /* 从1970年开始计算 */
     for (y = 1970; y < year; y++)
     {
         days += Common_IsLeapYear(y) ? 366 : 365;
     }
     
-    // 加上当年的月份天数
+    /* 加上当年的月份天数 */
     for (y = 1; y < month; y++)
     {
         days += Common_DaysInMonth(year, y);
     }
     
-    // 加上当月天数
-    days += day - 1; // 减1是因为当天也要计算
+    /* 加上当月天数 */
+    days += day - 1; /* 减1是因为当天也要计算 */
     return days;
 }
 
@@ -173,21 +173,21 @@ static void Common_DaysToDate(uint32_t days, CommonDateTime_Struct *dt)
     uint8_t month = 1;
     uint8_t day = 1;
     
-    // 计算年份
+    /* 计算年份 */
     while (days >= (Common_IsLeapYear(year) ? 366 : 365))
     {
         days -= (Common_IsLeapYear(year) ? 366 : 365);
         year++;
     }
     
-    // 计算月份
+    /* 计算月份 */
     while (days >= Common_DaysInMonth(year, month))
     {
         days -= Common_DaysInMonth(year, month);
         month++;
     }
     
-    // 计算日期
+    /* 计算日期 */
     day = (uint8_t)(days + 1);
     
     dt->year = year;
@@ -198,8 +198,8 @@ static void Common_DaysToDate(uint32_t days, CommonDateTime_Struct *dt)
 
 static uint8_t Common_GetCp56Time2aWeekday(uint32_t days)
 {
-    // 1970年1月1日是星期四, 在CP56TIME2A中索引为4 (在CP56TIME2A中是4，因为1表示周一)
-    return (days + 3) % 7+1; 
+    /* 1970年1月1日是星期四, 在CP56TIME2A中索引为4 (在CP56TIME2A中是4，因为1表示周一) */
+    return ((days + 3) % 7 + 1); 
 }
 
 uint32_t Common_DateTimeToTimestamp(CommonDateTime_Struct *dt)
@@ -207,10 +207,10 @@ uint32_t Common_DateTimeToTimestamp(CommonDateTime_Struct *dt)
     uint32_t timestamp = 0;
     uint32_t days = 0;
     
-    // 计算日期部分的天数
+    /* 计算日期部分的天数 */
     days = Common_DateToDays(dt->year, dt->month, dt->day);
     
-    // 转换为时间戳 (天数 * 24小时 * 3600秒 + 小时 * 3600 + 分钟 * 60 + 秒)
+    /* 转换为时间戳 (天数 * 24小时 * 3600秒 + 小时 * 3600 + 分钟 * 60 + 秒) */
     timestamp = days * 86400UL;
     timestamp += dt->hour * 3600UL;
     timestamp += dt->minute * 60UL;
@@ -224,44 +224,44 @@ void Common_TimestampToDateTime(uint32_t timestamp, CommonDateTime_Struct *dt)
     uint32_t days = timestamp / 86400UL;
     uint32_t remainder = timestamp % 86400UL;
     
-    // 计算日期部分
+    /* 计算日期部分 */
     Common_DaysToDate(days, dt);
     
-    // 计算时间部分
+    /* 计算时间部分 */
     dt->hour = (uint8_t)(remainder / 3600);
     remainder %= 3600;
     dt->minute = (uint8_t)(remainder / 60);
     dt->second = (uint8_t)(remainder % 60);
-    dt->millisecond = 0; // 时间戳本身不包含毫秒
+    dt->millisecond = 0; /* 时间戳本身不包含毫秒 */
 }
 
 void Common_TimestampToCp56Time2a(uint32_t timestamp, uint8_t *cp56time2a)
 {
     uint8_t qualityFlags = 0;
     CommonDateTime_Struct dt;
-    uint16_t milliSec = 0; // 假设毫秒为0
+    uint16_t milliSec = 0; /* 假设毫秒为0 */
     uint32_t days;
 
-    // 将时间戳转换为日期时间结构
+    /* 将时间戳转换为日期时间结构 */
     Common_TimestampToDateTime(timestamp, &dt);
 
-     // 计算从1970年1月1日到指定日期的天数
-    days = Common_DateToDays(dt.year, dt.month, dt.day);
-    milliSec = dt.second * 1000;
-    // 填充CP56TIME2A格式
-    // 毫秒 (低字节)COMMON_
+     /* 计算从1970年1月1日到指定日期的天数 */
+    days = Common_DateToDays(dt.year, dt.month, dt.day); 
+    
+    /* 填充CP56TIME2A格式 */
+    /* 毫秒 (低字节)COMMON_ */
     cp56time2a[COMMON_CP56TIME2A_MS_LSB_OFFSET] = (uint8_t)(milliSec & 0xFF);
-    // 毫秒 (高字节)
+    /* 毫秒 (高字节) */
     cp56time2a[COMMON_CP56TIME2A_MS_MSB_OFFSET] = (uint8_t)((milliSec >> 8) & 0xFF);
-    // 分钟 (加上质量标志位)
+    /* 分钟 (加上质量标志位) */
     cp56time2a[COMMON_CP56TIME2A_MINUTE_OFFSET] = (dt.minute & COMMON_CP56TIME2A_MINUTE_MASK) | qualityFlags;
-    // 小时 (加上质量标志位)
+    /* 小时 (加上质量标志位) */
     cp56time2a[COMMON_CP56TIME2A_HOUR_OFFSET] = (dt.hour & COMMON_CP56TIME2A_HOUR_MASK) | qualityFlags;
-    // 日 (加上星期几信息)
+    /* 日 (加上星期几信息) */
     cp56time2a[COMMON_CP56TIME2A_DAY_OFFSET] = (dt.day & COMMON_CP56TIME2A_DAY_MASK) | ((Common_GetCp56Time2aWeekday(days) & 0x07) << 5);
-    // 月 (加上无效标志)
+    /* 月 (加上无效标志) */
     cp56time2a[COMMON_CP56TIME2A_MONTH_OFFSET] = (dt.month & COMMON_CP56TIME2A_MONTH_MASK) | qualityFlags;
-    // 年 (加上无效标志)
+    /* 年 (加上无效标志) */
     cp56time2a[COMMON_CP56TIME2A_YEAR_OFFSET] = ((dt.year - 2000) & COMMON_CP56TIME2A_YEAR_MASK) | qualityFlags;
 }
 
@@ -270,7 +270,7 @@ uint32_t Common_Cp56Time2aToTimestamp(const uint8_t *cp56time2a)
     CommonDateTime_Struct dt = {0};
     uint32_t timestamp;
 
-    // 解析CP56TIME2A格式
+    /* 解析CP56TIME2A格式 */
     dt.millisecond = ((uint16_t)cp56time2a[COMMON_CP56TIME2A_MS_MSB_OFFSET] << 8) | 
                      cp56time2a[COMMON_CP56TIME2A_MS_LSB_OFFSET];
     dt.minute = cp56time2a[COMMON_CP56TIME2A_MINUTE_OFFSET] & COMMON_CP56TIME2A_MINUTE_MASK;
@@ -279,7 +279,7 @@ uint32_t Common_Cp56Time2aToTimestamp(const uint8_t *cp56time2a)
     dt.month = cp56time2a[COMMON_CP56TIME2A_MONTH_OFFSET] & COMMON_CP56TIME2A_MONTH_MASK;
     dt.year = (cp56time2a[COMMON_CP56TIME2A_YEAR_OFFSET] & COMMON_CP56TIME2A_YEAR_MASK) + 2000;
     
-    // 将日期时间转换为时间戳
+    /* 将日期时间转换为时间戳 */
     timestamp = Common_DateTimeToTimestamp(&dt);
     return timestamp;
 }
@@ -558,7 +558,7 @@ void Common_BubbleSort(uint16_t *pData, uint16_t size)
     uint16_t i, j;
     uint16_t temp;
 
-    for (j = 0; j < size; j++) //冒泡排序
+    for (j = 0; j < size; j++) /*冒泡排序 */
     {
         for (i = 0; i < (size - j - 1); i++)
         {
@@ -566,7 +566,7 @@ void Common_BubbleSort(uint16_t *pData, uint16_t size)
             {
                 temp = pData[i];
                 pData[i] = pData[i + 1];
-                pData[i + 1] = temp; //大的下沉到数组高端
+                pData[i + 1] = temp; /*大的下沉到数组高端 */
             }
         }
     }
@@ -669,19 +669,19 @@ uint16_t Common_ReplaceStr(uint8_t* pData, uint16_t nDataLen, char* cDestStr, vo
 	{
 		offset = pDest - pData;
 
-        // 计算尾部字符串长度，并确保不会溢出cTailStr缓冲区
+        /* 计算尾部字符串长度，并确保不会溢出cTailStr缓冲区 */
         tailLen = nDataLen - offset - nDestStrLen;
 
         if (tailLen >= sizeof(cTailStr))
         {
-            tailLen = sizeof(cTailStr) - 1; // 确保留出终止符空间
+            tailLen = sizeof(cTailStr) - 1; /* 确保留出终止符空间 */
         }
         
-        // 保存尾巴
+        /* 保存尾巴 */
         strncpy(cTailStr, (char*)(pDest + nDestStrLen), tailLen);
-        cTailStr[tailLen] = '\0'; // 确保字符串终止
+        cTailStr[tailLen] = '\0'; /* 确保字符串终止 */
 
-        //默认
+        /*默认 */
         if (0 == nCopyLen)
         {
             pCopyData = pDefault;
@@ -699,10 +699,10 @@ uint16_t Common_ReplaceStr(uint8_t* pData, uint16_t nDataLen, char* cDestStr, vo
         memcpy(pDest, pCopyData, nCopyLen);
         pDest += nCopyLen;
 
-        // 加上尾巴
+        /* 加上尾巴 */
         strcpy((char*)pDest, cTailStr);
 
-        // 重新计算长度
+        /* 重新计算长度 */
         nDataLen = offset + nCopyLen + strlen(cTailStr);
 	}
 
@@ -715,7 +715,7 @@ uint16_t Common_ReplaceNum(uint8_t* pData, uint16_t nDataLen, char* cDestStr, ui
     char cReplace[32] = { 0 };
     char cDefault[32] = { 0 };
 
-    // 验证输入参数
+    /* 验证输入参数 */
     if (pData != NULL && cDestStr != NULL) 
     {
         snprintf(cReplace, sizeof(cReplace), "%d", replace);
@@ -730,12 +730,12 @@ void Common_AsciiToBCD(char *pASC, uint8_t *pBCD, uint16_t length)
 {
     uint16_t index;
     
-    // 通过条件保护块替代提前return
+    /* 通过条件保护块替代提前return */
     if (pASC != NULL && pBCD != NULL && length > 0)
     {
         for (index = 0; index < length; index += 2)
         {
-            // ASCII合法性检查，非法则中断处理
+            /* ASCII合法性检查，非法则中断处理 */
             if (pASC[index] < '0' || pASC[index] > '9') 
             {
                 break;
@@ -751,7 +751,7 @@ void Common_AsciiToBCD(char *pASC, uint8_t *pBCD, uint16_t length)
             }
             else
             {
-                // 奇数长度时高4位清零
+                /* 奇数长度时高4位清零 */
                 pBCD[index / 2] = (pASC[index] - '0') & 0x0F;  
             }
         }
@@ -820,10 +820,10 @@ uint64_t Common_uintBINToBCD(uint32_t bin)
     
     while (recvBin > 0) 
     {
-        // 取出最低位的十进制数字，放到对应的4位BCD位置
+        /* 取出最低位的十进制数字，放到对应的4位BCD位置 */
         bcd |= (recvBin % 10) << (shift * 4);
-        recvBin /= 10;      // 去掉已处理的最低位
-        shift++;        // 移动到下4个bit位置
+        recvBin /= 10;      /* 去掉已处理的最低位 */
+        shift++;        /* 移动到下4个bit位置 */
     }
     
     return bcd;
