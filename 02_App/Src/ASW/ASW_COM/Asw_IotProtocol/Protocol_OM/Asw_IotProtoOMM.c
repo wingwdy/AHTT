@@ -92,6 +92,7 @@ static CommonSendCtrl_Struct* IotOM_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_OM_CMD_UPDATE_RSP:                 pSendCtrl = &pIotOMCtx->stSendCtrl[port][11];   break;
         case IOT_OM_CMD_ORDER_RECORD:               pSendCtrl = &pIotOMCtx->stSendCtrl[port][12];   break;
         case IOT_OM_CMD_REMOTE_QUERY_SET_PARAM_RSP: pSendCtrl = &pIotOMCtx->stSendCtrl[port][13];   break;
+        case IOT_OM_CMD_CALL_READ_LOCALFILE_RSP:    pSendCtrl = &pIotOMCtx->stSendCtrl[port][14];   break;
         default: break;
     }
 
@@ -115,6 +116,7 @@ static CommonRecvCtrl_Struct* IotOM_GetRecvCtrl(uint8_t port, uint16_t cmd)
         case IOT_OM_CMD_UPDATE:                     pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][8];   break;
         case IOT_OM_CMD_ORDER_RECORD_RSP:           pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][9];   break;
         case IOT_OM_CMD_REMOTE_QUERY_SET_PARAM:     pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][10];  break;
+        case IOT_OM_CMD_CALL_READ_LOCALFILE:        pRecvCtrl = &pIotOMCtx->stRecvCtrl[port][11];  break;
         default: break;
     }
     

@@ -156,6 +156,9 @@ int32_t Common_ExtractPathAndFileName(const char *input,
                                        char *path, uint32_t pathSize,
                                        char *filename, uint32_t nameSize);
 uint16_t Common_CalcCharCount(char *pInString, uint16_t StringLen, char cData);
+
+uint32_t Common_MemEqual(const void * pbuf, uint8_t c, uint32_t len);
+
 #endif /* COMMON_H_ */
 
 

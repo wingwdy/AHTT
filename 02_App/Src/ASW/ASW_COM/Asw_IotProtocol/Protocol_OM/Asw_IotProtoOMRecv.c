@@ -23,6 +23,7 @@
 #include "SS_Ucm.h"
 #include "Asw_PlatM.h"
 #include "Cdd_ModeM.h"
+#include "SS_Snapshot.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -66,6 +67,7 @@ static uint8_t IotOM_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t
 static uint8_t IotOM_RecvRemoteQueryParam(uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvRemoteSetParam(uint8_t *r_data, uint16_t len);
 static uint8_t IotOM_RecvRemoteQuerySetParam(uint8_t *port, uint8_t *r_data, uint16_t len);
+static uint8_t IotOM_RecvReadLocalFile(uint8_t *port, uint8_t *r_data, uint16_t len);
 static const IotOMRecvCtrl_Struct* IotOM_GetRecvCtrlPtr(uint16_t cmd);
 static IotOMFrameHead_Struct *IotOM_FindValidFrameLen(uint8_t *pData, uint16_t dataLen, uint16_t *dealLen);
 static void IotOM_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen, uint8_t *pTopic, uint16_t *dealLen);
@@ -206,6 +208,18 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .matchCmd = IOT_OM_CMD_REMOTE_QUERY_SET_PARAM_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程设置查询参数",
+    },
+
+    [11] = 
+    {
+        .cmd = IOT_OM_CMD_CALL_READ_LOCALFILE,
+        .cmdType = IOT_OM_CMDTYPE_REQUSET,
+        .pRecvParse = IotOM_RecvReadLocalFile,
+        .maxTimeout = 0,
+        .maxTryCnt = 1,
+        .matchCmd = IOT_OM_CMD_CALL_READ_LOCALFILE_RSP,
+        .printFlag = TRUE,
+        .cMeaning = "远程读取桩本地文件",
     },
 };
 
@@ -635,6 +649,61 @@ static uint8_t IotOM_RecvRemoteQuerySetParam(uint8_t *port, uint8_t *r_data, uin
     }
     
     return TRUE;
+}
+
+static uint8_t IotOM_RecvReadLocalFile(uint8_t *port, uint8_t *r_data, uint16_t len)
+{
+    IotOMFrameReadLocalFile_Struct *pReq = (IotOMFrameReadLocalFile_Struct *)r_data;
+    CddNetMSocketPara_Union stSocketPara = {0};
+    uint8_t ret = FALSE;
+    uint8_t result = eIotOMReadLocalFileResult_TOOLARGE;
+
+    do
+    {
+        if (len < sizeof(IotOMFrameReadLocalFile_Struct))
+        {
+            IOTOM_CFG_LogPrint("[%s] param is invaild\r\n", __FUNCTION__);
+            break;
+        }
+
+        if (Common_MemEqual(pReq->ip, 0x0, sizeof(pReq->ip))
+            || Common_MemEqual(pReq->user, 0x0, sizeof(pReq->user))
+            || Common_MemEqual(pReq->passwd, 0x0, sizeof(pReq->passwd)) 
+            || Common_MemEqual(pReq->remotePath, 0x0, sizeof(pReq->remotePath)))
+        {
+            break;
+        }
+
+        if (TRUE == SSUcm_IsUpdating())
+        {/* 升级中, 不允许文件上传 */
+            break;
+        }
+
+        stSocketPara.stFtpPara.eMode = eCddNetMFtpMode_Upload;
+        stSocketPara.stFtpPara.eFileFormat = eCddNetMFileType_BIN;
+        stSocketPara.stFtpPara.port = pReq->port;
+        memcpy(stSocketPara.stFtpPara.ip,     pReq->ip,     sizeof(pReq->ip));
+        memcpy(stSocketPara.stFtpPara.user,   pReq->user,   sizeof(pReq->user));
+        memcpy(stSocketPara.stFtpPara.passwd, pReq->passwd, sizeof(pReq->passwd));
+
+        uint16_t pathLen = sizeof(stSocketPara.stFtpPara.path) - 1; // 协议长度 > path长度 
+        memcpy(stSocketPara.stFtpPara.path, pReq->remotePath, pathLen);
+        stSocketPara.stFtpPara.path[pathLen] = '\0';
+
+        if (SSSnapshot_ExportAllItems(&stSocketPara) != TRUE)
+        {
+            result = eIotOMReadLocalFileResult_NULL;
+            break;
+        }
+
+        result = eIotOMReadLocalFileResult_OK;
+        ret = TRUE;
+
+    } while(0);
+
+    pIotOMCtx->stProtoData[0].readLocalFileResult = result;
+
+    return ret;
 }
 
 static const IotOMRecvCtrl_Struct* IotOM_GetRecvCtrlPtr(uint16_t cmd)

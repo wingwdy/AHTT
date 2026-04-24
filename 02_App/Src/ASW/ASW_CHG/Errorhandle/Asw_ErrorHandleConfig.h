@@ -33,6 +33,7 @@
                                                              }while(0)
                                                              
 #define ASWERR_CFG_LogPrint(fmt, ...)                 DSLOGM_Debug(DSLogMModule_ErrorHandle, fmt, ##__VA_ARGS__)
+#define ASWERR_CFG_RunLogPrint(fmt, ...)              DSLOGM_Info(DSLogMModule_ErrorHandle, fmt, ##__VA_ARGS__)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

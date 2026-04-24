@@ -60,12 +60,12 @@ static uint16_t ATTCP_PackReadData(uint8_t socketIndex, void * socketPara, uint8
 static uint16_t ATTCP_PackWriteData(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t nATLen);
 static uint16_t ATTCP_PackQIPQurey(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t nATLen);
 
-static uint8_t ATTCP_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
-static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
-static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
-static uint8_t ATTCP_RecvWrite(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
-static uint8_t ATTCP_RecvClose(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
-static uint8_t ATTCP_RecvQuery(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
+static uint8_t ATTCP_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
+static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
+static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
+static uint8_t ATTCP_RecvWrite(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
+static uint8_t ATTCP_RecvClose(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
+static uint8_t ATTCP_RecvQuery(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
 
 static uint8_t ATTCP_FailHandle(uint8_t socketIndex, void * socketPara, uint8_t atTaskID);
 
@@ -75,23 +75,23 @@ static uint8_t ATTCP_FailHandle(uint8_t socketIndex, void * socketPara, uint8_t 
 const ATCmdDescribtor_Struct c_stTCPATCmdDescribtor[eATTCPCmd_Count] =
 {
     [eATTCPCmd_Open] =
-    { "AT+QIOPEN=1,[ID],\"TCP\",\"[MIP]\",[MPORT],0,0\r\n",     "+QIOPEN=",       3,   20000,     3000,  TRUE, "建立连接",
+    { "AT+QIOPEN=1,[ID],\"TCP\",\"[MIP]\",[MPORT],0,0\r\n",     "+QIOPEN=",          NULL,   3,   20000,     3000,  TRUE, "建立连接",
     ATTCP_PackOpenSocket,                                       ATTCP_RecvOpenSocket,                    ATTCP_FailHandle},
 
     [eATTCPCmd_Read] =
-    { "AT+QIRD=[ID],1460\r\n",                                  "+QIRD:",         3,   3000,      500,   FALSE, "数据读取",
+    { "AT+QIRD=[ID],1460\r\n",                                  "+QIRD:",            NULL,   3,   3000,      500,   FALSE, "数据读取",
     ATTCP_PackReadData,                                         ATTCP_RecvData,                          ATTCP_FailHandle},
 
     [eATTCPCmd_Write] =
-    { "AT+QISEND=[ID],[LEN]\r\n",                               "> ",             3,   3000,      2000,  FALSE, "数据发送",
+    { "AT+QISEND=[ID],[LEN]\r\n",                               "> ",                NULL,   3,   3000,      2000,  FALSE, "数据发送",
     ATTCP_PackWriteData,                                        ATTCP_RecvWrite,                         ATTCP_FailHandle},
 
     [eATTCPCmd_Close] =
-    { "AT+QICLOSE=[ID]\r\n",                                    "+QICLOSE",       3,   5000,      3000,  TRUE, "关闭连接",
+    { "AT+QICLOSE=[ID]\r\n",                                    "+QICLOSE",          NULL,   3,   5000,      3000,  TRUE, "关闭连接",
     ATTCP_PackQIPClose,                                         ATTCP_RecvClose,                         ATTCP_FailHandle},
 
     [eATTCPCmd_QueryState] =
-    { "AT+QISTATE=1,[ID]\r\n",                                  "+QISTATE:",      3,   5000,      3000,  FALSE, "查询连接状态",
+    { "AT+QISTATE=1,[ID]\r\n",                                  "+QISTATE:",         NULL,   3,   5000,      3000,  FALSE, "查询连接状态",
     ATTCP_PackQIPQurey,                                         ATTCP_RecvQuery,                         ATTCP_FailHandle},
 };
 
@@ -161,7 +161,7 @@ static uint8_t ATTCP_RecvQIPClose(uint8_t socketIndex, void * socketPara, uint8_
 }
 
 
-static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
+static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
     ATTCPPrivate_Struct *pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
@@ -180,7 +180,7 @@ static uint8_t ATTCP_RecvOpenSocket(uint8_t socketIndex, void * socketPara, uint
     return ret;
 }
 
-static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
+static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
     ATTCPPrivate_Struct *pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
@@ -231,7 +231,7 @@ static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *p
 	return ret;
 }
 
-static uint8_t ATTCP_RecvWrite(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
+static uint8_t ATTCP_RecvWrite(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen)
 {  
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
     CddNetMSocketPara_Union *pSocketPara = (CddNetMSocketPara_Union *)pSocketCtrl->specificPara;
@@ -240,7 +240,7 @@ static uint8_t ATTCP_RecvWrite(uint8_t socketIndex, void * socketPara, uint8_t *
     return TRUE;
 }
 
-static uint8_t ATTCP_RecvClose(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
+static uint8_t ATTCP_RecvClose(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen)
 {  
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
 
@@ -248,7 +248,7 @@ static uint8_t ATTCP_RecvClose(uint8_t socketIndex, void * socketPara, uint8_t *
     return TRUE;
 }
 
-static uint8_t ATTCP_RecvQuery(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
+static uint8_t ATTCP_RecvQuery(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
     ATTCPPrivate_Struct *pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
@@ -279,7 +279,7 @@ static uint8_t ATTCP_RecvQuery(uint8_t socketIndex, void * socketPara, uint8_t *
     return TRUE;
 }
 
-static uint8_t ATTCP_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen)
+static uint8_t ATTCP_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
     ATTCPPrivate_Struct *pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
@@ -439,115 +439,87 @@ static void ATTCP_SocketStateMange(uint8_t socketIndex, CddDrvEG800AKSocketCtrl_
     {}
 }
 
-void ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
+
+
+uint32_t ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = NULL;
     CddDrvEG800AKCtrl_Struct *pModulePara = (CddDrvEG800AKCtrl_Struct *)modulePara;
     ATTCPPrivate_Struct *pPrivate = NULL;
     int32_t socketIndex = 0;
     int32_t connectState = 0;
-    uint8_t *pTemp = NULL;
-    uint8_t *pEnd = NULL;
-    uint16_t dealLen = 0;
-    uint16_t remainLen = 0;
 
-    pTemp = Common_SearchData(pData, dataLen, "+QIOPEN: ", strlen("+QIOPEN: "));
-
-    while (NULL != pTemp)
+    if (2 == sscanf((char*)pData, "+QIOPEN: %d,%d\r\n", &socketIndex, &connectState))
     {
-        if (2 == sscanf((char*)pTemp, "+QIOPEN: %d,%d\r\n", &socketIndex, &connectState))
+        if ((socketIndex >= 0) && (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT))
         {
-            if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
-            {
-                pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
-                pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
+            pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
+            pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
 
-                if (connectState == 0)
+            if (connectState == 0)
+            {
+                if (pPrivate->waitTcpConnectOkFlag == TRUE)
                 {
-                    if (pPrivate->waitTcpConnectOkFlag == TRUE)
-                    {
-                        pPrivate->waitTcpConnectOkFlag = FALSE;
-                        ATTCP_SetSocketState(socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
-                    }
-                }
-                else
-                {
-                    CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]连接失败，errcode: %d !\r\n", socketIndex, connectState);
-                    ATTCP_CloseSocket(pSocketCtrl);
+                    pPrivate->waitTcpConnectOkFlag = FALSE;
+                    ATTCP_SetSocketState(socketIndex, pSocketCtrl, eCddNetMSocketState_ConnectOK);
                 }
             }
+            else
+            {
+                CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]连接失败，errcode: %d !\r\n", socketIndex, connectState);
+                ATTCP_CloseSocket(pSocketCtrl);
+            }
         }
-
-            
-        pTemp += strlen("+QIOPEN: ");
-        dealLen = (uint32_t)pTemp - (uint32_t)pData;
-        remainLen = (dealLen >= dataLen) ? 0 : (dataLen - dealLen);
-
-        if (NULL != (pEnd = Common_SearchData(pTemp, remainLen, "\r\n", strlen("\r\n"))))
-        {
-            pEnd += strlen("\r\n");
-            dealLen = (uint32_t)pEnd - (uint32_t)pData;
-            remainLen = (dealLen >= dataLen) ? 0 : (dataLen - dealLen);
-            pTemp = pEnd;
-        }
-        else
-        {
-            break;
-        }
-
-        pTemp = Common_SearchData(pTemp, remainLen, "+QIOPEN: ", strlen("+QIOPEN: "));
     }
+    
+    return 0;
 }
 
-void ATTCP_UrcSendOK(uint8_t *pData, void * modulePara, uint16_t dataLen)
+uint32_t ATTCP_UrcSendOK(uint8_t *pData, void * modulePara, uint16_t dataLen)
 {
     CddDrvEG800AK_ExitTransparentMode();
+
+    return 0;
 }
 
-void ATTCP_UrcClose(uint8_t *pData, void * modulePara, uint16_t dataLen)
+uint32_t ATTCP_UrcClose(uint8_t *pData, void * modulePara, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = NULL;
     CddDrvEG800AKCtrl_Struct *pModulePara = (CddDrvEG800AKCtrl_Struct *)modulePara;
     int32_t socketIndex = 0;
-    uint8_t *pTemp = NULL;
 
-    if (NULL != (pTemp = Common_SearchData(pData, dataLen, "+QIURC: \"closed\"", strlen("+QIURC: \"closed\""))))
+    if (sscanf((char*)pData, "+QIURC: \"closed\",%d", &socketIndex) == 1)
     {
-        if (sscanf((char*)pTemp, "+QIURC: \"closed\",%d", &socketIndex) == 1)
+        if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
         {
-            if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
-            {
-                pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
-                ATTCP_CloseSocket(pSocketCtrl);
-                CDDDRV_EG800AK_CFG_LogPrint("[socket: %d] 后台主动断开连接!\r\n", socketIndex);
-            }
+            pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
+            ATTCP_CloseSocket(pSocketCtrl);
+            CDDDRV_EG800AK_CFG_LogPrint("[socket: %d] 后台主动断开连接!\r\n", socketIndex);
         }
-    }  
+    }
+
+    return 0;
 }
 
-void ATTCP_UrcRecv(uint8_t *pData, void * modulePara, uint16_t dataLen)
+uint32_t ATTCP_UrcRecv(uint8_t *pData, void * modulePara, uint16_t dataLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = NULL;
     CddDrvEG800AKCtrl_Struct *pModulePara = (CddDrvEG800AKCtrl_Struct *)modulePara;
     int32_t socketIndex = 0;
     ATTCPPrivate_Struct *pPrivate = NULL;
-    uint8_t *pTemp = NULL;
 
-    if (NULL != (pTemp = Common_SearchData(pData, dataLen, "+QIURC: \"recv\"", strlen("+QIURC: \"recv\""))))
+    if (sscanf((char*)pData, "+QIURC: \"recv\",%d\r", &socketIndex) == 1)
     {
-        pTemp += strlen("+QIURC: \"recv\"");
-
-        if (sscanf((char*)pTemp, ",%d\r", &socketIndex) == 1)
+        if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
         {
-            if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
-            {
-                pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
-                pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
-                CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATTCPCmd_Read);
-                pPrivate->cycleReadTickStart = Common_GetSystick();
-            }
+            pSocketCtrl = &pModulePara->stSocketCtrl[socketIndex];
+            pPrivate = (ATTCPPrivate_Struct *)pSocketCtrl->user_data;
+            CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATTCPCmd_Read);
+            pPrivate->cycleReadTickStart = Common_GetSystick();
         }
     }
+
+    return 0; 
 }
 
 void ATTCP_CloseSocket(void *socketCtrl)

@@ -1956,7 +1956,7 @@ void IotXDT_UpCtrlSendDeal(void)
                         }
 						
 						extern size_t xPortGetFreeHeapSize( void );
-						IOTXDT_CFG_LogPrint("Remaining heap size: %zu bytes\n", xPortGetFreeHeapSize());
+						IOTXDT_CFG_LogPrint("Remaining heap size: %zu bytes\r\n", xPortGetFreeHeapSize());
                         Common_SetSendFlag(pIotXDTCtx->pFuncSendCtrl, port, pSendCtrl->cmd, TRUE);
                         Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, port, pSendCtrl->cmd, FALSE);
                         Common_SetSendTick(pIotXDTCtx->pFuncSendCtrl, port, pSendCtrl->cmd, Common_GetSystick());

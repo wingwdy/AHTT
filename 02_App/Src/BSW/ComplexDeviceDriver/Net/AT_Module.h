@@ -30,9 +30,8 @@
 typedef enum
 {
     eATModuleCmd_Null,
+    eATModuleCmd_ATE0,                              /* 关闭回显 */
     eATModuleCmd_QueryModule,                       /* 识别模块 */
-    eATModuleCmd_SetSimStatusReportEnable,          /* 设置sim卡状态上报使能 */
-    eATModuleCmd_QuerySimStatus,                    /* sim卡状态查询 */
     eATModuleCmd_QuerySimRecognizeStatus,           /* sim识别状态查询 */
     eATModuleCmd_QueryIccid,                        /* sim卡iccid查询 */
     eATModuleCmd_QueryCsq,                          /* 信号强度查询 */

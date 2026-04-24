@@ -73,10 +73,10 @@ extern const ATCmdDescribtor_Struct c_stTCPATCmdDescribtor[eATTCPCmd_Count];
 void ATTCP_StateHandle(uint8_t socketIndex, void *socketCtrl);
 void ATTCP_CloseSocket(void *socketCtrl);
 
-void ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen);
-void ATTCP_UrcSendOK(uint8_t *pData, void * modulePara, uint16_t dataLen);
-void ATTCP_UrcClose(uint8_t *pData, void * modulePara, uint16_t dataLen);
-void ATTCP_UrcRecv(uint8_t *pData, void * modulePara, uint16_t dataLen);
+uint32_t ATTCP_UrcQIPOpen(uint8_t *pData, void * modulePara, uint16_t dataLen);
+uint32_t ATTCP_UrcSendOK(uint8_t *pData, void * modulePara, uint16_t dataLen);
+uint32_t ATTCP_UrcClose(uint8_t *pData, void * modulePara, uint16_t dataLen);
+uint32_t ATTCP_UrcRecv(uint8_t *pData, void * modulePara, uint16_t dataLen);
 #endif
 
 

@@ -155,7 +155,16 @@ static int32_t DSConsoleCfg_GetPara(int32_t argc, char *argv[])
         }
         else if (0 == strcmp(argv[1], "runningLog"))
         {
+            SSSnapshot_FlushRunningLog();
             SSSnapshot_ExportItem(eSSSnapshotItemType_RunningLog, eSnapshotItemReadSrc_Remote);
+        }
+        else if (0 == strcmp(argv[1], "orderRecord"))
+        {
+            SSSnapshot_ExportItem(eSSSnapshotItemType_OmOrderRecord, eSnapshotItemReadSrc_Remote);
+        }
+        else if (0 == strcmp(argv[1], "allLog"))
+        {
+            SSSnapshot_ExportAllItems(NULL);
         }
     }
 

@@ -63,6 +63,7 @@ static uint16_t IotOM_SendSetForbidState(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendUpdateResponse(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendOrderRecord(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf);
+static uint16_t IotOM_SendReadLocalFileRsp(uint8_t port, uint8_t *pBuf);
 static void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf);   
 static uint16_t IotOM_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf, uint16_t dataLen);
 /*******************************************************************************
@@ -224,6 +225,17 @@ static const IotOMSendCtrl_Struct c_stIotOMSendctrlTable[IOT_OM_CMD_SEND_COUNT] 
         .sendCycle = 0,
         .printFlag = TRUE,
         .cMeaning = "远程设置查询参数应答"
+    },
+
+    [14] = 
+    {
+        .cmd = IOT_OM_CMD_CALL_READ_LOCALFILE_RSP,
+        .cmdType = IOT_OM_CMDTYPE_RESPONSE,
+        .matchCmd = IOT_OM_CMD_CALL_READ_LOCALFILE,
+        .pSendFunc = IotOM_SendReadLocalFileRsp,
+        .sendCycle = 0,
+        .printFlag = TRUE,
+        .cMeaning = "远程读取桩本地文件应答"
     },
 };
 

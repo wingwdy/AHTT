@@ -45,6 +45,7 @@
 
 /* 日志接口函数定义 */
 #define IOTGN_CFG_LogPrint(fmt, ...)            DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
+#define IOTGN_CFG_RunLogPrint(fmt, ...)         DSLOGM_Info(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
 
 /* 充电最小余额，1元，保留2位小数 */
 #define IOTGN_CFG_CHARGE_MIN_ACCOUNT_MONEY      (100)   

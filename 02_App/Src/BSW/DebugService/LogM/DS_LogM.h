@@ -21,6 +21,8 @@
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
+#define DSLOGM_RUNLOG_LEVEL     eDSLogOutputLevel_Info
+
 #if (DSLOGM_CFG_OUTPUT_WITH_MODULE_NAME == TRUE)
 #define DSLOGM_Trace(module, fmt, ...)      DSLogM_Output(module, eDSLogOutputLevel_Trace,    "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)
 #define DSLOGM_Debug(module, fmt, ...)      DSLogM_Output(module, eDSLogOutputLevel_Debug,    "[%s] "fmt, DSLogM_GetModuleName(module), ##__VA_ARGS__)

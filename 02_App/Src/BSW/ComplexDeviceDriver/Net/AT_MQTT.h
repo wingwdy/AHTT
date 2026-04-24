@@ -72,11 +72,11 @@ extern const ATCmdDescribtor_Struct c_stMQTTATCmdDescribtor[eATMQTTCmd_Count];
 ******************************************************************************/
 void ATMQTT_CloseSocket(void *socketCtrl);
 void ATMQTT_StateHandle(uint8_t socketIndex, void *socketCtrl);
-void ATMQTT_UrcQMTOpen(uint8_t *pData, void * modulePara, uint16_t dataLen);
-void ATMQTT_UrcQMTConnect(uint8_t *pData, void * modulePara, uint16_t dataLen);
-void ATMQTT_UrcQMTPubex(uint8_t *pData, void * modulePara, uint16_t dataLen);
-void ATMQTT_UrcQMTStat(uint8_t *pData, void * modulePara, uint16_t dataLen);
-void ATMQTT_UrcQMTRecv(uint8_t *pData, void * modulePara, uint16_t dataLen);
+uint32_t ATMQTT_UrcQMTOpen(uint8_t *pData, void * modulePara, uint16_t dataLen);
+uint32_t ATMQTT_UrcQMTConnect(uint8_t *pData, void * modulePara, uint16_t dataLen);
+uint32_t ATMQTT_UrcQMTPubex(uint8_t *pData, void * modulePara, uint16_t dataLen);
+uint32_t ATMQTT_UrcQMTStat(uint8_t *pData, void * modulePara, uint16_t dataLen);
+uint32_t ATMQTT_UrcQMTRecv(uint8_t *pData, void * modulePara, uint16_t dataLen);
 void ATMQTT_UpdateIpPort(void *socketPara, char *pIp, uint16_t port);
 void ATMQTT_UpdateMqttUserNamePassword(void *socketPara, char *pUserName, char *pPassword);
 #endif

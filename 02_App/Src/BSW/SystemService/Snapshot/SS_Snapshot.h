@@ -17,7 +17,7 @@
 *    Header File Inclusion
 ******************************************************************************/
 #include "Common.h"
-
+#include "Cdd_NetM.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -37,9 +37,20 @@ typedef enum
 {
     eSSSnapshotItemType_RunningLog,
     eSSSnapshotItemType_ErrorLog,
+    eSSSnapshotItemType_OmOrderRecord,
     eSSSnapshotItemType_Count,
 }SSSnapshotItemType_Enum;
 
+typedef enum                                                                                                                                 
+{ 
+    eSSSnapshotItemRead_Idle = 0,
+    eSSSnapshotItemRead_ErrLog,
+    eSSSnapshotItemRead_WaitErrLog,
+    eSSSnapshotItemRead_RunLog,
+    eSSSnapshotItemRead_WaitRunLog,
+    eSSSnapshotItemRead_OmOrderRecord,
+    eSSSnapshotItemRead_WaitOmOrderRecord,
+} SSSnapshotItemRead_Enum;
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
@@ -57,13 +68,16 @@ typedef enum
 ******************************************************************************/
 void SSSnapshot_InitMemory(void);
 void SSSnapshot_MainFunction(void);
-void SSSnapshot_InsertRunningLog(void);
+void SSSnapshot_InsertRunningLog(const char *buf, uint16_t len);
 void SSSnapshot_InsertErrorLog(uint8_t port, char *pErrorInfo,  uint8_t flag);
 uint8_t SSSnapshot_ReadItem(uint8_t *pOutbuf, uint16_t bufSize, uint16_t *pOutLen);
 GlobalRet_Enum SSSnapshot_StartReadItem(SSSnapshotItemType_Enum eItemType);
 void SSSnapshot_StopReadItem(void);
 void SSSnapshot_ExportItem(SSSnapshotItemType_Enum itemType, SSSnapshotItemReadSrc_Enum eReadSrc);
+uint8_t SSSnapshot_ExportAllItems(CddNetMSocketPara_Union *pNetPara);
 uint8_t SSSnapshot_PreviewReadItem(uint16_t bufSize, uint16_t *pOutLen);
+void SSSnapshot_FlushRunningLog(void);
+
 #endif /* SS_SNAPSHOT_H_ */
 
 

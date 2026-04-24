@@ -27,6 +27,7 @@
 ******************************************************************************/
 
 #define ASWPLATM_CFG_LogPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_PlatM, fmt, ##__VA_ARGS__)
+#define ASWPLATM_CFG_RunLogPrint(fmt, ...)       DSLOGM_Info(DSLogMModule_PlatM, fmt, ##__VA_ARGS__)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

@@ -34,21 +34,23 @@
 typedef struct 
 {
 	char *cAT;
-	char *cATAnswer;
+	char *cATAnswerHead;
+	char *cATAnswerTail;
 	uint8_t maxTryCnt;
 	uint32_t waitTimeout;
 	uint32_t maxAckTimeout;
 	uint8_t printFlag;
 	char *cMeanings;
 	uint16_t (*pFuncPackAT)(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t nATLen);
-	uint8_t (*pFuncRecvHandle)(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen);
+	uint8_t (*pFuncRecvHandle)(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
 	uint8_t (*pFuncFailHandle)(uint8_t socketIndex, void * socketPara, uint8_t atTaskID);
 }ATCmdDescribtor_Struct;
 
 typedef struct
 {
 	char *cUrc;
-	void (*pFuncRecvHandle)(uint8_t *pData, void * modulePara, uint16_t dataLen);
+    char *cSuffix;
+	uint32_t (*pFuncRecvHandle)(uint8_t *pData, void * modulePara, uint16_t dataLen);
 	uint8_t printFlag;
 	char *cMeanings;
 }ATUrcDescribtor_Struct;

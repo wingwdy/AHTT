@@ -59,7 +59,7 @@ CddDrvEG800AKCtrl_Struct g_stCddDrvEG800AKCtrl = { 0 };
 static uint8_t CddDrvEG800AK_PowerOn(void);
 static const ATCmdDescribtor_Struct *CddDrvEG800AK_GetATDescribtor(CddNetMSocketType_Enum eSocketType, uint8_t cmd);
 static void CddDrvEG800AK_SwitchNextSocket(void);
-static void CddDrvEg800AK_UrcDecode(uint8_t *pData, void * modulePara, uint16_t dataLen);
+static uint16_t CddDrvEg800AK_UrcDecode(uint8_t *pData, void * modulePara, uint16_t dataLen, uint8_t printEnable);
 
 static void CddDrvEG800AK_CloseAllSocket(void);
 static uint8_t CddDrvEG800AK_CheckAllSocketCloseFinish(void);
@@ -82,7 +82,7 @@ static uint8_t CddDrvEG800AK_PowerOn(void)
             CDDDRV_EG800AK_CFG_PwrOff();
             g_stCddDrvEG800AKCtrl.powerCtrlStartTick = Common_GetSystick();
             g_stCddDrvEG800AKCtrl.powerOnStep = CDDDRV_EG800AK_CTRL_STEP1;
-            CDDDRV_EG800AK_CFG_LogPrint("4G Module EG800AK PowerOff!\n\n");
+            CDDDRV_EG800AK_CFG_LogPrint("4G Module EG800AK PowerOff!\r\n");
             break;
         }
 
@@ -93,7 +93,7 @@ static uint8_t CddDrvEG800AK_PowerOn(void)
                 CDDDRV_EG800AK_CFG_PwrOn();
                 g_stCddDrvEG800AKCtrl.powerCtrlStartTick = Common_GetSystick();
                 g_stCddDrvEG800AKCtrl.powerOnStep = CDDDRV_EG800AK_CTRL_STEP2;
-                CDDDRV_EG800AK_CFG_LogPrint("\n4G Module EG800AK PowerOn!!!\n\n");
+                CDDDRV_EG800AK_CFG_LogPrint("\r\n4G Module EG800AK PowerOn!!!\r\n");
             }
 
             break;
@@ -106,7 +106,7 @@ static uint8_t CddDrvEG800AK_PowerOn(void)
                 CDDDRV_EG800AK_CFG_PwrKeyOff();
                 g_stCddDrvEG800AKCtrl.powerCtrlStartTick = Common_GetSystick();
                 g_stCddDrvEG800AKCtrl.powerOnStep = CDDDRV_EG800AK_CTRL_STEP3;
-                CDDDRV_EG800AK_CFG_LogPrint("\n4G Module EG800AK PowerKeyOff!!!\n\n");
+                CDDDRV_EG800AK_CFG_LogPrint("\r\n4G Module EG800AK PowerKeyOff!!!\r\n");
             }
 
             break;
@@ -119,7 +119,7 @@ static uint8_t CddDrvEG800AK_PowerOn(void)
                 CDDDRV_EG800AK_CFG_PwrKeyOn();
                 g_stCddDrvEG800AKCtrl.powerCtrlStartTick = Common_GetSystick();
                 g_stCddDrvEG800AKCtrl.powerOnStep = CDDDRV_EG800AK_CTRL_STEP4;
-                CDDDRV_EG800AK_CFG_LogPrint("\r\n4G Module EG800AK PowerKeyOn!!!\n\n");
+                CDDDRV_EG800AK_CFG_LogPrint("\r\n4G Module EG800AK PowerKeyOn!!!\r\n");
             }
 
             break;
@@ -130,7 +130,7 @@ static uint8_t CddDrvEG800AK_PowerOn(void)
             if (Common_JudgeTimeoutMs(g_stCddDrvEG800AKCtrl.powerCtrlStartTick, CDDDRV_EG800AK_CFG_POWERKEY_ON_HOLD_TIME))
             {
                 g_stCddDrvEG800AKCtrl.powerOnStep = CDDDRV_EG800AK_CTRL_STEPEND;
-                CDDDRV_EG800AK_CFG_LogPrint("\r\n4G Module EG800AK Start Finish!!!\n\n");
+                CDDDRV_EG800AK_CFG_LogPrint("\r\n4G Module EG800AK Start Finish!!!\r\n");
             }
 
             break;
@@ -298,7 +298,7 @@ static void CddDrvEG800AK_ATTaskSendHandle(uint8_t *txBuf)
                     txBuf[txLen] = 0;
                     if (pATCmdDescribtor->printFlag == TRUE)
                     {
-                        CDDDRV_EG800AK_CFG_LogPrint("[4G %s-->Tx]:\n%s\n", pATCmdDescribtor->cMeanings, txBuf);
+                        CDDDRV_EG800AK_CFG_LogPrint("[4G %s-->Tx]:\r\n%s\r\n", pATCmdDescribtor->cMeanings, txBuf);
                     }
 
                     g_stCddDrvEG800AKCtrl.cmdTaskStep = CDDDRV_EG800AK_CTRL_STEP2;
@@ -391,14 +391,17 @@ static void CddDrvEG800AK_ATTaskRecvHandle(uint8_t *recvbuf)
     const ATCmdDescribtor_Struct *pATCmdDescribtor = g_stCddDrvEG800AKCtrl.currentTaskATDescribtor;
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = NULL;
     uint8_t socketIndex = g_stCddDrvEG800AKCtrl.currentTaskSocketIndex;
-    uint8_t taskCmd = g_stCddDrvEG800AKCtrl.currentTaskCmd;
     uint16_t dataLen = 0;
     char *pDest = NULL;
+    char *pTail = NULL;
     uint8_t bAnswerOK = FALSE;
     static uint16_t lastReadLen = 0;
-    uint16_t readLen = 0;
-    uint32_t readOffset = 0;
-
+    uint16_t dealLen = 0;
+    uint16_t preLen = 0;
+    uint8_t *pEnd = NULL;
+    uint16_t postLen = 0;
+    uint16_t remainLen = 0;
+    uint8_t printFlag = TRUE;
 
     CDDDRV_EG800AK_CFG_ReadData(recvbuf, dataLen, lastReadLen);
 
@@ -422,10 +425,14 @@ static void CddDrvEG800AK_ATTaskRecvHandle(uint8_t *recvbuf)
         }
         else
         {
+            remainLen = dataLen;
+            postLen = remainLen;
+            preLen = 0;
+
             if (g_stCddDrvEG800AKCtrl.currentTaskCmd != 0)
             {
-                pDest = (char *)Common_SearchData(recvbuf, dataLen, pATCmdDescribtor->cATAnswer, strlen(pATCmdDescribtor->cATAnswer));
-                
+                pDest = (char *)Common_SearchData(recvbuf, remainLen, pATCmdDescribtor->cATAnswerHead, strlen(pATCmdDescribtor->cATAnswerHead));
+
                 if (pDest != NULL)
                 {
                     if (pATCmdDescribtor->printFlag == TRUE)
@@ -435,69 +442,159 @@ static void CddDrvEG800AK_ATTaskRecvHandle(uint8_t *recvbuf)
 
                     if (NULL != pATCmdDescribtor->pFuncRecvHandle)
                     {
+                        postLen = remainLen - (uint16_t)((uint32_t)pDest - (uint32_t)recvbuf);
+
                         if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
                         {
                             pSocketCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex];
-                            bAnswerOK = pATCmdDescribtor->pFuncRecvHandle(socketIndex, pSocketCtrl, (uint8_t *)pDest, dataLen - (uint16_t)((uint32_t)pDest - (uint32_t)recvbuf));
+                            bAnswerOK = pATCmdDescribtor->pFuncRecvHandle(socketIndex, pSocketCtrl, (uint8_t *)pDest, postLen, &dealLen);
                         }
                         else
                         {
-                            bAnswerOK = pATCmdDescribtor->pFuncRecvHandle(socketIndex, &g_stCddDrvEG800AKCtrl, (uint8_t *)pDest, dataLen - (uint16_t)((uint32_t)pDest - (uint32_t)recvbuf));
+                            bAnswerOK = pATCmdDescribtor->pFuncRecvHandle(socketIndex, &g_stCddDrvEG800AKCtrl, (uint8_t *)pDest, postLen, &dealLen);
                         }
+
+                        postLen -= dealLen;
                     }
                     else
                     {
                         bAnswerOK = TRUE;
+                        postLen -= strlen(pATCmdDescribtor->cATAnswerHead);
                     }
 
-                    if (bAnswerOK == TRUE)
+                    /* 接收处理函数内部未处理dealLen */
+                    if (dealLen == 0)
                     {
-                        CddDrvEG800AK_DeleteCmd(g_stCddDrvEG800AKCtrl.currentTaskSocketIndex);
+                        if (bAnswerOK == TRUE && pATCmdDescribtor->cATAnswerTail != NULL)
+                        {
+                            pTail = (char *)Common_SearchData(recvbuf + (remainLen - postLen), postLen, pATCmdDescribtor->cATAnswerTail, strlen(pATCmdDescribtor->cATAnswerTail));
+
+                            if (pTail != NULL)
+                            {
+                                postLen = remainLen - (uint16_t)((uint32_t)pTail - (uint32_t)recvbuf) - strlen(pATCmdDescribtor->cATAnswerTail);
+                            }
+                        }
                     }
+
+                    preLen = (uint16_t)((uint32_t)pDest - (uint32_t)recvbuf);
+                    pEnd = recvbuf + (remainLen - postLen);
+
+                    if (postLen > 0)
+                    {
+                        memmove(recvbuf + preLen, pEnd, postLen);
+                    }
+
+                    remainLen = preLen + postLen;
+                    recvbuf[remainLen] = '\0';
+                }
+
+                if (bAnswerOK == TRUE)
+                {
+                    CddDrvEG800AK_DeleteCmd(g_stCddDrvEG800AKCtrl.currentTaskSocketIndex);
                 }
             }
-
-            if (pDest == NULL)
+            
+            while (remainLen > 0)
             {
-                CddDrvEg800AK_UrcDecode(recvbuf, &g_stCddDrvEG800AKCtrl, dataLen);
+                dealLen = CddDrvEg800AK_UrcDecode(recvbuf, &g_stCddDrvEG800AKCtrl, remainLen, printFlag);
+
+                if (dealLen == 0)
+                    break;
+
+                printFlag = FALSE;
+                remainLen -= dealLen;
+                
+                if (remainLen > 0)
+                {
+                    memmove(pData, &pData[dealLen], remainLen);
+                }
             }
         }
     }
 }
 
 
-static void CddDrvEg800AK_UrcDecode(uint8_t *pData, void * modulePara, uint16_t dataLen)
-{
+static uint16_t CddDrvEg800AK_UrcDecode(uint8_t *pData, void * modulePara, uint16_t dataLen, uint8_t printEnable)
+{                                                                                                                              
     const ATUrcDescribtor_Struct *pUrcDescribtor = NULL;
-    uint8_t index = 0; 
+    uint16_t usedLen = 0;
+    uint16_t remainLen = 0;
+    uint16_t matchPos = 0;
+    uint16_t minMatchPos = 0xffff;
+    uint16_t dropLen = 0;
+    uint8_t matchIndex = 0xff;
+    uint8_t findFlag = FALSE;
+    uint8_t *pMatch = NULL;
+    uint8_t index = 0;
+    char *pSuffix = NULL;
+    uint16_t dealLen = 0;
 
+    /* 查找最早出现的URC */
     for (index = 0; index < ARRAY_SIZE(c_stATUrcDescribtor); index++)
     {
         pUrcDescribtor = &c_stATUrcDescribtor[index];
-
         if (strlen(pUrcDescribtor->cUrc) > 0)
         {
-            if (Common_SearchData(pData, dataLen, pUrcDescribtor->cUrc, strlen(pUrcDescribtor->cUrc)) != NULL)
+            pMatch = Common_SearchData(pData, dataLen, (uint8_t *)pUrcDescribtor->cUrc, strlen(pUrcDescribtor->cUrc));
+            if (pMatch != NULL)
             {
-                if (pUrcDescribtor->printFlag == TRUE)
+                matchPos = (uint16_t)(pMatch - pData);
+                if (findFlag == FALSE || matchPos < minMatchPos)
                 {
-                    CDDDRV_EG800AK_CFG_LogPrint("[4G-->Rx]:\n%s\n", pData);
+                    findFlag = TRUE;
+                    minMatchPos = matchPos;
+                    matchIndex = index;
+                    if (minMatchPos == 0)
+                    {
+                        break;
+                    }
                 }
-
-                if (pUrcDescribtor->pFuncRecvHandle != NULL)
-                {
-                    pUrcDescribtor->pFuncRecvHandle(pData, modulePara, dataLen);
-                }
-                
-                break;
             }
         }
     }
 
-    if (index == ARRAY_SIZE(c_stATUrcDescribtor))
+    if (findFlag == TRUE)
     {
-        CDDDRV_EG800AK_CFG_LogPrint("[4G-->Rx]:\n%s\n", pData);
+        pUrcDescribtor = &c_stATUrcDescribtor[matchIndex];
+        if (printEnable == TRUE && pUrcDescribtor->printFlag == TRUE)
+        {                                                            
+            CDDDRV_EG800AK_CFG_LogPrint("[4G-->Rx]URC:\r\n%s\r\n", &pData[minMatchPos]);                                               
+        }
+
+        /* 如果函数内部会计算dealLen, 不需要配置cSuffix */
+        if (pUrcDescribtor->cSuffix != NULL)
+        {
+            pSuffix = strstr((char *)&pData[minMatchPos], pUrcDescribtor->cSuffix);
+            if (pSuffix != NULL)
+            {
+                usedLen = (uint16_t)(pSuffix - (char *)&pData[minMatchPos]) + strlen(pUrcDescribtor->cSuffix);
+            }
+            else
+            {
+                /* 没有找到后缀, 则认为是错误的URC */
+                findFlag = FALSE;
+            }
+        }
+
+        if (findFlag == TRUE && pUrcDescribtor->pFuncRecvHandle != NULL)
+        {
+            dealLen = pUrcDescribtor->pFuncRecvHandle(&pData[minMatchPos], modulePara,
+                        (pUrcDescribtor->cSuffix != NULL) ? usedLen : (dataLen - minMatchPos));
+            
+            /* 如果函数内部会计算dealLen, 则usedLen = dealLen */
+            if (pUrcDescribtor->cSuffix == NULL)
+            {
+                usedLen = dealLen;
+            }
+        }
+
+        if (usedLen > 0 && usedLen <= (dataLen - minMatchPos))
+        {
+            dropLen = minMatchPos + usedLen;
+        }
     }
+
+    return dropLen;
 }
 
 static void CddDrvEG800AK_SocketStateHandle(void)
@@ -587,6 +684,7 @@ static void CddDrvEG800AK_noCommTimeoutDetect(void)
 
 static void CddDrvEG800AK_StartModuleCfg(void)
 {
+    CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_ATE0);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryModule);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QuerySimRecognizeStatus);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryIccid);

@@ -34,6 +34,7 @@
 
 /* 日志接口函数定义 */
 #define IOTOM_CFG_LogPrint(fmt, ...)            DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
+#define IOTOM_CFG_RunLogPrint(fmt, ...)         DSLOGM_Info(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
 
 /* 实时数据上报周期定义 */
 #define IOTOM_CFG_IDLE_REALDATA_CYCLE           (10 * 60 * 1000)
@@ -65,7 +66,8 @@
 #define IOT_OM_CMD_UPDATE_RSP                   (0x93U)             /* 远程更新应答 */
 #define IOT_OM_CMD_SET_FORBID_RSP               (0x95U)             /* 设置禁用应答状态 */
 #define IOT_OM_CMD_REPORT_FORBID_STATE          (0x97U)             /* 上报禁用状态 */
-#define IOT_OM_CMD_SEND_COUNT                   (14U)
+#define IOT_OM_CMD_CALL_READ_LOCALFILE_RSP      (0xF5)              /* 远程读取桩本地文件应答 */
+#define IOT_OM_CMD_SEND_COUNT                   (15U)
 
 /* 协议CMD 接收定义 */
 #define IOT_OM_CMD_LOGIN_RSP                    (0x02U)             /* 登陆应答 */
@@ -79,12 +81,26 @@
 #define IOT_OM_CMD_UPDATE                       (0x94U)             /* 设置远程更新 */
 #define IOT_OM_CMD_SET_FORBID                   (0x96U)             /* 设置禁用状态 */
 #define IOT_OM_CMD_REPORT_FORBID_STATE_RSP      (0x98U)             /* 上报禁用状态应答 */
-#define IOT_OM_CMD_RECV_COUNT                   (11U)
+#define IOT_OM_CMD_CALL_READ_LOCALFILE          (0xF4)              /* 远程读取桩本地文件 */
+#define IOT_OM_CMD_RECV_COUNT                   (12U)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
+typedef enum
+{
+    eIotOMReadLocalFileResult_OK = 0,
+    eIotOMReadLocalFileResult_NULL,
+    eIotOMReadLocalFileResult_TOOLARGE,
+}IotOMReadLocalFileResult_Enum;
 
-
+typedef enum
+{
+    eIotOMReadLocalFileType_ALL = 0,
+    eIotOMReadLocalFileType_INDEX,
+    eIotOMReadLocalFileType_LOG,
+    eIotOMReadLocalFileType_PARA,
+    eIotOMReadLocalFileType_SPECALL,
+}IotOMReadLocalFileType_Enum;
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/
@@ -125,7 +141,25 @@ typedef struct
     uint8_t dataLen[2];
 }IotOMFrameHead_Struct;
 
+/* 【0xF4】 远程读取桩本地文件 */
+typedef struct
+{
+    char dn[32];
+    char ip[16];
+    uint16_t port;
+    char user[16];
+    char passwd[16];
+    char remotePath[64];
+    uint8_t fileType;
+    char localPath[64];
+}__attribute__((packed)) IotOMFrameReadLocalFile_Struct;
 
+/* 【0xF5】 桩应答远程读取文件 */
+typedef struct
+{
+    char dn[32];
+    uint8_t result;
+}__attribute__((packed)) IotOMFrameReadLocalFileRsp_Struct;
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/

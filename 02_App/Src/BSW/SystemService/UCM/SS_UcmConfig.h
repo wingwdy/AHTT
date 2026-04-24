@@ -33,6 +33,7 @@
 #define SSUCM_CONFIG_STABLE_TIMEOUT              (15000U)
 
 #define SSUCM_CFG_LogPrint(fmt, ...)              DSLOGM_Debug(DSLogMModule_System, fmt, ##__VA_ARGS__)
+#define SSUCM_CFG_RunLogPrint(fmt, ...)           DSLOGM_Info(DSLogMModule_System, fmt, ##__VA_ARGS__)
 
 #define SSUCM_CFG_Reboot()                       AswMonitor_SetReboot(eAswMonitorRebootType_Immediate);
 

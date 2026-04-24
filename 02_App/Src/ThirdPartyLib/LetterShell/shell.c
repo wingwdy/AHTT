@@ -70,11 +70,17 @@ enum
 static const char *shellText[] =
 {
     [SHELL_TEXT_INFO] =
-    "\n****************************************************************\n"
-    "*  Build:                 "__DATE__" "__TIME__"\t\t\t\t\t *\r\n"
-    "*  AppVersion:      "APP_SW_VERSION_STRING"\t\t\t\t\t\t\t\t\t *\r\n"
-    "*  ProductCode:    "SYSCFG_CFG_PRODUCT_CODE"\t\t\t\t\t\t\t\t *\r\n"
-    "*  Copyright:         (c) 2099 GONEO\t\t\t\t\t\t *\r\n"
+    "\r\n****************************************************************\r\n"
+    "   ____   ___  _   _ _____ ___  \r\n"
+    "  / ___| / _ \\| \\ | | ____/ _ \\ \r\n"
+    " | |  _ | | | |  \\| |  _|| | | |\r\n"
+    " | |_| || |_| | |\\  | |__| |_| |\r\n"
+    "  \\____| \\___/|_| \\_|_____\\___/ \r\n"
+    "\r\n"
+    "*  Build:          "__DATE__" "__TIME__"\r\n"
+    "*  AppVersion:     "APP_SW_VERSION_STRING"\r\n"
+    "*  ProductCode:    "SYSCFG_CFG_PRODUCT_CODE"\r\n"
+    "*  Copyright:      (c) 2099 GONEO\r\n"
     "****************************************************************",
     [SHELL_TEXT_CMD_TOO_LONG] = 
         "\r\nWarning: Command is too long\r\n",

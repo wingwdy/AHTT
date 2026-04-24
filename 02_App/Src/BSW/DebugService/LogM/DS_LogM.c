@@ -55,6 +55,7 @@ typedef struct
     DSLogOutputLevel_Enum eOutputLevel;
     uint8_t cacheBuf[DSLOGM_CFG_ASYN_BUFF_SIZE];
     uint16_t logDataLen;
+    DSLogM_RunLogWriteCb runLogWriteCb;
 }DSLogMCtrl_Struct;
 
 
@@ -86,6 +87,14 @@ static void DSLogM_OutputFilter(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum
     tempLen = strlen((char *)g_stLogMCtrl.cacheBuf);
     dataLen = vsnprintf((char *)g_stLogMCtrl.cacheBuf + tempLen, DSLOGM_CFG_ASYN_BUFF_SIZE, fmt, args);
     McalUart_WriteData(eMcalUartChanel_Debug, g_stLogMCtrl.cacheBuf, dataLen + tempLen);
+
+    if (eLevel >= DSLOGM_RUNLOG_LEVEL)
+    {
+        if (g_stLogMCtrl.runLogWriteCb != NULL)
+        {
+            g_stLogMCtrl.runLogWriteCb((const char *)g_stLogMCtrl.cacheBuf, dataLen + tempLen);
+        }
+    }
 }
 
 const char* DSLogM_GetModuleName(DSLogMModule_Enum eModule)
@@ -108,6 +117,11 @@ void DSLogM_Output(DSLogMModule_Enum eModule, DSLogOutputLevel_Enum eLevel, cons
     DSLogM_OutputFilter(eModule, eLevel, fmt, args);
     va_end(args);
     xSemaphoreGive(g_stLogMCtrl.mutex);
+}
+
+void DSLogM_RegisterRunLogCb(DSLogM_RunLogWriteCb cb)
+{
+    g_stLogMCtrl.runLogWriteCb = cb;
 }
 
 void DSLogM_InitMemory(void)

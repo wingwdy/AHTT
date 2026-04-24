@@ -1044,3 +1044,33 @@ uint16_t Common_CalcCharCount(char *pInString, uint16_t StringLen, char cData)
 
 	return count;
 }
+/**
+ ******************************************************************************
+ * @brief      判断给定的缓冲区数据是否全等于指定的字符
+ * @param[in]  pbuf 需要判断的缓冲区数据
+ * @param[in]  c     用于比较的字符
+ * @param[in]  len   缓冲区长度
+ * @retval     返回判断结果 0-相等 其它-不相等
+ *
+ * @details
+ *
+ * @note
+ ******************************************************************************
+ */
+uint32_t Common_MemEqual(const void * pbuf, uint8_t c, uint32_t len)
+{
+    uint32_t i;
+    const uint8_t *p;
+
+    p = (const uint8_t *) pbuf;
+    for (i = 0; i < len; ++i)
+    {
+        if (*(p + i) != c)
+        {
+            return (i + 1);
+        }
+    }
+
+    return 0;
+}
+

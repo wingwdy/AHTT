@@ -34,6 +34,7 @@
 #define ASWCHARGE_CFG_GetCurRateCurrent(port)          AswVoltCurHandle_GetMaxOutputCurrent(port)
 
 #define ASWCHARGE_CFG_LogPrint(fmt, ...)               DSLOGM_Debug(DSLogMModule_Charge, fmt, ##__VA_ARGS__)
+#define ASWCHARGE_CFG_RunLogPrint(fmt, ...)            DSLOGM_Info(DSLogMModule_Charge, fmt, ##__VA_ARGS__)
 
 #define ASWCHARGE_CFG_GetOutputCurrent(port)           CddMeterM_GetRmsCurrent(port)
 

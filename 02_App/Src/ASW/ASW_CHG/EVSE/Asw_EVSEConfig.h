@@ -34,6 +34,7 @@
 #define ASWEVSE_CFG_S2_CLOSE_TIMEOUT                 (6000)
 
 #define ASWEVSE_CFG_LogPrint(fmt, ...)               DSLOGM_Debug(DSLogMModule_EVSE, fmt, ##__VA_ARGS__)
+#define ASWEVSE_CFG_RunLogPrint(fmt, ...)            DSLOGM_Info(DSLogMModule_EVSE, fmt, ##__VA_ARGS__)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

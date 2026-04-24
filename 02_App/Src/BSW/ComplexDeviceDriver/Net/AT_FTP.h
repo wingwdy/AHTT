@@ -83,10 +83,10 @@ extern const ATCmdDescribtor_Struct c_stFTPATCmdDescribtor[eATFTPCmd_Count];
 ******************************************************************************/
 void ATFTP_StateHandle(uint8_t socketIndex, void *socketCtrl);
 void ATFTP_CloseSocket(void *socketCtrl);
-void ATFTP_UrcRecvWrite(uint8_t *pData, void * modulePara, uint16_t dataLen);
-void ATFTP_UrcRecvOpen(uint8_t *pData, void * modulePara, uint16_t dataLen);
-void ATFTP_UrcRecvPut(uint8_t *pData, void * modulePara, uint16_t dataLen);
-void ATFTP_UrcRecvGet(uint8_t *pData, void * modulePara, uint16_t dataLen);
+uint32_t ATFTP_UrcRecvWrite(uint8_t *pData, void * modulePara, uint16_t dataLen);
+uint32_t ATFTP_UrcRecvOpen(uint8_t *pData, void * modulePara, uint16_t dataLen);
+uint32_t ATFTP_UrcRecvPut(uint8_t *pData, void * modulePara, uint16_t dataLen);
+uint32_t ATFTP_UrcRecvGet(uint8_t *pData, void * modulePara, uint16_t dataLen);
 void ATFTP_ReavTransparentData(void *modulePara, uint8_t *pData, uint16_t dataLen);
 #endif
 
