@@ -63,8 +63,8 @@
                                                                 }\
                                                             }while(0)
 
-#define CDD_METERM_CFG_LogPrint(fmt, ...)                   DSLOGM_Debug(DSLogMModule_Meter, fmt, ##__VA_ARGS__)
-#define CDD_METERM_CFG_RunLogPrint(fmt, ...)                DSLOGM_Info(DSLogMModule_Meter, fmt, ##__VA_ARGS__)
+#define CDD_METERM_CFG_DebugPrint(fmt, ...)               DSLOGM_Debug(DSLogMModule_Meter, fmt, ##__VA_ARGS__)
+#define CDD_METERM_CFG_InfoPrint(fmt, ...)                DSLOGM_Info(DSLogMModule_Meter, fmt, ##__VA_ARGS__)
         
 
 /******************************************************************************

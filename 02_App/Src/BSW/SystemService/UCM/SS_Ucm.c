@@ -133,7 +133,7 @@ static uint8_t SSUcm_ErasePart(char *partName)
 
     if (part == NULL)
     {
-        SSUCM_CFG_LogPrint("Partition\"%s\" not found.", partName);
+        SSUCM_CFG_DebugPrint("Partition\"%s\" not found.", partName);
     }
     else
     {
@@ -143,7 +143,7 @@ static uint8_t SSUcm_ErasePart(char *partName)
         }
         else
         {
-            SSUCM_CFG_LogPrint("Partition\"%s\" erase failed!", part->name);
+            SSUCM_CFG_DebugPrint("Partition\"%s\" erase failed!", part->name);
         }
     }
 
@@ -158,7 +158,7 @@ static uint8_t SSUcm_program_part(const char *part_name, uint32_t addr, const ui
 
     if (part == NULL)
     {
-        SSUCM_CFG_LogPrint("Partition\"%s\" not found.", part_name);
+        SSUCM_CFG_DebugPrint("Partition\"%s\" not found.", part_name);
     }
     else
     {
@@ -168,7 +168,7 @@ static uint8_t SSUcm_program_part(const char *part_name, uint32_t addr, const ui
         }
         else
         {
-            SSUCM_CFG_LogPrint("Partition\"%s\" write failed!", part->name);
+            SSUCM_CFG_DebugPrint("Partition\"%s\" write failed!", part->name);
         }
     }
 
@@ -183,7 +183,7 @@ static uint8_t SSUcm_read_part(const char *part_name, uint32_t addr, uint8_t *bu
 
     if (part == NULL)
     {
-        SSUCM_CFG_LogPrint("Partition\"%s\" not found.", part_name);
+        SSUCM_CFG_DebugPrint("Partition\"%s\" not found.", part_name);
     }
     else
     {
@@ -193,7 +193,7 @@ static uint8_t SSUcm_read_part(const char *part_name, uint32_t addr, uint8_t *bu
         }
         else
         {
-            SSUCM_CFG_LogPrint("Partition\"%s\" read failed!", part->name);
+            SSUCM_CFG_DebugPrint("Partition\"%s\" read failed!", part->name);
         }
     }
     
@@ -238,7 +238,7 @@ static void SSUcm_LoadUcmPara(void)
 {
     if (TRUE != SSUcm_read_part(FAL_NULL_NAME_UCM_PARA, 0, (uint8_t *)&g_stSSUcmPara, sizeof(SSUcmPara_Struct)))
     {
-        SSUCM_CFG_LogPrint("Ucm 参数加载失败, 执行默认参数!\r\n");
+        SSUCM_CFG_DebugPrint("Ucm 参数加载失败, 执行默认参数!\r\n");
         SSUcm_DefaultUcmPara();
     }
 }
@@ -264,7 +264,7 @@ static uint8_t SSUcm_CheckFileHead(uint8_t *headData, uint32_t dataLen)
     }
     else
     {
-        SSUCM_CFG_LogPrint("文件头校验CRC错误, recvCrc: 0x%04X, calcCrc: 0x%04X!\r\n", recvCrc, calcCrc);
+        SSUCM_CFG_DebugPrint("文件头校验CRC错误, recvCrc: 0x%04X, calcCrc: 0x%04X!\r\n", recvCrc, calcCrc);
     }
 
     return ret;
@@ -322,11 +322,11 @@ static void SSUcm_SetWorkState(SSUcmWorkState_Enum eWorkState)
                 g_stSSUcmPara.eBootState = eSSUcmBootState_FileCheck;
                 SSUcm_WriteUcmPara();
                 SSUCM_CFG_Reboot();
-                SSUCM_CFG_LogPrint("升级文件下载完成，即将重启...!\r\n");
+                SSUCM_CFG_DebugPrint("升级文件下载完成，即将重启...!\r\n");
             }
             else
             {
-                SSUCM_CFG_LogPrint("升级失败, 失败原因：%s!\r\n", c_UcmResultStr[g_stSSUcmCtx.eResult]);
+                SSUCM_CFG_DebugPrint("升级失败, 失败原因：%s!\r\n", c_UcmResultStr[g_stSSUcmCtx.eResult]);
                 g_stSSUcmCtx.eUcmWorkState = eSSUcmWorkState_Idle;
             }
         }
@@ -351,7 +351,7 @@ static void SSUcm_RollbackCheck(void)
     {
         if (Common_JudgeTimeoutMs(g_stSSUcmCtx.timeoutTick, SSUCM_CONFIG_STABLE_TIMEOUT))
         {
-            SSUCM_CFG_LogPrint("升级后, 稳定15秒成功!\r\n");
+            SSUCM_CFG_DebugPrint("升级后, 稳定15秒成功!\r\n");
             g_stSSUcmPara.eBootState = eSSUcmBootState_Idle;
             SSUcm_WriteUcmPara();
         }
@@ -381,7 +381,7 @@ uint8_t SSUcm_FileDataHandle(uint8_t *data, uint32_t dataLen)
     {
         if (dataLen == g_stSSUcmCtx.readLen)
         {
-            SSUCM_CFG_LogPrint("文件下载中[进度：%d%%]: 总包数[%d], 当前包数[%d], 总帧数[%d], 当前帧数[%d]\r\n",
+            SSUCM_CFG_DebugPrint("文件下载中[进度：%d%%]: 总包数[%d], 当前包数[%d], 总帧数[%d], 当前帧数[%d]\r\n",
                 g_stSSUcmCtx.currentFrameIndex * 100 / g_stSSUcmCtx.totalFrameCnt,
                  g_stSSUcmCtx.packCnt, g_stSSUcmCtx.packIndex + 1,
                 g_stSSUcmCtx.totalFrameCnt,g_stSSUcmCtx.currentFrameIndex);
@@ -419,7 +419,7 @@ uint8_t SSUcm_FileDataHandle(uint8_t *data, uint32_t dataLen)
         }
         else
         {
-            SSUCM_CFG_LogPrint("Download file error, recvLen: %d, readLen: %d\r\n", dataLen, g_stSSUcmCtx.readLen);
+            SSUCM_CFG_DebugPrint("Download file error, recvLen: %d, readLen: %d\r\n", dataLen, g_stSSUcmCtx.readLen);
             SSUcm_SetResult(eSSUcmResult_DataRecvInterrupt);
         }
     }
@@ -552,12 +552,12 @@ void SSUcm_ReqStartOTA(CddNetMSocketPara_Union *pNetPara, eSSUcmChannelType_Enum
             if (eExcuteMode == eSSUcmExcuteMode_Immediate)
             {
                 SSUcm_SetWorkState(eSSUcmWorkState_Connecting);
-                SSUCM_CFG_LogPrint("请求升级成功,立即执行!\r\n");
+                SSUCM_CFG_DebugPrint("请求升级成功,立即执行!\r\n");
             }
             else
             {
                 SSUcm_SetWorkState(eSSUcmWorkState_WaitIdle);
-                SSUCM_CFG_LogPrint("请求升级成功,等待空闲执行!\r\n");
+                SSUCM_CFG_DebugPrint("请求升级成功,等待空闲执行!\r\n");
             }
         }
     }

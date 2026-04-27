@@ -33,8 +33,8 @@
 ******************************************************************************/
 #define DSCONSOLE_CFG_ADD_CMD(cmd, func, desc)   SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0)|SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN)|SHELL_CMD_DISABLE_RETURN, cmd, func, desc)
 
-#define DSCONSOLE_CFG_LogPrint(fmt, ...)         DSLOGM_Debug(DSLogMModule_Console, fmt, ##__VA_ARGS__)
-#define DSCONSOLE_CFG_RunLogPrint(fmt, ...)      DSLOGM_Info(DSLogMModule_Console, fmt, ##__VA_ARGS__)
+#define DSCONSOLE_CFG_DebugPrint(fmt, ...)       DSLOGM_Debug(DSLogMModule_Console, fmt, ##__VA_ARGS__)
+#define DSCONSOLE_CFG_InfoPrint(fmt, ...)        DSLOGM_Info(DSLogMModule_Console, fmt, ##__VA_ARGS__)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

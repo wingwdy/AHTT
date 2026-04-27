@@ -500,9 +500,8 @@ void AswCharge_SetWorkState(uint8_t port, uint8_t workState)
     {
         if (pChargeCtrl->workState != workState)
         {
-            ASWCHARGE_CFG_LogPrint("[枪：%d]充电状态变化: %s ---> %s\r\n", port, 
-                c_ChargeStateName[pChargeCtrl->workState], c_ChargeStateName[workState]);
-                pChargeCtrl->workState = workState;
+            ASWCHARGE_CFG_InfoPrint("[枪：%d]充电状态变化: %s ---> %s\r\n", port, c_ChargeStateName[pChargeCtrl->workState], c_ChargeStateName[workState]);
+            pChargeCtrl->workState = workState;
 
             if (workState == ASWCHARGE_WORKSTATE_WAKEUP)
             {
@@ -589,7 +588,7 @@ void AswCharge_StartAuth(uint8_t port)
         {
             pChargeCtrl->eStopReason = eErr_none;
             pChargeCtrl->authFlag = TRUE;
-            ASWCHARGE_CFG_LogPrint("[枪：%d]充电授权!\r\n", port);
+            ASWCHARGE_CFG_InfoPrint("[枪：%d]充电授权!\r\n", port);
         }
     }
 }
@@ -604,7 +603,7 @@ void AswCharge_StopAuth(uint8_t port)
         {
             pChargeCtrl = &g_stAswChargeCtrl[port];
             pChargeCtrl->authFlag = FALSE;
-            ASWCHARGE_CFG_LogPrint("[枪：%d]取消充电授权\r\n", port);
+            ASWCHARGE_CFG_InfoPrint("[枪：%d]取消充电授权\r\n", port);
         }
     }
 }
@@ -635,7 +634,7 @@ void AswCharge_SetStopReason(uint8_t port, AswErrorType_Enum eReason)
         if (pChargeCtrl->authFlag == TRUE && pChargeCtrl->eStopReason == eErr_none)
         {
             pChargeCtrl->eStopReason = eReason;
-            ASWCHARGE_CFG_LogPrint("[枪：%d]取消充电授权, 停止原因：%s!\r\n", port, pErrDesc);
+            ASWCHARGE_CFG_InfoPrint("[枪：%d]取消充电授权, 停止原因：%s!\r\n", port, pErrDesc);
         }
     }
 }

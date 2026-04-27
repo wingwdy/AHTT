@@ -37,8 +37,8 @@
 
 #define SSSNAPSHOT_CFG_ERROR_ITEM_COUNT                 8
 
-#define SSSNAPSHOT_CFG_LogPrint(fmt, ...)               DSLOGM_Debug(DSLogMModule_System, fmt, ##__VA_ARGS__)
-#define SSSNAPSHOT_CFG_RunLogPrint(fmt, ...)            DSLOGM_Info(DSLogMModule_System, fmt, ##__VA_ARGS__)
+#define SSSNAPSHOT_CFG_DebugPrint(fmt, ...)             DSLOGM_Debug(DSLogMModule_System, fmt, ##__VA_ARGS__)
+#define SSSNAPSHOT_CFG_InfoPrint(fmt, ...)              DSLOGM_Info(DSLogMModule_System, fmt, ##__VA_ARGS__)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

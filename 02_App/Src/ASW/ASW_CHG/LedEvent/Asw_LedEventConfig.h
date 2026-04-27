@@ -31,8 +31,8 @@
 #define ASWLED_CFG_DISP_MODE_ROTATING                   1   /* 轮显 */
 #define ASWLED_CFG_DISP_MODE_CHOOSE                     ASWLED_CFG_DISP_MODE_NON_ROTATING
 
-#define ASWLED_CFG_LogPrint(fmt, ...)                   DSLOGM_Debug(DSLogMModule_Led, fmt, ##__VA_ARGS__)
-#define ASWLED_CFG_RunLogPrint(fmt, ...)                DSLOGM_Info(DSLogMModule_Led, fmt, ##__VA_ARGS__)
+#define ASWLED_CFG_DebugPrint(fmt, ...)                 DSLOGM_Debug(DSLogMModule_Led, fmt, ##__VA_ARGS__)
+#define ASWLED_CFG_InfoPrint(fmt, ...)                  DSLOGM_Info(DSLogMModule_Led, fmt, ##__VA_ARGS__)
 
 #define ASWLED_CFG_IsQBStandardMode()                   (CddModeM_IsGBMode() == FALSE)       
 #define ASWLED_CFG_IsFactoryMode()                      (CddModeM_IsFactoryMode() == TRUE)

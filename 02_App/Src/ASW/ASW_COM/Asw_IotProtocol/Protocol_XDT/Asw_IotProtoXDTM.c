@@ -636,7 +636,7 @@ void IotXDT_AddErrInfoQueue(uint8_t port, uint8_t errIndex, IotXDTErrDesc_Struct
 		
 		if (index == (IOT_XDT_ERRINFO_REPORT_QUEUE_SIZE - 1))
 		{
-			IOTXDT_CFG_LogPrint("[%s()]: Failed to push into the error info queue\r\n", __FUNCTION__);
+			IOTXDT_CFG_DebugPrint("[%s()]: Failed to push into the error info queue\r\n", __FUNCTION__);
 		}
 	}
 }
@@ -747,7 +747,7 @@ void IotXDT_CheckErrStatus(void)
 						{
 							IotXDT_AddErrInfoQueue(gunNo, pErrDesc->errNo, pErrDesc, status, TRUE);
 							pErrDesc->lastStatus[gunNo] = status;
-							IOTXDT_CFG_LogPrint("[%s()]: port: %d, status: %d, errdesc:%s\r\n", __FUNCTION__, index, status, pErrDesc->alarmDesc);
+							IOTXDT_CFG_DebugPrint("[%s()]: port: %d, status: %d, errdesc:%s\r\n", __FUNCTION__, index, status, pErrDesc->alarmDesc);
 						}
 					}
 				}
@@ -755,7 +755,7 @@ void IotXDT_CheckErrStatus(void)
 				{
 					IotXDT_AddErrInfoQueue(gunNo, pErrDesc->errNo, pErrDesc, status, FALSE);
 					pErrDesc->lastStatus[gunNo] = status;
-					IOTXDT_CFG_LogPrint("[%s()]: port: %d, status: %d, errdesc:%s\r\n", __FUNCTION__, index, status, pErrDesc->alarmDesc);
+					IOTXDT_CFG_DebugPrint("[%s()]: port: %d, status: %d, errdesc:%s\r\n", __FUNCTION__, index, status, pErrDesc->alarmDesc);
 				}
 			}
 		}
@@ -1333,18 +1333,18 @@ void IotXDT_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandard
 	if (Common_FourUint8ToUint32(pRecvBillingModel->validFlag) != IOT_XDT_MAGIC_NUM)
 	{
 		ret = FALSE;
-		IOTXDT_CFG_LogPrint("[%s()]magic num error\r\n", __FUNCTION__);
+		IOTXDT_CFG_DebugPrint("[%s()]magic num error\r\n", __FUNCTION__);
 	}
 	else if (pRecvBillingModel->period_count > MSNVM_XDT_BILLMODE_PERIOD_COUNT || 
 		pRecvBillingModel->period_count == 0)
 	{
 		ret = FALSE;
-		IOTXDT_CFG_LogPrint("[%s()]period count error1\r\n", __FUNCTION__);
+		IOTXDT_CFG_DebugPrint("[%s()]period count error1\r\n", __FUNCTION__);
 	}	
 	else if (pRecvBillingModel->typeRule != 0 && pRecvBillingModel->typeRule != 1)
 	{
 		ret = FALSE;
-		IOTXDT_CFG_LogPrint("[%s()]type rule error\r\n", __FUNCTION__);
+		IOTXDT_CFG_DebugPrint("[%s()]type rule error\r\n", __FUNCTION__);
 	}
 	else
 	{
@@ -1422,7 +1422,7 @@ void IotXDT_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandard
 						default:
 						{
 							ret = FALSE;
-							IOTXDT_CFG_LogPrint("[%s()]period flag erro\r\n", __FUNCTION__);
+							IOTXDT_CFG_DebugPrint("[%s()]period flag erro\r\n", __FUNCTION__);
 							break;
 						}
 					}

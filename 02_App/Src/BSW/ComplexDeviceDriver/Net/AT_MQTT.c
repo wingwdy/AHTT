@@ -157,11 +157,11 @@ static void ATMQTT_SetSocketState(uint8_t socketIndex, void *socketPara, CddNetM
 
                 if (pSocketCtrl->ePlatType == eCddNetMPlatType_O)
                 {
-                    CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]运营平台建立连接成功!\r\n", socketIndex);
+                    CDDDRV_EG800AK_CFG_DebugPrint("[socket: %d]运营平台建立连接成功!\r\n", socketIndex);
                 }
                 else if (pSocketCtrl->ePlatType == eCddNetMPlatType_OM)
                 {
-                    CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]运维平台建立连接成功!\r\n", socketIndex);
+                    CDDDRV_EG800AK_CFG_DebugPrint("[socket: %d]运维平台建立连接成功!\r\n", socketIndex);
                 }
                 else
                 {}
@@ -488,7 +488,7 @@ static void ATMQTT_SocketStateMange(uint8_t socketIndex, CddDrvEG800AKSocketCtrl
 
             CDDDRV_EG800AK_CFG_RECONECT_TIMEOUT(pSocketCtrl->reconectTimes, pPrivate->reconnectInterval);
             pSocketCtrl->disconectTickStart = Common_GetSystick();
-            CDDDRV_EG800AK_CFG_LogPrint("[socket: %d] %d ms 后进行第 %d 次 重新连接!\r\n", socketIndex, pPrivate->reconnectInterval, pSocketCtrl->reconectTimes);
+            CDDDRV_EG800AK_CFG_DebugPrint("[socket: %d] %d ms 后进行第 %d 次 重新连接!\r\n", socketIndex, pPrivate->reconnectInterval, pSocketCtrl->reconectTimes);
         }
         else
         {
@@ -545,7 +545,7 @@ uint32_t ATMQTT_UrcQMTOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
             }
             else
             {
-                CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]连接失败，errcode: %d !\r\n", socketIndex, connectState);
+                CDDDRV_EG800AK_CFG_DebugPrint("[socket: %d]连接失败，errcode: %d !\r\n", socketIndex, connectState);
 
                 if (connectState == 2 || connectState == 3)
                 {
@@ -614,7 +614,7 @@ uint32_t ATMQTT_UrcQMTConnect(uint8_t *pData, void * modulePara, uint16_t dataLe
             }
             else
             {
-                CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]连接失败，errcode: %d !\r\n", socketIndex, connectState);
+                CDDDRV_EG800AK_CFG_DebugPrint("[socket: %d]连接失败，errcode: %d !\r\n", socketIndex, connectState);
 
                 if (pMqttPara->pFuncMqttConnectCallback != NULL)
                 {
@@ -662,7 +662,7 @@ uint32_t ATMQTT_UrcQMTStat(uint8_t *pData, void * modulePara, uint16_t dataLen)
                 if (pSocketCtrl->eSocketState == eCddNetMSocketState_ConnectOK)
                 {
                     ATMQTT_CloseSocket(pSocketCtrl);
-                    CDDDRV_EG800AK_CFG_LogPrint("[socket: %d] 后台主动断开连接!\r\n", socketIndex);
+                    CDDDRV_EG800AK_CFG_DebugPrint("[socket: %d] 后台主动断开连接!\r\n", socketIndex);
                 }
             }
         }

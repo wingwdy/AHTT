@@ -164,7 +164,7 @@ static void CddMeterM_LoadPara(void)
             pstMeterM->lastSaveEnergy = pstMeterM->totalEnergy;
             temp1 = pstMeterM->totalEnergy / 10000;
             temp2 = pstMeterM->totalEnergy % 10000;
-            CDD_METERM_CFG_LogPrint("[枪：%d]上电加载电表示值成功，累计已充电能：%ld.%04ld kwh \r\n", port, temp1, temp2);
+            CDD_METERM_CFG_DebugPrint("[枪：%d]上电加载电表示值成功，累计已充电能：%ld.%04ld kwh \r\n", port, temp1, temp2);
         }
         else
         {

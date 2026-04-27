@@ -33,8 +33,8 @@
 
 #define CDD_MODEM_CFG_FCT_FILTER_POINT                     (300 / CDD_MODEM_CFG_CALL_CYCLE)
 
-#define CDDMODE_CFG_LogPrint(fmt, ...)                     DSLOGM_Debug(DSLogMModule_ModeM, fmt, ##__VA_ARGS__)
-#define CDDMODE_CFG_RunLogPrint(fmt, ...)                  DSLOGM_Info(DSLogMModule_ModeM, fmt, ##__VA_ARGS__)
+#define CDDMODE_CFG_DebugPrint(fmt, ...)                   DSLOGM_Debug(DSLogMModule_ModeM, fmt, ##__VA_ARGS__)
+#define CDDMODE_CFG_InfoPrint(fmt, ...)                    DSLOGM_Info(DSLogMModule_ModeM, fmt, ##__VA_ARGS__)
 
 /******************************************************************************
 *    Enum Definition

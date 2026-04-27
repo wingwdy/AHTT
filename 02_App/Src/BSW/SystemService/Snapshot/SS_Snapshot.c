@@ -185,8 +185,8 @@ static void SSSnapshot_PrintItemInfo(void)
             {
                 if (outLen > 0)
                 {
-                    SSSNAPSHOT_CFG_LogPrint("日志[%d 条]:\n", g_stSnapshotCtx.stReadItem.currentReadTime);
-                    SSSNAPSHOT_CFG_LogPrint("\n%s", data);
+                    SSSNAPSHOT_CFG_DebugPrint("日志[%d 条]:\n", g_stSnapshotCtx.stReadItem.currentReadTime);
+                    SSSNAPSHOT_CFG_DebugPrint("\n%s", data);
                     memset(data, 0x00, outLen);
                 }
             }
@@ -207,7 +207,7 @@ void SSSnapshot_ExportItem(SSSnapshotItemType_Enum itemType, SSSnapshotItemReadS
 
     if (pReadItemHandle->readItemOngoing == TRUE)
     {
-        SSSNAPSHOT_CFG_LogPrint("快照读取已开始!\r\n");
+        SSSNAPSHOT_CFG_DebugPrint("快照读取已开始!\r\n");
         return;
     }
 
@@ -218,7 +218,7 @@ void SSSnapshot_ExportItem(SSSnapshotItemType_Enum itemType, SSSnapshotItemReadS
         pReadItemHandle->localPrintItemFlag = TRUE;
 
         SSSnapshot_StartReadItem(itemType);
-        SSSNAPSHOT_CFG_LogPrint("开始本地快照读取!\r\n");
+        SSSNAPSHOT_CFG_DebugPrint("开始本地快照读取!\r\n");
         return;
     }
 
@@ -246,7 +246,7 @@ void SSSnapshot_ExportItem(SSSnapshotItemType_Enum itemType, SSSnapshotItemReadS
 
         if (eGlobalRet_OK != CddNetM_CreatLink(eCddNetMSocketType_FTP, *pSocketPara, eCddNetMPlatType_File))
         {
-            SSSNAPSHOT_CFG_LogPrint("创建FTP传输通道失败!\r\n");
+            SSSNAPSHOT_CFG_DebugPrint("创建FTP传输通道失败!\r\n");
             break;
         }
 
@@ -257,7 +257,7 @@ void SSSnapshot_ExportItem(SSSnapshotItemType_Enum itemType, SSSnapshotItemReadS
         SSSnapshot_StartReadItem(itemType);
         //CddNetM_SetLinkDisconnect(eCddNetMPlatType_O);
         //CddNetM_SetLinkDisconnect(eCddNetMPlatType_OM);
-        SSSNAPSHOT_CFG_LogPrint("开始远程快照[%d]读取!\r\n", itemType);
+        SSSNAPSHOT_CFG_DebugPrint("开始远程快照[%d]读取!\r\n", itemType);
         
     } while(0);
 }
@@ -459,7 +459,7 @@ void SSSnapshot_StopReadItem(void)
         }
 
         memset(pReadItemHandle, 0x00, sizeof(SSSnapshotReadItem_Struct));
-        SSSNAPSHOT_CFG_LogPrint("停止读取快照!\r\n");
+        SSSNAPSHOT_CFG_DebugPrint("停止读取快照!\r\n");
     }
 }
 
@@ -511,7 +511,7 @@ uint8_t SSSnapshot_ReadItem(uint8_t *pOutbuf, uint16_t bufSize, uint16_t *pOutLe
         }
         else
         {
-            SSSNAPSHOT_CFG_LogPrint("快照已全部取出!\r\n");
+            SSSNAPSHOT_CFG_DebugPrint("快照已全部取出!\r\n");
             SSSnapshot_StopReadItem();
         }
     }
@@ -565,7 +565,7 @@ uint8_t SSSnapshot_PreviewReadItem(uint16_t bufSize, uint16_t *pOutLen)
         else
         {
             pReadItemHandle->readItemOngoing = FALSE;
-            SSSNAPSHOT_CFG_LogPrint("快照已全部取出!\r\n");
+            SSSNAPSHOT_CFG_DebugPrint("快照已全部取出!\r\n");
             if (pReadItemHandle->pItemBuf != NULL)
             {
                 myFree(pReadItemHandle->pItemBuf);
@@ -585,7 +585,7 @@ void SSSnapshot_ExportTimeoutHandle(void)
     {
         if (Common_JudgeTimeoutMs(pReadItemHandle->exportItemStartTick, SSSNAPSHOT_CFG_EXPORT_TIMEOUT))
         {
-            SSSNAPSHOT_CFG_LogPrint("读取快照超时!\r\n");
+            SSSNAPSHOT_CFG_DebugPrint("读取快照超时!\r\n");
 
             if (pReadItemHandle->eReadSrc == eSnapshotItemReadSrc_Remote)
             {
@@ -601,7 +601,7 @@ uint8_t SSSnapshot_ExportAllItems(CddNetMSocketPara_Union *pNetPara)
 {
     if (g_stSnapshotCtx.stReadItem.readItemOngoing == TRUE)
     {
-        SSSNAPSHOT_CFG_LogPrint("FAILED, ReadItem is Going\r\n");
+        SSSNAPSHOT_CFG_DebugPrint("FAILED, ReadItem is Going\r\n");
         return FALSE;
     }
 

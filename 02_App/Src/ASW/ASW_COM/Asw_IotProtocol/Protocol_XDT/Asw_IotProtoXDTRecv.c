@@ -444,7 +444,7 @@ static uint8_t IotXDT_RecvLinkRsp_ITEM824(uint8_t port, uint8_t *r_data, uint16_
 		
 	if (cAns->valueint != 0)
 	{
-		IOTXDT_CFG_LogPrint("上线请求失败!!! 失败原因：%d!r\n", cAns->valueint);
+		IOTXDT_CFG_DebugPrint("上线请求失败!!! 失败原因：%d!r\n", cAns->valueint);
         IotXDT_OfflineHandle();
 	}
 	else
@@ -629,7 +629,7 @@ static uint8_t IotXDT_RecvRequestRateModeRsp_ITEM832(uint8_t port, uint8_t *r_da
 
 				if (peroidCnt > MSNVM_XDT_BILLMODE_PERIOD_COUNT || peroidCnt == 0)
 				{
-					IOTXDT_CFG_LogPrint("[%s()]: rateMode period cnt[%d] is invalid...\r\n", __FUNCTION__, peroidCnt);
+					IOTXDT_CFG_DebugPrint("[%s()]: rateMode period cnt[%d] is invalid...\r\n", __FUNCTION__, peroidCnt);
 				}
 				else
 				{
@@ -673,12 +673,12 @@ static uint8_t IotXDT_RecvRequestRateModeRsp_ITEM832(uint8_t port, uint8_t *r_da
 		}
 		else
 		{
-			IOTXDT_CFG_LogPrint("[%s()]: rateMode type is discharge ..\r\n", __FUNCTION__);
+			IOTXDT_CFG_DebugPrint("[%s()]: rateMode type is discharge ..\r\n", __FUNCTION__);
 		}
 	}
 	else
 	{
-		IOTXDT_CFG_LogPrint("[%s()]: rateMode response Error, Errcode is %d ..\r\n", __FUNCTION__, cAns->valueint);
+		IOTXDT_CFG_DebugPrint("[%s()]: rateMode response Error, Errcode is %d ..\r\n", __FUNCTION__, cAns->valueint);
 	}
 
 	if (ret == TRUE)
@@ -730,7 +730,7 @@ static uint8_t IotXDT_RecvRateModeSet_ITEM834(uint8_t port, uint8_t *r_data, uin
 	if (cType->valueint != 0)
 	{
 		pAns[0] = eIotXDTErrCode_ParaInvalid;
-		IOTXDT_CFG_LogPrint("[%s()]: rateMode type is discharge ..\r\n", __FUNCTION__);
+		IOTXDT_CFG_DebugPrint("[%s()]: rateMode type is discharge ..\r\n", __FUNCTION__);
 	}
 
 	cElec = cJSON_GetObjectItem(cParams, "elec");
@@ -753,12 +753,12 @@ static uint8_t IotXDT_RecvRateModeSet_ITEM834(uint8_t port, uint8_t *r_data, uin
 		if (peroidCnt == 0)
 		{
 			pAns[0] = eIotXDTErrCode_RateModePeriodParaErr;
-			IOTXDT_CFG_LogPrint("[%s()]: rateMode period cnt[%d] is invalid...\r\n", __FUNCTION__, peroidCnt);
+			IOTXDT_CFG_DebugPrint("[%s()]: rateMode period cnt[%d] is invalid...\r\n", __FUNCTION__, peroidCnt);
 		}
 		else if (peroidCnt > IOT_XDT_RATE_MODE_MAX_PERIOD)
 		{
 			peroidCnt = IOT_XDT_RATE_MODE_MAX_PERIOD;
-			IOTXDT_CFG_LogPrint("[%s()]: rateMode period cnt[%d] is invalid...\r\n", __FUNCTION__, peroidCnt);
+			IOTXDT_CFG_DebugPrint("[%s()]: rateMode period cnt[%d] is invalid...\r\n", __FUNCTION__, peroidCnt);
 		}
 		else
 		{}
@@ -818,7 +818,7 @@ static uint8_t IotXDT_RecvRateModeSet_ITEM834(uint8_t port, uint8_t *r_data, uin
 		else
 		{
 			pAns[0] = eIotXDTErrCode_OnCharging;
-			IOTXDT_CFG_LogPrint("[%s()]: rateMode set failed, some gun is on charging ..\r\n", __FUNCTION__);
+			IOTXDT_CFG_DebugPrint("[%s()]: rateMode set failed, some gun is on charging ..\r\n", __FUNCTION__);
 		}
 	}
 
@@ -876,7 +876,7 @@ static uint8_t IotXDT_RecvQueryRateMode_ITEM833(uint8_t port, uint8_t *r_data, u
 	else
 	{
 		pAns[0] = eIotXDTErrCode_ParaInvalid;
-		IOTXDT_CFG_LogPrint("[%s()]: rateMode type is discharge ..\r\n", __FUNCTION__);
+		IOTXDT_CFG_DebugPrint("[%s()]: rateMode type is discharge ..\r\n", __FUNCTION__);
 	}
 
 	cJSON_Delete(cRoot);
@@ -901,7 +901,7 @@ static uint8_t IotXDT_RecvPlieStateRsp_ITEM842(uint8_t port, uint8_t *r_data, ui
 	}
 	else
 	{
-		IOTXDT_CFG_LogPrint("[%s()]: Platform response error[%d]\r\n", __FUNCTION__, cStatus->valueint);
+		IOTXDT_CFG_DebugPrint("[%s()]: Platform response error[%d]\r\n", __FUNCTION__, cStatus->valueint);
 	}
 
 	cJSON_Delete(cRoot);
@@ -936,7 +936,7 @@ static uint8_t IotXDT_RecvPlieErrInfoRsp_ITEM844(uint8_t port, uint8_t *r_data, 
 	}
 	else
 	{
-		IOTXDT_CFG_LogPrint("[%s()]: Platform response error[%d]\r\n", __FUNCTION__, cStatus->valueint);
+		IOTXDT_CFG_DebugPrint("[%s()]: Platform response error[%d]\r\n", __FUNCTION__, cStatus->valueint);
 	}
 	
 	cJSON_Delete(cRoot);
@@ -1009,7 +1009,7 @@ static uint8_t IotXDT_RecvCallRealData_ITEM846(uint8_t port, uint8_t *r_data, ui
 	else
 	{
 		ret = FALSE;
-		IOTXDT_CFG_LogPrint("[%s()]: request type is invalid[%d]\r\n", __FUNCTION__, cType->valueint);
+		IOTXDT_CFG_DebugPrint("[%s()]: request type is invalid[%d]\r\n", __FUNCTION__, cType->valueint);
 	}
 
 	cJSON_Delete(cRoot);
@@ -1435,7 +1435,7 @@ static uint8_t IotXDT_CheckChargeStart(uint8_t port, IotXDTErrCodeList_Enum *up_
 	else if (TRUE != AswMonitor_CheckBillModeValid(port))
 	{
 		up_fail_reason[0] = eIotXDTErrCode_RateModePeriodParaErr;
-        IOTXDT_CFG_LogPrint("[%s()]---计费模型异常\r\n", __FUNCTION__);
+        IOTXDT_CFG_DebugPrint("[%s()]---计费模型异常\r\n", __FUNCTION__);
 	}
 	else
 	{
@@ -1515,7 +1515,7 @@ static uint8_t IotXDT_RecvChargeStart_ITEM861(uint8_t port, uint8_t *r_data, uin
 
 	if (cPasswd != NULL)
 	{
-		IOTXDT_CFG_LogPrint("[%s()]: Failed to find the key [%s]\r\n", __FUNCTION__, "passwdStop");
+		IOTXDT_CFG_DebugPrint("[%s()]: Failed to find the key [%s]\r\n", __FUNCTION__, "passwdStop");
 		memset(pRecvData->offlineClearData.passwdStop, 0x00, sizeof(pRecvData->offlineClearData.passwdStop));
 	}
 	else
@@ -1538,7 +1538,7 @@ static uint8_t IotXDT_RecvChargeStart_ITEM861(uint8_t port, uint8_t *r_data, uin
 		(cGunNo->valueint > SYSCFG_CFG_GUN_NUM))
 	{
 		pAns[0] = eIotXDTErrCode_ParaInvalid;
-		IOTXDT_CFG_LogPrint("[%s()]: Charge Start para error\r\n", __FUNCTION__);
+		IOTXDT_CFG_DebugPrint("[%s()]: Charge Start para error\r\n", __FUNCTION__);
 	}
 	else
 	{
@@ -1607,7 +1607,7 @@ static uint8_t IotXDT_RecvChargeStart_ITEM861(uint8_t port, uint8_t *r_data, uin
 				}
 				else
 				{
-					IOTXDT_CFG_LogPrint("[%s()]: state error, but there are no error info\r\n", __FUNCTION__);	
+					IOTXDT_CFG_DebugPrint("[%s()]: state error, but there are no error info\r\n", __FUNCTION__);	
 				}
 			}
 		}
@@ -1671,13 +1671,13 @@ static uint8_t IotXDT_RecvChargeStop_ITEM864(uint8_t port, uint8_t *r_data, uint
 		else
 		{
 			pAns[0] = eIotXDTErrCode_PileNotStartCharge;
-			IOTXDT_CFG_LogPrint("[%s()]: Gun is not on charging\r\n", __FUNCTION__);
+			IOTXDT_CFG_DebugPrint("[%s()]: Gun is not on charging\r\n", __FUNCTION__);
 		}
 	}
 	else
 	{
 		pAns[0] = eIotXDTErrCode_OrderNumIsInvalid;
-		IOTXDT_CFG_LogPrint("[%s()]: orderNum error [%s][%s]\r\n", __FUNCTION__, pOrderRecord->orderNo, cOrderNum->valuestring);
+		IOTXDT_CFG_DebugPrint("[%s()]: orderNum error [%s][%s]\r\n", __FUNCTION__, pOrderRecord->orderNo, cOrderNum->valuestring);
 	}
 
 	cJSON_Delete(cRoot);
@@ -1991,19 +1991,19 @@ static void IotXDT_OTAAttributeCheck(char *fw_url, char *fw_version, uint8_t act
 	{
 		if (IotXDT_ParseFtpUrl(fw_url, &socketPara.stFtpPara) == FALSE)
 		{
-			IOTXDT_CFG_LogPrint("[%s()]Parse ftp url failed...\r\n", __FUNCTION__);
+			IOTXDT_CFG_DebugPrint("[%s()]Parse ftp url failed...\r\n", __FUNCTION__);
 		}
 		else if (strcmp(fw_version, APP_SW_VERSION_STRING) == 0)
 		{
-			IOTXDT_CFG_LogPrint("[%s()]The received fw_version is same as the current software version...\r\n", __FUNCTION__);
+			IOTXDT_CFG_DebugPrint("[%s()]The received fw_version is same as the current software version...\r\n", __FUNCTION__);
 		}
 		else if (CddNetM_CheckFileLinkExsit() == TRUE)
 		{
-			IOTXDT_CFG_LogPrint("[%s()]The file link busy...\r\n", __FUNCTION__);
+			IOTXDT_CFG_DebugPrint("[%s()]The file link busy...\r\n", __FUNCTION__);
 		}
 		else if (SSUcm_IsOngoging() == TRUE)
 		{
-			IOTXDT_CFG_LogPrint("[%s()]the device is updating...\r\n", __FUNCTION__);
+			IOTXDT_CFG_DebugPrint("[%s()]the device is updating...\r\n", __FUNCTION__);
 		}
 		else 
 		{
@@ -2011,12 +2011,12 @@ static void IotXDT_OTAAttributeCheck(char *fw_url, char *fw_version, uint8_t act
 			{
 				if (activeFlag == TRUE)
 				{
-					IOTXDT_CFG_LogPrint("[%s()]the device is forced to update...\r\n", __FUNCTION__);
+					IOTXDT_CFG_DebugPrint("[%s()]the device is forced to update...\r\n", __FUNCTION__);
 					checkResult = TRUE;
 				}
 				else
 				{
-					IOTXDT_CFG_LogPrint("[%s()]The fireware version is same as the last update version...\r\n", __FUNCTION__);
+					IOTXDT_CFG_DebugPrint("[%s()]The fireware version is same as the last update version...\r\n", __FUNCTION__);
 				}
 			}
 			else
@@ -2028,7 +2028,7 @@ static void IotXDT_OTAAttributeCheck(char *fw_url, char *fw_version, uint8_t act
 
 	if (checkResult == TRUE)
 	{
-		IOTXDT_CFG_LogPrint("[%s()]The received Info as followed:\r\n""***********************************\r\n"
+		IOTXDT_CFG_DebugPrint("[%s()]The received Info as followed:\r\n""***********************************\r\n"
 		"ip = %s\r\nport = %d\r\npath = %s\r\n""fileName = %s\r\nUserName = %s\r\nPasswd = %s\r\nVersion:%s--->%s\r\n"
 		"***********************************\r\n", __FUNCTION__, socketPara.stFtpPara.ip, socketPara.stFtpPara.port, 
 		socketPara.stFtpPara.path, socketPara.stFtpPara.fileName, socketPara.stFtpPara.user, socketPara.stFtpPara.passwd, 
@@ -2328,12 +2328,12 @@ static void IotXDT_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLe
             }
             else
             {
-                IOTXDT_CFG_LogPrint("\"%s\"parse failed...\r\n", (char *)pData);
+                IOTXDT_CFG_DebugPrint("\"%s\"parse failed...\r\n", (char *)pData);
             }
         }
         else
         {
-            IOTXDT_CFG_LogPrint("\"%s\" topic parse failed...\r\n", topic);
+            IOTXDT_CFG_DebugPrint("\"%s\" topic parse failed...\r\n", topic);
         }
     }
 }
@@ -2414,7 +2414,7 @@ void IotXDT_TimeoutDetect(void)
                     Common_SetRptCount(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd);
                     timeoutCount = Common_GetRptCount(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd);
 
-                    IOTXDT_CFG_LogPrint("[cmd:0x%04X %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pRecvCtrl->cmd, 
+                    IOTXDT_CFG_DebugPrint("[cmd:0x%04X %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pRecvCtrl->cmd, 
                         pRecvCtrl->cMeaning, timeoutCount, pRecvCtrl->maxTimeout);
 
 					if (pRecvCtrl->maxTryCnt == 0xFFFF)

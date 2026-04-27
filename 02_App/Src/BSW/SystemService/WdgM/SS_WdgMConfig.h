@@ -27,8 +27,8 @@
 #define SSWDGM_CFG_MAX_MODULES                 16      /* 最大支持的模块数 */
 #define SSWDGM_CFG_CHECK_INTERVAL              500     /* 默认检查间隔(ms) */
 
-#define SSWDGM_CFG_LogPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_System, fmt, ##__VA_ARGS__)
-#define SSWDGM_CFG_RunLogPrint(fmt, ...)       DSLOGM_Info(DSLogMModule_System, fmt, ##__VA_ARGS__)
+#define SSWDGM_CFG_DebugPrint(fmt, ...)        DSLOGM_Debug(DSLogMModule_System, fmt, ##__VA_ARGS__)
+#define SSWDGM_CFG_InfoPrint(fmt, ...)         DSLOGM_Info(DSLogMModule_System, fmt, ##__VA_ARGS__)
 
 /*******************************************************************************
 *    Enum Definition

@@ -109,7 +109,7 @@ static void SSWdgM_CheckTimeout(void)
             if (Common_JudgeTimeoutMs(g_stSSWdgCtx.modules[moduleIndex].lastCheckinTime, g_stSSWdgCtx.modules[moduleIndex].timeout))
             {
                 /* 模块超时 */
-                SSWDGM_CFG_LogPrint("Watchdog timeout: module %s (ID: %d), timeout: %dms\r\n", 
+                SSWDGM_CFG_DebugPrint("Watchdog timeout: module %s (ID: %d), timeout: %dms\r\n", 
                     g_stSSWdgCtx.modules[moduleIndex].moduleName, moduleIndex, g_stSSWdgCtx.modules[moduleIndex].timeout);
                 
                 hasTimeout = TRUE;

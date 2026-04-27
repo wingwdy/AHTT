@@ -980,7 +980,7 @@ void IotOM_UpCtrlSendDeal(void)
 
                         if (pCmdSendCtrl->printFlag)
                         {
-                            IOTOM_CFG_LogPrint("[枪：%d]发送[cmd: %02X, %s][%d]: ", port, (uint8_t)pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
+                            IOTOM_CFG_DebugPrint("[枪：%d]发送[cmd: %02X, %s][%d]: ", port, (uint8_t)pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
                             DSLogM_HexOutput(txBuf, dataLen);
                         }
 

@@ -159,7 +159,7 @@ static void AswVoltCur_LimitManage(uint8_t port)
 
         if (pHandle->maxOutputCurrent != pHandle->prevMaxOutputCurrent)
         {
-            ASWVOLTCUR_CFG_LogPrint("当前额定电流发生变化：%d.%03d --->%d.%03d A\r\n", pHandle->prevMaxOutputCurrent / 1000, 
+            ASWVOLTCUR_CFG_DebugPrint("当前额定电流发生变化：%d.%03d --->%d.%03d A\r\n", pHandle->prevMaxOutputCurrent / 1000, 
             pHandle->prevMaxOutputCurrent % 1000, pHandle->maxOutputCurrent / 1000, pHandle->maxOutputCurrent % 1000);
             pHandle->prevMaxOutputCurrent = pHandle->maxOutputCurrent;
             CddCP_AdjustCurRateCurrent(port, pHandle->maxOutputCurrent);
@@ -217,7 +217,7 @@ void AswVoltCur_AdjustOutputCurrent(uint8_t port, AswVoltCurAdjustMode_Enum eMod
     {
         case eAswVoltCurAdjustMode_PowerAbsolute:
         {
-            ASWVOLTCUR_CFG_LogPrint("远程调节功率，调节模式：绝对值调节，调节功率为：%dW\r\n", val);
+            ASWVOLTCUR_CFG_DebugPrint("远程调节功率，调节模式：绝对值调节，调节功率为：%dW\r\n", val);
 
             if (val == SYSCFG_CFG_MAX_OUTPUT_POWER)
             {
@@ -241,7 +241,7 @@ void AswVoltCur_AdjustOutputCurrent(uint8_t port, AswVoltCurAdjustMode_Enum eMod
         }
         case eAswVoltCurAdjustMode_PowerPercent:
         {
-            ASWVOLTCUR_CFG_LogPrint("远程调节功率，调节模式：百分比调节，调节百分比为：%d.%d%%\r\n", val / 10, val % 10);
+            ASWVOLTCUR_CFG_DebugPrint("远程调节功率，调节模式：百分比调节，调节百分比为：%d.%d%%\r\n", val / 10, val % 10);
             if (val == 1000)
             {
                 pHandle->setOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;

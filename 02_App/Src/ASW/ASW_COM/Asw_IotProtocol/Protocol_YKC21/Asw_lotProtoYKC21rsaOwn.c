@@ -61,7 +61,7 @@ int encrypt_and_decrypt_data(unsigned char *rsa_key, unsigned char *output, unsi
                                 (unsigned char *)base64_der_pub_key, IOTYKC21_CFG_RSA_KEY_LEN);
     if (ret != 0)
     {
-        IOTYKC21_CFG_LogPrint("Failed to decode Base64: -0x%04X\n", -ret);
+        IOTYKC21_CFG_DebugPrint("Failed to decode Base64: -0x%04X\n", -ret);
         goto exit;
     }
 
@@ -69,7 +69,7 @@ int encrypt_and_decrypt_data(unsigned char *rsa_key, unsigned char *output, unsi
     ret = mbedtls_pk_parse_public_key(&pk_ctx, der_pub_key, der_len);
     if (ret != 0)
     {
-        IOTYKC21_CFG_LogPrint("Failed to parse public key: -0x%04X\n", -ret);
+        IOTYKC21_CFG_DebugPrint("Failed to parse public key: -0x%04X\n", -ret);
         goto exit;
     }
 
@@ -79,7 +79,7 @@ int encrypt_and_decrypt_data(unsigned char *rsa_key, unsigned char *output, unsi
 
     if (ret != 0)
     {
-        IOTYKC21_CFG_LogPrint("Failed to seed the random generator: -0x%04X\n", -ret);
+        IOTYKC21_CFG_DebugPrint("Failed to seed the random generator: -0x%04X\n", -ret);
         goto exit;
     }
 
@@ -88,7 +88,7 @@ int encrypt_and_decrypt_data(unsigned char *rsa_key, unsigned char *output, unsi
     ret = mbedtls_ctr_drbg_random(&ctr_drbg, random_key, KEY_LEN);
     if (ret != 0)
     {
-        IOTYKC21_CFG_LogPrint("Failed to generate the random key: -0x%04X\n", -ret);
+        IOTYKC21_CFG_DebugPrint("Failed to generate the random key: -0x%04X\n", -ret);
         goto exit;
     }
 
@@ -99,7 +99,7 @@ int encrypt_and_decrypt_data(unsigned char *rsa_key, unsigned char *output, unsi
                              mbedtls_ctr_drbg_random, &ctr_drbg);
     if (ret != 0)
     {
-        IOTYKC21_CFG_LogPrint("Encryption failed: -0x%04X\n", -ret);
+        IOTYKC21_CFG_DebugPrint("Encryption failed: -0x%04X\n", -ret);
         goto exit;
     }
 
@@ -110,13 +110,13 @@ int encrypt_and_decrypt_data(unsigned char *rsa_key, unsigned char *output, unsi
                                 encrypt_output, olen);
     if (ret != 0)
     {
-        IOTYKC21_CFG_LogPrint("Base64 encoding fails: -0x%04X\n", -ret);
+        IOTYKC21_CFG_DebugPrint("Base64 encoding fails: -0x%04X\n", -ret);
         goto exit;
     }
     // 添加字符串终止符
     if (base64_len >= sizeof(base64_data))
     {
-        IOTYKC21_CFG_LogPrint("Error :Base64 buffer overflow\n");
+        IOTYKC21_CFG_DebugPrint("Error :Base64 buffer overflow\n");
         goto exit;
     }
     // base64_data[base64_len] = '\0';
@@ -129,13 +129,13 @@ int encrypt_and_decrypt_data(unsigned char *rsa_key, unsigned char *output, unsi
                                 encrypt_output, olen);
     if (ret != 0)
     {
-        IOTYKC21_CFG_LogPrint("Base64 encoding fails: -0x%04X\n", -ret);
+        IOTYKC21_CFG_DebugPrint("Base64 encoding fails: -0x%04X\n", -ret);
         goto exit;
     }
     // 添加字符串终止符
     if (base64_len >= sizeof(base64_output))
     {
-        IOTYKC21_CFG_LogPrint("Error :Base64 buffer overflow\n");
+        IOTYKC21_CFG_DebugPrint("Error :Base64 buffer overflow\n");
         goto exit;
     }
 
@@ -249,24 +249,24 @@ int encrypt_and_decrypt_data00(unsigned char *rsa_key, unsigned char *output, un
     ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
                                 (const uint8_t *)pers, strlen(pers));
     if (ret != 0)
-        IOTYKC21_CFG_LogPrint("mbedtls_ctr_drbg_seed: 0x%08X\n", ret);
+        IOTYKC21_CFG_DebugPrint("mbedtls_ctr_drbg_seed: 0x%08X\n", ret);
 
     // 2. 加载已知的128字节RSA-512公钥
-    IOTYKC21_CFG_LogPrint("Loading known 128-byte RSA-%d public key...\n", RSA_KEY_BITS);
+    IOTYKC21_CFG_DebugPrint("Loading known 128-byte RSA-%d public key...\n", RSA_KEY_BITS);
     ret = load_rsa_public_key(&rsa, rsa_key);
     if (ret != 0)
-        IOTYKC21_CFG_LogPrint("load_rsa_public_key: 0x%08X\n", ret);
+        IOTYKC21_CFG_DebugPrint("load_rsa_public_key: 0x%08X\n", ret);
 
     // 3. 用RSA公钥加密16字节对称密钥
-    IOTYKC21_CFG_LogPrint("Encrypting known 16-byte symmetric key...\n");
+    IOTYKC21_CFG_DebugPrint("Encrypting known 16-byte symmetric key...\n");
     ret = mbedtls_rsa_pkcs1_encrypt(&rsa, mbedtls_ctr_drbg_random, &ctr_drbg,
                                     MBEDTLS_RSA_PUBLIC, SYM_KEY_LEN, sym_key,
                                     rsa_encrypted);
     if (ret != 0)
-        IOTYKC21_CFG_LogPrint("mbedtls_rsa_pkcs1_encrypt: 0x%08X\n", ret);
+        IOTYKC21_CFG_DebugPrint("mbedtls_rsa_pkcs1_encrypt: 0x%08X\n", ret);
 
     // 4. 封装为88字节格式
-    IOTYKC21_CFG_LogPrint("Packaging to %d bytes...\n", ENCRYPTED_LEN);
+    IOTYKC21_CFG_DebugPrint("Packaging to %d bytes...\n", ENCRYPTED_LEN);
     memset(final_encrypted, 0, ENCRYPTED_LEN);
     pkg->magic = htonl(0x52534145);                        // 魔数RSAE
     pkg->sym_key_len = htons(SYM_KEY_LEN);                 // 对称密钥长度
@@ -275,14 +275,14 @@ int encrypt_and_decrypt_data00(unsigned char *rsa_key, unsigned char *output, un
     memset(pkg->padding, 0xFF, sizeof(pkg->padding));      // 填充0xFF
 
     // 输出验证
-    // IOTYKC21_CFG_LogPrint("\n=== Known Symmetric Key (16 bytes) ===\n");
+    // IOTYKC21_CFG_DebugPrint("\n=== Known Symmetric Key (16 bytes) ===\n");
     //  DSLogM_HexOutput((uint8_t *)sym_key, 16);
     
 
-    // IOTYKC21_CFG_LogPrint("\n\n=== RSA Encrypted Data (64 bytes) ===\n");
+    // IOTYKC21_CFG_DebugPrint("\n\n=== RSA Encrypted Data (64 bytes) ===\n");
     //  DSLogM_HexOutput((uint8_t *)rsa_encrypted, RSA_ENCRYPT_LEN);
     
-    // IOTYKC21_CFG_LogPrint("\n=== Final Encrypted Data (88 bytes) ===\n");
+    // IOTYKC21_CFG_DebugPrint("\n=== Final Encrypted Data (88 bytes) ===\n");
     //  DSLogM_HexOutput((uint8_t *)final_encrypted, ENCRYPTED_LEN);
      memcpy(output, final_encrypted, 88);
 

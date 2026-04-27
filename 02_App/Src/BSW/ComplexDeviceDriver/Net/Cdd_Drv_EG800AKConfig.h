@@ -52,8 +52,8 @@
                                                                     lastReadLen = 0;\
                                                                 } while(0)
 
-#define CDDDRV_EG800AK_CFG_LogPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_4G, fmt, ##__VA_ARGS__)
-#define CDDDRV_EG800AK_CFG_RunLogPrint(fmt, ...)       DSLOGM_Info(DSLogMModule_4G, fmt, ##__VA_ARGS__)
+#define CDDDRV_EG800AK_CFG_DebugPrint(fmt, ...)         DSLOGM_Debug(DSLogMModule_4G, fmt, ##__VA_ARGS__)
+#define CDDDRV_EG800AK_CFG_InfoPrint(fmt, ...)          DSLOGM_Info(DSLogMModule_4G, fmt, ##__VA_ARGS__)
 
 #define CDDDRV_EG800AK_CFG_POWEROFF_HOLD_TIME           500           
 #define CDDDRV_EG800AK_CFG_POWERON_HOLD_TIME            1000

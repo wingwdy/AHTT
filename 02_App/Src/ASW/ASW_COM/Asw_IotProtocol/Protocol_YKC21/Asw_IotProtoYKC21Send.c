@@ -446,7 +446,7 @@ static uint16_t IotYKC21_SendLoginReq(uint8_t port, uint8_t *pBuf)
     /* 随机密钥 */
     encrypt_and_decrypt_data(pPlatInfo->rsa_Key, b64_buf, random_key_A);
     memcpy(&pBuf[dataLen], b64_buf, 88);
-    IOTYKC21_CFG_LogPrint("随机钥匙A: ");
+    IOTYKC21_CFG_DebugPrint("随机钥匙A: ");
     DSLogM_HexOutput((uint8_t *)random_key_A, 16);
     dataLen += 88;
     /* 设备编码 */
@@ -995,7 +995,7 @@ static uint16_t IotYKC21_PackHead(uint8_t port, uint16_t cmd, uint8_t encryptflg
 
     if (TRUE == printflg)
     {
-        IOTYKC21_CFG_LogPrint("[枪：%d]发送明文消息体[cmd: 0x%02X][%d]: ",port ,cmd, dataLen);
+        IOTYKC21_CFG_DebugPrint("[枪：%d]发送明文消息体[cmd: 0x%02X][%d]: ",port ,cmd, dataLen);
         DSLogM_HexOutput(&pBuf[1 + 2 + IOT_YKC21_ECRPTHEAD_LENGTH], dataLen);
     }
 
@@ -1116,7 +1116,7 @@ void IotYKC21_UpCtrlSendDeal(void)
 
                         if (pCmdSendCtrl->printFlag)
                         {
-                            IOTYKC21_CFG_LogPrint("[枪：%d]加密发送[cmd: 0x%02X, %s][%d]: ", port, (uint8_t)pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
+                            IOTYKC21_CFG_DebugPrint("[枪：%d]加密发送[cmd: 0x%02X, %s][%d]: ", port, (uint8_t)pCmdSendCtrl->cmd, pCmdSendCtrl->cMeaning, dataLen);
                             DSLogM_HexOutput(txBuf, dataLen);
                         }
 

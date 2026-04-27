@@ -100,8 +100,7 @@ static void AswEVSE_SetEVSEState(uint8_t port, uint8_t state)
 
     if (pEVSECtrl->evseState != state)
     {
-        ASWEVSE_CFG_LogPrint("[枪：%d]EVSE状态变化: %s ---> %s\r\n", port, 
-            c_EVSEStateName[pEVSECtrl->evseState], c_EVSEStateName[state]);
+        ASWEVSE_CFG_InfoPrint("[枪：%d]EVSE状态变化: %s ---> %s\r\n", port, c_EVSEStateName[pEVSECtrl->evseState], c_EVSEStateName[state]);
         pEVSECtrl->evseState = state;
     }
 }
@@ -384,7 +383,7 @@ void AswEVSE_StartCharge(uint8_t port)
         if (pEVSECtrl->startCharge != TRUE)
         {
             pEVSECtrl->startCharge = TRUE;
-            ASWEVSE_CFG_LogPrint("[枪：%d]请求开始充电！\r\n");
+            ASWEVSE_CFG_InfoPrint("[枪：%d]请求开始充电！\r\n");
         }
     }
 }
@@ -398,7 +397,7 @@ void AswEVSE_StopCharge(uint8_t port)
         if (pEVSECtrl->startCharge != FALSE)
         {
             pEVSECtrl->startCharge = FALSE;
-            ASWEVSE_CFG_LogPrint("[枪：%d]请求停止充电！\r\n");
+            ASWEVSE_CFG_InfoPrint("[枪：%d]请求停止充电！\r\n");
         }
     }    
 }

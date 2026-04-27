@@ -47,8 +47,8 @@
 #define CDDCP_CFG_WAKEUP_LOW_HOLDTIME         30000
 #define CDDCP_CFG_WAKEUP_HIGH_HOLDTIME        15000
 
-#define CDDCP_CFG_LogPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_CP, fmt, ##__VA_ARGS__)
-#define CDDCP_CFG_RunLogPrint(fmt, ...)       DSLOGM_Info(DSLogMModule_CP, fmt, ##__VA_ARGS__)
+#define CDDCP_CFG_DebugPrint(fmt, ...)        DSLOGM_Debug(DSLogMModule_CP, fmt, ##__VA_ARGS__)
+#define CDDCP_CFG_InfoPrint(fmt, ...)         DSLOGM_Info(DSLogMModule_CP, fmt, ##__VA_ARGS__)
 
 #define CDDCP_CFG_VOLSTATE_COUNT              (4)
 /******************************************************************************

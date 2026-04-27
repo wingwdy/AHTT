@@ -246,12 +246,12 @@ static uint8_t IotOM_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
         }
 
         pIotOMCtx->loginSucc = TRUE;
-        IOTOM_CFG_LogPrint("[运维平台]登陆成功!\r\n");
+        IOTOM_CFG_DebugPrint("[运维平台]登陆成功!\r\n");
     }
     else
     {
         index++;
-        IOTOM_CFG_LogPrint("[运维平台]登陆失败，失败原因：%d!\r\n", pRecvData[index]);
+        IOTOM_CFG_DebugPrint("[运维平台]登陆失败，失败原因：%d!\r\n", pRecvData[index]);
         IotOM_OfflineHandle();
     }
 
@@ -291,7 +291,7 @@ static uint8_t IotOM_RecvSetQrcode(uint8_t *port, uint8_t *r_data, uint16_t len)
     {
         memcpy(qrParam.qrcode, &pRecvData[index], 200);
         MSNvm_WriteParaBlock(eMSNvmBlockID_Gun0Qrcode, (uint8_t *)&qrParam, sizeof(MSNvmDrcode_Struct));
-        IOTOM_CFG_LogPrint("[枪：%d]设置的二维码内容：%.200s\r\n", port[0], &pRecvData[index]);
+        IOTOM_CFG_DebugPrint("[枪：%d]设置的二维码内容：%.200s\r\n", port[0], &pRecvData[index]);
     }
 
     return TRUE;
@@ -428,7 +428,7 @@ static uint8_t IotOM_RecvUpdate(uint8_t *port, uint8_t *r_data, uint16_t len)
 static uint8_t IotOM_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
     MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OmOrderRecord, pIotOMCtx->time);
-    IOTOM_CFG_LogPrint("订单上报成功!\r\n");
+    IOTOM_CFG_DebugPrint("订单上报成功!\r\n");
     return TRUE;
 }
 
@@ -508,7 +508,7 @@ static uint8_t IotOM_RecvRemoteQueryParam(uint8_t *r_data, uint16_t len)
             else
             {
                 result = FALSE;
-                IOTOM_CFG_LogPrint("查询参数: %s (未知参数)\r\n", key);
+                IOTOM_CFG_DebugPrint("查询参数: %s (未知参数)\r\n", key);
             }
         }
     }
@@ -609,7 +609,7 @@ static uint8_t IotOM_RecvRemoteSetParam(uint8_t *r_data, uint16_t len)
             else
             {
                 result = FALSE;
-                IOTOM_CFG_LogPrint("设置参数: %s (未知参数)\r\n", key);
+                IOTOM_CFG_DebugPrint("设置参数: %s (未知参数)\r\n", key);
             }
 
             if (handleResult == FALSE)
@@ -662,7 +662,7 @@ static uint8_t IotOM_RecvReadLocalFile(uint8_t *port, uint8_t *r_data, uint16_t 
     {
         if (len < sizeof(IotOMFrameReadLocalFile_Struct))
         {
-            IOTOM_CFG_LogPrint("[%s] param is invaild\r\n", __FUNCTION__);
+            IOTOM_CFG_DebugPrint("[%s] param is invaild\r\n", __FUNCTION__);
             break;
         }
 
@@ -782,7 +782,7 @@ static void IotOM_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTOM_CFG_LogPrint("[枪：%d]接收[cmd: %02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTOM_CFG_DebugPrint("[枪：%d]接收[cmd: %02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
 
@@ -809,7 +809,7 @@ static void IotOM_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTOM_CFG_LogPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTOM_CFG_DebugPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
                 }
@@ -851,7 +851,7 @@ void IotOM_TimeoutDetect(void)
                 Common_SetRptCount(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
                 timeoutCount = Common_GetRptCount(pIotOMCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
 
-                IOTOM_CFG_LogPrint("[cmd:0x%02X %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, timeoutCount, pCmdRecvCtrl->maxTimeout);
+                IOTOM_CFG_DebugPrint("[cmd:0x%02X %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, timeoutCount, pCmdRecvCtrl->maxTimeout);
 
                 if (timeoutCount >= pCmdRecvCtrl->maxTryCnt)
                 {
@@ -863,7 +863,7 @@ void IotOM_TimeoutDetect(void)
                     {
                         if (pCmdRecvCtrl->cmd == IOT_OM_CMD_ORDER_RECORD_RSP)
                         {
-                            IOTOM_CFG_LogPrint("订单上报失败，删除记录!\r\n");
+                            IOTOM_CFG_DebugPrint("订单上报失败，删除记录!\r\n");
                             MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OmOrderRecord, pIotOMCtx->time);
                         }
 

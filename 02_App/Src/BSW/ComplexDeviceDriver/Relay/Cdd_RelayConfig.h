@@ -44,8 +44,8 @@
 
 #define CDDRELAY_CFG_CheckGunPlugout(port)                 (eCddCPVolState_12V == CddCP_GetVolState(port))
 
-#define CDDRELAY_CFG_LogPrint(fmt, ...)                    DSLOGM_Debug(DSLogMModule_RELAY, fmt, ##__VA_ARGS__)
-#define CDDRELAY_CFG_RunLogPrint(fmt, ...)                 DSLOGM_Info(DSLogMModule_RELAY, fmt, ##__VA_ARGS__)
+#define CDDRELAY_CFG_DebugPrint(fmt, ...)                  DSLOGM_Debug(DSLogMModule_RELAY, fmt, ##__VA_ARGS__)
+#define CDDRELAY_CFG_InfoPrint(fmt, ...)                   DSLOGM_Info(DSLogMModule_RELAY, fmt, ##__VA_ARGS__)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

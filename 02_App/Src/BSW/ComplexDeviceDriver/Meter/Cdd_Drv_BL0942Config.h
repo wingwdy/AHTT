@@ -67,8 +67,8 @@
                                                                 }\
                                                             }while(0)
 
-#define CDDDRV_BL0942_CFG_LogPrint(fmt, ...)        DSLOGM_Debug(DSLogMModule_Meter, fmt, ##__VA_ARGS__)
-#define CDDDRV_BL0942_CFG_RunLogPrint(fmt, ...)     DSLOGM_Info(DSLogMModule_Meter, fmt, ##__VA_ARGS__)
+#define CDDDRV_BL0942_CFG_DebugPrint(fmt, ...)       DSLOGM_Debug(DSLogMModule_Meter, fmt, ##__VA_ARGS__)
+#define CDDDRV_BL0942_CFG_InfoPrint(fmt, ...)        DSLOGM_Info(DSLogMModule_Meter, fmt, ##__VA_ARGS__)
 
 #define CDDDRV_BL0942_CFG_CheckFCTPin()             (MCALPORT_PIN_HIGH == McalPort_GetPin(eMcalPortPinChanel_PC0_FCTPin) ? FALSE : TRUE)
 /******************************************************************************

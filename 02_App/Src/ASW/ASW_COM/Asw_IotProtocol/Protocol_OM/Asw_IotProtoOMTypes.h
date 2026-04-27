@@ -33,8 +33,8 @@
 #define IOT_OM_TXRX_BUFFER_SIZE                 (2048U)
 
 /* 日志接口函数定义 */
-#define IOTOM_CFG_LogPrint(fmt, ...)            DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
-#define IOTOM_CFG_RunLogPrint(fmt, ...)         DSLOGM_Info(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
+#define IOTOM_CFG_DebugPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
+#define IOTOM_CFG_InfoPrint(fmt, ...)           DSLOGM_Info(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
 
 /* 实时数据上报周期定义 */
 #define IOTOM_CFG_IDLE_REALDATA_CYCLE           (10 * 60 * 1000)

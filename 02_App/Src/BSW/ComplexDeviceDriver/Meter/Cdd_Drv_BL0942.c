@@ -447,12 +447,12 @@ static void CddDrvBL0942_WorkStateManage(uint8_t port, CddDrvBL0942_Struct *pBL0
         {
             pBL0942->comErrorFlag = FALSE;
             pBL0942->eWorkState = eCddDrvBL0942WorkState_Normal;
-            CDDDRV_BL0942_CFG_LogPrint("[枪：%d]计量芯片0942配置寄存器成功!\r\n", port);
+            CDDDRV_BL0942_CFG_DebugPrint("[枪：%d]计量芯片0942配置寄存器成功!\r\n", port);
         }
         else if (GLOBAL_OPT_STATE_FAIL == ret)
         {
             pBL0942->eWorkState = eCddDrvBL0942WorkState_Error;
-            CDDDRV_BL0942_CFG_LogPrint("[枪：%d]计量芯片0942配置寄存器失败!\r\n", port);
+            CDDDRV_BL0942_CFG_DebugPrint("[枪：%d]计量芯片0942配置寄存器失败!\r\n", port);
         }
         else
         {}
@@ -473,7 +473,7 @@ static void CddDrvBL0942_WorkStateManage(uint8_t port, CddDrvBL0942_Struct *pBL0
                 if (pBL0942->fctCaliFlag == FALSE)
                 {
                     pBL0942->eWorkState = eCddDrvBL0942WorkState_FCT;
-                    CDDDRV_BL0942_CFG_LogPrint("[枪：%d]计量芯片0942进入到产线标定模式!\r\n", port);
+                    CDDDRV_BL0942_CFG_DebugPrint("[枪：%d]计量芯片0942进入到产线标定模式!\r\n", port);
                 }
             }
             else
@@ -501,7 +501,7 @@ static void CddDrvBL0942_WorkStateManage(uint8_t port, CddDrvBL0942_Struct *pBL0
             {
                 pBL0942->fctCaliFlag = FALSE;
                 pBL0942->eWorkState = eCddDrvBL0942WorkState_Normal;
-                CDDDRV_BL0942_CFG_LogPrint("[枪：%d]计量芯片0942退出产线标定模式!\r\n", port);
+                CDDDRV_BL0942_CFG_DebugPrint("[枪：%d]计量芯片0942退出产线标定模式!\r\n", port);
             }
             else
             {
@@ -509,7 +509,7 @@ static void CddDrvBL0942_WorkStateManage(uint8_t port, CddDrvBL0942_Struct *pBL0
                 {
                     pBL0942->fctCaliFlag = TRUE;
                     pBL0942->eWorkState = eCddDrvBL0942WorkState_Normal;
-                    CDDDRV_BL0942_CFG_LogPrint("[枪：%d]计量芯片0942电压校正完成，退出产线标定模式!\r\n", port);
+                    CDDDRV_BL0942_CFG_DebugPrint("[枪：%d]计量芯片0942电压校正完成，退出产线标定模式!\r\n", port);
                 }
             }
         }
@@ -527,7 +527,7 @@ static void CddDrvBL0942_WorkStateManage(uint8_t port, CddDrvBL0942_Struct *pBL0
     case eCddDrvBL0942WorkState_Error:
     {
         pBL0942->failTryCount++;
-        CDDDRV_BL0942_CFG_LogPrint("[枪：%d]计量芯片0942失败 %d 次!\r\n", port, pBL0942->failTryCount);
+        CDDDRV_BL0942_CFG_DebugPrint("[枪：%d]计量芯片0942失败 %d 次!\r\n", port, pBL0942->failTryCount);
         if (pBL0942->failTryCount == CDDDRV_BL0942_CFG_MAX_TIMES)
         {
             pBL0942->comErrorFlag = TRUE;

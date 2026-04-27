@@ -199,7 +199,7 @@ static void ATFTP_SetSocketState(uint8_t socketIndex, void *socketPara, CddNetMS
             {
                 pPrivate->downLoadFileTickStart = FALSE;
                 pPrivate->uploadFileTickStartFlag = FALSE;
-                CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]FTP服务器建立连接成功!\r\n", socketIndex);
+                CDDDRV_EG800AK_CFG_DebugPrint("[socket: %d]FTP服务器建立连接成功!\r\n", socketIndex);
                 CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATFTPCmd_FTPSwithPath);
             }
             else if (eSocketState == eCddNetMSocketState_WaitReconnect)
@@ -507,7 +507,7 @@ uint32_t ATFTP_UrcRecvOpen(uint8_t *pData, void * modulePara, uint16_t dataLen)
         }
         else
         {
-            CDDDRV_EG800AK_CFG_LogPrint("FTP连接失败，err1: %d, err2: %d !\r\n", err1, err2);
+            CDDDRV_EG800AK_CFG_DebugPrint("FTP连接失败，err1: %d, err2: %d !\r\n", err1, err2);
             pPrivate->abnormalCloseFlag = TRUE;
             ATFTP_CloseSocket(pSocketCtrl);
         }
@@ -531,12 +531,12 @@ uint32_t ATFTP_UrcRecvPut(uint8_t *pData, void * modulePara, uint16_t dataLen)
             {
                 pPrivate->uploadFileTickStartFlag = FALSE;
                 CddNetM_DeleteLink(eCddNetMPlatType_File);
-                CDDDRV_EG800AK_CFG_LogPrint("FTP上传文件成功, 文件长度： %d !\r\n",transferLen);
+                CDDDRV_EG800AK_CFG_DebugPrint("FTP上传文件成功, 文件长度： %d !\r\n",transferLen);
             }
         }
         else
         {
-            CDDDRV_EG800AK_CFG_LogPrint("FTP上传文件失败，err1: %d, err2: %d !\r\n", err1, transferLen);
+            CDDDRV_EG800AK_CFG_DebugPrint("FTP上传文件失败，err1: %d, err2: %d !\r\n", err1, transferLen);
             pPrivate->abnormalCloseFlag = TRUE;
             ATFTP_CloseSocket(pSocketCtrl);
         }
@@ -561,12 +561,12 @@ uint32_t ATFTP_UrcRecvGet(uint8_t *pData, void * modulePara, uint16_t dataLen)
                 CddDrvEG800AK_AddCmd(g_socketIndex, eATFTPCmd_UFSOpen);
                 pPrivate->downLoadFileTickStartFlag = FALSE;
                 pPrivate->totalReadSize = transferLen;
-                CDDDRV_EG800AK_CFG_LogPrint("FTP下载文件成功, 文件长度： %d !\r\n",transferLen);
+                CDDDRV_EG800AK_CFG_DebugPrint("FTP下载文件成功, 文件长度： %d !\r\n",transferLen);
             }
         }
         else
         {
-            CDDDRV_EG800AK_CFG_LogPrint("FTP下载文件失败, err1: %d, err2: %d !\r\n", err1, transferLen);
+            CDDDRV_EG800AK_CFG_DebugPrint("FTP下载文件失败, err1: %d, err2: %d !\r\n", err1, transferLen);
             pPrivate->abnormalCloseFlag = TRUE;
             ATFTP_CloseSocket(pSocketCtrl);
         }
@@ -856,7 +856,7 @@ static uint8_t ATFTP_RecvFTPSwithPath(uint8_t socketIndex, void * socketPara, ui
             }
             else
             {
-                CDDDRV_EG800AK_CFG_LogPrint("FTP切换路径失败, err1: %d, err2: %d !\r\n", err1, err2);
+                CDDDRV_EG800AK_CFG_DebugPrint("FTP切换路径失败, err1: %d, err2: %d !\r\n", err1, err2);
                 pPrivate->abnormalCloseFlag = TRUE;
                 ATFTP_CloseSocket(pSocketCtrl);
                 ret = FALSE;
@@ -956,7 +956,7 @@ static void ATFTP_SocketStateMange(uint8_t socketIndex, CddDrvEG800AKSocketCtrl_
 
                 CDDDRV_EG800AK_CFG_RECONECT_TIMEOUT(1, pPrivate->reconnectInterval);
                 pSocketCtrl->disconectTickStart = Common_GetSystick();
-                CDDDRV_EG800AK_CFG_LogPrint("[socket: %d] %d ms 后进行第 %d 次 重新连接!\r\n", socketIndex, pPrivate->reconnectInterval, pSocketCtrl->reconectTimes);
+                CDDDRV_EG800AK_CFG_DebugPrint("[socket: %d] %d ms 后进行第 %d 次 重新连接!\r\n", socketIndex, pPrivate->reconnectInterval, pSocketCtrl->reconectTimes);
             }
             else
             {

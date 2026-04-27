@@ -44,8 +44,8 @@
 #define ASWVOLTCUR_CFG_OC_SET_FILTER_COUNT                  (5000u / ASWVOLTCUR_CFG_CALLCYCLE) /* 产生过流故障阈值 */
 #define ASWVOLTCUR_CFG_OC_CLR_FILTER_COUNT                  (5000u / ASWVOLTCUR_CFG_CALLCYCLE) /* 解除过流故障阈值 */
 
-#define ASWVOLTCUR_CFG_LogPrint(fmt, ...)                   DSLOGM_Debug(DSLogMModule_VoltCur, fmt, ##__VA_ARGS__)
-#define ASWVOLTCUR_CFG_RunLogPrint(fmt, ...)                DSLOGM_Info(DSLogMModule_VoltCur, fmt, ##__VA_ARGS__)
+#define ASWVOLTCUR_CFG_DebugPrint(fmt, ...)                 DSLOGM_Debug(DSLogMModule_VoltCur, fmt, ##__VA_ARGS__)
+#define ASWVOLTCUR_CFG_InfoPrint(fmt, ...)                  DSLOGM_Info(DSLogMModule_VoltCur, fmt, ##__VA_ARGS__)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

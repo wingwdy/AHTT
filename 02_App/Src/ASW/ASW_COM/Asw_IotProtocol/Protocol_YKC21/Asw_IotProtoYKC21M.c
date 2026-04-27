@@ -320,7 +320,7 @@ static void IotYKC21_UpError(void)
                             pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearId = Iot_Ykc21Error_map[index].err_codeid;
 
                             Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULT_REQ, TRUE);
-                            IOTYKC21_CFG_LogPrint("[枪：%d]故障发生时间戳[%d],云快充2.1上报故障编码[0x%04x]\r\n", port, pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearTime, Iot_Ykc21Error_map[index].err_codeid);
+                            IOTYKC21_CFG_DebugPrint("[枪：%d]故障发生时间戳[%d],云快充2.1上报故障编码[0x%04x]\r\n", port, pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearTime, Iot_Ykc21Error_map[index].err_codeid);
                         }
                         else
                         {
@@ -331,7 +331,7 @@ static void IotYKC21_UpError(void)
                             pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearId = Iot_Ykc21Error_map[index].err_codeid;
 
                             Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULTREST_REQ, TRUE);
-                            IOTYKC21_CFG_LogPrint("[枪：%d]故障取消时间戳[%d],云快充2.1上报故障编码[0x%04x]\r\n", port, pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearTime, Iot_Ykc21Error_map[index].err_codeid);
+                            IOTYKC21_CFG_DebugPrint("[枪：%d]故障取消时间戳[%d],云快充2.1上报故障编码[0x%04x]\r\n", port, pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearTime, Iot_Ykc21Error_map[index].err_codeid);
                         }
 
                         break;
@@ -599,7 +599,7 @@ void IotYKC21_SetPowerControl(uint8_t port, uint32_t powerLimit)
     {
         AswChargeIf_AdjustOutputCurrent(port, ASWCHARGEIF_ADJUST_POWER_ABSOLUTE, powerLimit);
         pIotYKC21Ctx->stProtoData[port].lastSetPower = powerLimit;
-        IOTYKC21_CFG_LogPrint("[枪：%d]:云快充2.1协议, 功率调整为[%d]w\r\n", port, powerLimit);
+        IOTYKC21_CFG_DebugPrint("[枪：%d]:云快充2.1协议, 功率调整为[%d]w\r\n", port, powerLimit);
     }
 }
 
@@ -782,11 +782,11 @@ uint8_t IotYKC21_SwipCardCharge(uint8_t port)
             {
                 Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_PILE_START_CHARGE_REQ, TRUE);
                 ret = TRUE;
-                IOTYKC21_CFG_LogPrint("[枪：%d]刷卡成功，请求启动充电!\r\n", port);
+                IOTYKC21_CFG_DebugPrint("[枪：%d]刷卡成功，请求启动充电!\r\n", port);
             }
             else
             {
-                IOTYKC21_CFG_LogPrint("[枪：%d]刷卡成功，但是已经有卡在申请启动充电，本次刷卡作废!\r\n", port);
+                IOTYKC21_CFG_DebugPrint("[枪：%d]刷卡成功，但是已经有卡在申请启动充电，本次刷卡作废!\r\n", port);
             }
         }
     }
@@ -804,7 +804,7 @@ uint8_t IotYKC21_SetRsaPublicKey(char *pCipherKey, uint8_t len)
     {
         if ((len != pPlatInfo->rsa_Keylength) || memcmp(pCipherKey, pPlatInfo->rsa_Key, len) != 0)
         {
-            IOTYKC21_CFG_LogPrint("ykc2.1平台RSA公钥变化：[%.128s]-->[%s]\r\n", pPlatInfo->rsa_Key, pCipherKey);
+            IOTYKC21_CFG_DebugPrint("ykc2.1平台RSA公钥变化：[%.128s]-->[%s]\r\n", pPlatInfo->rsa_Key, pCipherKey);
             memset(pPlatInfo->rsa_Key, 0, MSNVM_YKC21_RSA_PUBLIC_KEY_LEN);
             memcpy(pPlatInfo->rsa_Key, pCipherKey, len);
             pPlatInfo->rsa_Keylength = len;
@@ -827,7 +827,7 @@ uint8_t IotYKC21_SetToken(char *pToken, uint8_t len)
     {
         if ((len != pPlatInfo->tokenLen) || memcmp(pToken, pPlatInfo->token, len) != 0)
         {
-            IOTYKC21_CFG_LogPrint("ykc2.1平台token变化：[%s]-->[%s]\r\n", pPlatInfo->token, pToken);
+            IOTYKC21_CFG_DebugPrint("ykc2.1平台token变化：[%s]-->[%s]\r\n", pPlatInfo->token, pToken);
             memset(pPlatInfo->token, 0, MSNVM_YKC21_TOKEN_LEN);
             memcpy(pPlatInfo->token, pToken, len);
             pPlatInfo->tokenLen = len;
@@ -850,8 +850,8 @@ void IotYKC21_PrintfYKC21KeyAndToken(void)
 
     if (pIotYKC21Ctx != NULL)
     {
-        IOTYKC21_CFG_LogPrint("RSA密钥[%d]：[\"%.128s\"]\r\n",pPlatInfo->rsa_Keylength,pPlatInfo->rsa_Key);
-        IOTYKC21_CFG_LogPrint("token：[\"%.14s\"]\r\n", pPlatInfo->token);
+        IOTYKC21_CFG_DebugPrint("RSA密钥[%d]：[\"%.128s\"]\r\n",pPlatInfo->rsa_Keylength,pPlatInfo->rsa_Key);
+        IOTYKC21_CFG_DebugPrint("token：[\"%.14s\"]\r\n", pPlatInfo->token);
     }
 }
 

@@ -337,7 +337,7 @@ void CddCardM_NfcInitProcess(CddCardM_Struct *pCardM)
 	if (pCardM->eCardType != pCardM->eCardTypeSet)
 	{
 		pCardM->eCardType = pCardM->eCardTypeSet;
-        CDDCARDM_CFG_LogPrint("读卡类型：%s\r\n", (pCardM->eCardType == eCddCardType_BullCard) ? "公牛卡" : "通用卡");
+        CDDCARDM_CFG_DebugPrint("读卡类型：%s\r\n", (pCardM->eCardType == eCddCardType_BullCard) ? "公牛卡" : "通用卡");
 	}
 }
 
@@ -360,7 +360,7 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
 				if (pCardM->eCardType == eCddCardType_UUID)
 				{
 					pCardM->eCardEvent = CddCardEvent_CardIdOK;
-					CDDCARDM_CFG_LogPrint("读卡号成功,卡号: %02X%02X%02X%02X\r\n", tempData[0], tempData[1],tempData[2],tempData[3]);
+					CDDCARDM_CFG_DebugPrint("读卡号成功,卡号: %02X%02X%02X%02X\r\n", tempData[0], tempData[1],tempData[2],tempData[3]);
 				}
 				else
 				{
@@ -374,7 +374,7 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
 					memset(pCardM->cardUid, 0, 4);
 					memset(pCardM->cardUserId, 0, sizeof(pCardM->cardUserId));
 					pCardM->eCardEvent = CddCardEvent_CardIdError;
-					CDDCARDM_CFG_LogPrint("读卡号失败\r\n");
+					CDDCARDM_CFG_DebugPrint("读卡号失败\r\n");
 				}
 				else
 				{
@@ -407,7 +407,7 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
             {
                 pCardM->eCardEvent = CddCardEvent_CardIdOK;
                 memcpy(pCardM->cardUserId, tempData, sizeof(pCardM->cardUserId));
-                CDDCARDM_CFG_LogPrint("读卡号成功,卡号: %02X%02X%02X%02X%02X%02X%02X%02X\r\n", tempData[0], tempData[1],tempData[2],tempData[3],\
+                CDDCARDM_CFG_DebugPrint("读卡号成功,卡号: %02X%02X%02X%02X%02X%02X%02X%02X\r\n", tempData[0], tempData[1],tempData[2],tempData[3],\
 				                                                                               tempData[4],tempData[5],tempData[6],tempData[7]);
             }
             else
@@ -415,7 +415,7 @@ void CddCardM_NfcReadyProcess(CddCardM_Struct *pCardM)
 				memset(pCardM->cardUid, 0, 4);
 				memset(pCardM->cardUserId, 0, sizeof(pCardM->cardUserId));
                 pCardM->eCardEvent = CddCardEvent_CardIdError;
-                CDDCARDM_CFG_LogPrint("读卡号失败\r\n");
+                CDDCARDM_CFG_DebugPrint("读卡号失败\r\n");
             }
         }
     }

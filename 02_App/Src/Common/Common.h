@@ -82,7 +82,7 @@ typedef union
         uint8_t  hour_reserved  : 1;    /* 保留位 */
         uint8_t  hour_su        : 1;    /* 小时夏令时标志 */
         uint8_t  day            : 5;    /* 日期 (1-31) */
-        uint8_t  weekday        : 3;    /* 星期几 (0=周一, 1=周二, ..., 6=周日) */
+        uint8_t  weekday        : 3;    /* 星期几 (1=周一, 2=周二, ..., 7=周日) */
         uint8_t  month          : 4;    /* 月份 (1-12) */
         uint8_t  month_iv       : 1;    /* 月无效标志 */
         uint8_t  month_reserved : 3;    /* 保留位 */

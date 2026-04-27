@@ -29,8 +29,8 @@
 #define CDDCARDM_CFG_SWIPECARD_FAULT_TICK           (500u)  /* 刷卡器故障检测时间间隔 */
 #define CDDCARDM_CFG_SWIPECARD_FAULT_COUNT          (10u)   /* 刷卡故障累计次数*/
 
-#define CDDCARDM_CFG_LogPrint(fmt, ...)             DSLOGM_Debug(DSLogMModule_CardM, fmt, ##__VA_ARGS__)
-#define CDDCARDM_CFG_RunLogPrint(fmt, ...)          DSLOGM_Info(DSLogMModule_CardM, fmt, ##__VA_ARGS__)
+#define CDDCARDM_CFG_DebugPrint(fmt, ...)           DSLOGM_Debug(DSLogMModule_CardM, fmt, ##__VA_ARGS__)
+#define CDDCARDM_CFG_InfoPrint(fmt, ...)            DSLOGM_Info(DSLogMModule_CardM, fmt, ##__VA_ARGS__)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

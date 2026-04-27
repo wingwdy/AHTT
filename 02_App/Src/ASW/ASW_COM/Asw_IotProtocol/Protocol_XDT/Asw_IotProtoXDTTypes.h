@@ -137,7 +137,8 @@
 
 
 /* 日志接口函数定义 */
-#define IOTXDT_CFG_LogPrint(fmt, ...)             DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
+#define IOTXDT_CFG_DebugPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
+#define IOTXDT_CFG_InfoPrint(fmt, ...)           DSLOGM_Info(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
 
 
 #define IOT_XDT_CheckKeyIsNull(key, keyName, ret, pAns)                   \
@@ -149,7 +150,7 @@
 			pAns[0] = eIotXDTErrCode_ParaMissing;\
 		}\
 		cJSON_Delete(cRoot);\
-		IOTXDT_CFG_LogPrint("[%s()]: Failed to find the key [%s]\r\n", __FUNCTION__, keyName);\
+		IOTXDT_CFG_DebugPrint("[%s()]: Failed to find the key [%s]\r\n", __FUNCTION__, keyName);\
 		return ret;\
 	} \
 }
@@ -159,7 +160,7 @@
 	if (obj == NULL)\
 	{\
 		cJSON_Delete(cRoot);\
-		IOTXDT_CFG_LogPrint("[%s()]: Failed to Creat JSON object\r\n", __FUNCTION__);\
+		IOTXDT_CFG_DebugPrint("[%s()]: Failed to Creat JSON object\r\n", __FUNCTION__);\
 		return ret;\
 	} \
 }
@@ -168,7 +169,7 @@
 {\
 	if (pJson == NULL)\
 	{\
-		IOTXDT_CFG_LogPrint("[%s()]: Failed to print JSON object\r\n", __FUNCTION__);\
+		IOTXDT_CFG_DebugPrint("[%s()]: Failed to print JSON object\r\n", __FUNCTION__);\
 		cJSON_Delete(cRoot);\
 		return ret;\
 	} \

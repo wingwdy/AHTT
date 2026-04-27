@@ -103,61 +103,61 @@ void AswPlatM_PrintAllConfigInfo(void)
     char tempStr[128 + 1] = { 0 };
     uint8_t tempLen = 0;
 
-    ASWPLATM_CFG_LogPrint("---------------------------------配置信息------------------------------------\r\n");
-    ASWPLATM_CFG_LogPrint("平台编码：%s\r\n", pParam->platPileDn);
-    ASWPLATM_CFG_LogPrint("资产编码：%s\r\n", pParam->fixPileDn);
-    ASWPLATM_CFG_LogPrint("软件版本：(%s) %s_%s\r\n", APP_SW_VERSION_TYPE, APP_SW_VERSION_STRING, APP_SW_VERSION_DATE);
-    ASWPLATM_CFG_LogPrint("硬件信息：%s\r\n", HW_VERSION_INFO);
-    ASWPLATM_CFG_LogPrint("是否厂内模式：%s\r\n", (TRUE == CddModeM_IsFactoryMode()) ? "是" : "否");
-    ASWPLATM_CFG_LogPrint("是否国标模式：%s\r\n", (TRUE == CddModeM_IsGBMode()) ? "是" : "否");
-    ASWPLATM_CFG_LogPrint("平台类型：%s\r\n", pProtocolDescriptor->pName);
-    ASWPLATM_CFG_LogPrint("卡类型：%s\r\n", pCardDescriptor->pName);
-    ASWPLATM_CFG_LogPrint("运营平台IP端口：%s, %d\r\n", pParam->platMainIp, pParam->platMainPort);
-    ASWPLATM_CFG_LogPrint("运维平台IP端口：%s, %d\r\n", pParam->platAuxiliaryIp, pParam->platAuxiliaryPort);
+    ASWPLATM_CFG_DebugPrint("---------------------------------配置信息------------------------------------\r\n");
+    ASWPLATM_CFG_DebugPrint("平台编码：%s\r\n", pParam->platPileDn);
+    ASWPLATM_CFG_DebugPrint("资产编码：%s\r\n", pParam->fixPileDn);
+    ASWPLATM_CFG_DebugPrint("软件版本：(%s) %s_%s\r\n", APP_SW_VERSION_TYPE, APP_SW_VERSION_STRING, APP_SW_VERSION_DATE);
+    ASWPLATM_CFG_DebugPrint("硬件信息：%s\r\n", HW_VERSION_INFO);
+    ASWPLATM_CFG_DebugPrint("是否厂内模式：%s\r\n", (TRUE == CddModeM_IsFactoryMode()) ? "是" : "否");
+    ASWPLATM_CFG_DebugPrint("是否国标模式：%s\r\n", (TRUE == CddModeM_IsGBMode()) ? "是" : "否");
+    ASWPLATM_CFG_DebugPrint("平台类型：%s\r\n", pProtocolDescriptor->pName);
+    ASWPLATM_CFG_DebugPrint("卡类型：%s\r\n", pCardDescriptor->pName);
+    ASWPLATM_CFG_DebugPrint("运营平台IP端口：%s, %d\r\n", pParam->platMainIp, pParam->platMainPort);
+    ASWPLATM_CFG_DebugPrint("运维平台IP端口：%s, %d\r\n", pParam->platAuxiliaryIp, pParam->platAuxiliaryPort);
 
     if (pProtocolDescriptor->pFuncGetDevOperator != NULL )
     {
         memset(tempStr, 0x00, sizeof(tempStr));
         pProtocolDescriptor->pFuncGetDevOperator(tempStr, &tempLen);
-        ASWPLATM_CFG_LogPrint("设备运营商：%s\r\n", tempStr);
+        ASWPLATM_CFG_DebugPrint("设备运营商：%s\r\n", tempStr);
     }
 
     if (pProtocolDescriptor->pFuncGetProductKey != NULL )
     {
         memset(tempStr, 0x00, sizeof(tempStr));
         pProtocolDescriptor->pFuncGetProductKey(tempStr, &tempLen);
-        ASWPLATM_CFG_LogPrint("产品密钥：%s\r\n", tempStr);
+        ASWPLATM_CFG_DebugPrint("产品密钥：%s\r\n", tempStr);
     }
 
     if (pProtocolDescriptor->pFuncGetProductSecret != NULL )
     {
         memset(tempStr, 0x00, sizeof(tempStr));
         pProtocolDescriptor->pFuncGetProductSecret(tempStr, &tempLen);
-        ASWPLATM_CFG_LogPrint("产品密码：%s\r\n", tempStr);
+        ASWPLATM_CFG_DebugPrint("产品密码：%s\r\n", tempStr);
     }
 
     if (pProtocolDescriptor->pFuncGetToken != NULL )
     {
         memset(tempStr, 0x00, sizeof(tempStr));
         pProtocolDescriptor->pFuncGetToken(tempStr, &tempLen);
-        ASWPLATM_CFG_LogPrint("Token：%s\r\n", tempStr);
+        ASWPLATM_CFG_DebugPrint("Token：%s\r\n", tempStr);
     }
 
     if (pProtocolDescriptor->pFuncGetCipherKey != NULL )
     {
         memset(tempStr, 0x00, sizeof(tempStr));
         pProtocolDescriptor->pFuncGetCipherKey(tempStr, &tempLen);
-        ASWPLATM_CFG_LogPrint("加密密钥：%s\r\n", tempStr);
+        ASWPLATM_CFG_DebugPrint("加密密钥：%s\r\n", tempStr);
     }
 
     if (pProtocolDescriptor->pFuncGetIv != NULL )
     {
         memset(tempStr, 0x00, sizeof(tempStr));
         pProtocolDescriptor->pFuncGetIv(tempStr, &tempLen);
-        ASWPLATM_CFG_LogPrint("初始向量：%s\r\n", tempStr);
+        ASWPLATM_CFG_DebugPrint("初始向量：%s\r\n", tempStr);
     }
 
-    ASWPLATM_CFG_LogPrint("----------------------------------------------------------------------------\r\n");
+    ASWPLATM_CFG_DebugPrint("----------------------------------------------------------------------------\r\n");
 }
 
 uint8_t AswPlatM_SetPileDn(char *pPileDn, uint8_t len)
@@ -168,7 +168,7 @@ uint8_t AswPlatM_SetPileDn(char *pPileDn, uint8_t len)
     {
         if (len != strlen(g_stAswPlatMCtx.stPlatParam.platPileDn) || memcmp(pPileDn, g_stAswPlatMCtx.stPlatParam.platPileDn, len) != 0)
         {
-            ASWPLATM_CFG_LogPrint("桩平台编码变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platPileDn, pPileDn);
+            ASWPLATM_CFG_DebugPrint("桩平台编码变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platPileDn, pPileDn);
             memset(g_stAswPlatMCtx.stPlatParam.platPileDn, 0x00, MSNVM_PILE_DN_LEN);
             memcpy(g_stAswPlatMCtx.stPlatParam.platPileDn, pPileDn, len);
             MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));
@@ -193,7 +193,7 @@ uint8_t AswPlatM_SetFixPileDn(char *pFixPileDn, uint8_t len)
     {
         if (len != strlen(g_stAswPlatMCtx.stPlatParam.fixPileDn) || memcmp(pFixPileDn, g_stAswPlatMCtx.stPlatParam.fixPileDn, len) != 0)
         {
-            ASWPLATM_CFG_LogPrint("桩固定编码变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.fixPileDn, pFixPileDn);
+            ASWPLATM_CFG_DebugPrint("桩固定编码变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.fixPileDn, pFixPileDn);
             memset(g_stAswPlatMCtx.stPlatParam.fixPileDn, 0x00, MSNVM_PILE_DN_LEN);
             memcpy(g_stAswPlatMCtx.stPlatParam.fixPileDn, pFixPileDn, len);
             MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));
@@ -213,7 +213,7 @@ uint8_t AswPlatM_SetPlatMainIpPort(char *pIp, uint8_t ipLen, uint16_t port)
     {
         if (ipLen != strlen(g_stAswPlatMCtx.stPlatParam.platMainIp) || memcmp(pIp, g_stAswPlatMCtx.stPlatParam.platMainIp, ipLen) != 0)
         {
-            ASWPLATM_CFG_LogPrint("运营平台IP变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platMainIp, pIp);
+            ASWPLATM_CFG_DebugPrint("运营平台IP变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platMainIp, pIp);
 
             memset(g_stAswPlatMCtx.stPlatParam.platMainIp, 0x00, CDD_NETM_CFG_IP_LEN);
             memcpy(g_stAswPlatMCtx.stPlatParam.platMainIp, pIp, ipLen);
@@ -235,7 +235,7 @@ uint8_t AswPlatM_SetPlatMainIp(char *pIp, uint8_t ipLen)
     {
         if (ipLen != strlen(g_stAswPlatMCtx.stPlatParam.platMainIp) || memcmp(pIp, g_stAswPlatMCtx.stPlatParam.platMainIp, ipLen) != 0)
         {
-            ASWPLATM_CFG_LogPrint("运营平台IP变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platMainIp, pIp);
+            ASWPLATM_CFG_DebugPrint("运营平台IP变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platMainIp, pIp);
 
             memset(g_stAswPlatMCtx.stPlatParam.platMainIp, 0x00, CDD_NETM_CFG_IP_LEN);
             memcpy(g_stAswPlatMCtx.stPlatParam.platMainIp, pIp, ipLen);
@@ -252,7 +252,7 @@ uint8_t AswPlatM_SetPlatMainPort(uint16_t port)
 {
     if (g_stAswPlatMCtx.stPlatParam.platMainPort != port)
     {
-        ASWPLATM_CFG_LogPrint("运营平台port变化：[%d]-->[%d]\r\n", g_stAswPlatMCtx.stPlatParam.platMainPort, port);
+        ASWPLATM_CFG_DebugPrint("运营平台port变化：[%d]-->[%d]\r\n", g_stAswPlatMCtx.stPlatParam.platMainPort, port);
         g_stAswPlatMCtx.stPlatParam.platMainPort = port;
         MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));
     }
@@ -269,7 +269,7 @@ uint8_t AswPlatM_SetPlatAuxiliaryIpPort(char *pIp, uint8_t ipLen, uint16_t port)
     {
         if (ipLen != strlen(g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp) || memcmp(pIp, g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp, ipLen) != 0)
         {
-            ASWPLATM_CFG_LogPrint("运维平台IP变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp, pIp);
+            ASWPLATM_CFG_DebugPrint("运维平台IP变化：[\"%s\"]-->[\"%s\"]\r\n", g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp, pIp);
 
             memset(g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp, 0x00, CDD_NETM_CFG_IP_LEN);
             memcpy(g_stAswPlatMCtx.stPlatParam.platAuxiliaryIp, pIp, ipLen);
@@ -287,7 +287,7 @@ uint8_t AswPlatM_SetPlatAuxiliaryPort(uint16_t port)
 {
     if (g_stAswPlatMCtx.stPlatParam.platAuxiliaryPort != port)
     {
-        ASWPLATM_CFG_LogPrint("运维平台port变化：[%d]-->[%d]\r\n", g_stAswPlatMCtx.stPlatParam.platAuxiliaryPort, port);
+        ASWPLATM_CFG_DebugPrint("运维平台port变化：[%d]-->[%d]\r\n", g_stAswPlatMCtx.stPlatParam.platAuxiliaryPort, port);
         g_stAswPlatMCtx.stPlatParam.platAuxiliaryPort = port;
         MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));
     }
@@ -311,7 +311,7 @@ uint8_t AswPlatM_SetPlatType(char *platName, uint8_t platNameLen)
         {
             if (index != g_stAswPlatMCtx.stPlatParam.platMainType)
             {
-                ASWPLATM_CFG_LogPrint("平台协议变化：[%s]-->[%s]\r\n", 
+                ASWPLATM_CFG_DebugPrint("平台协议变化：[%s]-->[%s]\r\n", 
                     c_stAswPlatMProtocolDescriptorTable[currentPlatType].cProtoMeaning, pProtocolDescriptor->cProtoMeaning);
                 g_stAswPlatMCtx.stPlatParam.platMainType = index;
                 MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));
@@ -344,7 +344,7 @@ uint8_t AswPlatM_SetPlatCardType(char *platCardName, uint8_t cardNameLen)
         {
             if (index != g_stAswPlatMCtx.stPlatParam.platMainCardType)
             {
-                ASWPLATM_CFG_LogPrint("卡类型变化：[%s]-->[%s]\r\n", 
+                ASWPLATM_CFG_DebugPrint("卡类型变化：[%s]-->[%s]\r\n", 
                     c_stAswPlatMCardDescriptorTable[currentPlatCardType].cMeaning, pPlatCardDescriptor->cMeaning);
                 g_stAswPlatMCtx.stPlatParam.platMainCardType = index;
                 MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));

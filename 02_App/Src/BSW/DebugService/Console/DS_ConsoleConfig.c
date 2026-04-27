@@ -184,11 +184,11 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
         {
             if (TRUE == AswPlatM_SetPileDn(argv[2], strlen(argv[2])))
             {
-                DSCONSOLE_CFG_LogPrint("Set PileDn: \"%s\" ok!\r\n", argv[2]);
+                DSCONSOLE_CFG_DebugPrint("Set PileDn: \"%s\" ok!\r\n", argv[2]);
             }
             else
             {
-                DSCONSOLE_CFG_LogPrint("Set PileDn failed!\r\n");
+                DSCONSOLE_CFG_DebugPrint("Set PileDn failed!\r\n");
             }
         }
         /* 设置运维桩号 */
@@ -196,11 +196,11 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
         {
             if (TRUE == AswPlatM_SetFixPileDn(argv[2], strlen(argv[2])))
             {
-                DSCONSOLE_CFG_LogPrint("Set PileOdn: \"%s\" ok!\r\n", argv[2]);
+                DSCONSOLE_CFG_DebugPrint("Set PileOdn: \"%s\" ok!\r\n", argv[2]);
             }
             else
             {
-                DSCONSOLE_CFG_LogPrint("Set PileOdn failed!\r\n");
+                DSCONSOLE_CFG_DebugPrint("Set PileOdn failed!\r\n");
             }
         }
         else if (0 == strcmp(argv[1], "plat"))
@@ -212,13 +212,13 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                 if (TRUE == AswPlatM_SetPlatType(platName, strlen(platName)))
                 {
                     setResult = TRUE;
-                    DSCONSOLE_CFG_LogPrint("Set plat: \"%s\" ok!\r\n", platName);
+                    DSCONSOLE_CFG_DebugPrint("Set plat: \"%s\" ok!\r\n", platName);
                 }
             }
 
             if (setResult == FALSE)
             {
-                DSCONSOLE_CFG_LogPrint("Set plat failed!\r\n");
+                DSCONSOLE_CFG_DebugPrint("Set plat failed!\r\n");
             } 
         }
         else if (0 == strcmp(argv[1], "card"))
@@ -230,13 +230,13 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                 if (TRUE == AswPlatM_SetPlatCardType(platCardName, strlen(platCardName)))
                 {
                     setResult = TRUE;
-                    DSCONSOLE_CFG_LogPrint("Set card: \"%s\" ok!\r\n", platCardName);
+                    DSCONSOLE_CFG_DebugPrint("Set card: \"%s\" ok!\r\n", platCardName);
                 }
             }
 
             if (setResult == FALSE)
             {
-                DSCONSOLE_CFG_LogPrint("Set card failed!\r\n");
+                DSCONSOLE_CFG_DebugPrint("Set card failed!\r\n");
             } 
         }
         /* 设置参数 */
@@ -255,7 +255,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                     {
                         if (TRUE == AswPlatM_SetPlatMainIpPort(ip, strlen(ip), (uint16_t)port))
                         {
-                            DSCONSOLE_CFG_LogPrint("Set Plat Main ip port: \"%s\", port= %d ok!\r\n", ip, port);
+                            DSCONSOLE_CFG_DebugPrint("Set Plat Main ip port: \"%s\", port= %d ok!\r\n", ip, port);
                             setResult = TRUE;
                         }
                     }
@@ -263,7 +263,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
 
                 if (setResult == FALSE)
                 {
-                    DSCONSOLE_CFG_LogPrint("Set Plat Main ip port failed!\r\n");
+                    DSCONSOLE_CFG_DebugPrint("Set Plat Main ip port failed!\r\n");
                 }
             }
             else if (NULL != (pTemp = Common_SearchData((uint8_t *)argv[2], strlen(argv[2]), "domain:", strlen("domain:"))))
@@ -278,7 +278,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                     {
                         if (TRUE == AswPlatM_SetPlatMainIpPort(ip, strlen(ip), (uint16_t)port))
                         {
-                            DSCONSOLE_CFG_LogPrint("Set Plat Main domain port: \"%s\", port= %d ok!\r\n", ip, port);
+                            DSCONSOLE_CFG_DebugPrint("Set Plat Main domain port: \"%s\", port= %d ok!\r\n", ip, port);
                             setResult = TRUE;
                         }
                     }
@@ -286,7 +286,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
 
                 if (setResult == FALSE)
                 {
-                    DSCONSOLE_CFG_LogPrint("Set Plat Main domain port failed!\r\n");
+                    DSCONSOLE_CFG_DebugPrint("Set Plat Main domain port failed!\r\n");
                 }
             }
             else if (NULL != (pTemp = Common_SearchData((uint8_t *)argv[2], strlen(argv[2]), "port:", strlen("port:"))))
@@ -296,14 +296,14 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                 {
                     if (TRUE == AswPlatM_SetPlatMainPort((uint16_t)port))
                     {
-                        DSCONSOLE_CFG_LogPrint("Set Plat Main port= %d ok!\r\n", port);
+                        DSCONSOLE_CFG_DebugPrint("Set Plat Main port= %d ok!\r\n", port);
                         setResult = TRUE;
                     }
                 }
 
                 if (setResult == FALSE)
                 {
-                    DSCONSOLE_CFG_LogPrint("Set Plat Main port failed!\r\n");
+                    DSCONSOLE_CFG_DebugPrint("Set Plat Main port failed!\r\n");
                 }
             }
             else
@@ -313,55 +313,55 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
         {
             if (TRUE == AswPlatM_SetCipherKey(argv[2], strlen(argv[2])))
             {
-                DSCONSOLE_CFG_LogPrint("Set cipherKey \"%s\" ok!\r\n", argv[2]);
+                DSCONSOLE_CFG_DebugPrint("Set cipherKey \"%s\" ok!\r\n", argv[2]);
             }
             else
             {
-                DSCONSOLE_CFG_LogPrint("Set cipherKey failed!\r\n");
+                DSCONSOLE_CFG_DebugPrint("Set cipherKey failed!\r\n");
             }
         }
         else if (0 == strcmp(argv[1], "token"))
         {
             if (TRUE == AswPlatM_SetToken(argv[2], strlen(argv[2])))
             {
-                DSCONSOLE_CFG_LogPrint("Set token \"%s\" ok!\r\n", argv[2]);
+                DSCONSOLE_CFG_DebugPrint("Set token \"%s\" ok!\r\n", argv[2]);
             }
             else
             {
-                DSCONSOLE_CFG_LogPrint("Set token failed!\r\n");
+                DSCONSOLE_CFG_DebugPrint("Set token failed!\r\n");
             }
         }
         else if (0 == strcmp(argv[1], "devOperator"))
         {
             if (TRUE == AswPlatM_SetDevOperator(argv[2], strlen(argv[2])))
             {
-                DSCONSOLE_CFG_LogPrint("Set devOperator \"%s\" ok!\r\n", argv[2]);
+                DSCONSOLE_CFG_DebugPrint("Set devOperator \"%s\" ok!\r\n", argv[2]);
             }
             else
             {
-                DSCONSOLE_CFG_LogPrint("Set devOperator failed!\r\n");
+                DSCONSOLE_CFG_DebugPrint("Set devOperator failed!\r\n");
             }
         }
         else if (0 == strcmp(argv[1], "productKey"))
         {
             if (TRUE == AswPlatM_SetProductKey(argv[2], strlen(argv[2])))
             {
-                DSCONSOLE_CFG_LogPrint("Set productKey \"%s\" ok!\r\n", argv[2]);
+                DSCONSOLE_CFG_DebugPrint("Set productKey \"%s\" ok!\r\n", argv[2]);
             }
             else
             {
-                DSCONSOLE_CFG_LogPrint("Set productKey failed!\r\n");
+                DSCONSOLE_CFG_DebugPrint("Set productKey failed!\r\n");
             }
         }
         else if (0 == strcmp(argv[1], "productSecret"))
         {
             if (TRUE == AswPlatM_SetProductSecret(argv[2], strlen(argv[2])))
             {
-                DSCONSOLE_CFG_LogPrint("Set productSecret \"%s\" ok!\r\n", argv[2]);
+                DSCONSOLE_CFG_DebugPrint("Set productSecret \"%s\" ok!\r\n", argv[2]);
             }
             else
             {
-                DSCONSOLE_CFG_LogPrint("Set productSecret failed!\r\n");
+                DSCONSOLE_CFG_DebugPrint("Set productSecret failed!\r\n");
             }
         }
         else if (0 == strcmp(argv[1], "mntr"))
@@ -379,7 +379,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                     {
                         if (TRUE == AswPlatM_SetPlatAuxiliaryIpPort(ip, strlen(ip), (uint16_t)port))
                         {
-                            DSCONSOLE_CFG_LogPrint("Set Plat Auxiliary ip port: \"%s\", port= %d ok!\r\n", ip, port);
+                            DSCONSOLE_CFG_DebugPrint("Set Plat Auxiliary ip port: \"%s\", port= %d ok!\r\n", ip, port);
                             setResult = TRUE;
                         }
                     }
@@ -387,7 +387,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
 
                 if (setResult == FALSE)
                 {
-                    DSCONSOLE_CFG_LogPrint("Set Plat Auxiliary ip port failed!\r\n");
+                    DSCONSOLE_CFG_DebugPrint("Set Plat Auxiliary ip port failed!\r\n");
                 }
             }
             else if (NULL != (pTemp = Common_SearchData((uint8_t *)argv[2], strlen(argv[2]), "port:", strlen("port:"))))
@@ -397,14 +397,14 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                 {
                     if (TRUE == AswPlatM_SetPlatAuxiliaryPort((uint16_t)port))
                     {
-                        DSCONSOLE_CFG_LogPrint("Set Plat Auxiliary port= %d ok!\r\n", port);
+                        DSCONSOLE_CFG_DebugPrint("Set Plat Auxiliary port= %d ok!\r\n", port);
                         setResult = TRUE;
                     }
                 }
 
                 if (setResult == FALSE)
                 {
-                    DSCONSOLE_CFG_LogPrint("Set Plat Auxiliary port failed!\r\n");
+                    DSCONSOLE_CFG_DebugPrint("Set Plat Auxiliary port failed!\r\n");
                 }
 
             }
@@ -416,14 +416,14 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
 
 static int32_t DSConsoleCfg_ReadAgingState(int32_t argc, char *argv[])
 {
-    DSCONSOLE_CFG_LogPrint("AgingState: %d\r\n", CddModeM_IsAgingTestFinish());
+    DSCONSOLE_CFG_DebugPrint("AgingState: %d\r\n", CddModeM_IsAgingTestFinish());
     return 0;
 }
 
 static int32_t DSConsoleCfg_ClearFlash(int32_t argc, char *argv[])
 {
     int32_t ret = -1;
-    DSCONSOLE_CFG_LogPrint("开始格式化Flash....\r\n");
+    DSCONSOLE_CFG_DebugPrint("开始格式化Flash....\r\n");
 
     const struct fal_flash_dev *flash_dev = fal_flash_device_find(NOR_FLASH_DEV_NAME);
     if (flash_dev != NULL)
@@ -431,16 +431,16 @@ static int32_t DSConsoleCfg_ClearFlash(int32_t argc, char *argv[])
         ret = flash_dev->ops.erase(0, flash_dev->len);
         if (ret >= 0)
         {
-            DSCONSOLE_CFG_LogPrint("格式化Flash完成！\r\n");
+            DSCONSOLE_CFG_DebugPrint("格式化Flash完成！\r\n");
         }
         else
         {
-            DSCONSOLE_CFG_LogPrint("格式化Flash失败！错误码: %d\r\n", ret);
+            DSCONSOLE_CFG_DebugPrint("格式化Flash失败！错误码: %d\r\n", ret);
         }
     }
     else
     {
-        DSCONSOLE_CFG_LogPrint("获取Flash设备失败！\r\n");
+        DSCONSOLE_CFG_DebugPrint("获取Flash设备失败！\r\n");
     }
 
     return ret;

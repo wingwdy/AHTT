@@ -76,7 +76,7 @@ static void CddModeM_AgingTestHandle(void)
                 g_stCddModeMCtx.isAgingTestStart = TRUE;
                 g_stCddModeMCtx.agingTestExsistTickStart = Common_GetSystick();
                 g_stCddModeMCtx.agingTestTickStart = Common_GetSystick();
-                CDDMODE_CFG_LogPrint("进入老化测试!\r\n");
+                CDDMODE_CFG_DebugPrint("进入老化测试!\r\n");
             }
         }
         else
@@ -85,7 +85,7 @@ static void CddModeM_AgingTestHandle(void)
             {
                 if (Common_JudgeTimeoutMs(g_stCddModeMCtx.agingTestTickStart, CDD_MODEM_CFG_AGING_TEST_TIMEOUT))
                 {
-                    CDDMODE_CFG_LogPrint("老化完成!\r\n");
+                    CDDMODE_CFG_DebugPrint("老化完成!\r\n");
                     g_stCddModeMCtx.modeParam.isAgingTestFinish = TRUE;
                     MSNvm_WriteParaBlock(eMSNvmBlockID_ModeParam, (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct));
                 }
@@ -96,7 +96,7 @@ static void CddModeM_AgingTestHandle(void)
             {
                 if (Common_JudgeTimeoutMs(g_stCddModeMCtx.agingTestExsistTickStart, CDD_MODEM_CFG_EXSIST_AGING_TEST_TIMEOUT))
                 {
-                    CDDMODE_CFG_LogPrint("电流不满足条件，老化中止!\r\n");
+                    CDDMODE_CFG_DebugPrint("电流不满足条件，老化中止!\r\n");
                     g_stCddModeMCtx.isAgingTestStart = FALSE;
                 }
             }
@@ -152,7 +152,7 @@ static uint8_t CddModeM_CheckExsitFactoryModeCondition(void)
 
             if (timeDiff >= CDD_MODEM_CFG_FACTORY_TIMEOUT)
             {
-                CDDMODE_CFG_LogPrint("进入产线超过72小时!!\r\n");
+                CDDMODE_CFG_DebugPrint("进入产线超过72小时!!\r\n");
                 exsitFlag = TRUE;
             }
         }
@@ -168,7 +168,7 @@ void CddModeM_InitMemory(void)
     if (eGlobalRet_OK != MSNvm_ReadParaBlock(eMSNvmBlockID_ModeParam, 
         (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct)))
     {
-        CDDMODE_CFG_LogPrint("读取模式参数失败!\r\n");
+        CDDMODE_CFG_DebugPrint("读取模式参数失败!\r\n");
     }
 }
 
@@ -196,13 +196,13 @@ void CddModeM_EnterFactoryMode(void)
 { 
     if (g_stCddModeMCtx.modeParam.isFactoryMode == FALSE)
     {
-        CDDMODE_CFG_LogPrint("进入厂内模式 ok!\r\n");
+        CDDMODE_CFG_DebugPrint("进入厂内模式 ok!\r\n");
         g_stCddModeMCtx.modeParam.isFactoryMode = TRUE;
         MSNvm_WriteParaBlock(eMSNvmBlockID_ModeParam, (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct));
     }
     else
     {
-        CDDMODE_CFG_LogPrint("已在厂内模式 ok!\r\n");
+        CDDMODE_CFG_DebugPrint("已在厂内模式 ok!\r\n");
     }
 }
 
@@ -210,7 +210,7 @@ void CddModeM_ExsitFactoryMode(void)
 { 
     if (g_stCddModeMCtx.modeParam.isFactoryMode == TRUE)
     {
-        CDDMODE_CFG_LogPrint("退出厂内模式 ok!\r\n");
+        CDDMODE_CFG_DebugPrint("退出厂内模式 ok!\r\n");
         g_stCddModeMCtx.modeParam.isFactoryMode = FALSE;
         g_stCddModeMCtx.modeParam.isSynTime = FALSE;
         g_stCddModeMCtx.modeParam.sysTimeStamp = 0;
@@ -218,7 +218,7 @@ void CddModeM_ExsitFactoryMode(void)
     }
     else
     {
-        CDDMODE_CFG_LogPrint("已退出厂内模式 ok!\r\n");
+        CDDMODE_CFG_DebugPrint("已退出厂内模式 ok!\r\n");
     }
 }
 
@@ -226,13 +226,13 @@ void CddModeM_ExitGBMode(void)
 { 
     if (g_stCddModeMCtx.modeParam.isQBMode == FALSE)
     {
-        CDDMODE_CFG_LogPrint("进入兼容模式 ok!\r\n");
+        CDDMODE_CFG_DebugPrint("进入兼容模式 ok!\r\n");
         g_stCddModeMCtx.modeParam.isQBMode = TRUE;
         MSNvm_WriteParaBlock(eMSNvmBlockID_ModeParam, (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct));
     }
     else
     {
-        CDDMODE_CFG_LogPrint("已在兼容模式 ok!\r\n");
+        CDDMODE_CFG_DebugPrint("已在兼容模式 ok!\r\n");
     }
 }
 
@@ -240,13 +240,13 @@ void CddModeM_EnterGBMode(void)
 { 
     if (g_stCddModeMCtx.modeParam.isQBMode == TRUE)
     {
-        CDDMODE_CFG_LogPrint("进入国标模式 ok!\r\n");
+        CDDMODE_CFG_DebugPrint("进入国标模式 ok!\r\n");
         g_stCddModeMCtx.modeParam.isQBMode = FALSE;
         MSNvm_WriteParaBlock(eMSNvmBlockID_ModeParam, (uint8_t *)&g_stCddModeMCtx.modeParam, sizeof(MSNvmModeParam_Struct));
     }
     else
     {
-        CDDMODE_CFG_LogPrint("已在国标模式 ok!\r\n");
+        CDDMODE_CFG_DebugPrint("已在国标模式 ok!\r\n");
     }
 }
 

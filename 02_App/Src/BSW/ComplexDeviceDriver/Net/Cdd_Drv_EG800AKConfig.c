@@ -97,7 +97,7 @@ void CDDDRVEG800AK_CFG_WriteData(uint8_t *pData, uint16_t len, void *userData)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)userData;
     /*
-        CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]Send Data[%d]: ", pSocketCtrl->socketIndex, len);
+        CDDDRV_EG800AK_CFG_DebugPrint("[socket: %d]Send Data[%d]: ", pSocketCtrl->socketIndex, len);
         DSLogM_HexOutput(pData, len);
     */
     CDDDRV_EG800AK_CFG_WriteData(pData, len);
