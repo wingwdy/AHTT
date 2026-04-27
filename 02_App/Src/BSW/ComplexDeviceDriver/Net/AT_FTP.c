@@ -97,19 +97,19 @@ static uint16_t ATFTP_PackUfsRead(uint8_t socketIndex, void * socketPara, uint8_
 const ATCmdDescribtor_Struct c_stFTPATCmdDescribtor[eATFTPCmd_Count] =
 {
     [eATFTPCmd_UFSDeleteFile] =
-    { "AT+QFDEL=\"*\"\r\n",              "OK",                        NULL,              3,      10000,     5000,    TRUE, "删除UFS文件",
+    { "AT+QFDEL=\"*\"\r\n",              "OK\r\n",                    NULL,              3,      10000,     5000,    TRUE, "删除UFS文件",
       NULL,                               NULL,                                          ATFTP_FailHandle },
 
     [eATFTPCmd_UFSQuerySpace] =
-    { "AT+QFLDS=\"UFS\"\r\n",            "+QFLDS: ",                  NULL,              3,      5000,      3000,    TRUE, "查询UFS剩余空间",
+    { "AT+QFLDS=\"UFS\"\r\n",            "+QFLDS: ",                  "OK\r\n",          3,      5000,      3000,    TRUE, "查询UFS剩余空间",
       NULL,                              ATFTP_RecvUFSSpace,                             ATFTP_FailHandle },
 
     [eATFTPCmd_UFSOpen] =
-    { "AT+QFOPEN=\"[FILE]\",[MODE]\r\n", "+QFOPEN:",                  NULL,              3,      5000,      3000,    TRUE, "打开/新建文件",
+    { "AT+QFOPEN=\"[FILE]\",[MODE]\r\n", "+QFOPEN: ",                 "OK\r\n",          3,      5000,      3000,    TRUE, "打开/新建文件",
       ATFTP_PackUfsOpen,                 ATFTP_RecvUFSOpen,                              ATFTP_FailHandle },
 
     [eATFTPCmd_UFSSeek] =
-    { "AT+QFSEEK=[HANDLE],[OFFSET],0\r\n",   "+QFSEEK=",              NULL,              3,      5000,      5000,    TRUE, "设置UFS文件指针",
+    { "AT+QFSEEK=[HANDLE],[OFFSET],0\r\n",   "OK\r\n",                NULL,              3,      5000,      5000,    TRUE, "设置UFS文件指针",
       ATFTP_PackUfsSeek,                 ATFTP_RecvOKACK,                                ATFTP_FailHandle },
 
     [eATFTPCmd_UFSRead] =
@@ -117,55 +117,55 @@ const ATCmdDescribtor_Struct c_stFTPATCmdDescribtor[eATFTPCmd_Count] =
       ATFTP_PackUfsRead,                 ATFTP_RecvUFSRead,                              ATFTP_FailHandle },
 
     [eATFTPCmd_UFSWrite] =
-    { "AT+QFWRITE=[HANDLE],[SIZE]\r\n",   "CONNECT",                  NULL,              3,      5000,      5000,    TRUE, "写UFS文件",
+    { "AT+QFWRITE=[HANDLE],[SIZE]\r\n",   "CONNECT\r\n",              NULL,                  3,      5000,      5000,    TRUE, "写UFS文件",
       ATFTP_PackUfsWrite,                ATFTP_RecvUFSWrite,                             ATFTP_FailHandle },
 
     [eATFTPCmd_UFSClose] =
-    { "AT+QFCLOSE=[HANDLE]\r\n",         "+QFCLOSE",                  NULL,              3,      5000,      5000,    TRUE, "关闭UFS文件",
+    { "AT+QFCLOSE=[HANDLE]\r\n",         "OK\r\n",                    NULL,              3,      5000,      5000,    TRUE, "关闭UFS文件",
       ATFTP_PackUfsClose,                ATFTP_RecvUFSClose,                             ATFTP_FailHandle },
 
     [eATFTPCmd_FTPConfigContext] =
-    { "AT+QFTPCFG=\"contextid\",1\r\n",  "contextid",                 NULL,              3,      5000,      5000,    TRUE, "配置FTP PDP上下文",
+    { "AT+QFTPCFG=\"contextid\",1\r\n",  "OK\r\n",                    NULL,              3,      5000,      5000,    TRUE, "配置FTP PDP上下文",
       NULL,                              ATFTP_RecvOKACK,                                 ATFTP_FailHandle },
 
     [eATFTPCmd_FTPConfigPSW] =
-    { "AT+QFTPCFG=\"account\",\"[NAME]\",\"[PSW]\"\r\n",  "account",  NULL,              3,      5000,      5000,    TRUE, "配置FTP用户名密码",
+    { "AT+QFTPCFG=\"account\",\"[NAME]\",\"[PSW]\"\r\n",  "OK\r\n",   NULL,              3,      5000,      5000,    TRUE, "配置FTP用户名密码",
       ATFTP_PackAccount,                 ATFTP_RecvOKACK,                                ATFTP_FailHandle },
 
     [eATFTPCmd_FTPConfigFileType] =
-    { "AT+QFTPCFG=\"filetype\",[FILETYPE]\r\n",   "filetype",         NULL,              3,      5000,      5000,    TRUE, "配置FTP文件类型",
+    { "AT+QFTPCFG=\"filetype\",[FILETYPE]\r\n",   "OK\r\n",           NULL,              3,      5000,      5000,    TRUE, "配置FTP文件类型",
       ATFTP_PackFileType,                ATFTP_RecvOKACK,                                ATFTP_FailHandle },
 
     [eATFTPCmd_FTPConfigTransferMode] =
-    { "AT+QFTPCFG=\"transmode\",1\r\n",  "transmode",                 NULL,              3,      5000,      5000,    TRUE, "配置FTP传输模式",
+    { "AT+QFTPCFG=\"transmode\",1\r\n",  "OK\r\n",                    NULL,              3,      5000,      5000,    TRUE, "配置FTP传输模式",
       NULL,                              ATFTP_RecvOKACK,                                ATFTP_FailHandle },
 
     [eATFTPCmd_FTPConfigTimeout] =
-    { "AT+QFTPCFG=\"rsptimeout\",90\r\n","rsptimeout",                NULL,              3,      5000,      5000,    TRUE, "配置FTP超时时间",
+    { "AT+QFTPCFG=\"rsptimeout\",90\r\n", "OK\r\n",                   NULL,              3,      5000,      5000,    TRUE, "配置FTP超时时间",
       NULL,                              ATFTP_RecvOKACK,                                ATFTP_FailHandle },
 
     [eATFTPCmd_FTPOpen] =
-    { "AT+QFTPOPEN=\"[FIP]\",[FPORT]\r\n",  "+QFTPOPEN=",             NULL,              3,      20000,     5000,    TRUE,  "Open FTP连接",
+    { "AT+QFTPOPEN=\"[FIP]\",[FPORT]\r\n",  "OK\r\n",                 NULL,              3,      20000,     5000,    TRUE,  "Open FTP连接",
       ATFTP_PackOpen,                    ATFTP_RecvOpen,                                 ATFTP_FailHandle },
 
     [eATFTPCmd_FTPState] =
-    { "AT+QFTPSTAT\r\n",                 "+QFTPSTAT:",                NULL,              3,      5000,      5000,    FALSE, "查询FTP连接状态",
+    { "AT+QFTPSTAT\r\n",                 "+QFTPSTAT:",                "\r\n",            3,      5000,      5000,    FALSE, "查询FTP连接状态",
       NULL,                              ATFTP_RecvFTPState,                             ATFTP_FailHandle },
   
     [eATFTPCmd_FTPSwithPath] =
-    { "AT+QFTPCWD=\"[PATH]\"\r\n",       "+QFTPCWD:",                 NULL,              3,      5000,      5000,    TRUE, "设置FTP路径",
+    { "AT+QFTPCWD=\"[PATH]\"\r\n",       "+QFTPCWD: ",                "\r\n",            3,      5000,      5000,    TRUE, "设置FTP路径",
       ATFTP_PackPath,                    ATFTP_RecvFTPSwithPath,                         ATFTP_FailHandle },
 
     [eATFTPCmd_FTPUpload] =
-    { "AT+QFTPPUT=\"[FILE1]\",\"UFS:[FILE2]\",0\r\n",   "+QFTPPUT=",  NULL,              3,      5000,      5000,    TRUE, "上传文件",
+    { "AT+QFTPPUT=\"[FILE1]\",\"UFS:[FILE2]\",0\r\n",   "OK\r\n",    NULL,               3,      5000,      5000,    TRUE, "上传文件",
       ATFTP_PackUpload,                  ATFTP_RecvOKACK,                                ATFTP_FailHandle },
 
     [eATFTPCmd_FTPDownload] =
-    { "AT+QFTPGET=\"[FILE]\",\"UFS:file\"\r\n",   "+QFTPGET=",        NULL,              3,      5000,      5000,    TRUE, "下载文件",
+    { "AT+QFTPGET=\"[FILE]\",\"UFS:file\"\r\n",   "OK\r\n",          NULL,               3,      5000,      5000,    TRUE, "下载文件",
       ATFTP_PackDownload,                ATFTP_RecvOKACK,                                ATFTP_FailHandle },
 
     [eATFTPCmd_FTPClose] =
-    { "AT+QFTPCLOSE\r\n",                 "+QFTPCLOSE",               NULL,              3,      5000,      5000,    TRUE, "关闭FTP连接",
+    { "AT+QFTPCLOSE\r\n",                 "+QFTPCLOSE: ",             "\r\n",            3,      5000,      5000,    TRUE, "关闭FTP连接",
       NULL,                              ATFTP_RecvFTPClose,                             ATFTP_FailHandle },   
 };
 
@@ -572,7 +572,7 @@ uint32_t ATFTP_UrcRecvGet(uint8_t *pData, void * modulePara, uint16_t dataLen)
         }
     }
 
-    return 0;
+    return 0;    
 }
 
 static uint8_t ATFTP_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen)

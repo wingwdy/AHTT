@@ -441,10 +441,10 @@ static void CddDrvEG800AK_ATTaskRecvHandle(uint8_t *recvbuf)
                         CDDDRV_EG800AK_CFG_DebugPrint("[4G-->Rx]:\n%s\n", recvbuf);
                     }
 
+                    postLen = remainLen - (uint16_t)((uint32_t)pDest - (uint32_t)recvbuf);
+
                     if (NULL != pATCmdDescribtor->pFuncRecvHandle)
                     {
-                        postLen = remainLen - (uint16_t)((uint32_t)pDest - (uint32_t)recvbuf);
-
                         if (socketIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT)
                         {
                             pSocketCtrl = &g_stCddDrvEG800AKCtrl.stSocketCtrl[socketIndex];

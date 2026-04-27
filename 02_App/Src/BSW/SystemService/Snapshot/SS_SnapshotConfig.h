@@ -39,6 +39,12 @@
 
 #define SSSNAPSHOT_CFG_DebugPrint(fmt, ...)             DSLOGM_Debug(DSLogMModule_System, fmt, ##__VA_ARGS__)
 #define SSSNAPSHOT_CFG_InfoPrint(fmt, ...)              DSLOGM_Info(DSLogMModule_System, fmt, ##__VA_ARGS__)
+
+#define SSSNAPSHOT_CFG_USER_DEFAULT                     "gn_ftp_fw_cls"
+#define SSSNAPSHOT_CFG_PWD_DEFAULT                      "24d79794d8b42ff5"
+#define SSSNAPSHOT_CFG_RMTIP_DEFAULT                    "fwftp.gongniu.cn"
+#define SSSNAPSHOT_CFG_RMTPORT_DEFAULT                  21
+#define SSSNAPSHOT_CFG_RMTPATH_DEFAULT                  "/AC_pile/D3_A32FB/"
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/

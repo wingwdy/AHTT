@@ -77,7 +77,7 @@ typedef struct
     uint32_t cycPrintTick;
     SSSnapshotReadItem_Struct stReadItem;
     CddNetMSocketPara_Union stNetPara;
-    SSSnapshotItemRead_Enum eState;
+    SSSnapshotItemState_Enum eState;
     uint32_t WaitTick;
     SSSnapshotErrorCache_Struct stErrorCache[SSSNAPSHOT_CFG_ERROR_ITEM_COUNT];
     SSSnapshotRunLogCache_Struct stRunLogCache;
@@ -204,61 +204,65 @@ static void SSSnapshot_PrintItemInfo(void)
 void SSSnapshot_ExportItem(SSSnapshotItemType_Enum itemType, SSSnapshotItemReadSrc_Enum eReadSrc)
 {
     SSSnapshotReadItem_Struct *pReadItemHandle = &g_stSnapshotCtx.stReadItem;
+    CddNetMSocketPara_Union *pSocketPara = &g_stSnapshotCtx.stNetPara;
+    CommonDateTime_Struct sttime = {0};
+    MSNvmPlatParam_Struct stPlatParam = {0};
+    char pileDn[MSNVM_PILE_DN_LEN + 1] = "Unknow";          
+    const char *snapshotName = "ErrLog";
 
-    if (pReadItemHandle->readItemOngoing == TRUE)
-    {
-        SSSNAPSHOT_CFG_DebugPrint("快照读取已开始!\r\n");
-        return;
-    }
-
-    if (eReadSrc == eSnapshotItemReadSrc_Local)
-    {/* 本地导出 */
-        pReadItemHandle->exportItemStartTick = Common_GetSystick();
-        pReadItemHandle->eReadSrc = eReadSrc;
-        pReadItemHandle->localPrintItemFlag = TRUE;
-
-        SSSnapshot_StartReadItem(itemType);
-        SSSNAPSHOT_CFG_DebugPrint("开始本地快照读取!\r\n");
-        return;
-    }
-
-    /* 远程导出 */
     do
     {
-        /* 注册升级链接 for test */
-        CddNetMSocketPara_Union *pSocketPara = &g_stSnapshotCtx.stNetPara;
-        CommonDateTime_Struct sttime;
-
-        SSTM_GetDateTime(&sttime);
-
-        const char *snapshotName = "ErrSnapshot";
-        if (itemType == eSSSnapshotItemType_RunningLog)
+        if (pReadItemHandle->readItemOngoing == TRUE)
         {
-            snapshotName = "RunLogSnapshot";
-        }
-        else if (itemType == eSSSnapshotItemType_OmOrderRecord)
-        {
-            snapshotName = "OmOrderRecordSnapshot";
-        }
-
-        snprintf(pSocketPara->stFtpPara.fileName, CDD_NETM_CFG_FTP_FILENAME_LEN + 1, "%s_%s_%04d%02d%02d.txt", 
-                    SYSCFG_CFG_PRODUCT_CODE, snapshotName, sttime.year, sttime.month, sttime.day);
-
-        if (eGlobalRet_OK != CddNetM_CreatLink(eCddNetMSocketType_FTP, *pSocketPara, eCddNetMPlatType_File))
-        {
-            SSSNAPSHOT_CFG_DebugPrint("创建FTP传输通道失败!\r\n");
+            SSSNAPSHOT_CFG_DebugPrint("快照读取已开始!\r\n");
             break;
         }
 
-        pReadItemHandle->exportItemStartTick = Common_GetSystick();
-        pReadItemHandle->eReadSrc = eReadSrc;
-        pReadItemHandle->localPrintItemFlag = FALSE;
+        if (eReadSrc == eSnapshotItemReadSrc_Local)
+        {/* 本地导出 */
+            pReadItemHandle->exportItemStartTick = Common_GetSystick();
+            pReadItemHandle->eReadSrc = eReadSrc;
+            pReadItemHandle->localPrintItemFlag = TRUE;
 
-        SSSnapshot_StartReadItem(itemType);
-        //CddNetM_SetLinkDisconnect(eCddNetMPlatType_O);
-        //CddNetM_SetLinkDisconnect(eCddNetMPlatType_OM);
-        SSSNAPSHOT_CFG_DebugPrint("开始远程快照[%d]读取!\r\n", itemType);
-        
+            SSSnapshot_StartReadItem(itemType);
+            SSSNAPSHOT_CFG_DebugPrint("开始本地快照读取!\r\n");
+        }
+        else
+        {/* 远程导出 */
+            SSTM_GetDateTime(&sttime);
+
+            if (eGlobalRet_OK == MSNvm_ReadParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&stPlatParam, sizeof(stPlatParam)))
+            {
+                snprintf(pileDn, sizeof(pileDn), "%s", stPlatParam.platPileDn);
+            }
+
+            if (itemType == eSSSnapshotItemType_RunningLog)
+            {
+                snapshotName = "RunLog";
+            }
+            else if (itemType == eSSSnapshotItemType_OmOrderRecord)
+            {
+                snapshotName = "OrderRecord";
+            }
+
+            snprintf(pSocketPara->stFtpPara.fileName, CDD_NETM_CFG_FTP_FILENAME_LEN + 1, "%s_%s_%04d%02d%02d.txt", 
+                        pileDn, snapshotName, sttime.year, sttime.month, sttime.day);
+
+            if (eGlobalRet_OK != CddNetM_CreatLink(eCddNetMSocketType_FTP, *pSocketPara, eCddNetMPlatType_File))
+            {
+                SSSNAPSHOT_CFG_DebugPrint("创建FTP传输通道失败!\r\n");
+                break;
+            }
+
+            pReadItemHandle->exportItemStartTick = Common_GetSystick();
+            pReadItemHandle->eReadSrc = eReadSrc;
+            pReadItemHandle->localPrintItemFlag = FALSE;
+
+            SSSnapshot_StartReadItem(itemType);
+            //CddNetM_SetLinkDisconnect(eCddNetMPlatType_O);
+            //CddNetM_SetLinkDisconnect(eCddNetMPlatType_OM);
+            SSSNAPSHOT_CFG_DebugPrint("开始远程快照[%d]读取!\r\n", itemType);
+        }
     } while(0);
 }
 
@@ -610,7 +614,7 @@ uint8_t SSSnapshot_ExportAllItems(CddNetMSocketPara_Union *pNetPara)
         memcpy(&g_stSnapshotCtx.stNetPara, pNetPara, sizeof(CddNetMSocketPara_Union));
     }
     
-    g_stSnapshotCtx.eState = eSSSnapshotItemRead_ErrLog;
+    g_stSnapshotCtx.eState = eSSSnapshotItemState_ErrLog;
 
     return TRUE;
 }
@@ -619,46 +623,46 @@ static void SSSnapshot_ExportHandle(void)
 {
     switch (g_stSnapshotCtx.eState)
     {
-        case eSSSnapshotItemRead_ErrLog:
+        case eSSSnapshotItemState_ErrLog:
             SSSnapshot_ExportItem(eSSSnapshotItemType_ErrorLog, eSnapshotItemReadSrc_Remote);
-            g_stSnapshotCtx.eState = eSSSnapshotItemRead_WaitErrLog;
+            g_stSnapshotCtx.eState = eSSSnapshotItemState_WaitErrLog;
             break;
 
-        case eSSSnapshotItemRead_WaitErrLog:
+        case eSSSnapshotItemState_WaitErrLog:
             if (g_stSnapshotCtx.stReadItem.readItemOngoing == FALSE)
             {
                 SSSnapshot_FlushRunningLog();
                 g_stSnapshotCtx.WaitTick = Common_GetSystick();
-                g_stSnapshotCtx.eState = eSSSnapshotItemRead_RunLog;
+                g_stSnapshotCtx.eState = eSSSnapshotItemState_RunLog;
             }
             break;
 
-        case eSSSnapshotItemRead_RunLog:
+        case eSSSnapshotItemState_RunLog:
             if (Common_JudgeTimeoutMs(g_stSnapshotCtx.WaitTick, 3000))
             {/* 等ftp关闭稳定 */
                 SSSnapshot_ExportItem(eSSSnapshotItemType_RunningLog, eSnapshotItemReadSrc_Remote);
-                g_stSnapshotCtx.eState = eSSSnapshotItemRead_WaitRunLog;
+                g_stSnapshotCtx.eState = eSSSnapshotItemState_WaitRunLog;
             }
             break;
 
-        case eSSSnapshotItemRead_WaitRunLog:
+        case eSSSnapshotItemState_WaitRunLog:
             if (g_stSnapshotCtx.stReadItem.readItemOngoing == FALSE)
             {
                 g_stSnapshotCtx.WaitTick = Common_GetSystick();
-                g_stSnapshotCtx.eState = eSSSnapshotItemRead_OmOrderRecord;
+                g_stSnapshotCtx.eState = eSSSnapshotItemState_OmOrderRecord;
             }
             break;
-        case eSSSnapshotItemRead_OmOrderRecord:
+        case eSSSnapshotItemState_OmOrderRecord:
             if (Common_JudgeTimeoutMs(g_stSnapshotCtx.WaitTick, 3000))
             {/* 等ftp关闭稳定 */
                 SSSnapshot_ExportItem(eSSSnapshotItemType_OmOrderRecord, eSnapshotItemReadSrc_Remote);
-                g_stSnapshotCtx.eState = eSSSnapshotItemRead_WaitOmOrderRecord;
+                g_stSnapshotCtx.eState = eSSSnapshotItemState_WaitOmOrderRecord;
             }
             break;
-        case eSSSnapshotItemRead_WaitOmOrderRecord:
+        case eSSSnapshotItemState_WaitOmOrderRecord:
             if (g_stSnapshotCtx.stReadItem.readItemOngoing == FALSE)
             {
-                g_stSnapshotCtx.eState = eSSSnapshotItemRead_Idle;
+                g_stSnapshotCtx.eState = eSSSnapshotItemState_Idle;
             }
             break;
         default:
@@ -670,12 +674,12 @@ static void SSSnapshot_NetParaDefault(void)
 {
     g_stSnapshotCtx.stNetPara.stFtpPara.eMode = eCddNetMFtpMode_Upload;
     g_stSnapshotCtx.stNetPara.stFtpPara.eFileFormat = eCddNetMFileType_BIN;
-    g_stSnapshotCtx.stNetPara.stFtpPara.port = 21;
+    g_stSnapshotCtx.stNetPara.stFtpPara.port = SSSNAPSHOT_CFG_RMTPORT_DEFAULT;
 
-    strncpy(g_stSnapshotCtx.stNetPara.stFtpPara.user, "gn_ftp_fw_cls", CDD_NETM_CFG_FTP_USERNAME_LEN + 1);
-    strncpy(g_stSnapshotCtx.stNetPara.stFtpPara.passwd, "24d79794d8b42ff5", CDD_NETM_CFG_FTP_PASSWD_LEN + 1);
-    strncpy(g_stSnapshotCtx.stNetPara.stFtpPara.ip, "fwftp.gongniu.cn", CDD_NETM_CFG_IP_LEN + 1);
-    strncpy(g_stSnapshotCtx.stNetPara.stFtpPara.path, "/AC_pile/D3_A32FB/", CDD_NETM_CFG_FTP_PATH_LEN);
+    strncpy(g_stSnapshotCtx.stNetPara.stFtpPara.user, SSSNAPSHOT_CFG_USER_DEFAULT, CDD_NETM_CFG_FTP_USERNAME_LEN + 1);
+    strncpy(g_stSnapshotCtx.stNetPara.stFtpPara.passwd, SSSNAPSHOT_CFG_PWD_DEFAULT, CDD_NETM_CFG_FTP_PASSWD_LEN + 1);
+    strncpy(g_stSnapshotCtx.stNetPara.stFtpPara.ip, SSSNAPSHOT_CFG_RMTIP_DEFAULT, CDD_NETM_CFG_IP_LEN + 1);
+    strncpy(g_stSnapshotCtx.stNetPara.stFtpPara.path, SSSNAPSHOT_CFG_RMTPATH_DEFAULT, CDD_NETM_CFG_FTP_PATH_LEN);
 }
 
 void SSSnapshot_InitMemory(void)

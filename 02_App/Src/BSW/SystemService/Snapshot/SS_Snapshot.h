@@ -43,14 +43,14 @@ typedef enum
 
 typedef enum                                                                                                                                 
 { 
-    eSSSnapshotItemRead_Idle = 0,
-    eSSSnapshotItemRead_ErrLog,
-    eSSSnapshotItemRead_WaitErrLog,
-    eSSSnapshotItemRead_RunLog,
-    eSSSnapshotItemRead_WaitRunLog,
-    eSSSnapshotItemRead_OmOrderRecord,
-    eSSSnapshotItemRead_WaitOmOrderRecord,
-} SSSnapshotItemRead_Enum;
+    eSSSnapshotItemState_Idle = 0,
+    eSSSnapshotItemState_ErrLog,
+    eSSSnapshotItemState_WaitErrLog,
+    eSSSnapshotItemState_RunLog,
+    eSSSnapshotItemState_WaitRunLog,
+    eSSSnapshotItemState_OmOrderRecord,
+    eSSSnapshotItemState_WaitOmOrderRecord,
+} SSSnapshotItemState_Enum;
 /******************************************************************************
 *    Typedef Definition
 ******************************************************************************/

@@ -747,7 +747,7 @@ void IotXDT_CheckErrStatus(void)
 						{
 							IotXDT_AddErrInfoQueue(gunNo, pErrDesc->errNo, pErrDesc, status, TRUE);
 							pErrDesc->lastStatus[gunNo] = status;
-							IOTXDT_CFG_DebugPrint("[%s()]: port: %d, status: %d, errdesc:%s\r\n", __FUNCTION__, index, status, pErrDesc->alarmDesc);
+							IOTXDT_CFG_DebugPrint("[%s()]: port: %d, status: %d, errdesc: %s\r\n", __FUNCTION__, gunNo, status, pErrDesc->alarmDesc);
 						}
 					}
 				}
@@ -755,7 +755,7 @@ void IotXDT_CheckErrStatus(void)
 				{
 					IotXDT_AddErrInfoQueue(gunNo, pErrDesc->errNo, pErrDesc, status, FALSE);
 					pErrDesc->lastStatus[gunNo] = status;
-					IOTXDT_CFG_DebugPrint("[%s()]: port: %d, status: %d, errdesc:%s\r\n", __FUNCTION__, index, status, pErrDesc->alarmDesc);
+					IOTXDT_CFG_DebugPrint("[%s()]: port: %d, status: %d, errdesc: %s\r\n", __FUNCTION__, gunNo, status, pErrDesc->alarmDesc);
 				}
 			}
 		}
