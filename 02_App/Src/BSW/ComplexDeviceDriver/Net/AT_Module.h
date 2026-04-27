@@ -40,6 +40,8 @@ typedef enum
     eATModuleCmd_QueryCOPS,                         /* 查询运营商 */
     eATModuleCmd_QueryNetWorkInfo,                  /* 查询网络信息 */
     eATModuleCmd_ConfigAPN,                         /* 配置APN */
+    eATModuleCmd_QueryNetState,                         /* 查询网络状态 */
+    
     eATModuleCmd_ActivePDP,                         /* 激活PDP */
     eATModuleCmd_QueryPDPState,                     /* 查询PDP状态 */
     eATModuleCmd_SetCFUN0,                          /* 设置最小功能模式 */

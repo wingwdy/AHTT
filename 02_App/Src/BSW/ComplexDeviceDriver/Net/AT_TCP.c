@@ -75,11 +75,11 @@ static uint8_t ATTCP_FailHandle(uint8_t socketIndex, void * socketPara, uint8_t 
 const ATCmdDescribtor_Struct c_stTCPATCmdDescribtor[eATTCPCmd_Count] =
 {
     [eATTCPCmd_Open] =
-    { "AT+QIOPEN=1,[ID],\"TCP\",\"[MIP]\",[MPORT],0,0\r\n",     "+QIOPEN=",          NULL,   3,   20000,     3000,  TRUE, "建立连接",
+    { "AT+QIOPEN=1,[ID],\"TCP\",\"[MIP]\",[MPORT],0,0\r\n",     "OK\r\n",          NULL,   3,   20000,     3000,  TRUE, "建立连接",
     ATTCP_PackOpenSocket,                                       ATTCP_RecvOpenSocket,                    ATTCP_FailHandle},
 
     [eATTCPCmd_Read] =
-    { "AT+QIRD=[ID],1460\r\n",                                  "+QIRD:",            NULL,   3,   3000,      500,   FALSE, "数据读取",
+    { "AT+QIRD=[ID],1460\r\n",                                  "+QIRD",            NULL,   3,   3000,      500,   FALSE, "数据读取",
     ATTCP_PackReadData,                                         ATTCP_RecvData,                          ATTCP_FailHandle},
 
     [eATTCPCmd_Write] =
@@ -87,11 +87,11 @@ const ATCmdDescribtor_Struct c_stTCPATCmdDescribtor[eATTCPCmd_Count] =
     ATTCP_PackWriteData,                                        ATTCP_RecvWrite,                         ATTCP_FailHandle},
 
     [eATTCPCmd_Close] =
-    { "AT+QICLOSE=[ID]\r\n",                                    "+QICLOSE",          NULL,   3,   5000,      3000,  TRUE, "关闭连接",
+    { "AT+QICLOSE=[ID]\r\n",                                    "OK\r\n",          NULL,   3,   5000,      3000,  TRUE, "关闭连接",
     ATTCP_PackQIPClose,                                         ATTCP_RecvClose,                         ATTCP_FailHandle},
 
     [eATTCPCmd_QueryState] =
-    { "AT+QISTATE=1,[ID]\r\n",                                  "+QISTATE:",         NULL,   3,   5000,      3000,  FALSE, "查询连接状态",
+    { "AT+QISTATE=1,[ID]\r\n",                                  "+QISTATE:",         "OK\r\n",   3,   5000,      3000,  FALSE, "查询连接状态",
     ATTCP_PackQIPQurey,                                         ATTCP_RecvQuery,                         ATTCP_FailHandle},
 };
 
@@ -189,7 +189,6 @@ static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *p
     uint8_t *pDest = NULL;
     uint8_t ret = FALSE;
     int32_t recvLen = 0;
-    uint16_t offset = 0;
 
     pTemp = Common_SearchData(pData, dataLen, "ERROR", strlen("ERROR"));
 
@@ -199,36 +198,39 @@ static uint8_t ATTCP_RecvData(uint8_t socketIndex, void * socketPara, uint8_t *p
 
         if (pTemp != NULL)
         {
-            if (sscanf((char*)pTemp, "+QIRD: %d\r", &recvLen) != 1 || 0 == recvLen)
+            ret = TRUE;
+
+            if (sscanf((char*)pTemp, "+QIRD: %d\r", &recvLen) == 1)
             {
-                ret = TRUE;
-            }
-            else
-            {
-                pDest = Common_SearchData(pData, dataLen, "\r\n", strlen("\r\n"));
+                pDest = Common_SearchData(pTemp, dataLen - (pTemp - pData), "\r\n", strlen("\r\n"));
 
                 if (pDest != NULL)
                 {
-                    pDest += strlen("\r\n");
-                    offset = pDest - pData;
-
-                    if ((dataLen - offset) >= recvLen)
+                    if (recvLen > 0)
                     {
+                        pDest += strlen("\r\n");
                         FrameQueue_PushRx(pSocketPara->stTcpPara.frameQueueChannelID, NULL, 0, pDest, recvLen);
-
-                        /*
-                        CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]Recv Data[%d]: \r\n", pSocketCtrl->socketIndex, recvLen);
-                        DSLogM_HexOutput(pDest, recvLen); 
-                        */
+                        pDest += recvLen;
                     }
 
-                    ret = TRUE;
+                    pDealLen[0] = (pDest - pData);
+
+                    pDest = Common_SearchData(pDest, dataLen - (pDest - pData), "OK\r\n", strlen("OK\r\n"));
+
+                    if (pDest != NULL)
+                    {
+                        pDealLen[0] = (pDest - pData) + strlen("OK\r\n");
+                    }
+                }
+                else
+                {
+                    pDealLen[0] = dataLen;
                 }
             }
         }
     }
 
-	return ret;
+    return ret;
 }
 
 static uint8_t ATTCP_RecvWrite(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen)

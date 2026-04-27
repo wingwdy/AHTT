@@ -139,6 +139,7 @@ static uint8_t CddDrvEG800AK_PowerOn(void)
         case CDDDRV_EG800AK_CTRL_STEPEND:
         {
             result = GLOBAL_OPT_STATE_SUCCESS;
+            CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_ATE0);
             break;
         }
         default:
@@ -459,12 +460,13 @@ static void CddDrvEG800AK_ATTaskRecvHandle(uint8_t *recvbuf)
                     else
                     {
                         bAnswerOK = TRUE;
-                        postLen -= strlen(pATCmdDescribtor->cATAnswerHead);
                     }
 
                     /* 接收处理函数内部未处理dealLen */
                     if (dealLen == 0)
                     {
+                        postLen -= strlen(pATCmdDescribtor->cATAnswerHead);
+
                         if (bAnswerOK == TRUE && pATCmdDescribtor->cATAnswerTail != NULL)
                         {
                             pTail = (char *)Common_SearchData(recvbuf + (remainLen - postLen), postLen, pATCmdDescribtor->cATAnswerTail, strlen(pATCmdDescribtor->cATAnswerTail));
@@ -494,7 +496,8 @@ static void CddDrvEG800AK_ATTaskRecvHandle(uint8_t *recvbuf)
                 }
             }
             
-            while (remainLen > 0)
+            /* 保证缓存区的数据长度，必须大于最小长度 */
+            while (remainLen > 4)
             {
                 dealLen = CddDrvEg800AK_UrcDecode(recvbuf, &g_stCddDrvEG800AKCtrl, remainLen, printFlag);
 
@@ -684,7 +687,6 @@ static void CddDrvEG800AK_noCommTimeoutDetect(void)
 
 static void CddDrvEG800AK_StartModuleCfg(void)
 {
-    CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_ATE0);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryModule);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QuerySimRecognizeStatus);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryIccid);
@@ -694,6 +696,7 @@ static void CddDrvEG800AK_StartModuleCfg(void)
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryCOPS);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryNetWorkInfo);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_ConfigAPN);
+    CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryNetState);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_ActivePDP);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryPDPState);
 }

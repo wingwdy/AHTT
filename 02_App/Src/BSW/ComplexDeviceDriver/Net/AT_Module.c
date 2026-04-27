@@ -67,71 +67,74 @@ static uint32_t ATModule_UrcNtp(uint8_t *pData, void * modulePara, uint16_t data
 const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
 {
     [eATModuleCmd_ATE0] =
-    { "ATE0\r\n",                               "ATE0",           NULL,       3,          5000,     3000,  TRUE, "关闭回显",
+    { "ATE0\r\n",                               "ATE0",           "OK\r\n",   3,          5000,     5000,  TRUE, "关闭回显",
         NULL,                                   NULL,                         ATModule_FailHandle},
 
     [eATModuleCmd_QueryModule] =
-    { "ATI\r\n",                               "OK\r\n",          NULL,       3,          5000,     3000,  TRUE, "识别模块",
+    { "ATI\r\n",                               "Quectel",         "OK\r\n",   3,          5000,     3000,  TRUE, "识别模块",
         NULL,                                   NULL,                         ATModule_FailHandle},
 
     [eATModuleCmd_QuerySimRecognizeStatus] =  
-    { "AT+CPIN?\r\n",                          "OK\r\n",         NULL,        10,          3000,     1000,  TRUE, "sim识别状态查询",
+    { "AT+CPIN?\r\n",                          "+CPIN: READY",    "OK\r\n",   10,         3000,     1000,  TRUE, "sim识别状态查询",
     NULL,                                      ATModule_RecvCPIN,             ATModule_FailHandle},
 
     [eATModuleCmd_QueryIccid] =  
-    { "AT+QCCID\r\n",                          "OK\r\n",         NULL,        3,          10000,    3000,  TRUE, "sim卡iccid查询",
+    { "AT+QCCID\r\n",                          "+QCCID:",         "OK\r\n",   3,          10000,    3000,  TRUE, "sim卡iccid查询",
     NULL,                                      ATModule_RecvIccid,            ATModule_FailHandle},
 
     [eATModuleCmd_QueryCsq] =  
-    { "AT+CSQ\r\n",                            "+CSQ:",           NULL,       3,          5000,     3000,  TRUE, "查询信号强度",
+    { "AT+CSQ\r\n",                            "+CSQ:",           "OK\r\n",   3,          5000,     3000,  TRUE, "查询信号强度",
     NULL,                                      ATModule_RecvCSQ,              NULL},
 
     [eATModuleCmd_QueryNtpClk] =  
-    { "AT+QNTP=1,\"ntp1.aliyun.com\"\r\n",    "+QNTP=",           NULL,       3,          5000,     3000,  TRUE, "查询NTP时间",
+    { "AT+QNTP=1,\"ntp1.aliyun.com\"\r\n",    "OK\r\n",           NULL,       3,          5000,     3000,  TRUE, "查询NTP时间",
     NULL,                                      NULL,                          NULL},
 
     [eATModuleCmd_QueryCGREG] =  
-    { "AT+CGREG?\r\n",                        "+CGREG:",          NULL,       3,          10000,    3000,  TRUE, "PS服务网络连接状态查询",
+    { "AT+CGREG?\r\n",                        "+CGREG:",          "OK\r\n",   3,          10000,    3000,  TRUE, "PS服务网络连接状态查询",
     NULL,                                      ATModule_RecvCGREG,            ATModule_FailHandle},
 
     [eATModuleCmd_QueryCOPS] =  
-    { "AT+COPS?\r\n",                         "+COPS:",           NULL,       10,         3000,     3000,  TRUE, "查询运营商",
+    { "AT+COPS?\r\n",                         "+COPS:",           "OK\r\n",   10,         3000,     3000,  TRUE, "查询运营商",
     NULL,                                      ATModule_RecvCOPS,             ATModule_FailHandle},
 
     [eATModuleCmd_QueryNetWorkInfo] =  
-    { "AT+QNWINFO\r\n",                        "+QNWINFO:",       NULL,       3,          10000,    3000,  TRUE, "查询网络信息",
+    { "AT+QNWINFO\r\n",                        "+QNWINFO:",       "OK\r\n",   3,          10000,    3000,  TRUE, "查询网络信息",
     NULL,                                      NULL,                          ATModule_FailHandle},
 
     [eATModuleCmd_ConfigAPN] =  
-    { "AT+QICSGP=1,1,\"[APN]\",\"\",\"\",0\r\n", "+QICSGP",       NULL,       3,          10000,    3000,  TRUE, "配置APN",
-    ATModule_PackConfigAPN,                    ATModule_RecvOKACK,            ATModule_FailHandle},
+    { "AT+CGDCONT=1,\"IP\",\"[APN]\"\r\n",    "OK\r\n",           NULL,       3,          10000,    3000,  TRUE,    "配置APN",
+    ATModule_PackConfigAPN,                    NULL,              ATModule_FailHandle},
+
+    [eATModuleCmd_QueryNetState] =  
+    { "AT+QENG=\"SERVINGCELL\"\r\n",          "+QENG:",           "OK\r\n",    3,          10000,    3000,  TRUE,    "查询网络状态",
+    NULL,                                      NULL,               ATModule_FailHandle},
 
     [eATModuleCmd_ActivePDP] =  
-    { "AT+QIACT=1\r\n",                        "+QIACT",          NULL,       3,          10000,    3000,  TRUE, "激活PDP",
+    { "AT+QIACT=1\r\n",                        "OK\r\n",          NULL,       1,          5000,     5000,  TRUE, "激活PDP",
     NULL,                                      NULL,                          ATModule_FailHandle},
     
     [eATModuleCmd_QueryPDPState] =  
-    { "AT+QIACT?\r\n",                         "+QIACT",          NULL,       3,          10000,    3000,  TRUE, "查询PDP状态",
+    { "AT+QIACT?\r\n",                         "+QIACT",         "OK\r\n",   3,          10000,    3000,  TRUE, "查询PDP状态",
     NULL,                                      ATModule_RecvPDPState,         ATModule_FailHandle},
 
     [eATModuleCmd_SetCFUN0] =  
-    { "AT+CFUN=0\r\n",                         "+CFUN=0",         NULL,       3,          10000,    3000,  TRUE, "设置最小功能模式",
+    { "AT+CFUN=0\r\n",                         "OK\r\n",         NULL,       3,          10000,    3000,  TRUE, "设置最小功能模式",
     NULL,                                      NULL,                         ATModule_FailHandle},
 
     [eATModuleCmd_SetCFUN1] =  
-    { "AT+CFUN=1\r\n",                         "+CFUN=1",         NULL,       3,          10000,    3000,  TRUE, "设置全功能模式",
+    { "AT+CFUN=1\r\n",                         "OK\r\n",         NULL,       3,          10000,    3000,  TRUE, "设置全功能模式",
     NULL,                                      NULL,                         ATModule_FailHandle},
 };
 
 
-/* 高频的往上放 */
+/* 高频的往上放， 需注意urc长度过短，会在接收处理处直接丢弃，目前限制最小必须大于4个字符 */
 const ATUrcDescribtor_Struct c_stATUrcDescribtor[14] =
 {
     { "+QMTPUBEX:",           "\r\n",   ATMQTT_UrcQMTPubex,       TRUE,    "MQTT数据发送完成"},
     { "+QMTRECV: ",           NULL,     ATMQTT_UrcQMTRecv,        TRUE,    "MQTT接收数据"},
     { "SEND OK",              "\r\n",   ATTCP_UrcSendOK,          FALSE,   "数据发送成功"},
     { "+QIURC: \"recv\"",     "\r\n",   ATTCP_UrcRecv,            FALSE,   "新数据通知"},
-
 
     { "+QFWRITE:",            "OK\r\n", ATFTP_UrcRecvWrite,       TRUE,    "写文件应答"},
 
@@ -379,6 +382,10 @@ static uint8_t ATModule_RecvPDPState(uint8_t socketID, void * modulePara, uint8_
             {
                 CddDrvEG800AK_SetModuleState(eCddNetMModuleState_Work);
                 ret = TRUE;
+            }
+            else
+            {
+
             }
         }
     }

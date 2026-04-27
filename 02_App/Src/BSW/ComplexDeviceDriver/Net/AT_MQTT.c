@@ -69,9 +69,6 @@ static uint16_t ATMQTT_PackConnect(uint8_t socketIndex, void * socketPara, uint8
 static uint16_t ATMQTT_PackSubscribe(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t nATLen);
 static uint16_t ATMQTT_PackPublish(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t nATLen);
 
-
-static uint8_t ATMQTT_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
-static uint8_t ATMQTT_RecvOpen(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
 static uint8_t ATMQTT_RecvConnect(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
 static uint8_t ATMQTT_RecvSubscribe(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
 static uint8_t ATMQTT_RecvQueryState(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
@@ -87,35 +84,35 @@ static void ATMQTT_SetSocketState(uint8_t socketIndex, void *socketPara, CddNetM
 const ATCmdDescribtor_Struct c_stMQTTATCmdDescribtor[eATMQTTCmd_Count] =
 {
     [eATMQTTCmd_ConfigDataFormat] =
-    { "AT+QMTCFG=\"dataformat\",[ID]\r\n",        "dataformat",            NULL,       3,   5000,     3000,  TRUE,    "查询数据格式",
-    ATMQTT_PackConfig,                            ATMQTT_RecvOKACK,                    ATMQTT_FailHandle },
+    { "AT+QMTCFG=\"dataformat\",[ID]\r\n",        "+QMTCFG:",            "OK\r\n",      3,   5000,     3000,  TRUE,    "查询数据格式",
+    ATMQTT_PackConfig,                            NULL,                                ATMQTT_FailHandle },
 
     [eATMQTTCmd_ConfigVersion] =
-    { "AT+QMTCFG=\"version\",[ID],[VSN]\r\n",     "version",               NULL,       3,   5000,     3000,  TRUE,    "MQTT版本配置",
-    ATMQTT_PackConfig,                            ATMQTT_RecvOKACK,                    ATMQTT_FailHandle },
+    { "AT+QMTCFG=\"version\",[ID],[VSN]\r\n",     "OK\r\n",               NULL,        3,   5000,     3000,  TRUE,    "MQTT版本配置",
+    ATMQTT_PackConfig,                            NULL,                                ATMQTT_FailHandle },
 
     [eATMQTTCmd_ConfigPing] =
-    { "AT+QMTCFG=\"qmtping\",[ID],30\r\n",        "qmtping",               NULL,       3,   5000,     3000,  TRUE,    "PingReq配置",
-    ATMQTT_PackConfig,                            ATMQTT_RecvOKACK,                    ATMQTT_FailHandle },
+    { "AT+QMTCFG=\"qmtping\",[ID],30\r\n",        "OK\r\n",               NULL,        3,   5000,     3000,  TRUE,    "PingReq配置",
+    ATMQTT_PackConfig,                            NULL,                                ATMQTT_FailHandle },
 
     [eATMQTTCmd_ConfigKeepAlive] =
-    { "AT+QMTCFG=\"keepalive\",[ID],[ALIVE]\r\n", "keepalive",             NULL,       3,   5000,     3000,  TRUE,    "保活配置",
-    ATMQTT_PackConfig,                            ATMQTT_RecvOKACK,                    ATMQTT_FailHandle },
+    { "AT+QMTCFG=\"keepalive\",[ID],[ALIVE]\r\n", "OK\r\n",               NULL,        3,   5000,     3000,  TRUE,    "保活配置",
+    ATMQTT_PackConfig,                            NULL,                                ATMQTT_FailHandle },
 
     [eATMQTTCmd_ConfigCleanSession] =
-    { "AT+QMTCFG=\"session\",[ID], 1\r\n",        "session",               NULL,       3,   5000,     3000,  TRUE,    "配置会话类型",
-    ATMQTT_PackConfig,                            ATMQTT_RecvOKACK,                    ATMQTT_FailHandle },
+    { "AT+QMTCFG=\"session\",[ID], 1\r\n",        "OK\r\n",               NULL,         3,   5000,     3000,  TRUE,    "配置会话类型",
+    ATMQTT_PackConfig,                            NULL,                                ATMQTT_FailHandle },
 
     [eATMQTTCmd_ConfigRecvMode] =
-    { "AT+QMTCFG=\"recv/mode\",[ID],0,1\r\n",     "recv/mode",             NULL,       3,   5000,     3000,  TRUE,    "配置接收模式",
-    ATMQTT_PackConfig,                            ATMQTT_RecvOKACK,                    ATMQTT_FailHandle },
+    { "AT+QMTCFG=\"recv/mode\",[ID],0,1\r\n",     "OK\r\n",               NULL,        3,   5000,     3000,  TRUE,    "配置接收模式",
+    ATMQTT_PackConfig,                            NULL,                                ATMQTT_FailHandle },
 
     [eATMQTTCmd_Open] =
-    { "AT+QMTOPEN=[ID],\"[IP]\",[PORT]\r\n",      "+QMTOPEN:",             NULL,       3,   30000,   10000,  TRUE,    "打开客户端网络",
-    ATMQTT_PackOpen,                              ATMQTT_RecvOpen,                     ATMQTT_FailHandle },
+    { "AT+QMTOPEN=[ID],\"[IP]\",[PORT]\r\n",      "OK\r\n",               NULL,        3,   30000,   10000,  TRUE,    "打开客户端网络",
+    ATMQTT_PackOpen,                              NULL,                                ATMQTT_FailHandle },
 
     [eATMQTTCmd_Connect] =
-    { "AT+QMTCONN=[ID],\"[PID]\",\"[NAME]\",\"[PASSWORD]\"\r\n","+QMTCONN=",  NULL,    3,   30000,  3000,  TRUE,      "连接客户端服务器",
+    { "AT+QMTCONN=[ID],\"[PID]\",\"[NAME]\",\"[PASSWORD]\"\r\n","OK\r\n",  NULL,       3,   30000,  3000,      TRUE,      "连接客户端服务器",
     ATMQTT_PackConnect,                           ATMQTT_RecvConnect,                  ATMQTT_FailHandle },
 
     [eATMQTTCmd_Subscribe] =
@@ -127,11 +124,11 @@ const ATCmdDescribtor_Struct c_stMQTTATCmdDescribtor[eATMQTTCmd_Count] =
     ATMQTT_PackPublish,                            ATMQTT_RecvPublish,                 ATMQTT_FailHandle },
 
     [eATMQTTCmd_QueryState] =
-    { "AT+QMTCONN?\r\n",                          "+QMTCONN:",             NULL,       3,   5000,      3000,  TRUE,   "查询连接状态",
+    { "AT+QMTCONN?\r\n",                          "+QMTCONN",            "OK\r\n",    3,   5000,      3000,  TRUE,   "查询连接状态",
     NULL,                                         ATMQTT_RecvQueryState,               ATMQTT_FailHandle },
 
     [eATMQTTCmd_Close] =
-    { "AT+QMTCLOSE=[ID]\r\n",                     "+QMTCLOSE",             NULL,       3,   5000,      3000,  TRUE,   "关闭客户端网络",
+    { "AT+QMTCLOSE=[ID]\r\n",                     "OK\r\n",             NULL,          1,   5000,      3000,  TRUE,   "关闭客户端网络",
     ATMQTT_PackConfig,                            ATMQTT_RecvClose,                    ATMQTT_FailHandle },
 };
 
@@ -278,87 +275,14 @@ static uint16_t ATMQTT_PackPublish(uint8_t socketIndex, void * socketPara, uint8
     return nATLen;
 }
 
-static uint8_t ATMQTT_RecvOKACK(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen)
-{
-    uint8_t *pTemp = NULL;
-    uint8_t ret = FALSE;
-    pTemp = Common_SearchData(pData, dataLen, "OK", strlen("OK"));
-    
-    if (pTemp != NULL)
-    {
-        ret = TRUE;
-    }
-
-    return ret;
-}
-
-static uint8_t ATMQTT_RecvOpen(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen)
-{
-    CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
-    ATMQTTPrivate_Struct *pPrivate = (ATMQTTPrivate_Struct *)pSocketCtrl->user_data;
-    uint8_t *pTemp = NULL;
-    uint8_t ret = FALSE;
-    int32_t connectState = 0;
-    int32_t clientIndex = 0;
-
-    pTemp = Common_SearchData(pData, dataLen, "+QMTOPEN: ", strlen("+QMTOPEN: "));
-
-    if (NULL != pTemp)
-    {
-        if (2 == sscanf((char*)pTemp, "+QMTOPEN: %d,%d\r\n", &clientIndex, &connectState))
-        {
-            if (clientIndex < CDDDRV_EG800AK_CFG_SOCKET_COUNT && clientIndex == socketIndex)
-            {
-                if (connectState == 0)
-                {
-                    if (pPrivate->waitMqttOpenOkFlag == TRUE)
-                    {
-                        pPrivate->waitMqttOpenOkFlag = FALSE;
-                        CddDrvEG800AK_AddCmd(pSocketCtrl->socketIndex, eATMQTTCmd_Connect);
-                    }
-
-                    ret = TRUE;
-                }
-                else
-                {
-                    CDDDRV_EG800AK_CFG_LogPrint("[socket: %d]连接失败，errcode: %d !\r\n", socketIndex, connectState);
-
-                    if (connectState == 2 || connectState == 3)
-                    {
-                        CddDrvEG800AK_SetModuleState(eCddNetMModuleState_AbNormal);
-                        CddDrvEG800AK_SetAbnormalType(eCddDrvEG800AKAbnormalHandle_CFun);
-                        ret = TRUE;
-                    }
-                    else
-                    {
-                        ATMQTT_CloseSocket(pSocketCtrl);
-                        ret = FALSE;
-                    }
-                }
-            }
-        }
-    }
-
-    return ret;
-}
-
 static uint8_t ATMQTT_RecvConnect(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen)
 {
     CddDrvEG800AKSocketCtrl_Struct *pSocketCtrl = (CddDrvEG800AKSocketCtrl_Struct *)socketPara;
     ATMQTTPrivate_Struct *pPrivate = (ATMQTTPrivate_Struct *)pSocketCtrl->user_data;
-    uint8_t *pTemp = NULL;
-    uint8_t ret = FALSE;
 
-    pTemp = Common_SearchData(pData, dataLen, "OK", strlen("OK"));
-
-    if (pTemp != NULL)
-    {
-        pPrivate->waitMqttConnectOkFlag = TRUE;
-        pPrivate->waitMqttConnectOkTickStart = Common_GetSystick();
-        ret = TRUE;
-    }
-
-    return ret;
+    pPrivate->waitMqttConnectOkFlag = TRUE;
+    pPrivate->waitMqttConnectOkTickStart = Common_GetSystick();
+    return TRUE;
 }
 
 static uint8_t ATMQTT_RecvSubscribe(uint8_t socketIndex, void * socketPara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen)
