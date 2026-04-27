@@ -49,6 +49,8 @@
 
 #define CDDCP_CFG_LogPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_CP, fmt, ##__VA_ARGS__)
 #define CDDCP_CFG_RunLogPrint(fmt, ...)       DSLOGM_Info(DSLogMModule_CP, fmt, ##__VA_ARGS__)
+
+#define CDDCP_CFG_VOLSTATE_COUNT              (4)
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -65,8 +67,10 @@ typedef struct
 
 typedef struct 
 {
-    uint16_t lowerVolLimit;
-    uint16_t upperVolLimit;
+    uint16_t abnormalLowerVolLimit;
+    uint16_t normalLowerVolLimit;
+    uint16_t normalUpperVolLimit;
+    uint16_t abnormalUpperVolLimit;
     uint16_t statefiterCnt;
     CddCPVolState_Enum eVoltageState;
 }CddCPVolStateFilter_Struct;

@@ -58,22 +58,21 @@ const CddCPOpsConfig_Struct c_stCddCPOpsConfigTable =
     .pFunSetPwmDuty = CddCPCfg_SetPwmDuty,
 };
 
-const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterGB[4] = 
+const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterGB[CDDCP_CFG_VOLSTATE_COUNT] = 
 {
-    [eCddCPVolState_Ground] = {     0,      1999,   CDDCP_CFG_GB_FILERCNT,  eCddCPVolState_Ground  },
-    [eCddCPVolState_6V] =     {  5000,      7000,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_6V  },
-    [eCddCPVolState_9V] =     {  8000,     10000,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_9V  },
-    [eCddCPVolState_12V] =    { 11000,     13000,   CDDCP_CFG_GB_FILERCNT,     eCddCPVolState_12V  },
+    [eCddCPVolState_Ground] = {     0,     0,  2000,   2000,   CDDCP_CFG_GB_FILERCNT,  eCddCPVolState_Ground  },
+    [eCddCPVolState_6V] =     {  4000,  5000,  7000,   8000,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_6V  },
+    [eCddCPVolState_9V] =     {  4000,  8000,  10000,  11000,  CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_9V  },
+    [eCddCPVolState_12V] =    { 11001,  11001, 13000,  13001,  CDDCP_CFG_GB_FILERCNT,     eCddCPVolState_12V  },
 };
 
-const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterQB[4] = 
+const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterQB[CDDCP_CFG_VOLSTATE_COUNT] = 
 {
-    [eCddCPVolState_Ground] = {     0,      1999,   CDDCP_CFG_QB_FILERCNT,  eCddCPVolState_Ground  },
-    [eCddCPVolState_6V]     = {  3000,      7800,   CDDCP_CFG_QB_FILERCNT,      eCddCPVolState_6V  },
-    [eCddCPVolState_9V]     = {  8000,     10000,   CDDCP_CFG_QB_FILERCNT,      eCddCPVolState_9V  },
-    [eCddCPVolState_12V]    = { 11000,     13000,   CDDCP_CFG_QB_FILERCNT,     eCddCPVolState_12V  },
+    [eCddCPVolState_Ground] = {     0,     0,  2000,   2000,   CDDCP_CFG_GB_FILERCNT,  eCddCPVolState_Ground  },
+    [eCddCPVolState_6V] =     {  4000,  3000,  7800,   8000,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_6V  },
+    [eCddCPVolState_9V] =     {  4000,  8000,  10000,  11000,  CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_9V  },
+    [eCddCPVolState_12V] =    { 11001,  11001, 13000,  13001,  CDDCP_CFG_GB_FILERCNT,     eCddCPVolState_12V  },
 };
-
 
 /*******************************************************************************
 *    Function Source Code
