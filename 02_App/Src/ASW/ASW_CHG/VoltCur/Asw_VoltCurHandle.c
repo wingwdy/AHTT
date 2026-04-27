@@ -23,34 +23,48 @@
 *    Header File Inclusion
 *******************************************************************************/
 
-
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
 
 
-
-
 /*******************************************************************************
 *    Enum Definition
 *******************************************************************************/
+typedef enum
+{
+    eAswVoltCurWorkState_Init,          /* 初始状态 */
+    eAswVoltCurWorkState_Normal,        /* 正常状态 */
+}AswVoltCurWorkState_Enum;
+
+typedef enum
+{
+    eAswVoltCurErrorType_L1OverVoltage,
+    eAswVoltCurErrorType_L1LessVoltage,
+    eAswVoltCurErrorType_L1OverCurrent,
+    eAswVoltCurErrorType_Count,
+}AswVoltCurHandleState_Enum;
+
 
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
 typedef struct 
 {
+    AswVoltCurWorkState_Enum eWorkState;
     uint8_t  lastAuthStatus;
 
-    uint8_t  setCurrentValid;
-    uint32_t setOutputCurrent;
-
-    uint32_t limitOutputCurrent;
+    uint8_t  setCurrentValid;       /* 更新过额定电流值标记 */
+    uint32_t setOutputCurrent;      /* 当前设置电流值 */
 
     uint32_t maxOutputCurrent;
 	uint32_t prevMaxOutputCurrent;
-    uint8_t arFaultStatus[AswVoltCur_EvtCnt];
-    FilterProfile1_Struct arfilter[AswVoltCur_EvtCnt];
+
+    uint32_t overCurrSetThreshold;      /* 过流阈值 */
+    uint32_t overCurrClearThreshold;    /* 过流恢复阈值 */
+
+    uint8_t arFaultStatus[eAswVoltCurErrorType_Count];
+    FilterProfile1_Struct stErrorfilter[eAswVoltCurErrorType_Count];
 }AswVoltCurHandle_Struct;
 
 /*******************************************************************************
@@ -62,147 +76,252 @@ static AswVoltCurHandle_Struct g_arAswVoltCurHandle[SYSCFG_CFG_GUN_NUM] = {0};
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
+static void AswVolCur_L1OverVoltageDetect(uint8_t port, AswVoltCurHandle_Struct *pHandle);
+static void AswVolCur_L1LessVoltageDetect(uint8_t port, AswVoltCurHandle_Struct *pHandle);
+static void AswVolCur_L1OverCurrentDetect(uint8_t port, AswVoltCurHandle_Struct *pHandle);
+static void AswVoltCur_WorkStateManage(uint8_t port, AswVoltCurHandle_Struct *pHandle);
+static void AswVoltCur_UpdateOverCurrThreshold(uint8_t port, AswVoltCurHandle_Struct *pHandle);
+static void AswVoltCur_CurrentLimitManage(uint8_t port, AswVoltCurHandle_Struct *pHandle);
 
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-static void AswVoltCur_ErrorManage(uint8_t port)
+static void AswVolCur_L1OverVoltageDetect(uint8_t port, AswVoltCurHandle_Struct *pHandle)
 {
-    uint8_t i = 0;
-    uint8_t result = FALSE;
-    uint8_t tempStatus = 0;
-    uint32_t tmpVoltCurr = 0;
-    AswVoltCurHandle_Struct *pHandle = &g_arAswVoltCurHandle[port];
+    CddCPVolState_Enum eCPState;
+    uint32_t tmpVolt = CddMeterM_GetRmsVoltage(port);
+    FilterProfile1_Struct *pFilter = &pHandle->stErrorfilter[eAswVoltCurErrorType_L1OverVoltage];
 
-    for (i = 0; i < AswVoltCur_EvtCnt; i++)
+    if (tmpVolt >= ASWVOLTCUR_CFG_SET_OV_THR)
     {
-        if (c_AswVoltCurHandleConfigTable[i].type == AswVoltType)
-        {
-            tmpVoltCurr = CddMeterM_GetRmsVoltage(port);
-        }
-        else
-        {
-            tmpVoltCurr = CddMeterM_GetRmsCurrent(port);
-        }
+        pFilter->status = TRUE;
+    }
+    else if (tmpVolt <= ASWVOLTCUR_CFG_CLR_OV_THR)
+    {
+        pFilter->status = FALSE;
+    } 
+    else
+    {
+        pFilter->status = pFilter->validStatus;
+    }
 
-        switch (c_AswVoltCurHandleConfigTable[i].compareType)
+    if (Filter_Profile1(pFilter, ASWVOLTCUR_CFG_OV_FILTER_COUNT) == TRUE)
+    {
+        if (pFilter->validStatus == TRUE)
         {
-            case AswVoltCurCmp_MaxEqu:
-            {
-                tempStatus = CHECK_MAX_EQU(tmpVoltCurr, c_AswVoltCurHandleConfigTable[i].threshold);
-                break;
-            }
-            case AswVoltCurCmp_Max:
-            {
-                tempStatus = CHECK_MAX(tmpVoltCurr, c_AswVoltCurHandleConfigTable[i].threshold);
-                break;
-            }
-            case AswVoltCurCmp_MinEqu:
-            {
-                tempStatus = CHECK_MIN_EQU(tmpVoltCurr, c_AswVoltCurHandleConfigTable[i].threshold);
-                break;
-            }
-            case AswVoltCurCmp_Min:
-            {
-                tempStatus = CHECK_MIN(tmpVoltCurr, c_AswVoltCurHandleConfigTable[i].threshold);
-                break;
-            }
-            case AswVoltCurCmp_Equ:
-            {
-                tempStatus = CHECK_EQU(tmpVoltCurr, c_AswVoltCurHandleConfigTable[i].threshold);
-                break;
-            }
-            default:
-            {
-                break;
-            }
+            AswErrhandle_SetErrExsitCallback(port, eErr_AphaseInputOverVol);
+            pHandle->arFaultStatus[eAswVoltCurErrorType_L1OverVoltage] = TRUE;
         }
+    }
 
-        pHandle->arfilter[i].status = tempStatus;
-        result = Filter_Profile1(&pHandle->arfilter[i], c_AswVoltCurHandleConfigTable[i].filterCount);
-     	
-		if (pHandle->arfilter[i].validStatus == TRUE)
-		{
-			if (c_AswVoltCurHandleConfigTable[i].setErrFlag == TRUE && pHandle->arFaultStatus[i] == FALSE)
-			{
-				pHandle->arFaultStatus[i] = TRUE;
-				AswErrhandle_SetErrExsitCallback(port, c_AswVoltCurHandleConfigTable[i].errType);
-			}
-			if (c_AswVoltCurHandleConfigTable[i].setErrFlag == FALSE)
-			{
-				CddCPVolState_Enum eCPState = CddCP_GetVolState(port);
-				if (pHandle->arFaultStatus[i] == FALSE && eCPState == eCddCPVolState_12V)
-				{/*拔枪状态且满足阈值条件*/
-					pHandle->arFaultStatus[i] = TRUE;
-					AswErrhandle_ResetErrExsitCallback(port, c_AswVoltCurHandleConfigTable[i].errType);
-				}
-			}
-		}
-		else
-		{
-			pHandle->arFaultStatus[i] = FALSE;
-		}	
+    if (pHandle->arFaultStatus[eAswVoltCurErrorType_L1OverVoltage] == TRUE && pFilter->validStatus == FALSE)
+    {
+        eCPState = CddCP_GetVolState(port);
+
+        if (eCPState == eCddCPVolState_12V)
+        {
+            AswErrhandle_ResetErrExsitCallback(port, eErr_AphaseInputOverVol);
+            pHandle->arFaultStatus[eAswVoltCurErrorType_L1OverVoltage] = FALSE;
+            memset(pFilter, 0, sizeof(FilterProfile1_Struct));
+        }
     }
 }
 
-static void AswVoltCur_LimitManage(uint8_t port)
+static void AswVolCur_L1LessVoltageDetect(uint8_t port, AswVoltCurHandle_Struct *pHandle)
 {
-    LimitCurrentLevel_Enum level = AswLimitCurrLevelZero;
-    uint8_t authStatus = 0;
-    AswVoltCurHandle_Struct *pHandle = NULL;
+    CddCPVolState_Enum eCPState;
+    uint32_t tmpVolt = CddMeterM_GetRmsVoltage(port);
+    FilterProfile1_Struct *pFilter = &pHandle->stErrorfilter[eAswVoltCurErrorType_L1LessVoltage];
 
-	if (port < SYSCFG_CFG_GUN_NUM)
-	{
-        pHandle = &g_arAswVoltCurHandle[port];
-        authStatus = ASW_VOLTCUR_CFG_IsAuthState(port);
-        level = AswTempHandle_GetLimitCurrentLevel(port);
+    if (tmpVolt <= ASWVOLTCUR_CFG_SET_UV_THR)
+    {
+        pFilter->status = TRUE;
+    }
+    else if (tmpVolt >= ASWVOLTCUR_CFG_CLR_UV_THR)
+    {
+        pFilter->status = FALSE;
+    } 
+    else
+    {
+        pFilter->status = pFilter->validStatus;
+    }
 
-        if (pHandle->maxOutputCurrent != pHandle->prevMaxOutputCurrent)
+    if (Filter_Profile1(pFilter, ASWVOLTCUR_CFG_UV_FILTER_COUNT) == TRUE)
+    {
+        if (pFilter->validStatus == TRUE)
         {
-            ASWVOLTCUR_CFG_DebugPrint("当前额定电流发生变化：%d.%03d --->%d.%03d A\r\n", pHandle->prevMaxOutputCurrent / 1000, 
-            pHandle->prevMaxOutputCurrent % 1000, pHandle->maxOutputCurrent / 1000, pHandle->maxOutputCurrent % 1000);
-            pHandle->prevMaxOutputCurrent = pHandle->maxOutputCurrent;
-            CddCP_AdjustCurRateCurrent(port, pHandle->maxOutputCurrent);
+            AswErrhandle_SetErrExsitCallback(port, eErr_AphaseInputLessVol);
+            pHandle->arFaultStatus[eAswVoltCurErrorType_L1LessVoltage] = TRUE;
+        }
+    }
+
+    if (pHandle->arFaultStatus[eAswVoltCurErrorType_L1LessVoltage] == TRUE && pFilter->validStatus == FALSE)
+    {
+        eCPState = CddCP_GetVolState(port);
+
+        if (eCPState == eCddCPVolState_12V)
+        {
+            AswErrhandle_ResetErrExsitCallback(port, eErr_AphaseInputLessVol);
+            pHandle->arFaultStatus[eAswVoltCurErrorType_L1LessVoltage] = FALSE;
+            memset(pFilter, 0, sizeof(FilterProfile1_Struct));
+        }
+    }
+}
+
+static void AswVolCur_L1OverCurrentDetect(uint8_t port, AswVoltCurHandle_Struct *pHandle)
+{
+    CddCPVolState_Enum eCPState;
+    uint32_t tmpCurr = CddMeterM_GetRmsCurrent(port);
+    FilterProfile1_Struct *pFilter = &pHandle->stErrorfilter[eAswVoltCurErrorType_L1OverCurrent];
+
+    if (tmpCurr >= pHandle->overCurrSetThreshold)
+    {
+        pFilter->status = TRUE;
+    }
+    else if (tmpCurr <= pHandle->overCurrClearThreshold)
+    {
+        pFilter->status = FALSE;
+    } 
+    else
+    {
+        pFilter->status = pFilter->validStatus;
+    }
+
+    if (Filter_Profile1(pFilter, ASWVOLTCUR_CFG_OC_FILTER_COUNT) == TRUE)
+    {
+        if (pFilter->validStatus == TRUE)
+        {
+            AswErrhandle_SetErrExsitCallback(port, eErr_OutputOverCurr);
+            pHandle->arFaultStatus[eAswVoltCurErrorType_L1OverCurrent] = TRUE;
+        }
+    }
+
+    if (pHandle->arFaultStatus[eAswVoltCurErrorType_L1OverCurrent] == TRUE)
+    {
+        eCPState = CddCP_GetVolState(port);
+
+        if (eCPState == eCddCPVolState_12V)
+        {
+            AswErrhandle_ResetErrExsitCallback(port, eErr_OutputOverCurr);
+            pHandle->arFaultStatus[eAswVoltCurErrorType_L1OverCurrent] = FALSE;
+            memset(pFilter, 0, sizeof(FilterProfile1_Struct));
+        }
+    }
+}
+
+static void AswVoltCur_WorkStateManage(uint8_t port, AswVoltCurHandle_Struct *pHandle)
+{
+    switch (pHandle->eWorkState)
+    {
+    case eAswVoltCurWorkState_Init:
+    {
+        if (CddMeterM_GetReadyFlag(port) == TRUE)
+        {
+            pHandle->eWorkState = eAswVoltCurWorkState_Normal;
         }
 
-        if (authStatus != pHandle->lastAuthStatus)
-        {
-            if (authStatus == FALSE)
-            {
-                pHandle->maxOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
-                pHandle->setCurrentValid = FALSE;
-            }
+        break;
+    }
 
-            pHandle->lastAuthStatus = authStatus;
+    case eAswVoltCurWorkState_Normal:
+    {
+        AswVolCur_L1OverVoltageDetect(port, pHandle);
+        AswVolCur_L1LessVoltageDetect(port, pHandle);
+        AswVolCur_L1OverCurrentDetect(port, pHandle);
+        AswVoltCur_CurrentLimitManage(port, pHandle);
+        break;
+    }
+
+    default:
+    {
+        pHandle->eWorkState = eAswVoltCurWorkState_Init;
+        memset(pHandle, 0, sizeof(AswVoltCurHandle_Struct));
+        break;
+    }
+    }
+}
+
+static void AswVoltCur_UpdateOverCurrThreshold(uint8_t port, AswVoltCurHandle_Struct *pHandle)
+{
+    uint32_t tempOverCurrSetThreshold = 0;
+    uint32_t tempOverCurrClearThreshold = 0;
+    
+    if (pHandle->maxOutputCurrent != 0)
+    {
+        if (pHandle->maxOutputCurrent > 20000)
+        {
+            tempOverCurrSetThreshold = (pHandle->maxOutputCurrent * 110) / 100;
+            tempOverCurrClearThreshold = tempOverCurrSetThreshold - 10;
         }
         else
         {
-            if (level != AswLimitCurrLevelOne)
-            {
-                pHandle->limitOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
-            }
-            else
-            {
-                pHandle->limitOutputCurrent = (SYSCFG_CFG_MAX_OUTPUT_CURRENT * 80) / 100;
-            }
+            tempOverCurrSetThreshold = pHandle->maxOutputCurrent + 2000;
+            tempOverCurrClearThreshold = tempOverCurrSetThreshold - 10;
+        }
 
-            if (pHandle->setCurrentValid == TRUE)
+        if (tempOverCurrSetThreshold != pHandle->overCurrSetThreshold || 
+            tempOverCurrClearThreshold != pHandle->overCurrClearThreshold)
+        {
+            ASWVOLTCUR_CFG_InfoPrint("更新过流阈值：%d.%03d A --->%d.%03d A\r\n", pHandle->overCurrSetThreshold / 1000, 
+            pHandle->overCurrSetThreshold % 1000, tempOverCurrSetThreshold / 1000, tempOverCurrSetThreshold % 1000);
+            pHandle->overCurrSetThreshold = tempOverCurrSetThreshold;
+            pHandle->overCurrClearThreshold = tempOverCurrClearThreshold;
+        }
+    }
+}
+
+static void AswVoltCur_CurrentLimitManage(uint8_t port, AswVoltCurHandle_Struct *pHandle)
+{
+    LimitCurrentLevel_Enum level = AswTempHandle_GetLimitCurrentLevel(port);;
+    uint8_t authStatus = ASW_VOLTCUR_CFG_IsAuthState(port);
+    uint32_t limitOutputCurrent = 0;
+
+    if (pHandle->maxOutputCurrent != pHandle->prevMaxOutputCurrent)
+    {
+        ASWVOLTCUR_CFG_DebugPrint("当前额定电流发生变化：%d.%03d --->%d.%03d A\r\n", pHandle->prevMaxOutputCurrent / 1000, 
+        pHandle->prevMaxOutputCurrent % 1000, pHandle->maxOutputCurrent / 1000, pHandle->maxOutputCurrent % 1000);
+        pHandle->prevMaxOutputCurrent = pHandle->maxOutputCurrent;
+        CddCP_AdjustCurRateCurrent(port, pHandle->maxOutputCurrent);
+        AswVoltCur_UpdateOverCurrThreshold(port, pHandle);
+    }
+
+    if (authStatus != pHandle->lastAuthStatus)
+    {
+        if (authStatus == FALSE)
+        {
+            pHandle->maxOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
+            pHandle->setCurrentValid = FALSE;
+        }
+
+        pHandle->lastAuthStatus = authStatus;
+    }
+    else
+    {
+        if (level != AswLimitCurrLevelOne)
+        {
+            limitOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
+        }
+        else
+        {
+            limitOutputCurrent = (SYSCFG_CFG_MAX_OUTPUT_CURRENT * 80) / 100;
+        }
+
+        if (pHandle->setCurrentValid == TRUE)
+        {
+            if (pHandle->setOutputCurrent <= limitOutputCurrent)
             {
-                if (pHandle->setOutputCurrent <= pHandle->limitOutputCurrent)
-                {
-                    pHandle->maxOutputCurrent = pHandle->setOutputCurrent;
-                }
-                else
-                {
-                    pHandle->maxOutputCurrent = pHandle->limitOutputCurrent;
-                }
+                pHandle->maxOutputCurrent = pHandle->setOutputCurrent;
             }
             else
             {
-                pHandle->maxOutputCurrent = pHandle->limitOutputCurrent;
+                pHandle->maxOutputCurrent = limitOutputCurrent;
             }
         }
-	}
+        else
+        {
+            pHandle->maxOutputCurrent = limitOutputCurrent;    
+        }
+    }
 }
 
 /* 
@@ -292,22 +411,20 @@ void AswVoltCurHandle_InitMemory(void)
     {
         g_arAswVoltCurHandle[port].prevMaxOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
         g_arAswVoltCurHandle[port].maxOutputCurrent = SYSCFG_CFG_MAX_OUTPUT_CURRENT;
+        g_arAswVoltCurHandle[port].overCurrSetThreshold = ASWVOLTCUR_CFG_SET_OC_THR;
+        g_arAswVoltCurHandle[port].overCurrClearThreshold = ASWVOLTCUR_CFG_CLR_OC_THR;
     }
 }
 
 void AswVoltCurHandle_MainFunction(void)
 {
+    AswVoltCurHandle_Struct *pHandle = NULL;
     uint8_t port = 0;
-    uint8_t readFlag = 0;
 
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
-        readFlag = CddMeterM_GetReadyFlag(port);
-        if (readFlag == TRUE)
-        {
-            AswVoltCur_ErrorManage(port);
-            AswVoltCur_LimitManage(port);
-        }
+        pHandle = &g_arAswVoltCurHandle[port];
+        AswVoltCur_WorkStateManage(port, pHandle);
     }
 }
 
