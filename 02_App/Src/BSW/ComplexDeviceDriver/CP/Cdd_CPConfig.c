@@ -61,17 +61,17 @@ const CddCPOpsConfig_Struct c_stCddCPOpsConfigTable =
 const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterGB[CDDCP_CFG_VOLSTATE_COUNT] = 
 {
     [eCddCPVolState_Ground] = {     0,      0,   2000,   2000,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_Ground },
-    [eCddCPVolState_6V] =     {  4000,   5000,   7000,   8000,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_6V  },
-    [eCddCPVolState_9V] =     {  4000,   8000,  10000,  11000,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_9V  },
-    [eCddCPVolState_12V] =    { 11001,  11001,  13000,  13001,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_12V },
+    [eCddCPVolState_6V] =     {  4000,   4200,   7800,   8000,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_6V  },
+    [eCddCPVolState_9V] =     {  7800,   8000,  10800,  11000,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_9V  },
+    [eCddCPVolState_12V] =    { 11000,  11000,  13000,  13000,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_12V },
 };
 
 const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterQB[CDDCP_CFG_VOLSTATE_COUNT] = 
 {
-    [eCddCPVolState_Ground] = {     0,      0,   2000,   2000,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_Ground  },
-    [eCddCPVolState_6V] =     {  3000,   3000,   7800,   8000,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_6V  },
-    [eCddCPVolState_9V] =     {  4000,   8000,  10000,  11000,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_9V  },
-    [eCddCPVolState_12V] =    { 11001,  11001,  13000,  13001,   CDDCP_CFG_GB_FILERCNT,      eCddCPVolState_12V },
+    [eCddCPVolState_Ground] = {     0,      0,   2000,   2000,   CDDCP_CFG_QB_FILERCNT,      eCddCPVolState_Ground  },
+    [eCddCPVolState_6V] =     {  3000,   3000,   7800,   8000,   CDDCP_CFG_QB_FILERCNT,      eCddCPVolState_6V  },
+    [eCddCPVolState_9V] =     {  7800,   8000,  10800,  11000,   CDDCP_CFG_QB_FILERCNT,      eCddCPVolState_9V  },
+    [eCddCPVolState_12V] =    { 11000,  11000,  13000,  13000,   CDDCP_CFG_QB_FILERCNT,      eCddCPVolState_12V },
 };
 
 /*******************************************************************************

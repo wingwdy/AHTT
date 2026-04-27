@@ -336,34 +336,28 @@ static void CddCP_VolStateHandle(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
         }
         else
         {
-            /* 未找到正常状态 */
+            /* 在初始状态，未找到正常状态 */
             if (pCPCtrl->eTempCpVolState == eCddCPVolState_Init)
             {
-                /* 初始态：进入故障态 */
-                if (pCPCtrl->eTempCpVolState != eCddCPVolState_Err)
-                {
-                    pCPCtrl->volStatefilerTimer = (CDDCP_CFG_IsQBStandardMode() == TRUE) ? CDDCP_CFG_QB_FILERCNT : CDDCP_CFG_GB_FILERCNT;
-                    pCPCtrl->eTempCpVolState = eCddCPVolState_Err;
-                }
+                pCPCtrl->volStatefilerTimer = (CDDCP_CFG_IsQBStandardMode() == TRUE) ? CDDCP_CFG_QB_FILERCNT : CDDCP_CFG_GB_FILERCNT;
+                pCPCtrl->eTempCpVolState = eCddCPVolState_Err;
             }
             else if (pCPCtrl->eTempCpVolState != eCddCPVolState_Err)
             {
                 /* 非初始态：检查是否在当前状态的异常电压区间内 */
                 pCurVolStateFilter = &pMap[(uint8_t)pCPCtrl->eTempCpVolState];
+
+                /* 超出异常电压区间：进入故障态 */
                 if (pCPCtrl->cpVol > pCurVolStateFilter->abnormalUpperVolLimit || pCPCtrl->cpVol < pCurVolStateFilter->abnormalLowerVolLimit)
                 {
-                    /* 超出异常电压区间：进入故障态 */
-                    if (pCPCtrl->eTempCpVolState != eCddCPVolState_Err)
-                    {
-                        pCPCtrl->volStatefilerTimer = (CDDCP_CFG_IsQBStandardMode() == TRUE) ? CDDCP_CFG_QB_FILERCNT : CDDCP_CFG_GB_FILERCNT;
-                        pCPCtrl->eTempCpVolState = eCddCPVolState_Err;
-                    }
+                    pCPCtrl->volStatefilerTimer = (CDDCP_CFG_IsQBStandardMode() == TRUE) ? CDDCP_CFG_QB_FILERCNT : CDDCP_CFG_GB_FILERCNT;
+                    pCPCtrl->eTempCpVolState = eCddCPVolState_Err;
                 }
                 /* 否则：维持当前状态，不做处理 */
             }
             else
             {
-                /* 未进入到新的正常电压区间，维持当前状态 */
+                /* 未进入到新的正常电压区间，维持故障态 */
             }
         }
 
@@ -377,8 +371,8 @@ static void CddCP_VolStateHandle(uint8_t port, CddCPCtrl_Struct *pCPCtrl)
                 if (pCPCtrl->eValidCpVolState != pCPCtrl->eTempCpVolState)
                 {
                     CDDCP_CFG_DebugPrint("[枪：%d]CP电压状态：%s ---> %s, 当前CP电压值：%d.%03d V\r\n",
-                    port, c_cpStateName[pCPCtrl->eValidCpVolState], c_cpStateName[pCPCtrl->eTempCpVolState]
-                    , pCPCtrl->cpVol/1000, pCPCtrl->cpVol % 1000);
+                    port, c_cpStateName[pCPCtrl->eValidCpVolState], c_cpStateName[pCPCtrl->eTempCpVolState],
+                    pCPCtrl->cpVol/1000, pCPCtrl->cpVol % 1000);
                     pCPCtrl->eValidCpVolState = pCPCtrl->eTempCpVolState;
                     CddCP_CPVolErrDetect(port, pCPCtrl);
                 }
