@@ -65,6 +65,7 @@ const MSMemifConfig_Struct c_stMSMemifConfigTable[MSMEMIF_DEVICE_EA_COUNT] =
         .pFuncInsertRecord = TSDBAdapt_InsertRecord,
         .pFuncSetReportSuccess = TSDBAdapt_SetRecordReportSuccess,
         .pFuncQueryLatestUnreportedRecord = TSDBAdapt_QueryLatestUnreportedRecord,
+        .pFuncQueryLatestRecordTime = TSDBAdapt_QueryLatestRecordTime,
         .pFuncQueryRecordByTime = TSDBAdapt_QueryRecordByTime,
         .pFuncQueryRecordByExternal = TSDBAdapt_QueryRecordByExternal,
     },

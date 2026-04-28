@@ -56,6 +56,7 @@ uint32_t MSMemIf_QueryTotalRecordCount(uint16_t deviceID, uint16_t memIfID);
 GlobalRet_Enum MSMemIf_InsertRecord(uint16_t deviceID, uint16_t memIfID, uint8_t *pInRecord, uint16_t recordSize);
 GlobalRet_Enum MSMemIf_SetReportSuccess(uint16_t deviceID, uint16_t memIfID, uint32_t time);
 GlobalRet_Enum MSMemIf_QueryLatestUnreportedRecord(uint16_t deviceID, uint16_t memIfID, uint8_t *pOutRecord, uint16_t recordSize, uint32_t *pTime);
+GlobalRet_Enum MSMemIf_QueryLatestRecordTime(uint16_t deviceID, uint16_t memIfID, uint32_t *pTime);
 GlobalRet_Enum MSMemIf_QueryRecordByTime(uint16_t deviceID, uint16_t memIfID, uint8_t *pOutRecord, uint16_t recordSize, uint32_t time);
 GlobalRet_Enum MSMemIf_QueryRecordByExternal(uint16_t deviceID, uint16_t memIfID, uint8_t *para, uint16_t paraSize, pNvmCmpFunc pCmpFunc, 
     uint8_t *pInRecord, uint16_t recordSize);

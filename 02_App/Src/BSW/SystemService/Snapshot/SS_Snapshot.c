@@ -48,7 +48,7 @@ typedef struct
     uint8_t readItemOngoing;
     MSNvmBlockID_Enum readBlockID;
     uint32_t exportItemStartTick;
-    uint32_t totalCount;
+    uint32_t latestTime;
     uint32_t currentReadTime;
     uint16_t singleItemSize;
     uint8_t sizeFlag;
@@ -383,36 +383,36 @@ GlobalRet_Enum SSSnapshot_StartReadItem(SSSnapshotItemType_Enum eItemType)
     {
         if (eItemType == eSSSnapshotItemType_ErrorLog)
         {
-            pReadItemHandle->totalCount = MSNvm_QueryTotalRecordCount(eMSNvmBlockID_ErrorRecord);
+            pReadItemHandle->latestTime = MSNvm_QueryRecordLatestTime(eMSNvmBlockID_ErrorRecord);
             pReadItemHandle->readBlockID = eMSNvmBlockID_ErrorRecord;
             pReadItemHandle->singleItemSize = MSNVM_ERROR_INFO_MAX_LEN;
             pReadItemHandle->sizeFlag = FALSE;
 
-            if (0 == pReadItemHandle->totalCount)
+            if (0 == pReadItemHandle->latestTime)
             {
                 eRet = eGlobalRet_NotEnoughData;
             }
         }
         else if (eItemType == eSSSnapshotItemType_RunningLog)
         {
-            pReadItemHandle->totalCount = MSNvm_QueryTotalRecordCount(eMSNvmBlockID_RunningLogRecord);
+            pReadItemHandle->latestTime = MSNvm_QueryRecordLatestTime(eMSNvmBlockID_RunningLogRecord);
             pReadItemHandle->readBlockID = eMSNvmBlockID_RunningLogRecord;
             pReadItemHandle->singleItemSize = MSNVM_RUNNING_LOG_MAX_LEN;
             pReadItemHandle->sizeFlag = FALSE;
 
-            if (0 == pReadItemHandle->totalCount)
+            if (0 == pReadItemHandle->latestTime)
             {
                 eRet = eGlobalRet_NotEnoughData;
             }
         }
         else if (eItemType == eSSSnapshotItemType_OmOrderRecord)
         {
-            pReadItemHandle->totalCount = MSNvm_QueryTotalRecordCount(eMSNvmBlockID_OmOrderRecord);
+            pReadItemHandle->latestTime = MSNvm_QueryRecordLatestTime(eMSNvmBlockID_OmOrderRecord);
             pReadItemHandle->readBlockID = eMSNvmBlockID_OmOrderRecord;
             pReadItemHandle->singleItemSize = sizeof(MSNvmOrderInfo_Struct);
             pReadItemHandle->sizeFlag = TRUE;
 
-            if (0 == pReadItemHandle->totalCount)
+            if (0 == pReadItemHandle->latestTime)
             {
                 eRet = eGlobalRet_NotEnoughData;
             }
@@ -440,7 +440,7 @@ GlobalRet_Enum SSSnapshot_StartReadItem(SSSnapshotItemType_Enum eItemType)
         else
         {
             pReadItemHandle->eItemType = eItemType;
-            pReadItemHandle->currentReadTime = pReadItemHandle->totalCount;
+            pReadItemHandle->currentReadTime = pReadItemHandle->latestTime;
             pReadItemHandle->readItemOngoing = TRUE;
             pReadItemHandle->readOffset = 0;
             pReadItemHandle->remainSize = 0;
@@ -487,7 +487,7 @@ uint8_t SSSnapshot_ReadItem(uint8_t *pOutbuf, uint16_t bufSize, uint16_t *pOutLe
     
                 if (eGlobalRet_OK == MSNvm_QueryRecordByTime(pReadItemHandle->readBlockID,  pReadItemHandle->pItemBuf, 
                                                             pReadItemHandle->singleItemSize,pReadItemHandle->currentReadTime))
-                {
+                { 
                     pReadItemHandle->readOffset = 0;
                     pReadItemHandle->remainSize = pReadItemHandle->singleItemSize;
                     pReadItemHandle->currentReadTime--;

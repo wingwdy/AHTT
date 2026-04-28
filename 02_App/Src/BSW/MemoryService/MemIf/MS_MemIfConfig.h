@@ -44,6 +44,7 @@ typedef struct
     GlobalRet_Enum (*pFuncInsertRecord)(uint16_t memIfID, uint8_t *pInBuf, uint16_t dataLen);
     GlobalRet_Enum (*pFuncSetReportSuccess)(uint16_t memIfID, uint32_t time);
     GlobalRet_Enum (*pFuncQueryLatestUnreportedRecord)(uint16_t memIfID, uint8_t *pOutBuf, uint16_t dataLen, uint32_t *pTime);
+    GlobalRet_Enum (*pFuncQueryLatestRecordTime)(uint16_t memIfID, uint32_t *pTime);
     GlobalRet_Enum (*pFuncQueryRecordByTime)(uint16_t memIfID, uint8_t *pOutBuf, uint16_t dataLen, uint32_t time);
     GlobalRet_Enum (*pFuncQueryRecordByExternal)(uint16_t memIfID, uint8_t *para, uint16_t paraSize,
     pNvmCmpFunc pCmpFunc, uint8_t *pInBuf, uint16_t dataLen);

@@ -160,6 +160,19 @@ GlobalRet_Enum MSMemIf_QueryLatestUnreportedRecord(uint16_t deviceID, uint16_t m
     return eRet;
 }
 
+GlobalRet_Enum MSMemIf_QueryLatestRecordTime(uint16_t deviceID, uint16_t memIfID, uint32_t *pTime)
+{
+    GlobalRet_Enum eRet = eGlobalRet_NotInit;
+    PARA_ASSERT_RET(deviceID < MSMEMIF_DEVICE_EA_COUNT, eGlobalRet_ParaInvalid);
+
+    if (c_stMSMemifConfigTable[deviceID].pFuncQueryLatestRecordTime != NULL)
+    {
+        eRet = c_stMSMemifConfigTable[deviceID].pFuncQueryLatestRecordTime(memIfID, pTime);
+    }
+
+    return eRet;
+}
+
 GlobalRet_Enum MSMemIf_QueryRecordByTime(uint16_t deviceID, uint16_t memIfID, uint8_t *pOutRecord, uint16_t recordSize, uint32_t time)
 {
     GlobalRet_Enum eRet = eGlobalRet_NotInit;

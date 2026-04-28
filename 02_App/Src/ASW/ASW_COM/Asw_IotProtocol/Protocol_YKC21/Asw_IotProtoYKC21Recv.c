@@ -532,7 +532,7 @@ static void IotYKC21_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTYKC21_CFG_InfoPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTYKC21_CFG_InfoPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败!\r\n", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
                 }
@@ -712,7 +712,7 @@ static uint8_t IotYKC21_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, u
         {
             pChargeCtrl->chargeCtrlVal = pChargeCtrl->accountMoney;
         }
-        IOTYKC21_CFG_DebugPrint("[枪：%d]更新账户余额成功，余额：%d!\r\n", port[0], pChargeCtrl->accountMoney);
+        IOTYKC21_CFG_InfoPrint("[枪：%d]更新账户余额成功，余额：%d!\r\n", port[0], pChargeCtrl->accountMoney);
         pIotYKC21Ctx->stProtoData[port[0]].updateAccountMoneyResult = 0x00;
     }
     else
@@ -727,12 +727,12 @@ static uint8_t IotYKC21_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, u
                 {
                     pChargeCtrl->chargeCtrlVal = pChargeCtrl->accountMoney;
                 }
-                IOTYKC21_CFG_DebugPrint("[枪：%d]更新账户余额成功，余额：%d!\r\n", port[0], pChargeCtrl->accountMoney);
+                IOTYKC21_CFG_InfoPrint("[枪：%d]更新账户余额成功，余额：%d!\r\n", port[0], pChargeCtrl->accountMoney);
                 pIotYKC21Ctx->stProtoData[port[0]].updateAccountMoneyResult = 0x00;
             }
             else
             {
-                IOTYKC21_CFG_DebugPrint("[枪：%d]更新账户余额失败，卡号不一致!\r\n", port[0]);
+                IOTYKC21_CFG_InfoPrint("[枪：%d]更新账户余额失败，卡号不一致!\r\n", port[0]);
                 pIotYKC21Ctx->stProtoData[port[0]].updateAccountMoneyResult = 0x02;
             }
         }
@@ -861,7 +861,7 @@ static uint8_t IotYKC21_RecvSetQRCode(uint8_t *port, uint8_t *r_data, uint16_t l
     {
         memcpy(qrParam.qrcode, &pRecvData[index], QRCodelength);
         MSNvm_WriteParaBlock(eMSNvmBlockID_Gun0Qrcode, (uint8_t *)&qrParam, sizeof(MSNvmDrcode_Struct));
-        IOTYKC21_CFG_DebugPrint("[枪：%d]设置的二维码内容：%.100s\r\n", port[0], &pRecvData[index]);
+        IOTYKC21_CFG_InfoPrint("[枪：%d]设置的二维码内容：%.100s\r\n", port[0], &pRecvData[index]);
     }
 
     return TRUE;
@@ -1006,7 +1006,7 @@ static uint8_t IotYKC21_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, ui
 
         if (accountMoney <= IOTYKC21_CFG_CHARGE_MIN_ACCOUNT_MONEY)
         {
-            IOTYKC21_CFG_DebugPrint("余额不足，拒绝充电！余额：%d.%02d 元!\r\n", accountMoney / 100, accountMoney % 100);
+            IOTYKC21_CFG_InfoPrint("余额不足，拒绝充电！余额：%d.%02d 元!\r\n", accountMoney / 100, accountMoney % 100);
             pIotYKC21Ctx->stProtoData[port[0]].remoteStartResult = 0;
             /* 充电启动失败，余额不足 */
             pIotYKC21Ctx->stProtoData[port[0]].remoteStartFailReason = 0x4E;
@@ -1145,16 +1145,16 @@ static uint8_t IotYKC21_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, u
             }
 
             AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_CARD, TRUE);
-            IOTYKC21_CFG_DebugPrint("[枪：%d]充电桩申请主动启动充电成功!\r\n", port[0]);
+            IOTYKC21_CFG_InfoPrint("[枪：%d]充电桩申请主动启动充电成功!\r\n", port[0]);
         }
         else
         {
-            IOTYKC21_CFG_DebugPrint("[枪：%d]充电桩申请主动启动充电失败，失败原因：0x%02X!\r\n", port[0], pRecvData[index]);
+            IOTYKC21_CFG_InfoPrint("[枪：%d]充电桩申请主动启动充电失败，失败原因：0x%02X!\r\n", port[0], pRecvData[index]);
         }
     }
     else
     {
-        IOTYKC21_CFG_DebugPrint("[枪：%d]充电桩申请主动启动充电, 平台应答成功，但设备无法启动充电，失败原因：%d\r\n", port[0], failReason);
+        IOTYKC21_CFG_InfoPrint("[枪：%d]充电桩申请主动启动充电, 平台应答成功，但设备无法启动充电，失败原因：%d\r\n", port[0], failReason);
     }
 
     return TRUE;
@@ -1300,7 +1300,7 @@ void IotYKC21_TimeoutDetect(void)
                 Common_SetRptCount(pIotYKC21Ctx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
                 timeoutCount = Common_GetRptCount(pIotYKC21Ctx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
 
-                IOTYKC21_CFG_DebugPrint("[cmd:0x%02X %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, timeoutCount, pCmdRecvCtrl->maxTimeout);
+                IOTYKC21_CFG_InfoPrint("[cmd:0x%02X %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, timeoutCount, pCmdRecvCtrl->maxTimeout);
 
                 if (timeoutCount >= pCmdRecvCtrl->maxTryCnt)
                 {
@@ -1319,7 +1319,7 @@ void IotYKC21_TimeoutDetect(void)
                             Common_SetSendFlag(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_MULTI_ORDER_RECORD_REQ, FALSE);
 
                             MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotYKC21Ctx->time);
-                            IOTYKC21_CFG_DebugPrint("交易记录上报失败, 强行置为成功!\r\n");
+                            IOTYKC21_CFG_InfoPrint("交易记录上报失败, 强行置为成功!\r\n");
                         }
                         else
                         {

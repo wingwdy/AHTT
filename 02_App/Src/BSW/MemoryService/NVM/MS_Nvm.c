@@ -244,6 +244,19 @@ GlobalRet_Enum MSNvm_QueryLatestUnreportedRecord(MSNvmBlockID_Enum eBlockID, uin
     return MSMemIf_QueryLatestUnreportedRecord(pDescriptor->deviceID, pDescriptor->memIfID, pOutRecord, recordSize, pTime);
 }
 
+uint32_t MSNvm_QueryRecordLatestTime(MSNvmBlockID_Enum eBlockID)
+{
+    const MSNvmBlockDescriptor_Struct *pDescriptor = &c_stMSNvmBlockDescriptorTable[eBlockID];
+    uint32_t time = 0;
+
+    PARA_ASSERT_RET(eBlockID < eMSNvmBlockID_Count, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(g_stMsNvmCtrlCtx.initFlag == TRUE, eGlobalRet_NotInit);
+    PARA_ASSERT_RET(pDescriptor->deviceID == MSMEMIF_DEVICE_EA_TSDB, eGlobalRet_ParaInvalid);
+
+    MSMemIf_QueryLatestRecordTime(pDescriptor->deviceID, pDescriptor->memIfID, &time);
+    return time;
+}
+
 GlobalRet_Enum MSNvm_QueryRecordByTime(MSNvmBlockID_Enum eBlockID, uint8_t *pOutRecord, uint16_t recordSize, uint32_t time)
 {
     const MSNvmBlockDescriptor_Struct *pDescriptor = &c_stMSNvmBlockDescriptorTable[eBlockID];

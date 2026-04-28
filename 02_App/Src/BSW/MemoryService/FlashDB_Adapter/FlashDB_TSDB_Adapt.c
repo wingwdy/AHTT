@@ -382,6 +382,25 @@ GlobalRet_Enum TSDBAdapt_QueryLatestUnreportedRecord(uint16_t ch, uint8_t *pOutB
 	return eRet;
 }
 
+GlobalRet_Enum TSDBAdapt_QueryLatestRecordTime(uint16_t ch, uint32_t *pTime)
+{
+	TSDBAdaptChannel_Enum eCh = (TSDBAdaptChannel_Enum)ch;
+	GlobalRet_Enum eRet = eGlobalRet_Error;
+	TSDBAdaptConfig_Struct *pCfg = &g_stTSDBAdaptConfigTable[eCh];
+
+	PARA_ASSERT_RET(eCh < eTSDBAdaptChannel_Count, eGlobalRet_ParaInvalid);
+	PARA_ASSERT_RET(pTime != NULL, eGlobalRet_ParaInvalid);
+    PARA_ASSERT_RET(pCfg->initFlag == TRUE, eGlobalRet_NotInit);
+
+	if (pCfg->time > 0)
+	{
+		*pTime = pCfg->time;
+		eRet = eGlobalRet_OK;
+	}
+
+	return eRet;
+}
+
 GlobalRet_Enum TSDBAdapt_QueryRecordByTime(uint16_t ch, uint8_t *pOutBuf, uint16_t dataLen, uint32_t time)
 {
 	TSDBAdaptChannel_Enum eCh = (TSDBAdaptChannel_Enum)ch;

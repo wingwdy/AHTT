@@ -80,6 +80,7 @@ GlobalRet_Enum MSNvm_QueryLatestUnreportedRecord(MSNvmBlockID_Enum eBlockID, uin
 GlobalRet_Enum MSNvm_QueryRecordByTime(MSNvmBlockID_Enum eBlockID, uint8_t *pOutRecord, uint16_t recordSize, uint32_t time);
 GlobalRet_Enum MSNvm_QueryRecordByExternal(MSNvmBlockID_Enum eBlockID, uint8_t *para, uint16_t paraSize,
 pNvmCmpFunc pCmpFunc, uint8_t *pInRecord, uint16_t recordSize);
+uint32_t MSNvm_QueryRecordLatestTime(MSNvmBlockID_Enum eBlockID);
 
 /* 记录块和参数块 公共接口 */
 

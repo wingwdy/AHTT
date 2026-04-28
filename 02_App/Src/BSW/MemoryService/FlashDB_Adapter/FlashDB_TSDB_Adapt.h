@@ -59,6 +59,7 @@ uint32_t TSDBAdapt_QueryUnreportedRecordCount(uint16_t ch);
 GlobalRet_Enum TSDBAdapt_InsertRecord(uint16_t ch, uint8_t *pInBuf, uint16_t dataLen);
 GlobalRet_Enum TSDBAdapt_SetRecordReportSuccess(uint16_t ch, uint32_t time);
 GlobalRet_Enum TSDBAdapt_QueryLatestUnreportedRecord(uint16_t ch, uint8_t *pOutBuf, uint16_t dataLen, uint32_t *pTime);
+GlobalRet_Enum TSDBAdapt_QueryLatestRecordTime(uint16_t ch, uint32_t *pTime);
 GlobalRet_Enum TSDBAdapt_QueryRecordByTime(uint16_t ch, uint8_t *pOutBuf, uint16_t dataLen, uint32_t time);
 GlobalRet_Enum TSDBAdapt_QueryRecordByExternal(uint16_t ch, uint8_t *para, uint16_t paraSize,
     pNvmCmpFunc pCmpFunc, uint8_t *pInBuf, uint16_t dataLen);
