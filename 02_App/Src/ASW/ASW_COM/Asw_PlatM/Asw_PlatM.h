@@ -78,6 +78,7 @@ void AswPlatM_PrintAllConfigInfo(void);
 
 uint16_t AswPlatM_TransformRecord(MSNvmOrderInfo_Struct *pNvmOrderInfo, uint8_t *pOutRecord);
 void AswPlatM_DefaultPlatParam(void *param);
+void AswPlatM_DefaultPlatPrivateParam(void *param);
 MSNvmPlatParam_Struct * AswPlatM_GetPlatParamPtr(void);
 MSNvmPlatPrivateParam_Union * AswPlatM_GetPlatPrivateParamPtr(void);
 void AswPlatM_InitMemory(void);
