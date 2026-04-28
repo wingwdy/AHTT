@@ -214,7 +214,7 @@ static void MSNvmConfig_PlatParam(uint8_t *pIndata, uint16_t dataLen)
 
 static void MSNvmConfig_PlatPrivateParam(uint8_t *pIndata, uint16_t dataLen)
 {
-    memset(pIndata, 0x00, dataLen);
+    AswPlatM_DefaultPlatPrivateParam(pIndata);
 }
 
 static void MSNvmConfig_ForbidState(uint8_t *pIndata, uint16_t dataLen)

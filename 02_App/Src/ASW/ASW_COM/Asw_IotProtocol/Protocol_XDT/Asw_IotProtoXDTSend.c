@@ -1954,7 +1954,8 @@ void IotXDT_UpCtrlSendDeal(void)
                             IOTXDT_CFG_DebugPrint("FrameQueue_PushTx fail...[cmd: 0x%03X][dataLen = %d]\r\n", pSendCtrl->cmd, dataLen);
                             break;
                         }
-						
+
+						IOTXDT_CFG_DebugPrint("%s, %s\r\n", cTopic, txbuf);
 						extern size_t xPortGetFreeHeapSize( void );
 						IOTXDT_CFG_DebugPrint("Remaining heap size: %zu bytes\r\n", xPortGetFreeHeapSize());
                         Common_SetSendFlag(pIotXDTCtx->pFuncSendCtrl, port, pSendCtrl->cmd, TRUE);

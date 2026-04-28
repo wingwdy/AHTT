@@ -232,11 +232,7 @@ static void IotXDT_WSInitHandle(void)
     if (pPlatInfo->pileDataReportCycle == 0)
     {
         pPlatInfo->pileDataReportCycle = 60;
-
-        if (pPlatInfo->pileDataCycleReportEnable == FALSE)
-        {
-            pPlatInfo->pileDataCycleReportEnable = TRUE;
-        }
+        pPlatInfo->pileDataCycleReportEnable = TRUE;
     }
 
     if (pPlatInfo->amountChangeThreshold == 0)

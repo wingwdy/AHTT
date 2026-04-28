@@ -67,7 +67,7 @@ typedef struct SS_Snapshot
 
 typedef struct
 {
-    char logBuf[2][MSNVM_RUNNING_LOG_MAX_LEN];      // 运行日志(双)缓存
+    char logBuf[2][SSSNAPSHOT_CFG_RUNNING_LOG_SZIE];      // 运行日志(双)缓存
     uint16_t writeOft;                              // 写入缓存偏移
     uint8_t writeIdx;                               // 当前写缓存索引(0 or 1)
     uint8_t flushFlag;                              // 运行日志flush(写入flashdb)标记
@@ -174,16 +174,17 @@ static uint8_t SSSnapshot_ReadItemByTime(SSSnapshotItemType_Enum itemType, uint8
 static void SSSnapshot_PrintItemInfo(void)
 {
     SSSnapshotReadItem_Struct *pReadItemHandle = &g_stSnapshotCtx.stReadItem;
-    uint8_t data[MSNVM_RUNNING_LOG_MAX_LEN] = { 0 };
+    uint8_t data[SSSNAPSHOT_CFG_RUNNING_LOG_SZIE];
     uint16_t outLen = 0;
 
     if (pReadItemHandle->localPrintItemFlag == TRUE)
     {
         if (Common_JudgeTimeoutMs(g_stSnapshotCtx.cycPrintTick, SSSNAPSHOT_CFG_CYCLE_PRINT_PERIOD))
         {
+            memset(data, 0x00, SSSNAPSHOT_CFG_RUNNING_LOG_SZIE);
             g_stSnapshotCtx.cycPrintTick = Common_GetSystick();
         
-            if (TRUE == SSSnapshot_ReadItem(data, MSNVM_RUNNING_LOG_MAX_LEN, &outLen))
+            if (TRUE == SSSnapshot_ReadItem(data, SSSNAPSHOT_CFG_RUNNING_LOG_SZIE, &outLen))
             {
                 if (outLen > 0)
                 {
@@ -250,6 +251,11 @@ void SSSnapshot_ExportItem(SSSnapshotItemType_Enum itemType, SSSnapshotItemReadS
             snprintf(pSocketPara->stFtpPara.fileName, CDD_NETM_CFG_FTP_FILENAME_LEN + 1, "%s_%s_%04d%02d%02d.txt", 
                         pileDn, snapshotName, sttime.year, sttime.month, sttime.day);
 
+            if (eGlobalRet_OK != SSSnapshot_StartReadItem(itemType))
+            {
+                break;
+            }
+
             if (eGlobalRet_OK != CddNetM_CreatLink(eCddNetMSocketType_FTP, *pSocketPara, eCddNetMPlatType_File))
             {
                 SSSNAPSHOT_CFG_InfoPrint("创建FTP传输通道失败!\r\n");
@@ -260,7 +266,6 @@ void SSSnapshot_ExportItem(SSSnapshotItemType_Enum itemType, SSSnapshotItemReadS
             pReadItemHandle->eReadSrc = eReadSrc;
             pReadItemHandle->localPrintItemFlag = FALSE;
 
-            SSSnapshot_StartReadItem(itemType);
             SSSNAPSHOT_CFG_InfoPrint("开始远程快照[%d]读取!\r\n", itemType);
         }
     } while(0);
@@ -291,13 +296,13 @@ void SSSnapshot_InsertRunningLog(const char *buf, uint16_t len)
     {
         xSemaphoreTake(g_stSnapshotCtx.mutex, portMAX_DELAY);
 
-        remain = MSNVM_RUNNING_LOG_MAX_LEN - g_stSnapshotCtx.stRunLogCache.writeOft - 1;
+        remain = SSSNAPSHOT_CFG_RUNNING_LOG_SZIE - g_stSnapshotCtx.stRunLogCache.writeOft - 1;
 
         if (len > remain)
         {
             if (g_stSnapshotCtx.stRunLogCache.flushFlag == FALSE)
             {
-                totalSpace = remain + (MSNVM_RUNNING_LOG_MAX_LEN - 1);
+                totalSpace = remain + (SSSNAPSHOT_CFG_RUNNING_LOG_SZIE - 1);
                 
                 if (len > totalSpace)
                 {
@@ -344,8 +349,8 @@ static void SSSnapshot_HandleRunningLog(void)
         flushIdx = g_stSnapshotCtx.stRunLogCache.writeIdx ^ 1;
         MSNvm_InsertNewRecord(eMSNvmBlockID_RunningLogRecord,
                               (uint8_t *)g_stSnapshotCtx.stRunLogCache.logBuf[flushIdx],
-                              MSNVM_RUNNING_LOG_MAX_LEN);
-        memset(g_stSnapshotCtx.stRunLogCache.logBuf[flushIdx], 0x00, MSNVM_RUNNING_LOG_MAX_LEN);
+                              SSSNAPSHOT_CFG_RUNNING_LOG_SZIE);
+        memset(g_stSnapshotCtx.stRunLogCache.logBuf[flushIdx], 0x00, SSSNAPSHOT_CFG_RUNNING_LOG_SZIE);
         g_stSnapshotCtx.stRunLogCache.flushFlag = FALSE;
     }
 }
@@ -390,6 +395,7 @@ GlobalRet_Enum SSSnapshot_StartReadItem(SSSnapshotItemType_Enum eItemType)
     if (pReadItemHandle->readItemOngoing == TRUE)
     {
         eRet = eGlobalRet_DeviceBusy;
+        SSSNAPSHOT_CFG_InfoPrint("读取快照[%d]繁忙!\r\n", eItemType);
     }
     else
     {
@@ -403,6 +409,7 @@ GlobalRet_Enum SSSnapshot_StartReadItem(SSSnapshotItemType_Enum eItemType)
             if (0 == pReadItemHandle->latestTime)
             {
                 eRet = eGlobalRet_NotEnoughData;
+                SSSNAPSHOT_CFG_InfoPrint("读取快照[%d]无数据!\r\n", eItemType);
             }
         }
         else if (eItemType == eSSSnapshotItemType_RunningLog)
@@ -413,12 +420,13 @@ GlobalRet_Enum SSSnapshot_StartReadItem(SSSnapshotItemType_Enum eItemType)
 
             pReadItemHandle->latestTime = MSNvm_QueryRecordLatestTime(eMSNvmBlockID_RunningLogRecord);
             pReadItemHandle->readBlockID = eMSNvmBlockID_RunningLogRecord;
-            pReadItemHandle->singleItemSize = MSNVM_RUNNING_LOG_MAX_LEN;
+            pReadItemHandle->singleItemSize = SSSNAPSHOT_CFG_RUNNING_LOG_SZIE;
             pReadItemHandle->sizeFlag = FALSE;
 
             if (0 == pReadItemHandle->latestTime)
             {
                 eRet = eGlobalRet_NotEnoughData;
+                SSSNAPSHOT_CFG_InfoPrint("读取快照[%d]无数据!\r\n", eItemType);
             }
             else
             {
@@ -445,11 +453,13 @@ GlobalRet_Enum SSSnapshot_StartReadItem(SSSnapshotItemType_Enum eItemType)
             if (0 == pReadItemHandle->latestTime)
             {
                 eRet = eGlobalRet_NotEnoughData;
+                SSSNAPSHOT_CFG_InfoPrint("读取快照[%d]无数据!\r\n", eItemType);
             }
         }
         else
         {
             eRet = eGlobalRet_ParaInvalid;
+            SSSNAPSHOT_CFG_InfoPrint("读取快照[%d]参数无效!\r\n", eItemType);
         }
     }
 
@@ -461,11 +471,12 @@ GlobalRet_Enum SSSnapshot_StartReadItem(SSSnapshotItemType_Enum eItemType)
             pReadItemHandle->pItemBuf = NULL;
         }
 
-        pReadItemHandle->pItemBuf = myCalloc(MSNVM_RUNNING_LOG_MAX_LEN, 1);
+        pReadItemHandle->pItemBuf = myCalloc(SSSNAPSHOT_CFG_RUNNING_LOG_SZIE, 1);
         
         if (pReadItemHandle->pItemBuf == NULL)
         {
             eRet = eGlobalRet_NotEnoughBuf;
+            SSSNAPSHOT_CFG_InfoPrint("读取快照[%d]内存分配失败!\r\n", eItemType);
         }
         else
         {

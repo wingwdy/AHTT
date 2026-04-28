@@ -655,12 +655,11 @@ void AswPlatM_DefaultPlatParam(void *param)
 
     memset(pPlatParam, 0x00, sizeof(MSNvmPlatParam_Struct));
 
-    pPlatParam->platMainType = eAswPlatType_GN;
-    pPlatParam->platMainCardType = eAswPlatCardType_GN;
+    pPlatParam->platMainType = eAswPlatType_XDT;
+    pPlatParam->platMainCardType = eAswPlatCardType_XDT;
 
-    strcpy(pPlatParam->platMainIp, "pile.gongniu.cn");
-    pPlatParam->platMainPort = 5455;
-
+    strcpy(pPlatParam->platMainIp, "47.114.93.1");
+    pPlatParam->platMainPort = 1883;
     strcpy(pPlatParam->platAuxiliaryIp, "pmgmt.gongniu.cn");
     pPlatParam->platAuxiliaryPort = 45113;
 }
@@ -668,8 +667,13 @@ void AswPlatM_DefaultPlatParam(void *param)
 void AswPlatM_DefaultPlatPrivateParam(void *param)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = (MSNvmPlatPrivateParam_Union *)param;
+    MSNvmXDTParam_Struct *pXDTParam = &pPrivateParam->stXDTParam;
 
     memset(pPrivateParam, 0x00, sizeof(MSNvmPlatPrivateParam_Union));
+
+    strcpy(pXDTParam->platinfo.cOperator, "XDT");
+    strcpy(pXDTParam->platinfo.cProductKey, "7X9A2KQ6M8N4P1R5T7W3");
+    strcpy(pXDTParam->platinfo.cProductSecret, "B5N8V2M9K4X7Q1T6C3L9R");
 }
 
 void AswPlatM_InitMemory(void)

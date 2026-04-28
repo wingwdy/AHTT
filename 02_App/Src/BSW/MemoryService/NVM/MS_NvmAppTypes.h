@@ -32,7 +32,7 @@
 #define MSNVM_ERROR_INFO_MAX_LEN              288
 
 /* 运行日志长度 */
-#define MSNVM_RUNNING_LOG_MAX_LEN             2048
+#define MSNVM_RUNNING_LOG_MAX_LEN             3584
 
 /* 桩编码字符串长度 */
 #define MSNVM_PILE_DN_LEN                     40
