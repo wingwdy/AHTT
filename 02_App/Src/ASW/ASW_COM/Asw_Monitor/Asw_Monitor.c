@@ -517,16 +517,16 @@ void AswMonitor_PrintChargeData(void)
         cpVol = AswChargeIf_GetCpVoltage(port);
         cpDuty = AswChargeIf_GetCpDuty(port);
                                                                  
-        ASWMONITOR_CFG_DebugPrint("---------------------------------[枪: %d]信息[CP:%d.%03dV, %d.%01d%%]------------------------------------\r\n", 
+        ASWMONITOR_CFG_InfoPrint("---------------------------------[枪: %d]信息[CP:%d.%03dV, %d.%01d%%]------------------------------------\r\n", 
             port, cpVol / 1000, cpVol % 1000, cpDuty / 10, cpDuty % 10);
-        ASWMONITOR_CFG_DebugPrint("电压：%d.%02d V,\t电流：%d.%03d A,\t功率：%d.%03d W\r\n",
+        ASWMONITOR_CFG_InfoPrint("电压：%d.%02d V,\t电流：%d.%03d A,\t功率：%d.%03d W\r\n",
                                 voltage / 100, voltage % 100, current / 1000, current % 1000, power / 1000, power % 1000);
-        ASWMONITOR_CFG_DebugPrint("枪温：%d ℃,\t壳温：%d ℃,\t\t已充时间：%d s\r\n",
+        ASWMONITOR_CFG_InfoPrint("枪温：%d ℃,\t壳温：%d ℃,\t\t已充时间：%d s\r\n",
                                 (gunTemp - 50), (envTemp - 50), chargeTime);                                
-        ASWMONITOR_CFG_DebugPrint("已充电量：%d.%04d kWh,\t\t\t已充金额：%d.%04d 元,\r\n",
+        ASWMONITOR_CFG_InfoPrint("已充电量：%d.%04d kWh,\t\t\t已充金额：%d.%04d 元,\r\n",
                                 energy / 10000, energy % 10000, money / 10000, money % 10000);
-        ASWMONITOR_CFG_DebugPrint("电表读数：%d.%04d kWh\r\n", temp1, temp2);
-        ASWMONITOR_CFG_DebugPrint("----------------------------------------------------------------------------------------------\r\n");             
+        ASWMONITOR_CFG_InfoPrint("电表读数：%d.%04d kWh\r\n", temp1, temp2);
+        ASWMONITOR_CFG_InfoPrint("----------------------------------------------------------------------------------------------\r\n");             
     }
 }
 
@@ -553,38 +553,38 @@ static void AswMonitor_CardAuthHandle(void)
     {
         if (FALSE == CddNetM_CheckLinkConnectOK(eCddNetMPlatType_O))
         {
-            ASWMONITOR_CFG_DebugPrint("[枪：%d]刷卡成功，设备离线，拒绝充电!!\r\n", port);
+            ASWMONITOR_CFG_InfoPrint("[枪：%d]刷卡成功，设备离线，拒绝充电!!\r\n", port);
         }
         else if (AswErrHandle_IsExsistError(port) == TRUE)
         {
-            ASWMONITOR_CFG_DebugPrint("[枪：%d]刷卡成功，设备故障，拒绝充电!!\r\n", port);
+            ASWMONITOR_CFG_InfoPrint("[枪：%d]刷卡成功，设备故障，拒绝充电!!\r\n", port);
         }
         else if (AswChargeIf_CheckGunConnected(port) != TRUE)
         {
-            ASWMONITOR_CFG_DebugPrint("[枪：%d]刷卡成功，枪未连接，拒绝充电!!\r\n", port);
+            ASWMONITOR_CFG_InfoPrint("[枪：%d]刷卡成功，枪未连接，拒绝充电!!\r\n", port);
         }
         else if (AswMonitor_CheckBillModeValid(port) != TRUE)
         {
-            ASWMONITOR_CFG_DebugPrint("[枪：%d]刷卡成功，计费模型无效，拒绝充电!!\r\n", port);
+            ASWMONITOR_CFG_InfoPrint("[枪：%d]刷卡成功，计费模型无效，拒绝充电!!\r\n", port);
         }
         else if (SSUcm_IsUpdating() == TRUE)
         {
-            ASWMONITOR_CFG_DebugPrint("刷卡成功，设备在升级，拒绝充电!!\r\n");
+            ASWMONITOR_CFG_InfoPrint("刷卡成功，设备在升级，拒绝充电!!\r\n");
         }
         else if (TRUE == AswMonitor_CheckForbidState())
         {
-            ASWMONITOR_CFG_DebugPrint("刷卡成功，设备禁用，拒绝充电!!\r\n");
+            ASWMONITOR_CFG_InfoPrint("刷卡成功，设备禁用，拒绝充电!!\r\n");
         }
         else
         {
             if (TRUE == AswPlatM_SwipCardCharge(port))
             {
                 memcpy(pstAswMonitorData->stChargeCtrl.authCardID, bcdCardID, ASWMONITOR_CARD_ID_LEN);
-                ASWMONITOR_CFG_DebugPrint("[枪：%d]刷卡成功，请求启动充电!\r\n", port);
+                ASWMONITOR_CFG_InfoPrint("[枪：%d]刷卡成功，请求启动充电!\r\n", port);
             }
             else
             {
-                ASWMONITOR_CFG_DebugPrint("[枪：%d]刷卡成功，但是已经有卡在申请启动充电，本次刷卡作废!\r\n", port);
+                ASWMONITOR_CFG_InfoPrint("[枪：%d]刷卡成功，但是已经有卡在申请启动充电，本次刷卡作废!\r\n", port);
             }
         }
     }
@@ -596,7 +596,7 @@ static void AswMonitor_CardAuthHandle(void)
         }
         else
         {
-            ASWMONITOR_CFG_DebugPrint("刷卡成功，卡号不一致，拒绝停止充电!!\r\n");
+            ASWMONITOR_CFG_InfoPrint("刷卡成功，卡号不一致，拒绝停止充电!!\r\n");
         }
     }
     else
@@ -679,7 +679,7 @@ void AswMonitor_SetForbidState(uint8_t lockState, uint8_t lockReason)
     if (g_stAswMonitorCtx.forbidParam.forbidState != lockState ||
         g_stAswMonitorCtx.forbidParam.forbidReason != lockReason)
     {
-        ASWMONITOR_CFG_DebugPrint("设备禁用状态变化：[%d]--->[%d]\r\n", g_stAswMonitorCtx.forbidParam.forbidState, lockState);
+        ASWMONITOR_CFG_InfoPrint("设备禁用状态变化：[%d]--->[%d]\r\n", g_stAswMonitorCtx.forbidParam.forbidState, lockState);
         g_stAswMonitorCtx.forbidParam.forbidState = lockState;
         g_stAswMonitorCtx.forbidParam.forbidReason = lockReason;
         MSNvm_WriteParaBlock(eMSNvmBlockID_ForbidState, (uint8_t *)&g_stAswMonitorCtx.forbidParam, sizeof(MSNvmForbidState_Struct));
@@ -874,8 +874,7 @@ void AswMonitor_InitMemory(void)
         g_stAswMonitorCtx.forbidParam.forbidState = FALSE;
     }
 
-    ASWMONITOR_CFG_DebugPrint("设备锁机状态：%s\r\n", (g_stAswMonitorCtx.forbidParam.forbidState == 0) ? "未锁机" : "已锁机");
-
+    ASWMONITOR_CFG_InfoPrint("设备锁机状态：%s\r\n", (g_stAswMonitorCtx.forbidParam.forbidState == 0) ? "未锁机" : "已锁机");
     g_stAswMonitorCtrlPara.minAccountMoney = ASWMONITOR_CFG_CHARGE_MIN_ACCOUNT_MONEY;
 }
 

@@ -56,7 +56,8 @@
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
-
+#define SSSYSTEMM_CFG_DebugPrint(fmt, ...)             DSLOGM_Debug(DSLogMModule_System, fmt, ##__VA_ARGS__)
+#define SSSYSTEMM_CFG_InfoPrint(fmt, ...)              DSLOGM_Info(DSLogMModule_System, fmt, ##__VA_ARGS__)
 
 
 
@@ -95,7 +96,6 @@ static void SSSystemM_InitOne(void)
     DSConsole_Init();
     SSTM_InitMemory();
     SSWdgM_InitMemory();
-    SSSystemM_ShowInfo();
     McalMcu_ClearResetFlags();
 }
 
@@ -103,8 +103,8 @@ static void SSSystemM_InitTwo(void)
 {
     MSNvm_InitMemory();
     MSNvm_ReadAll();
-    
     SSSnapshot_InitMemory();
+    SSSystemM_ShowInfo();
     AswErrHandle_InitMemory();
     SSUcm_InitMemory();
 }
@@ -148,7 +148,7 @@ static void SSSystemM_ShowInfo(void)
     };
 
     snprintf(printInfo, sizeof(printInfo), "复位源：%s\r\n", st[eResetSource].cShowInfo);
-    DSLOGM_Debug(DSLogMModule_System, "%s", printInfo);
+    SSSYSTEMM_CFG_InfoPrint("%s", printInfo);
 }
 
 void SSSystemM_Init(void)

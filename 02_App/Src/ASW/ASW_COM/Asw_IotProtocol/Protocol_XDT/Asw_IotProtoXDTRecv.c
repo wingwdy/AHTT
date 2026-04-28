@@ -444,7 +444,7 @@ static uint8_t IotXDT_RecvLinkRsp_ITEM824(uint8_t port, uint8_t *r_data, uint16_
 		
 	if (cAns->valueint != 0)
 	{
-		IOTXDT_CFG_DebugPrint("上线请求失败!!! 失败原因：%d!r\n", cAns->valueint);
+		IOTXDT_CFG_InfoPrint("上线请求失败!!! 失败原因：%d!r\n", cAns->valueint);
         IotXDT_OfflineHandle();
 	}
 	else
@@ -629,7 +629,7 @@ static uint8_t IotXDT_RecvRequestRateModeRsp_ITEM832(uint8_t port, uint8_t *r_da
 
 				if (peroidCnt > MSNVM_XDT_BILLMODE_PERIOD_COUNT || peroidCnt == 0)
 				{
-					IOTXDT_CFG_DebugPrint("[%s()]: rateMode period cnt[%d] is invalid...\r\n", __FUNCTION__, peroidCnt);
+					IOTXDT_CFG_InfoPrint("[%s()]: rateMode period cnt[%d] is invalid...\r\n", __FUNCTION__, peroidCnt);
 				}
 				else
 				{
@@ -673,12 +673,12 @@ static uint8_t IotXDT_RecvRequestRateModeRsp_ITEM832(uint8_t port, uint8_t *r_da
 		}
 		else
 		{
-			IOTXDT_CFG_DebugPrint("[%s()]: rateMode type is discharge ..\r\n", __FUNCTION__);
+			IOTXDT_CFG_InfoPrint("[%s()]: rateMode type is discharge ..\r\n", __FUNCTION__);
 		}
 	}
 	else
 	{
-		IOTXDT_CFG_DebugPrint("[%s()]: rateMode response Error, Errcode is %d ..\r\n", __FUNCTION__, cAns->valueint);
+		IOTXDT_CFG_InfoPrint("[%s()]: rateMode response Error, Errcode is %d ..\r\n", __FUNCTION__, cAns->valueint);
 	}
 
 	if (ret == TRUE)
@@ -730,7 +730,7 @@ static uint8_t IotXDT_RecvRateModeSet_ITEM834(uint8_t port, uint8_t *r_data, uin
 	if (cType->valueint != 0)
 	{
 		pAns[0] = eIotXDTErrCode_ParaInvalid;
-		IOTXDT_CFG_DebugPrint("[%s()]: rateMode type is discharge ..\r\n", __FUNCTION__);
+		IOTXDT_CFG_InfoPrint("[%s()]: rateMode type is discharge ..\r\n", __FUNCTION__);
 	}
 
 	cElec = cJSON_GetObjectItem(cParams, "elec");

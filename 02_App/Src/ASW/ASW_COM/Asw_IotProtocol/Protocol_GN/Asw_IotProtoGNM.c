@@ -352,7 +352,7 @@ static IotGNStopReason_Enum IotGN_ConverStopReason(AswErrorType_Enum errType)
 
     if (findFlag == FALSE)
     {
-        IOTGN_CFG_DebugPrint("公牛结束原因转换，未找到对应原因，原始原因为：%d!\r\n", errType);
+        IOTGN_CFG_InfoPrint("公牛结束原因转换，未找到对应原因，原始原因为：%d!\r\n", errType);
     }
     
     return eStopReason;

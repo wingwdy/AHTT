@@ -82,7 +82,7 @@ static uint8_t CddDrvEG800AK_PowerOn(void)
             CDDDRV_EG800AK_CFG_PwrOff();
             g_stCddDrvEG800AKCtrl.powerCtrlStartTick = Common_GetSystick();
             g_stCddDrvEG800AKCtrl.powerOnStep = CDDDRV_EG800AK_CTRL_STEP1;
-            CDDDRV_EG800AK_CFG_DebugPrint("4G Module EG800AK PowerOff!\r\n");
+            CDDDRV_EG800AK_CFG_InfoPrint("4G Module EG800AK PowerOff!\r\n");
             break;
         }
 
@@ -93,7 +93,7 @@ static uint8_t CddDrvEG800AK_PowerOn(void)
                 CDDDRV_EG800AK_CFG_PwrOn();
                 g_stCddDrvEG800AKCtrl.powerCtrlStartTick = Common_GetSystick();
                 g_stCddDrvEG800AKCtrl.powerOnStep = CDDDRV_EG800AK_CTRL_STEP2;
-                CDDDRV_EG800AK_CFG_DebugPrint("\r\n4G Module EG800AK PowerOn!!!\r\n");
+                CDDDRV_EG800AK_CFG_InfoPrint("\r\n4G Module EG800AK PowerOn!!!\r\n");
             }
 
             break;
@@ -106,7 +106,7 @@ static uint8_t CddDrvEG800AK_PowerOn(void)
                 CDDDRV_EG800AK_CFG_PwrKeyOff();
                 g_stCddDrvEG800AKCtrl.powerCtrlStartTick = Common_GetSystick();
                 g_stCddDrvEG800AKCtrl.powerOnStep = CDDDRV_EG800AK_CTRL_STEP3;
-                CDDDRV_EG800AK_CFG_DebugPrint("\r\n4G Module EG800AK PowerKeyOff!!!\r\n");
+                CDDDRV_EG800AK_CFG_InfoPrint("\r\n4G Module EG800AK PowerKeyOff!!!\r\n");
             }
 
             break;
@@ -119,7 +119,7 @@ static uint8_t CddDrvEG800AK_PowerOn(void)
                 CDDDRV_EG800AK_CFG_PwrKeyOn();
                 g_stCddDrvEG800AKCtrl.powerCtrlStartTick = Common_GetSystick();
                 g_stCddDrvEG800AKCtrl.powerOnStep = CDDDRV_EG800AK_CTRL_STEP4;
-                CDDDRV_EG800AK_CFG_DebugPrint("\r\n4G Module EG800AK PowerKeyOn!!!\r\n");
+                CDDDRV_EG800AK_CFG_InfoPrint("\r\n4G Module EG800AK PowerKeyOn!!!\r\n");
             }
 
             break;
@@ -130,7 +130,7 @@ static uint8_t CddDrvEG800AK_PowerOn(void)
             if (Common_JudgeTimeoutMs(g_stCddDrvEG800AKCtrl.powerCtrlStartTick, CDDDRV_EG800AK_CFG_POWERKEY_ON_HOLD_TIME))
             {
                 g_stCddDrvEG800AKCtrl.powerOnStep = CDDDRV_EG800AK_CTRL_STEPEND;
-                CDDDRV_EG800AK_CFG_DebugPrint("\r\n4G Module EG800AK Start Finish!!!\r\n");
+                CDDDRV_EG800AK_CFG_InfoPrint("\r\n4G Module EG800AK Start Finish!!!\r\n");
             }
 
             break;
@@ -308,7 +308,12 @@ static void CddDrvEG800AK_ATTaskSendHandle(uint8_t *txBuf)
                 else
                 {
                     /* 紧急撤回一个发送 */
-                    CddDrvEG800AK_DeleteCmd(g_stCddDrvEG800AKCtrl.currentTaskSocketIndex);
+                    if (g_stCddDrvEG800AKCtrl.currentTaskCmd != 0)
+                    {
+                        /* 如果 g_stCddDrvEG800AKCtrl.currentTaskCmd == 0, 说明内部执行过删除，不需要重复删除 */
+                        CddDrvEG800AK_DeleteCmd(g_stCddDrvEG800AKCtrl.currentTaskSocketIndex);
+                    }
+
                     g_stCddDrvEG800AKCtrl.currentTaskCmd = 0;
                     g_stCddDrvEG800AKCtrl.currentTaskATDescribtor = NULL;
                     g_stCddDrvEG800AKCtrl.cmdTaskStep = CDDDRV_EG800AK_CTRL_STEP0;
@@ -490,6 +495,7 @@ static void CddDrvEG800AK_ATTaskRecvHandle(uint8_t *recvbuf)
                     recvbuf[remainLen] = '\0';
                 }
 
+                /* bAnswerOK == FALSE 表示接收函数内部已经执行过清除动作，不需要重复删除，并没有其它逻辑含义 */
                 if (bAnswerOK == TRUE)
                 {
                     CddDrvEG800AK_DeleteCmd(g_stCddDrvEG800AKCtrl.currentTaskSocketIndex);
@@ -681,7 +687,7 @@ static void CddDrvEG800AK_noCommTimeoutDetect(void)
         g_stCddDrvEG800AKCtrl.noCommTickStart = Common_GetSystick();
         CddDrvEG800AK_SetModuleState(eCddNetMModuleState_AbNormal);
         CddDrvEG800AK_SetAbnormalType(eCddDrvEG800AKAbnormalHandle_Reboot);
-        CDDDRV_EG800AK_CFG_DebugPrint("4G 模组无数据通信超时 %d ms\r\n!", CDDDRV_EG800AK_CFG_NO_COMM_TIMEOUT);    
+        CDDDRV_EG800AK_CFG_InfoPrint("4G 模组无数据通信超时 %d ms\r\n!", CDDDRV_EG800AK_CFG_NO_COMM_TIMEOUT);    
     }
 }
 

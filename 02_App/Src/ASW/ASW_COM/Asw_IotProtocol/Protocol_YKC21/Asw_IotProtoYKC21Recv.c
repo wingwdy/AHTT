@@ -532,7 +532,7 @@ static void IotYKC21_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTYKC21_CFG_DebugPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTYKC21_CFG_InfoPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
                 }
@@ -570,7 +570,7 @@ static uint8_t IotYKC21_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t le
     else
     {
         index++;
-        IOTYKC21_CFG_DebugPrint("登陆失败，失败原因：%d!\r\n", pRecvData[index]);
+        IOTYKC21_CFG_InfoPrint("登陆失败，失败原因：%d!\r\n", pRecvData[index]);
         IotYKC21_OfflineHandle();
     }
 
@@ -607,7 +607,7 @@ static uint8_t IotYKC21_RecvBillModeVerifyRsp(uint8_t *port, uint8_t *r_data, ui
         {
             /*  和平台沟通，建议每次都请求，这个标识暂时不使用
                 verifyRes = TRUE;
-                IOTYKC21_CFG_DebugPrint("计费模型，不需要更新！\r\n");
+                IOTYKC21_CFG_InfoPrint("计费模型，不需要更新！\r\n");
              */
             verifyRes = FALSE;
         }
@@ -615,7 +615,7 @@ static uint8_t IotYKC21_RecvBillModeVerifyRsp(uint8_t *port, uint8_t *r_data, ui
 
     if (verifyRes == FALSE)
     {
-        IOTYKC21_CFG_DebugPrint("计费模型变化，需要更新！\r\n");
+        IOTYKC21_CFG_InfoPrint("计费模型变化，需要更新！\r\n");
         Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, 0, IOT_YKC21_CMD_BILLMODE_REQ, TRUE);
     }
 
@@ -686,7 +686,7 @@ static uint8_t IotYKC21_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint1
     uint8_t *pRecvData = r_data;
 
     MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotYKC21Ctx->time);
-    IOTYKC21_CFG_DebugPrint("交易记录上报成功!\r\n");
+    IOTYKC21_CFG_InfoPrint("交易记录上报成功!\r\n");
     return TRUE;
 
 }

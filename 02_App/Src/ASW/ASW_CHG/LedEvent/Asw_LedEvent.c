@@ -127,7 +127,7 @@ void AswLedEvent_HandleLedDeviceStatusChange(uint8_t dev, AswLedConfig_Struct *p
                 pLedConfig->lastHighestLedDesc[port] = "初始状态";
             }
 
-            ASWLED_CFG_DebugPrint("[枪：%d]灯语状态发生变化：[%s] ---> [%s]\r\n", port, pLedConfig->lastHighestLedDesc[port], pLedConfig->currentHighestLedDesc[port]);
+            ASWLED_CFG_InfoPrint("[枪：%d]灯语状态发生变化：[%s] ---> [%s]\r\n", port, pLedConfig->lastHighestLedDesc[port], pLedConfig->currentHighestLedDesc[port]);
 
             pLedConfig->lastHighestLedDesc[port] = pLedConfig->currentHighestLedDesc[port];            
             pLedConfig->lastHighestPriorityledDispType[port] = pLedConfig->currentHighestPriorityledDispType[port];

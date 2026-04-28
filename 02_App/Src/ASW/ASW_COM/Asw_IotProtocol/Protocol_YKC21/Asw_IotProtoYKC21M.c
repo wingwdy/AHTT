@@ -320,7 +320,7 @@ static void IotYKC21_UpError(void)
                             pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearId = Iot_Ykc21Error_map[index].err_codeid;
 
                             Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULT_REQ, TRUE);
-                            IOTYKC21_CFG_DebugPrint("[枪：%d]故障发生时间戳[%d],云快充2.1上报故障编码[0x%04x]\r\n", port, pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearTime, Iot_Ykc21Error_map[index].err_codeid);
+                            IOTYKC21_CFG_InfoPrint("[枪：%d]故障发生时间戳[%d],云快充2.1上报故障编码[0x%04x]\r\n", port, pIotYKC21Ctx->stProtoData[port].erroInfo.errorAppearTime, Iot_Ykc21Error_map[index].err_codeid);
                         }
                         else
                         {
@@ -331,7 +331,7 @@ static void IotYKC21_UpError(void)
                             pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearId = Iot_Ykc21Error_map[index].err_codeid;
 
                             Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_FAULTREST_REQ, TRUE);
-                            IOTYKC21_CFG_DebugPrint("[枪：%d]故障取消时间戳[%d],云快充2.1上报故障编码[0x%04x]\r\n", port, pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearTime, Iot_Ykc21Error_map[index].err_codeid);
+                            IOTYKC21_CFG_InfoPrint("[枪：%d]故障取消时间戳[%d],云快充2.1上报故障编码[0x%04x]\r\n", port, pIotYKC21Ctx->stProtoData[port].erroInfo.errorDisppearTime, Iot_Ykc21Error_map[index].err_codeid);
                         }
 
                         break;
@@ -599,7 +599,7 @@ void IotYKC21_SetPowerControl(uint8_t port, uint32_t powerLimit)
     {
         AswChargeIf_AdjustOutputCurrent(port, ASWCHARGEIF_ADJUST_POWER_ABSOLUTE, powerLimit);
         pIotYKC21Ctx->stProtoData[port].lastSetPower = powerLimit;
-        IOTYKC21_CFG_DebugPrint("[枪：%d]:云快充2.1协议, 功率调整为[%d]w\r\n", port, powerLimit);
+        IOTYKC21_CFG_InfoPrint("[枪：%d]:云快充2.1协议, 功率调整为[%d]w\r\n", port, powerLimit);
     }
 }
 

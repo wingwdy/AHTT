@@ -370,7 +370,7 @@ static void IotGN_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTGN_CFG_DebugPrint("[枪：%d]接收[cmd: 0x%02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTGN_CFG_InfoPrint("[枪：%d]接收[cmd: 0x%02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
 
@@ -397,7 +397,7 @@ static void IotGN_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTGN_CFG_DebugPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTGN_CFG_InfoPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
                 }
@@ -427,7 +427,7 @@ static uint8_t IotGN_RecvLoginRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
     else
     {
         index++;
-        IOTGN_CFG_DebugPrint("登陆失败，失败原因：%d!\r\n", pRecvData[index]);
+        IOTGN_CFG_InfoPrint("登陆失败，失败原因：%d!\r\n", pRecvData[index]);
         IotGN_OfflineHandle();
     }
 
@@ -464,7 +464,7 @@ static uint8_t IotGN_RecvBillModeVerifyRsp(uint8_t *port, uint8_t *r_data, uint1
         {
             /*  和平台沟通，建议每次都请求，这个标识暂时不使用
                 verifyRes = TRUE;
-                IOTGN_CFG_DebugPrint("计费模型，不需要更新！\r\n");
+                IOTGN_CFG_InfoPrint("计费模型，不需要更新！\r\n");
              */
             verifyRes = FALSE;
 
@@ -473,7 +473,7 @@ static uint8_t IotGN_RecvBillModeVerifyRsp(uint8_t *port, uint8_t *r_data, uint1
 
     if (verifyRes == FALSE)
     {
-        IOTGN_CFG_DebugPrint("计费模型变化，需要更新！\r\n");
+        IOTGN_CFG_InfoPrint("计费模型变化，需要更新！\r\n");
         Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, 0, IOT_GN_CMD_BILLMODE_REQ, TRUE);
     }
 
@@ -619,7 +619,7 @@ static uint8_t IotGN_RecvRemoteStartCharge(uint8_t *port, uint8_t *r_data, uint1
 
         if (accountMoney <= IOTGN_CFG_CHARGE_MIN_ACCOUNT_MONEY)
         {
-            IOTGN_CFG_DebugPrint("余额不足，拒绝充电！余额：%d.%02d 元!\r\n", accountMoney / 100, accountMoney % 100);
+            IOTGN_CFG_InfoPrint("余额不足，拒绝充电！余额：%d.%02d 元!\r\n", accountMoney / 100, accountMoney % 100);
             pIotGNCtx->stProtoData[port[0]].remoteStartResult = 0;
             /* 充电启动失败，余额不足*/
             pIotGNCtx->stProtoData[port[0]].remoteStartFailReason = 0x4E;
@@ -695,7 +695,7 @@ static uint8_t IotGN_RecvRemoteStopCharge(uint8_t *port, uint8_t *r_data, uint16
 static uint8_t IotGN_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t len)
 {
     MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotGNCtx->time);
-    IOTGN_CFG_DebugPrint("交易记录上报成功!\r\n");
+    IOTGN_CFG_InfoPrint("交易记录上报成功!\r\n");
     return TRUE;
 }
 
@@ -721,7 +721,7 @@ static uint8_t IotGN_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, uint
 
             if (accountMoney <= IOTGN_CFG_CHARGE_MIN_ACCOUNT_MONEY)
             {
-                IOTGN_CFG_DebugPrint("余额不足，拒绝充电！余额：%d.%02d 元!\r\n", accountMoney / 100, accountMoney % 100);
+                IOTGN_CFG_InfoPrint("余额不足，拒绝充电！余额：%d.%02d 元!\r\n", accountMoney / 100, accountMoney % 100);
             }
             else
             {
@@ -759,18 +759,18 @@ static uint8_t IotGN_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, uint
                 }
 
                 AswMonitor_ChargeStart(port[0], ASWMONITOR_ORDER_START_SRC_CARD, TRUE);
-                IOTGN_CFG_DebugPrint("[枪：%d]充电桩申请主动启动充电成功!\r\n", port[0]);
+                IOTGN_CFG_InfoPrint("[枪：%d]充电桩申请主动启动充电成功!\r\n", port[0]);
             }
         }
         else
         {
             index += 29;
-            IOTGN_CFG_DebugPrint("[枪：%d]充电桩申请主动启动充电失败，失败原因：%02X!\r\n", port[0], pRecvData[index]);
+            IOTGN_CFG_InfoPrint("[枪：%d]充电桩申请主动启动充电失败，失败原因：%02X!\r\n", port[0], pRecvData[index]);
         }
     }
     else
     {
-        IOTGN_CFG_DebugPrint("[枪：%d]充电桩申请主动启动充电, 平台应答成功，但设备无法启动充电，失败原因：%d\r\n", port[0], failReason);
+        IOTGN_CFG_InfoPrint("[枪：%d]充电桩申请主动启动充电, 平台应答成功，但设备无法启动充电，失败原因：%d\r\n", port[0], failReason);
     }
 
     return TRUE;
@@ -794,7 +794,7 @@ static uint8_t IotGN_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, uint
     {
         index += 8;
         pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
-                IOTGN_CFG_DebugPrint("[枪：%d]更新账户余额成功，余额：%d.%02d!\r\n", port[0], pChargeCtrl->accountMoney / 100, 
+                IOTGN_CFG_InfoPrint("[枪：%d]更新账户余额成功，余额：%d.%02d!\r\n", port[0], pChargeCtrl->accountMoney / 100, 
                     pChargeCtrl->accountMoney % 100);
         pIotGNCtx->stProtoData[port[0]].updateAccountMoneyResult = 0x00;
     }
@@ -806,19 +806,19 @@ static uint8_t IotGN_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, uint
             {
                 index += 8;
                 pChargeCtrl->accountMoney = Common_FourUint8ToUint32(&pRecvData[index]);
-                IOTGN_CFG_DebugPrint("[枪：%d]更新账户余额成功，余额：%d.%02d!\r\n", port[0], pChargeCtrl->accountMoney / 100, 
+                IOTGN_CFG_InfoPrint("[枪：%d]更新账户余额成功，余额：%d.%02d!\r\n", port[0], pChargeCtrl->accountMoney / 100, 
                     pChargeCtrl->accountMoney % 100);
                 pIotGNCtx->stProtoData[port[0]].updateAccountMoneyResult = 0x00;
             }
             else
             {
-                IOTGN_CFG_DebugPrint("[枪：%d]更新账户余额失败，卡号不一致!\r\n", port[0]);
+                IOTGN_CFG_InfoPrint("[枪：%d]更新账户余额失败，卡号不一致!\r\n", port[0]);
                 pIotGNCtx->stProtoData[port[0]].updateAccountMoneyResult = 0x02;
             }
         }
         else
         {
-            IOTGN_CFG_DebugPrint("[枪：%d]更新账户余额失败，非刷卡启动充电!\r\n", port[0]);
+            IOTGN_CFG_InfoPrint("[枪：%d]更新账户余额失败，非刷卡启动充电!\r\n", port[0]);
             pIotGNCtx->stProtoData[port[0]].updateAccountMoneyResult = 0x02;
         }
     }
@@ -917,7 +917,7 @@ static uint8_t IotGN_RecvSetQRCode(uint8_t *port, uint8_t *r_data, uint16_t len)
     {
         memcpy(qrParam.qrcode, &pRecvData[index], 100);
         MSNvm_WriteParaBlock(eMSNvmBlockID_Gun0Qrcode, (uint8_t *)&qrParam, sizeof(MSNvmDrcode_Struct));
-        IOTGN_CFG_DebugPrint("[枪：%d]设置的二维码内容：%.100s\r\n", port[0], &pRecvData[index]);
+        IOTGN_CFG_InfoPrint("[枪：%d]设置的二维码内容：%.100s\r\n", port[0], &pRecvData[index]);
     }
 
     return TRUE;
@@ -1026,7 +1026,7 @@ void IotGN_TimeoutDetect(void)
                 Common_SetRptCount(pIotGNCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
                 timeoutCount = Common_GetRptCount(pIotGNCtx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
 
-                IOTGN_CFG_DebugPrint("[cmd:0x%02X %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, timeoutCount, pCmdRecvCtrl->maxTimeout);
+                IOTGN_CFG_InfoPrint("[cmd:0x%02X %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, timeoutCount, pCmdRecvCtrl->maxTimeout);
 
                 if (timeoutCount >= pCmdRecvCtrl->maxTryCnt)
                 {
@@ -1051,7 +1051,7 @@ void IotGN_TimeoutDetect(void)
                             }
 
                             MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotGNCtx->time);
-                            IOTGN_CFG_DebugPrint("交易记录上报失败, 强行置为成功!\r\n");
+                            IOTGN_CFG_InfoPrint("交易记录上报失败, 强行置为成功!\r\n");
                         }
                         else
                         {
