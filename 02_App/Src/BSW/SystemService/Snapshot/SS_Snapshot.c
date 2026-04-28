@@ -40,7 +40,7 @@
 /*******************************************************************************
 *    Typedef Definition
 *******************************************************************************/
-typedef struct
+typedef struct 
 {
     SSSnapshotItemReadSrc_Enum eReadSrc;
     SSSnapshotItemType_Enum eItemType;
@@ -50,8 +50,10 @@ typedef struct
     uint32_t exportItemStartTick;
     uint32_t latestTime;
     uint32_t currentReadTime;
+    uint32_t startReadTime;
     uint16_t singleItemSize;
     uint8_t sizeFlag;
+    uint8_t readDirection;
     uint8_t *pItemBuf;
     uint16_t readOffset;
     uint16_t remainSize;
@@ -259,8 +261,6 @@ void SSSnapshot_ExportItem(SSSnapshotItemType_Enum itemType, SSSnapshotItemReadS
             pReadItemHandle->localPrintItemFlag = FALSE;
 
             SSSnapshot_StartReadItem(itemType);
-            //CddNetM_SetLinkDisconnect(eCddNetMPlatType_O);
-            //CddNetM_SetLinkDisconnect(eCddNetMPlatType_OM);
             SSSNAPSHOT_CFG_InfoPrint("开始远程快照[%d]读取!\r\n", itemType);
         }
     } while(0);
@@ -283,44 +283,56 @@ void SSSnapshot_FlushRunningLog(void)
 void SSSnapshot_InsertRunningLog(const char *buf, uint16_t len)
 {
     uint16_t remain = 0;
+    uint16_t writeLen = 0;
+    uint16_t totalSpace = 0;
+    uint8_t writeFlag = TRUE;
 
-    if (buf == NULL)
+    if (buf != NULL && len > 0)
     {
-        return;
-    }
+        xSemaphoreTake(g_stSnapshotCtx.mutex, portMAX_DELAY);
 
-    if (len == 0 || len >= MSNVM_RUNNING_LOG_MAX_LEN)
-    {
-        return;
-    }
+        remain = MSNVM_RUNNING_LOG_MAX_LEN - g_stSnapshotCtx.stRunLogCache.writeOft - 1;
 
-    xSemaphoreTake(g_stSnapshotCtx.mutex, portMAX_DELAY);
-
-    remain = MSNVM_RUNNING_LOG_MAX_LEN - g_stSnapshotCtx.stRunLogCache.writeOft - 1;//预留\0
-
-    if (len > remain)
-    {
-        /* 当前缓冲已满，尝试切换到另一个缓冲 */
-        if (g_stSnapshotCtx.stRunLogCache.flushFlag == FALSE)
+        if (len > remain)
         {
-            /* 标记当前缓冲待 flush，切换写缓冲 */
-            g_stSnapshotCtx.stRunLogCache.flushFlag = TRUE;
-            g_stSnapshotCtx.stRunLogCache.writeIdx ^= 1;
-            g_stSnapshotCtx.stRunLogCache.writeOft = 0;
+            if (g_stSnapshotCtx.stRunLogCache.flushFlag == FALSE)
+            {
+                totalSpace = remain + (MSNVM_RUNNING_LOG_MAX_LEN - 1);
+                
+                if (len > totalSpace)
+                {
+                    len = totalSpace;
+                }
+
+                if (remain > 0)
+                {
+                    memcpy(g_stSnapshotCtx.stRunLogCache.logBuf[g_stSnapshotCtx.stRunLogCache.writeIdx] + \
+                            g_stSnapshotCtx.stRunLogCache.writeOft, buf, remain);
+                }
+
+                g_stSnapshotCtx.stRunLogCache.flushFlag = TRUE;
+                g_stSnapshotCtx.stRunLogCache.writeIdx ^= 1;
+                g_stSnapshotCtx.stRunLogCache.writeOft = 0;
+
+                writeLen = len - remain;
+                memcpy(g_stSnapshotCtx.stRunLogCache.logBuf[g_stSnapshotCtx.stRunLogCache.writeIdx] + \
+                        g_stSnapshotCtx.stRunLogCache.writeOft, buf + remain, writeLen);
+                g_stSnapshotCtx.stRunLogCache.writeOft += writeLen;
+            }
+            else
+            {
+                writeFlag = FALSE;
+            }
         }
         else
         {
-            /* 另一个缓冲还未被 flush，两个缓冲都占用中，丢弃本次内容 */
-            xSemaphoreGive(g_stSnapshotCtx.mutex);
-            return;
+            memcpy(g_stSnapshotCtx.stRunLogCache.logBuf[g_stSnapshotCtx.stRunLogCache.writeIdx] + \
+                    g_stSnapshotCtx.stRunLogCache.writeOft, buf, len);
+            g_stSnapshotCtx.stRunLogCache.writeOft += len;
         }
+
+        xSemaphoreGive(g_stSnapshotCtx.mutex);
     }
-
-    memcpy(g_stSnapshotCtx.stRunLogCache.logBuf[g_stSnapshotCtx.stRunLogCache.writeIdx] + \
-            g_stSnapshotCtx.stRunLogCache.writeOft, buf, len);
-    g_stSnapshotCtx.stRunLogCache.writeOft += len;
-
-    xSemaphoreGive(g_stSnapshotCtx.mutex);
 }
 
 static void SSSnapshot_HandleRunningLog(void)
@@ -395,6 +407,10 @@ GlobalRet_Enum SSSnapshot_StartReadItem(SSSnapshotItemType_Enum eItemType)
         }
         else if (eItemType == eSSSnapshotItemType_RunningLog)
         {
+            uint32_t totalCount = 0;
+            uint32_t maxRecordCount = 0;
+            uint32_t startRecord = 0;
+
             pReadItemHandle->latestTime = MSNvm_QueryRecordLatestTime(eMSNvmBlockID_RunningLogRecord);
             pReadItemHandle->readBlockID = eMSNvmBlockID_RunningLogRecord;
             pReadItemHandle->singleItemSize = MSNVM_RUNNING_LOG_MAX_LEN;
@@ -403,6 +419,20 @@ GlobalRet_Enum SSSnapshot_StartReadItem(SSSnapshotItemType_Enum eItemType)
             if (0 == pReadItemHandle->latestTime)
             {
                 eRet = eGlobalRet_NotEnoughData;
+            }
+            else
+            {
+                totalCount = pReadItemHandle->latestTime;
+                
+                maxRecordCount = (100 * 1024) / pReadItemHandle->singleItemSize;
+                
+                if (totalCount > maxRecordCount)
+                {
+                    startRecord = totalCount - maxRecordCount;
+                }
+                
+                pReadItemHandle->startReadTime = startRecord + 1;
+                pReadItemHandle->readDirection = TRUE;
             }
         }
         else if (eItemType == eSSSnapshotItemType_OmOrderRecord)
@@ -440,7 +470,16 @@ GlobalRet_Enum SSSnapshot_StartReadItem(SSSnapshotItemType_Enum eItemType)
         else
         {
             pReadItemHandle->eItemType = eItemType;
-            pReadItemHandle->currentReadTime = pReadItemHandle->latestTime;
+            
+            if (pReadItemHandle->readDirection == TRUE)
+            {
+                pReadItemHandle->currentReadTime = pReadItemHandle->startReadTime;
+            }
+            else
+            {
+                pReadItemHandle->currentReadTime = pReadItemHandle->latestTime;
+            }
+            
             pReadItemHandle->readItemOngoing = TRUE;
             pReadItemHandle->readOffset = 0;
             pReadItemHandle->remainSize = 0;
@@ -482,15 +521,30 @@ uint8_t SSSnapshot_ReadItem(uint8_t *pOutbuf, uint16_t bufSize, uint16_t *pOutLe
     {
         if (pReadItemHandle->remainSize == 0)
         {
-            if (pReadItemHandle->currentReadTime > 0)
+            if (pReadItemHandle->readDirection == TRUE)
             {
-    
-                if (eGlobalRet_OK == MSNvm_QueryRecordByTime(pReadItemHandle->readBlockID,  pReadItemHandle->pItemBuf, 
-                                                            pReadItemHandle->singleItemSize,pReadItemHandle->currentReadTime))
-                { 
-                    pReadItemHandle->readOffset = 0;
-                    pReadItemHandle->remainSize = pReadItemHandle->singleItemSize;
-                    pReadItemHandle->currentReadTime--;
+                if (pReadItemHandle->currentReadTime <= pReadItemHandle->latestTime)
+                {
+                    if (eGlobalRet_OK == MSNvm_QueryRecordByTime(pReadItemHandle->readBlockID,  pReadItemHandle->pItemBuf, 
+                                                                pReadItemHandle->singleItemSize, pReadItemHandle->currentReadTime))
+                    { 
+                        pReadItemHandle->readOffset = 0;
+                        pReadItemHandle->remainSize = pReadItemHandle->singleItemSize;
+                        pReadItemHandle->currentReadTime++;
+                    }
+                }
+            }
+            else
+            {
+                if (pReadItemHandle->currentReadTime > 0)
+                {
+                    if (eGlobalRet_OK == MSNvm_QueryRecordByTime(pReadItemHandle->readBlockID,  pReadItemHandle->pItemBuf, 
+                                                                pReadItemHandle->singleItemSize, pReadItemHandle->currentReadTime))
+                    { 
+                        pReadItemHandle->readOffset = 0;
+                        pReadItemHandle->remainSize = pReadItemHandle->singleItemSize;
+                        pReadItemHandle->currentReadTime--;
+                    }
                 }
             }
         }
