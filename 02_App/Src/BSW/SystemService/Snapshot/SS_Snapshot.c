@@ -593,16 +593,34 @@ uint8_t SSSnapshot_PreviewReadItem(uint16_t bufSize, uint16_t *pOutLen)
     {
         if (pReadItemHandle->remainSize == 0)
         {
-            if (pReadItemHandle->currentReadTime > 0)
+            if (pReadItemHandle->readDirection == TRUE)
             {
-                memset(pReadItemHandle->pItemBuf, 0x00, pReadItemHandle->singleItemSize);
-    
-                if (eGlobalRet_OK == MSNvm_QueryRecordByTime(pReadItemHandle->readBlockID,  pReadItemHandle->pItemBuf, 
-                                                            pReadItemHandle->singleItemSize,pReadItemHandle->currentReadTime))
+                if (pReadItemHandle->currentReadTime <= pReadItemHandle->latestTime)
                 {
-                    pReadItemHandle->readOffset = 0;
-                    pReadItemHandle->remainSize = pReadItemHandle->sizeFlag ? pReadItemHandle->singleItemSize : strlen((char *)pReadItemHandle->pItemBuf);
-                    pReadItemHandle->currentReadTime--;
+                    memset(pReadItemHandle->pItemBuf, 0x00, pReadItemHandle->singleItemSize);
+        
+                    if (eGlobalRet_OK == MSNvm_QueryRecordByTime(pReadItemHandle->readBlockID,  pReadItemHandle->pItemBuf, 
+                                                                pReadItemHandle->singleItemSize, pReadItemHandle->currentReadTime))
+                    {
+                        pReadItemHandle->readOffset = 0;
+                        pReadItemHandle->remainSize = pReadItemHandle->sizeFlag ? pReadItemHandle->singleItemSize : strlen((char *)pReadItemHandle->pItemBuf);
+                        pReadItemHandle->currentReadTime++;
+                    }
+                }
+            }
+            else
+            {
+                if (pReadItemHandle->currentReadTime > 0)
+                {
+                    memset(pReadItemHandle->pItemBuf, 0x00, pReadItemHandle->singleItemSize);
+        
+                    if (eGlobalRet_OK == MSNvm_QueryRecordByTime(pReadItemHandle->readBlockID,  pReadItemHandle->pItemBuf, 
+                                                                pReadItemHandle->singleItemSize, pReadItemHandle->currentReadTime))
+                    {
+                        pReadItemHandle->readOffset = 0;
+                        pReadItemHandle->remainSize = pReadItemHandle->sizeFlag ? pReadItemHandle->singleItemSize : strlen((char *)pReadItemHandle->pItemBuf);
+                        pReadItemHandle->currentReadTime--;
+                    }
                 }
             }
         }
