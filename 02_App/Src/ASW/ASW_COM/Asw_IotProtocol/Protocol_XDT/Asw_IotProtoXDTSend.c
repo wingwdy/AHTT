@@ -1364,7 +1364,8 @@ static uint16_t IotXDT_ReportChargeStartReponse_ITEM862(uint8_t port, void *pBuf
 
 static uint16_t IotXDT_ReportChargeStartEvent_ITEM863(uint8_t port, void *pBuf)
 {
-	MSNvmXDTOrderInfo_Struct *pRecord = &pIotXDTCtx->stOrderInfo.platOrderInfo.stXDTOrderInfo;
+	MSNvmOrderInfo_Struct *pOrderInfo = AswMonitor_GerOrderDataPtr(port);
+	MSNvmXDTOrderInfo_Struct *pRecord = &pOrderInfo->platOrderInfo.stXDTOrderInfo;
 	IotXDTRecvData_Struct *pRecvDataInfo = &pIotXDTCtx->stProtoData.stRecvData[port];
 	cJSON *cRoot = NULL;
 	cJSON *params = NULL;
