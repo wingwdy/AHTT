@@ -96,7 +96,6 @@ static void SSSystemM_InitOne(void)
     DSConsole_Init();
     SSTM_InitMemory();
     SSWdgM_InitMemory();
-    McalMcu_ClearResetFlags();
 }
 
 static void SSSystemM_InitTwo(void)
@@ -149,6 +148,7 @@ static void SSSystemM_ShowInfo(void)
 
     snprintf(printInfo, sizeof(printInfo), "复位源：%s\r\n", st[eResetSource].cShowInfo);
     SSSYSTEMM_CFG_InfoPrint("%s", printInfo);
+    McalMcu_ClearResetFlags();
 }
 
 void SSSystemM_Init(void)
