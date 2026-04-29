@@ -247,6 +247,7 @@ void Common_TimestampToCp56Time2a(uint32_t timestamp, uint8_t *cp56time2a)
 
      /* 计算从1970年1月1日到指定日期的天数 */
     days = Common_DateToDays(dt.year, dt.month, dt.day); 
+    milliSec = dt.second * 1000;
     
     /* 填充CP56TIME2A格式 */
     /* 毫秒 (低字节)COMMON_ */
