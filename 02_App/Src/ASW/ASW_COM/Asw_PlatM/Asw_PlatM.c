@@ -652,6 +652,7 @@ uint8_t AswPlatM_GetIv(char *pIv, uint8_t *pOutLen)
 void AswPlatM_DefaultPlatParam(void *param)
 {
     MSNvmPlatParam_Struct *pPlatParam = (MSNvmPlatParam_Struct *)param;
+    MSNvmPlatParam_Struct *pAswPlatMPlatParam = &g_stAswPlatMCtx.stPlatParam;
 
     memset(pPlatParam, 0x00, sizeof(MSNvmPlatParam_Struct));
 
@@ -662,18 +663,18 @@ void AswPlatM_DefaultPlatParam(void *param)
     pPlatParam->platMainPort = 1883;
     strcpy(pPlatParam->platAuxiliaryIp, "pmgmt.gongniu.cn");
     pPlatParam->platAuxiliaryPort = 45113;
+
+    memcpy(pAswPlatMPlatParam, pPlatParam, sizeof(MSNvmPlatParam_Struct));
 }
 
 void AswPlatM_DefaultPlatPrivateParam(void *param)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = (MSNvmPlatPrivateParam_Union *)param;
     MSNvmXDTParam_Struct *pXDTParam = &pPrivateParam->stXDTParam;
+    MSNvmPlatPrivateParam_Union *pAswPlatMPrivateParam = &g_stAswPlatMCtx.stPrivateParam;
 
     memset(pPrivateParam, 0x00, sizeof(MSNvmPlatPrivateParam_Union));
-
-    strcpy(pXDTParam->platinfo.cOperator, "XDT");
-    strcpy(pXDTParam->platinfo.cProductKey, "7X9A2KQ6M8N4P1R5T7W3");
-    strcpy(pXDTParam->platinfo.cProductSecret, "B5N8V2M9K4X7Q1T6C3L9R");
+    memcpy(pAswPlatMPrivateParam, pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
 }
 
 void AswPlatM_InitMemory(void)

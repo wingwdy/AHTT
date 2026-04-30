@@ -595,7 +595,7 @@ static uint8_t IotOM_RecvRemoteSetParam(uint8_t *r_data, uint16_t len)
             }
             else if (strcmp((const char *)key, "workmode") == 0)
             {
-                if (pRecvData[dataIndex + 1] == 0x01)
+                if (pRecvData[dataIndex] == 0x01)
                 {
                     CddModeM_ExitGBMode();
                 }
