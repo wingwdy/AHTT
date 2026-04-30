@@ -566,6 +566,7 @@ static void IotYKC21_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
      AswMonitorChargeCtrl_Struct *pstChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
      uint16_t dataLen = 0;
      uint8_t orderIdleFlag = AswMonitor_IsOrderIdle(port);
+     uint64_t currMeterEnergyVal = 0;
 
      /* 交易流水号 */
      if (orderIdleFlag != TRUE)
@@ -659,9 +660,14 @@ static void IotYKC21_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
      /*烟感状态*/
      pBuf[dataLen++] = 0;
 
-     /*电表示值*/
-     memset(&pBuf[dataLen], 0x00, 4);
+     /*电表示值 精确到小数点后四位，取不到置零 */
+     memset(&pBuf[dataLen], 0x00, 5);
+     currMeterEnergyVal = AswChargeIf_GetMeterEnergyVal(port);
+     Common_Uint32ToFourUint8(&pBuf[dataLen], currMeterEnergyVal);
      dataLen += 4;
+     /* 电能8字节转5字节，需多转1字节 */
+     pBuf[dataLen++] = ((currMeterEnergyVal >> 32) & 0x00ff);
+
 
      return dataLen;
  }
