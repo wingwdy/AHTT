@@ -666,16 +666,18 @@ static uint8_t IotOM_RecvReadLocalFile(uint8_t *port, uint8_t *r_data, uint16_t 
             break;
         }
 
-        if (Common_MemEqual(pReq->ip, 0x0, sizeof(pReq->ip))
-            || Common_MemEqual(pReq->user, 0x0, sizeof(pReq->user))
-            || Common_MemEqual(pReq->passwd, 0x0, sizeof(pReq->passwd)) 
-            || Common_MemEqual(pReq->remotePath, 0x0, sizeof(pReq->remotePath)))
+        if (!Common_MemEqual(pReq->ip, 0x0, sizeof(pReq->ip))
+            || !Common_MemEqual(pReq->user, 0x0, sizeof(pReq->user))
+            || !Common_MemEqual(pReq->passwd, 0x0, sizeof(pReq->passwd)) 
+            || !Common_MemEqual(pReq->remotePath, 0x0, sizeof(pReq->remotePath)))
         {
+            IOTOM_CFG_InfoPrint("[%s] seg data is zero\r\n", __FUNCTION__);
             break;
         }
 
         if (TRUE == SSUcm_IsUpdating())
         {/* 升级中, 不允许文件上传 */
+            IOTOM_CFG_InfoPrint("[%s] ota going\r\n", __FUNCTION__);
             break;
         }
 
