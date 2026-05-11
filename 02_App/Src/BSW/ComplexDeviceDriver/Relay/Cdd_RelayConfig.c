@@ -20,6 +20,7 @@
 #include "Mcal_Port.h"
 #include "Mcal_ADC.h"
 
+
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -45,111 +46,88 @@
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-static void CddRelayCfg_CtrlSwitchOn(uint8_t port);
-static void CddRelayCfg_HoldSwitchOn(uint8_t port);
-static void CddRelayCfg_CtrlSwitchOff(uint8_t port);
-static void CddRelayCfg_CtrlShortCutOff(uint8_t port);
-static void CddRelayCfg_CtrlShortCutOn(uint8_t port);
-static uint8_t CddRelayCfg_GetShortCutStatus(uint8_t port);
-static uint8_t CddRelayCfg_GetRelayStatus(uint8_t port);
-static uint8_t CddRelayCfg_GetRelayAdhesionStatus(uint8_t port);
+static void CddRelayCfg_CtrlPort0SwitchOn(void);
+static void CddRelayCfg_HoldPort0SwitchOn(void);
+static void CddRelayCfg_CtrlPort0SwitchOff(void);
+static void CddRelayCfg_CtrlPort0ShortCutOff(void);
+static void CddRelayCfg_CtrlPort0ShortCutOn(void);
+static uint8_t CddRelayCfg_GetPort0ShortCutStatus(void);
+static uint8_t CddRelayCfg_GetPort0RelayStatus(void);
+static uint8_t CddRelayCfg_GetPort0RelayAdhesionStatus(void);
 
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-const CddRelayOpsConfig_Struct c_stCddRelayOpsConfigTable = 
+const CddRelayOpsConfig_Struct c_stCddRelayOpsConfigTable[SYSCFG_CFG_GUN_NUM] = 
 {
-    .pFuncCtrlSwitchOn = CddRelayCfg_CtrlSwitchOn,
-    .pFuncCtrlSwitchOff = CddRelayCfg_CtrlSwitchOff,
-    .pFuncHoldSwitchOn = CddRelayCfg_HoldSwitchOn,
-    .pFuncGetSwitchStatus = CddRelayCfg_GetRelayStatus,
-    .pFuncGetRelayAdhesionStatus = CddRelayCfg_GetRelayAdhesionStatus,
-    .pFuncCtrlShortCutOn = CddRelayCfg_CtrlShortCutOn,
-    .pFuncCtrlShortCutOff = CddRelayCfg_CtrlShortCutOff,
-    .pFuncGetShortCutStatus = CddRelayCfg_GetShortCutStatus,
+    [0] =
+    { 
+        .pFuncCtrlSwitchOn = CddRelayCfg_CtrlPort0SwitchOn,
+        .pFuncCtrlSwitchOff = CddRelayCfg_CtrlPort0SwitchOff,
+        .pFuncHoldSwitchOn = CddRelayCfg_HoldPort0SwitchOn,
+        .pFuncGetSwitchStatus = CddRelayCfg_GetPort0RelayStatus,
+        .pFuncGetRelayAdhesionStatus = CddRelayCfg_GetPort0RelayAdhesionStatus,
+        .pFuncCtrlShortCutOn = CddRelayCfg_CtrlPort0ShortCutOn,
+        .pFuncCtrlShortCutOff = CddRelayCfg_CtrlPort0ShortCutOff,
+        .pFuncGetShortCutStatus = CddRelayCfg_GetPort0ShortCutStatus,
+    },
 };
 
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
-static void CddRelayCfg_CtrlSwitchOn(uint8_t port)
+static void CddRelayCfg_CtrlPort0SwitchOn(void)
 {
-    if (port == 0)
-    {
-        McalPWM_SetOutputMode(eMcalPWMOCChannel_Relay, MCALPWM_MODE_FORCE_HIGH);
-    }
+    McalPWM_SetOutputMode(eMcalPWMOCChannel_Relay, MCALPWM_MODE_FORCE_HIGH);
 }
 
-static void CddRelayCfg_HoldSwitchOn(uint8_t port)
+static void CddRelayCfg_HoldPort0SwitchOn(void)
 {
-    if (port == 0)
-    {
-        McalPWM_SetSingleDuty(eMcalPWMOCChannel_Relay, 500);
-        McalPWM_SetOutputMode(eMcalPWMOCChannel_Relay, MCALPWM_MODE_FORCE_PWM);
-    }
+    McalPWM_SetSingleDuty(eMcalPWMOCChannel_Relay, 500);
+    McalPWM_SetOutputMode(eMcalPWMOCChannel_Relay, MCALPWM_MODE_FORCE_PWM);
 }
 
-static void CddRelayCfg_CtrlSwitchOff(uint8_t port)
+static void CddRelayCfg_CtrlPort0SwitchOff(void)
 {
-    if (port == 0)
-    {
-        McalPWM_SetOutputMode(eMcalPWMOCChannel_Relay, MCALPWM_MODE_FORCE_LOW);
-    }
+    McalPWM_SetOutputMode(eMcalPWMOCChannel_Relay, MCALPWM_MODE_FORCE_LOW);
 }
 
-static uint8_t CddRelayCfg_GetRelayStatus(uint8_t port)
+static uint8_t CddRelayCfg_GetPort0RelayStatus(void)
 {  
     CddRelayState_Enum eRet = eCddRelayState_Off;
 
-    if (port == 0)
-    {
-        eRet = ((MCALPORT_PIN_LOW == McalPort_GetPin(eMcalPortPinChanel_PC7_OutBack1)) ? \
-        eCddRelayState_On : eCddRelayState_Off);
-    }
-
+    eRet = ((MCALPORT_PIN_LOW == McalPort_GetPin(eMcalPortPinChanel_PC7_OutBack1)) ? \
+    eCddRelayState_On : eCddRelayState_Off);
+    
     return (uint8_t)eRet;
 }
 
-static uint8_t CddRelayCfg_GetRelayAdhesionStatus(uint8_t port)
+static uint8_t CddRelayCfg_GetPort0RelayAdhesionStatus(void)
 {  
-    uint8_t ret = FALSE;
-
-    if (port == 0)
-    {
-        ret = ((MCALPORT_PIN_LOW == McalPort_GetPin(eMcalPortPinChanel_PC6_RelayAdhesion)) ? TRUE : FALSE);
-    }
+    uint8_t ret = ((MCALPORT_PIN_LOW == McalPort_GetPin(eMcalPortPinChanel_PC6_RelayAdhesion)) ? TRUE : FALSE);
 
     return ret;
 }
 
-static void CddRelayCfg_CtrlShortCutOff(uint8_t port)
+static void CddRelayCfg_CtrlPort0ShortCutOff(void)
 {
-    if (port == 0)
-    {
-        McalPort_ResetPin(eMcalPortPinChanel_PA8_ShortCutEn);
-    }
+    McalPort_ResetPin(eMcalPortPinChanel_PA8_ShortCutEn);
 }
 
-static void CddRelayCfg_CtrlShortCutOn(uint8_t port)
+static void CddRelayCfg_CtrlPort0ShortCutOn(void)
 {
-    if (port == 0)
-    {
-        McalPort_SetPin(eMcalPortPinChanel_PA8_ShortCutEn);
-    }
+    McalPort_SetPin(eMcalPortPinChanel_PA8_ShortCutEn);
 }
 
-static uint8_t CddRelayCfg_GetShortCutStatus(uint8_t port)
+static uint8_t CddRelayCfg_GetPort0ShortCutStatus(void)
 {
     uint16_t adcData[CDDRELAY_CFG_ADC_BUFF_POINT] = {0};
     uint16_t averageAdcData = 0;
     float shortCutVol = 0.0;
     uint8_t ret = TRUE;
 
-    if (port == 0)
-    {
-        McalADC_GetChannelData(eMcalADCChanel_ShortCut, adcData, CDDRELAY_CFG_ADC_BUFF_POINT);
-    }
-
+    McalADC_GetChannelData(eMcalADCChanel_ShortCut, adcData, CDDRELAY_CFG_ADC_BUFF_POINT);
+    
     averageAdcData = Common_MedianU16Filter(adcData, CDDRELAY_CFG_ADC_BUFF_POINT, CDDRELAY_CFG_ADC_BUFF_POINT / 2);
     shortCutVol = averageAdcData * 100 / 4096.0 * 3.3;
 

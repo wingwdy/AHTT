@@ -21,6 +21,7 @@
 #include "Cdd_Relay.h"
 #include "Cdd_CP.h"
 #include "DS_LogM.h"
+#include "SysCfg.h"
 
 /******************************************************************************
 *    Macro Definition
@@ -56,21 +57,21 @@
 ******************************************************************************/
 typedef struct 
 {
-    void (*pFuncCtrlSwitchOn)(uint8_t port);
-    void (*pFuncCtrlSwitchOff)(uint8_t port);
-    void (*pFuncHoldSwitchOn)(uint8_t port);
-    uint8_t (*pFuncGetSwitchStatus)(uint8_t port);
-    uint8_t (*pFuncGetRelayAdhesionStatus)(uint8_t port);
-    void (*pFuncCtrlShortCutOn)(uint8_t port);
-    void (*pFuncCtrlShortCutOff)(uint8_t port);
-    uint8_t (*pFuncGetShortCutStatus)(uint8_t port);
+    void (*pFuncCtrlSwitchOn)(void);
+    void (*pFuncCtrlSwitchOff)(void);
+    void (*pFuncHoldSwitchOn)(void);
+    uint8_t (*pFuncGetSwitchStatus)(void);
+    uint8_t (*pFuncGetRelayAdhesionStatus)(void);
+    void (*pFuncCtrlShortCutOn)(void);
+    void (*pFuncCtrlShortCutOff)(void);
+    uint8_t (*pFuncGetShortCutStatus)(void);
 }CddRelayOpsConfig_Struct;
 
 
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-extern const CddRelayOpsConfig_Struct c_stCddRelayOpsConfigTable;
+extern const CddRelayOpsConfig_Struct c_stCddRelayOpsConfigTable[SYSCFG_CFG_GUN_NUM];
 
 
 /******************************************************************************

@@ -117,11 +117,11 @@ static void CddRelay_IdleHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
     }
     else
     {
-        if (c_stCddRelayOpsConfigTable.pFuncGetRelayAdhesionStatus != NULL)
+        if (c_stCddRelayOpsConfigTable[port].pFuncGetRelayAdhesionStatus != NULL)
         {
             if (CddModeM_IsGBMode() == TRUE)
             {
-                pRelayCtrl->stFilterAdhesionDetect.status = c_stCddRelayOpsConfigTable.pFuncGetRelayAdhesionStatus(port);   
+                pRelayCtrl->stFilterAdhesionDetect.status = c_stCddRelayOpsConfigTable[port].pFuncGetRelayAdhesionStatus();   
             }
             else
             {
@@ -168,7 +168,6 @@ static void CddRelay_IdleHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
             AswErrhandle_ResetErrExsitCallback(port, eErr_JcqMaloperation);
         }
     }
- 
 }
 
 static void CddRelay_SwitchOnHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
@@ -181,9 +180,9 @@ static void CddRelay_SwitchOnHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
             {
                 pRelayCtrl->relayCtrlStep = CDDRELAY_CTRL_STEP_2;
 
-                if (c_stCddRelayOpsConfigTable.pFuncHoldSwitchOn != NULL)
+                if (c_stCddRelayOpsConfigTable[port].pFuncHoldSwitchOn != NULL)
                 {
-                    c_stCddRelayOpsConfigTable.pFuncHoldSwitchOn(port);
+                    c_stCddRelayOpsConfigTable[port].pFuncHoldSwitchOn();
                 }
 
                 pRelayCtrl->relayCtrlHoldTick = Common_GetSystick();
@@ -235,7 +234,21 @@ static void CddRelay_SwitchOffHandle(uint8_t port, CddRelayCtrl_Struct *pRelayCt
 
 static void CddRelay_RelayStateManage(uint8_t port, CddRelayCtrl_Struct *pRelayCtrl)
 {
-    pRelayCtrl->stRelayState.status = (uint8_t)c_stCddRelayOpsConfigTable.pFuncGetSwitchStatus(port);
+    if (c_stCddRelayOpsConfigTable[port].pFuncGetSwitchStatus != NULL)
+    {
+        pRelayCtrl->stRelayState.status = (uint8_t)c_stCddRelayOpsConfigTable[port].pFuncGetSwitchStatus();
+    }
+    else
+    {
+        if (pRelayCtrl->eRelayCtrlOpt == eCddRelayCtrlState_SwitchOn)
+        {
+            pRelayCtrl->stRelayState.status = (uint8_t)eCddRelayState_On;
+        }
+        else
+        {
+            pRelayCtrl->stRelayState.status = (uint8_t)eCddRelayState_Off;
+        }
+    }
 
     Filter_Profile1(&pRelayCtrl->stRelayState, CDDRELAY_CFG_STATE_FILTER_COUNT);
 
@@ -285,16 +298,19 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
                 }
                 else
                 {
-                    if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOn != NULL)
+                    if (c_stCddRelayOpsConfigTable[port].pFuncCtrlShortCutOn != NULL)
                     {
-                        c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOn(port);
+                        c_stCddRelayOpsConfigTable[port].pFuncCtrlShortCutOn();
+                        CDDRELAY_CFG_InfoPrint("[枪：%d]投入输出短路检测回路!\r\n", port);
+                        pRelayCtrl->shortCutDetectTimer = Common_GetSystick();
+                        pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP2;
+                        pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_PROCESS;
                     }
-
-                    CDDRELAY_CFG_InfoPrint("[枪：%d]投入输出短路检测回路!\r\n", port);
-
-                    pRelayCtrl->shortCutDetectTimer = Common_GetSystick();
-                    pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP2;
-                    pRelayCtrl->shortCutDetectResult = GLOBAL_OPT_STATE_PROCESS;
+                    else
+                    {
+                        pRelayCtrl->shortCutFinishDelay = Common_GetSystick();
+                        pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP3;
+                    }
                 }
             }
 
@@ -309,18 +325,18 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
                 pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP4;
                 CDDRELAY_CFG_InfoPrint("[枪：%d]输出短路检测超时[%d]ms!\r\n", port, CDDRELAY_CFG_SHORTCUT_TIMEOUT);
                 AswErrhandle_SetErrExsitCallback(port, eErr_ShortCircleErr);
-                if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff != NULL)
+                if (c_stCddRelayOpsConfigTable[port].pFuncCtrlShortCutOff != NULL)
                 {
-                    c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff(port);
+                    c_stCddRelayOpsConfigTable[port].pFuncCtrlShortCutOff();
                 }
 
                 CDDRELAY_CFG_InfoPrint("[枪：%d]断开输出短路检测回路!\r\n", port);
             }
             else
             {
-                if (c_stCddRelayOpsConfigTable.pFuncGetShortCutStatus != NULL)
+                if (c_stCddRelayOpsConfigTable[port].pFuncGetShortCutStatus != NULL)
                 {
-                    pRelayCtrl->stFilterShortCutDetect.status = c_stCddRelayOpsConfigTable.pFuncGetShortCutStatus(port);
+                    pRelayCtrl->stFilterShortCutDetect.status = c_stCddRelayOpsConfigTable[port].pFuncGetShortCutStatus();
                 }
                 else
                 {
@@ -335,9 +351,9 @@ static void CddRelay_ShortCutDetect(uint8_t port, CddRelayCtrl_Struct *pRelayCtr
                         pRelayCtrl->shortCutDetectStep = CDDRELAY_SHORTCUT_STEP3;
                         CDDRELAY_CFG_InfoPrint("[枪：%d]输出短路检测成功!\r\n", port);
 
-                        if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff != NULL)
+                        if (c_stCddRelayOpsConfigTable[port].pFuncCtrlShortCutOff != NULL)
                         {
-                            c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff(port);
+                            c_stCddRelayOpsConfigTable[port].pFuncCtrlShortCutOff();
                         }
 
                         CDDRELAY_CFG_InfoPrint("[枪：%d]断开输出短路检测回路!\r\n", port);
@@ -421,9 +437,9 @@ void CddRelay_SetReqStopShortCutDetect(uint8_t port)
 
             CDDRELAY_CFG_InfoPrint("[枪：%d]请求中止输出短路检测!\r\n", port);
 
-            if (c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff != NULL)
+            if (c_stCddRelayOpsConfigTable[port].pFuncCtrlShortCutOff != NULL)
             {
-                c_stCddRelayOpsConfigTable.pFuncCtrlShortCutOff(port);
+                c_stCddRelayOpsConfigTable[port].pFuncCtrlShortCutOff();
             }
 
             CDDRELAY_CFG_InfoPrint("[枪：%d]断开输出短路检测回路!\r\n", port);
@@ -472,9 +488,9 @@ void CddRelay_CtrlSwichOn(uint8_t port)
             pRelayCtrl->relayCtrlStep = CDDRELAY_CTRL_STEP_1;
             pRelayCtrl->relayCtrlHoldTick = Common_GetSystick();
 
-            if (c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOn != NULL)
+            if (c_stCddRelayOpsConfigTable[port].pFuncCtrlSwitchOn != NULL)
             {
-                c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOn(port);
+                c_stCddRelayOpsConfigTable[port].pFuncCtrlSwitchOn();
             }
 
             CDDRELAY_CFG_InfoPrint("[枪：%d]请求闭合继电器!\r\n", port);
@@ -496,9 +512,9 @@ void CddRelay_CtrlSwichOff(uint8_t port)
             pRelayCtrl->relayCtrlStep = CDDRELAY_CTRL_STEP_1;
             pRelayCtrl->relayCtrlHoldTick = Common_GetSystick();
 
-            if (c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOff != NULL)
+            if (c_stCddRelayOpsConfigTable[port].pFuncCtrlSwitchOff != NULL)
             {
-                c_stCddRelayOpsConfigTable.pFuncCtrlSwitchOff(port);
+                c_stCddRelayOpsConfigTable[port].pFuncCtrlSwitchOff();
             }
 
             pRelayCtrl->adhesionDetectValidFlag = FALSE;
