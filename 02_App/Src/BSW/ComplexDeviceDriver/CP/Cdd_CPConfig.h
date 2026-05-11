@@ -61,8 +61,8 @@
 ******************************************************************************/
 typedef struct 
 {
-    float (*pFuncGetCpVol)(uint8_t port);
-    void (*pFunSetPwmDuty)(uint8_t port, uint16_t duty);
+    float (*pFuncGetCpVol)(void);
+    void (*pFunSetPwmDuty)(uint16_t duty);
 }CddCPOpsConfig_Struct;
 
 typedef struct 
@@ -79,7 +79,7 @@ typedef struct
 /******************************************************************************
 *    Global variables Declaration
 ******************************************************************************/
-extern const CddCPOpsConfig_Struct c_stCddCPOpsConfigTable;
+extern const CddCPOpsConfig_Struct c_stCddCPOpsConfigTable[SYSCFG_CFG_GUN_NUM];
 extern const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterGB[4];
 extern const CddCPVolStateFilter_Struct c_stCddCPVolStateFilterQB[4];
 /******************************************************************************

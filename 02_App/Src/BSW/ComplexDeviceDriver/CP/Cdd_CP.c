@@ -135,9 +135,9 @@ static void CddCP_SetPwmDuty(uint8_t port, uint16_t duty)
             pCpCtrl->curSetCpDuty = duty;
         }
 
-        if (c_stCddCPOpsConfigTable.pFunSetPwmDuty != NULL)
+        if (c_stCddCPOpsConfigTable[port].pFunSetPwmDuty != NULL)
         {
-            c_stCddCPOpsConfigTable.pFunSetPwmDuty(port, duty);
+            c_stCddCPOpsConfigTable[port].pFunSetPwmDuty(duty);
         }
     }
 }
@@ -161,9 +161,9 @@ static float CddCP_GetVol(uint8_t port)
     
     if (port < SYSCFG_CFG_GUN_NUM)
     {
-        if (c_stCddCPOpsConfigTable.pFuncGetCpVol != NULL)
+        if (c_stCddCPOpsConfigTable[port].pFuncGetCpVol != NULL)
         {
-            ret = c_stCddCPOpsConfigTable.pFuncGetCpVol(port);
+            ret = c_stCddCPOpsConfigTable[port].pFuncGetCpVol();
         }
     }
 
