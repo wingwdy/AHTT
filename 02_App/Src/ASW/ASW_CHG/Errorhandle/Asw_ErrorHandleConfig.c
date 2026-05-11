@@ -52,29 +52,29 @@
 const AswErrorHandleConfig_Struct c_AswErrorHandleConfigTable[eErr_Num] = 
 {
     {eErr_none,               eAswErrorOwner_None,  eAswErrorLevel_0, eAswErrorLevel_0, eAswErrorClear_None,       1,     0,   "无效值"},
-    {eErr_CpVoltAbnor,        eAswErrorOwner_Gun,   eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "CP电压异常"},
-    {eErr_CpGroundFault,      eAswErrorOwner_Gun,   eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "CP对地短路"},
-    {eErr_PEBreakFault,       eAswErrorOwner_Pile,  eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "PE接地故障"},
-    {eErr_EmergencyStop,      eAswErrorOwner_Pile,  eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "急停故障"},
-    {eErr_InputLineReversed,  eAswErrorOwner_Pile,  eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "火零反接"},
-    {eErr_LeakageCurrErr,     eAswErrorOwner_Pile,  eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "漏电流故障"},
-    {eErr_ShortCircleErr,     eAswErrorOwner_Gun,   eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "充电前输出短路故障"},
-    {eErr_RCDSelfcheckErr,    eAswErrorOwner_Pile,  eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "RCD自检故障"},
-    {eErr_AphaseInputOverVol, eAswErrorOwner_Pile,  eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "交流A相输入过压"},
-    {eErr_AphaseInputLessVol, eAswErrorOwner_Pile,  eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "交流A相输入欠压"},
-    {eErr_OutputOverCurr,     eAswErrorOwner_Gun,   eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "交流输出过流"}, 
-    {eErr_JcqMaloperation,    eAswErrorOwner_Gun,   eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "交流输出继电器误动拒动"},         
-    {eErr_JcqSynechiaFault,   eAswErrorOwner_Gun,   eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "交流输出继电器粘连"},       
-    {eErr_HmiCommErr,         eAswErrorOwner_Pile,  eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "人机交互通信故障"},
+    {eErr_CpVoltAbnor,        eAswErrorOwner_Gun,   eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "CP电压异常"},
+    {eErr_CpGroundFault,      eAswErrorOwner_Gun,   eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "CP对地短路"},
+    {eErr_PEBreakFault,       eAswErrorOwner_Pile,  eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "PE接地故障"},
+    {eErr_EmergencyStop,      eAswErrorOwner_Pile,  eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "急停故障"},
+    {eErr_InputLineReversed,  eAswErrorOwner_Pile,  eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "火零反接"},
+    {eErr_LeakageCurrErr,     eAswErrorOwner_Pile,  eAswErrorLevel_6, eAswErrorLevel_6, eAswErrorClear_External,   1,     0,   "漏电流故障"},
+    {eErr_ShortCircleErr,     eAswErrorOwner_Gun,   eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "充电前输出短路故障"},
+    {eErr_RCDSelfcheckErr,    eAswErrorOwner_Pile,  eAswErrorLevel_6, eAswErrorLevel_6, eAswErrorClear_External,   1,     0,   "RCD自检故障"},
+    {eErr_AphaseInputOverVol, eAswErrorOwner_Pile,  eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "交流A相输入过压"},
+    {eErr_AphaseInputLessVol, eAswErrorOwner_Pile,  eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "交流A相输入欠压"},
+    {eErr_OutputOverCurr,     eAswErrorOwner_Gun,   eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "交流输出过流"}, 
+    {eErr_JcqMaloperation,    eAswErrorOwner_Gun,   eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "交流输出继电器误动拒动"},         
+    {eErr_JcqSynechiaFault,   eAswErrorOwner_Gun,   eAswErrorLevel_6, eAswErrorLevel_6, eAswErrorClear_External,   1,     0,   "交流输出继电器粘连"},       
+    {eErr_HmiCommErr,         eAswErrorOwner_Pile,  eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "人机交互通信故障"},
 
     {eErr_ReaderCommErr,      eAswErrorOwner_Gun,   eAswErrorLevel_2, eAswErrorLevel_2, eAswErrorClear_External,   1,     0,   "读卡器通信故障"}, 
 
-    {eErr_MeterCommErr,       eAswErrorOwner_Pile,  eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "电表通信故障"}, 
-    {eErr_EnvOverTempErr,     eAswErrorOwner_Pile,  eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "环境过温故障"},
-    {eErr_GunOverTempErr,     eAswErrorOwner_Gun,   eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "枪过温故障"},
-    {eErr_POverTempErr,       eAswErrorOwner_Pile,  eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "插头过温"},
-    {eErr_DatabaseErr,        eAswErrorOwner_Pile,  eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "数据库存储错误"},
-    {eErr_MeterCalcErr,       eAswErrorOwner_Gun,   eAswErrorLevel_4, eAswErrorLevel_4, eAswErrorClear_External,   1,     0,   "电能表计量故障"},
+    {eErr_MeterCommErr,       eAswErrorOwner_Pile,  eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "电表通信故障"}, 
+    {eErr_EnvOverTempErr,     eAswErrorOwner_Pile,  eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "环境过温故障"},
+    {eErr_GunOverTempErr,     eAswErrorOwner_Gun,   eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "枪过温故障"},
+    {eErr_POverTempErr,       eAswErrorOwner_Pile,  eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "插头过温"},
+    {eErr_DatabaseErr,        eAswErrorOwner_Pile,  eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "数据库存储错误"},
+    {eErr_MeterCalcErr,       eAswErrorOwner_Gun,   eAswErrorLevel_5, eAswErrorLevel_5, eAswErrorClear_External,   1,     0,   "电能表计量故障"},
     {eErr_ChgStartTimeout,    eAswErrorOwner_Gun,   eAswErrorLevel_1, eAswErrorLevel_1, eAswErrorClear_External,   1,     0,   "启动超时"},
     {eErr_DiodeStop,          eAswErrorOwner_Gun,   eAswErrorLevel_1, eAswErrorLevel_1, eAswErrorClear_External,   1,     0,   "不存在二极管"},
     {eSrc_LittleCurr,         eAswErrorOwner_Gun,   eAswErrorLevel_1, eAswErrorLevel_1, eAswErrorClear_External,   1,     0,   "小电流停止"},
@@ -101,12 +101,12 @@ void AswErrHandleCfg_NoticeCallBack(uint8_t port, AswErrorType_Enum errType, uin
 {
     if (flag == TRUE)
     {
-        if (errLevel == eAswErrorLevel_5)
+        if (errLevel == eAswErrorLevel_6)
         {
             CddCP_SetCriticalErrNotice(port);
         }
 
-        if (errLevel == eAswErrorLevel_4 || errLevel == eAswErrorLevel_5 || errLevel == eAswErrorLevel_1)
+        if (errLevel == eAswErrorLevel_5 || errLevel == eAswErrorLevel_6 || errLevel == eAswErrorLevel_1)
         {
             AswCharge_SetStopReason(port, errType);
         }

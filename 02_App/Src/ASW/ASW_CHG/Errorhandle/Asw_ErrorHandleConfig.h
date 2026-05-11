@@ -40,13 +40,14 @@
 typedef enum
 {
     eAswErrorLevel_0,        /* 无效值 */
-    eAswErrorLevel_1,        /* 非故障告警类，正常终止类型 */
-    eAswErrorLevel_2,        /* 告警提示，不影响充电 */
-    eAswErrorLevel_3,        /* 不取消授权、暂停充电，故障次数取消授权清除 */
-    eAswErrorLevel_4,        /* 取消授权、停止充电，故障次数取消授权清除 */
-    eAswErrorLevel_5,        /* 需要断电才能清除的故障，故障次数掉电清除 */
-    AswErrorLevel_Cnt,    
-}AswErrorLevel_Enum; 
+    eAswErrorLevel_1,        /* 正常终止原因类：取消授权 */
+    eAswErrorLevel_2,        /* 状态类：不影响充电 */
+    eAswErrorLevel_3,        /* 状态类：暂停充电 */
+    eAswErrorLevel_4,        /* 故障类：不取消授权、暂停充电，故障次数取消授权清除 */
+    eAswErrorLevel_5,        /* 故障类：取消授权、停止充电，故障次数取消授权清除 */
+    eAswErrorLevel_6,        /* 故障类：需要断电才能清除的故障，故障次数掉电清除 */
+    AswErrorLevel_Cnt,
+}AswErrorLevel_Enum;
 
 typedef enum
 {

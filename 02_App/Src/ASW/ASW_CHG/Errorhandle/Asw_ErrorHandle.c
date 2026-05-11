@@ -167,12 +167,13 @@ static void AswErrHandle_SelfRecoverDetect(uint8_t port)
 static void AswErrHandle_RefreshChargeCondition(AswErrorHandle_Struct *pErrorHandle)
 {
     if (pErrorHandle->arErrLevelCnt[eAswErrorLevel_1] > 0 ||
-        pErrorHandle->arErrLevelCnt[eAswErrorLevel_4] > 0 ||
-        pErrorHandle->arErrLevelCnt[eAswErrorLevel_5] > 0) 
+        pErrorHandle->arErrLevelCnt[eAswErrorLevel_5] > 0 ||
+        pErrorHandle->arErrLevelCnt[eAswErrorLevel_6] > 0)
     {
         pErrorHandle->eChargeCondition = eErrChargeCondition_Cancel;
     }
-    else if (pErrorHandle->arErrLevelCnt[eAswErrorLevel_3] > 0)
+    else if (pErrorHandle->arErrLevelCnt[eAswErrorLevel_3] > 0 ||
+             pErrorHandle->arErrLevelCnt[eAswErrorLevel_4] > 0)
     {
         pErrorHandle->eChargeCondition = eErrChargeCondition_Suspend;
     }
@@ -314,9 +315,9 @@ uint8_t AswErrHandle_IsExsistError(uint8_t port)
 
     if (port < SYSCFG_CFG_GUN_NUM)
     {
-        if (pErrorHandle->arErrLevelCnt[eAswErrorLevel_3] > 0 || 
-            pErrorHandle->arErrLevelCnt[eAswErrorLevel_4] > 0 ||   
-            pErrorHandle->arErrLevelCnt[eAswErrorLevel_5] > 0)
+        if (pErrorHandle->arErrLevelCnt[eAswErrorLevel_4] > 0 || 
+            pErrorHandle->arErrLevelCnt[eAswErrorLevel_5] > 0 ||   
+            pErrorHandle->arErrLevelCnt[eAswErrorLevel_6] > 0)
         {
             ret = TRUE;
         }   
@@ -353,8 +354,8 @@ AswErrorType_Enum AswErrHandle_GetExsistError(uint8_t port)
             if (pErrorHandle->arErrFlag[index] == TRUE)
             {
                 if (pErrorHandle->arErrLevel[index] == eAswErrorLevel_1 ||
-                    pErrorHandle->arErrLevel[index] == eAswErrorLevel_4 ||
-                    pErrorHandle->arErrLevel[index] == eAswErrorLevel_5)
+                    pErrorHandle->arErrLevel[index] == eAswErrorLevel_5 ||
+                    pErrorHandle->arErrLevel[index] == eAswErrorLevel_6)
                 {
                     break;
                 }
