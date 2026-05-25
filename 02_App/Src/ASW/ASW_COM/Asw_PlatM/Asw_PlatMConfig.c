@@ -22,6 +22,7 @@
 #include "Asw_IotProtoOMM.h"
 #include "Asw_IotProtoYKC21M.h"
 #include "Asw_IotProtoXDTM.h"
+#include "Asw_IotProtoAPM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -115,6 +116,21 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncSwipCardCharge = IotGN_SwipCardCharge,
         .pFuncTransformChargeRecord = IotGN_TransformChargeRecord,
     },
+
+    [eAswPlatType_AP] =
+    {
+        .pName = "ap",
+        .cProtoMeaning = "安培",
+        .eSocketType = eCddNetMSocketType_TCP,
+        .pFuncFillLinkPara = IotAP_FillLinkPara,
+        .pFuncInit = IotAP_InitMemory,
+        .pMainFunction = IotAP_MainFunction,
+        .pFuncTransformBillMode = IotAP_TransformBillMode,
+        .pFuncPackChargeRecord = IotAP_PackChargeRecord,
+        .pFuncSwipCardCharge = IotAP_SwipCardCharge,
+        .pFuncTransformChargeRecord = IotAP_TransformChargeRecord,
+    },
+
 };
 
 const AswPlatMProtocolDescriptor_Struct c_stAswOMProtocolDescriptor = 
@@ -154,6 +170,13 @@ const AswPlatCardDescriptor_Struct c_stAswPlatMCardDescriptorTable[eAswPlatCardT
     {
         .pName = "gn+",
         .cMeaning = "通用卡",
+        .cardType = eCddCardType_UUID,
+    },
+
+    [eAswPlatCardType_AP] =
+    {
+        .pName = "ap",
+        .cMeaning = "安培卡",
         .cardType = eCddCardType_UUID,
     },
 };

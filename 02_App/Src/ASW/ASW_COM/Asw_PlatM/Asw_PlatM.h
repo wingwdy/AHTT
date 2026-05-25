@@ -33,6 +33,7 @@ typedef enum
     eAswPlatType_YKC21,    
     eAswPlatType_XDT,
     eAswPlatType_GNP,
+    eAswPlatType_AP,
     eAswPlatType_Count,
 }AswPlatType_Enum;
 
@@ -42,6 +43,7 @@ typedef enum
     eAswPlatCardType_YKC21,    
     eAswPlatCardType_XDT,
     eAswPlatCardType_GNP,
+    eAswPlatCardType_AP,
     eAswPlatCardType_Count,
 }AswPlatCardType_Enum;
 
