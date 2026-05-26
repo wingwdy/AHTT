@@ -339,7 +339,7 @@
               <MiscControls>-Wno-invalid-source-encoding</MiscControls>
               <Define>GD32E50X,GD32E50X_HD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\BSW\SystemService\SystemM;..\Src\BSW\SystemService\TM;..\Src\BSW\DebugService\LogM;..\Src\BSW\DebugService\Console;..\Src\ThirdPartyLib\FlashDB\port\fal\inc;..\Src\ThirdPartyLib\FlashDB\inc;..\Src\BSW\MemoryService\FlashDB_Adapter;..\Src\BSW\MemoryService\MemIf;..\Src\BSW\MemoryService\NVM;..\Src\BSW\MemoryService\EA;..\Src\ThirdPartyLib\LetterShell;..\Src\BSW\ComplexDeviceDriver\CP;..\Src\BSW\ComplexDeviceDriver\Meter;..\Src\BSW\ComplexDeviceDriver\PE;..\Src\BSW\ComplexDeviceDriver\RCD;..\Src\BSW\ComplexDeviceDriver\Relay;..\Src\BSW\ComplexDeviceDriver\Sensor;..\Src\BSW\ComplexDeviceDriver\Led;..\Src\BSW\ComplexDeviceDriver\Net;..\Src\BSW\ComplexDeviceDriver\ModeM;..\Src\BSW\ComplexDeviceDriver\Card;..\Src\ASW\ASW_COM;..\Src\ASW\ASW_CHG\Charge;..\Src\ASW\ASW_CHG\Errorhandle;..\Src\ASW\ASW_CHG\EVSE;..\Src\ASW\ASW_CHG\LedEvent;..\Src\ASW\ASW_CHG\Temp;..\Src\ASW\ASW_CHG\VoltCur;..\Src\ASW\ASW_COM\Asw_PlatM;..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_GN;..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_OM;..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_XDT;..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC21;..\Src\ASW\ASW_COM\Asw_Monitor;..\Src\ASW\ASW_COM\Asw_ChargeIf;..\Src\BSW\SystemService\UCM;..\Src\BSW\SystemService\Snapshot;..\Src\ThirdPartyLib\Mbedtls\mbedtls\include;..\Src\BSW\SystemService\WdgM;..\Src\ThirdPartyLib\cJSON</IncludePath>
+              <IncludePath>..\Src\Core\Inc;..\Src\Drivers\GD32E50x_Firmware_Library\GD32E50x_standard_peripheral\Include;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS\GD\GD32E50x\Include;..\Src\Core;..\Src\BSW\SystemService\OS\FreeRTOS\Source\include;..\Src\BSW\SystemService\OS\FreeRTOS\Source\CMSIS_RTOS_V2;..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure;..\Src\Drivers\GD32E50x_Firmware_Library\CMSIS;..\Src;..\Src\BSW\MCAL;..\Src\Common;..\Src\BSW\SystemService\SystemM;..\Src\BSW\SystemService\TM;..\Src\BSW\DebugService\LogM;..\Src\BSW\DebugService\Console;..\Src\ThirdPartyLib\FlashDB\port\fal\inc;..\Src\ThirdPartyLib\FlashDB\inc;..\Src\BSW\MemoryService\FlashDB_Adapter;..\Src\BSW\MemoryService\MemIf;..\Src\BSW\MemoryService\NVM;..\Src\BSW\MemoryService\EA;..\Src\ThirdPartyLib\LetterShell;..\Src\BSW\ComplexDeviceDriver\CP;..\Src\BSW\ComplexDeviceDriver\Meter;..\Src\BSW\ComplexDeviceDriver\PE;..\Src\BSW\ComplexDeviceDriver\RCD;..\Src\BSW\ComplexDeviceDriver\Relay;..\Src\BSW\ComplexDeviceDriver\Sensor;..\Src\BSW\ComplexDeviceDriver\Led;..\Src\BSW\ComplexDeviceDriver\Net;..\Src\BSW\ComplexDeviceDriver\ModeM;..\Src\BSW\ComplexDeviceDriver\Card;..\Src\ASW\ASW_COM;..\Src\ASW\ASW_CHG\Charge;..\Src\ASW\ASW_CHG\Errorhandle;..\Src\ASW\ASW_CHG\EVSE;..\Src\ASW\ASW_CHG\LedEvent;..\Src\ASW\ASW_CHG\Temp;..\Src\ASW\ASW_CHG\VoltCur;..\Src\ASW\ASW_COM\Asw_PlatM;..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_GN;..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_OM;..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_XDT;..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC21;..\Src\ASW\ASW_COM\Asw_Monitor;..\Src\ASW\ASW_COM\Asw_ChargeIf;..\Src\BSW\SystemService\UCM;..\Src\BSW\SystemService\Snapshot;..\Src\ThirdPartyLib\Mbedtls\mbedtls\include;..\Src\BSW\SystemService\WdgM;..\Src\ThirdPartyLib\cJSON;..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC16</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -439,11 +439,6 @@
               <FilePath>..\Src\ASW\ASW_COM\Asw_PlatM\Asw_PlatM.c</FilePath>
             </File>
             <File>
-              <FileName>Asw_PlatMConfig.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_COM\Asw_PlatM\Asw_PlatMConfig.c</FilePath>
-            </File>
-            <File>
               <FileName>Asw_IotProtoGNM.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_GN\Asw_IotProtoGNM.c</FilePath>
@@ -527,6 +522,26 @@
               <FileName>Asw_ChargeIf.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\ASW\ASW_COM\Asw_ChargeIf\Asw_ChargeIf.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoYKC16M.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC16\Asw_IotProtoYKC16M.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoYKC16Recv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC16\Asw_IotProtoYKC16Recv.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoYKC16Send.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC16\Asw_IotProtoYKC16Send.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_PlatMConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_PlatM\Asw_PlatMConfig.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1745,8 +1760,8 @@
   <RTE>
     <apis/>
     <components>
-      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="5.4.0" condition="ARMv6_7_8-M Device">
-        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.7.0"/>
+      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="5.5.0" condition="ARMv6_7_8-M Device">
+        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.8.0"/>
         <targetInfos>
           <targetInfo name="D3_A32FB_GD32E503RE"/>
         </targetInfos>
