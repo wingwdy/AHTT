@@ -29,10 +29,7 @@
 #define IOT_YKC16_HEAD                            (0x68U)                
 
 /* 通信buff缓存定义 */
-#define IOT_YKC16_TXRX_BUFFER_SIZE                 (2048U)
-
-/* 云快充物理卡号长度 */
-#define YKC16DATA_PHYCARD_LEN   	               4      	
+#define IOT_YKC16_TXRX_BUFFER_SIZE                 (3072U)	
 
 /* 计费模型类型定义 */
 #define IOT_YKC16_BILLMODE_RATE_TYPE_4             4
@@ -143,6 +140,8 @@ typedef enum
 
     eIotYKC16StopReason_PowerOff = 0x83,             /* 掉电故障 */
     eIotYKC16StopReason_NoExpectedErr = 0x90,        /* 未知原因 */
+
+    eIotTT24StopReason_CardStop = 0xE2,     	     /* 刷卡停充 */
 }IotYKC16StopReason_Enum;
 
 /******************************************************************************
@@ -151,6 +150,7 @@ typedef enum
 typedef uint16_t (*IotYKC16_pSendPackFuncType)(uint8_t port, uint8_t *pBuf);
 typedef uint8_t (*IotYKC16_pRecvParseFuncType)(uint8_t *port, uint8_t *r_data, uint16_t len);
 
+/* 发送控制 */
 typedef struct
 {
     uint16_t cmd;
@@ -162,6 +162,7 @@ typedef struct
     char *cMeaning;
 }IotYKC16SendCtrl_Struct;
 
+/* 接收控制 */
 typedef struct 
 {
 	uint16_t cmd;

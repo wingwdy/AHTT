@@ -96,6 +96,20 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncGetCipherKey = IotYKC21_GetRsaPublicKey,
     },
 
+    [eAswPlatType_TT24] =
+    {
+        .pName = "tt2.4",
+        .cProtoMeaning = "甘肃铁塔2.4",
+        .eSocketType = eCddNetMSocketType_TCP,
+        .pFuncFillLinkPara = IotYKC16_FillLinkPara,
+        .pFuncInit = IotYKC16_InitMemory,
+        .pMainFunction = IotYKC16_MainFunction,
+        .pFuncTransformBillMode = IotYKC16_TransformBillMode,
+        .pFuncPackChargeRecord = IotYKC16_PackChargeRecord,
+        .pFuncSwipCardCharge = IotYKC16_SwipCardCharge,
+        .pFuncTransformChargeRecord = IotYKC16_TransformChargeRecord,
+    },
+
     [eAswPlatType_XDT] =
     {
         .pName = "lxxdt",
@@ -167,7 +181,7 @@ const AswPlatCardDescriptor_Struct c_stAswPlatMCardDescriptorTable[eAswPlatCardT
 
     [eAswPlatCardType_TT24] =
     {
-        .pName = "tt24",
+        .pName = "tt",
         .cMeaning = "通用卡",
         .cardType = eCddCardType_UUID,
     },

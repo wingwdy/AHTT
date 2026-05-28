@@ -231,6 +231,7 @@ GlobalRet_Enum MSNvm_SetRecordReportSuccess(MSNvmBlockID_Enum eBlockID, uint32_t
     return MSMemIf_SetReportSuccess(pDescriptor->deviceID, pDescriptor->memIfID, time);
 }
 
+/* 查询最新未上报交易记录 */
 GlobalRet_Enum MSNvm_QueryLatestUnreportedRecord(MSNvmBlockID_Enum eBlockID, uint8_t *pOutRecord, uint16_t recordSize, uint32_t *pTime)
 {
     const MSNvmBlockDescriptor_Struct *pDescriptor = &c_stMSNvmBlockDescriptorTable[eBlockID];

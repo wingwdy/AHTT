@@ -92,7 +92,7 @@ static const IotYKC16SendCtrl_Struct c_stIotYKC16SendctrlTable[IOT_YKC16_CMD_SEN
         .matchCmd = IOT_YKC16_CMD_HEARTBEAT_RSP,
         .pSendFunc = IotYKC16_SendHeartBeat,
         .sendCycle = 10000,
-        .printFlag = FALSE,      //jxy 心跳暂时打开
+        .printFlag = FALSE,
         .cMeaning = "设备心跳"
     },
 
@@ -266,7 +266,7 @@ static const IotYKC16SendCtrl_Struct c_stIotYKC16SendctrlTable[IOT_YKC16_CMD_SEN
 *    Function Source Code
 *******************************************************************************/
 
-static uint8_t IotYKC16_ReportCycleCheck(uint8_t port, uint32_t cmd, uint32_t	sendCyc)
+static uint8_t IotYKC16_ReportCycleCheck(uint8_t port, uint32_t cmd, uint32_t sendCyc)
 {
 	uint32_t startTick = Common_GetSendTick(pIotYKC16Ctx->pFuncSendCtrl, port, cmd);
 	uint8_t sendImmdFlag = Common_GetSendImmdFlag(pIotYKC16Ctx->pFuncSendCtrl, port, cmd);
@@ -302,7 +302,11 @@ static uint16_t IotYKC16_SendLoginReq(uint8_t port, uint8_t *pBuf)
     /* 充电枪数量*/
     pBuf[dataLen++] = SYSCFG_CFG_GUN_NUM;
     /* 通信协议版本 */
-    if (AswPlatM_GetPlatType() == eAswPlatType_YKC16)
+    if (AswPlatM_GetPlatType() == eAswPlatType_TT24)
+    {
+        pBuf[dataLen++] = IOT_TT24_PROTOCOL_VERSION;
+    }
+    else
     {
         pBuf[dataLen++] = IOT_YKC16_PROTOCOL_VERSION;
     }
@@ -459,6 +463,95 @@ static void IotYKC16_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
     }
 }
 
+static void IotTT24_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
+{
+    uint8_t dataLen = 0;
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_LeakageCurrErr))
+    {
+        Common_SetBitFlag(pBuf, 0);
+        Common_SetBitFlag(pBuf, 23);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCalcErr))
+    {
+        Common_SetBitFlag(pBuf, 1);
+        Common_SetBitFlag(pBuf, 23);
+    }
+    
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqSynechiaFault))
+    {
+        Common_SetBitFlag(pBuf, 5);
+        Common_SetBitFlag(pBuf, 23);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqMaloperation))
+    {
+        Common_SetBitFlag(pBuf, 6);
+        Common_SetBitFlag(pBuf, 23);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpVoltAbnor))
+    {
+        Common_SetBitFlag(pBuf, 7);
+        Common_SetBitFlag(pBuf, 23);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_OutputOverCurr))
+    {
+        Common_SetBitFlag(pBuf, 8);
+        Common_SetBitFlag(pBuf, 23);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_AphaseInputOverVol))
+    {
+        Common_SetBitFlag(pBuf, 9);
+        Common_SetBitFlag(pBuf, 23);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_AphaseInputLessVol))
+    {
+        Common_SetBitFlag(pBuf, 10);
+        Common_SetBitFlag(pBuf, 23);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpGroundFault))
+    {
+        Common_SetBitFlag(pBuf, 11);
+        Common_SetBitFlag(pBuf, 23);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_PEBreakFault))
+    {
+        Common_SetBitFlag(pBuf, 12);
+        Common_SetBitFlag(pBuf, 23);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_DiodeStop))
+    {
+        Common_SetBitFlag(pBuf, 13);
+        Common_SetBitFlag(pBuf, 23);
+    }
+
+    if (TRUE != Common_GetBitFlag(pBuf, 23))
+    {
+        if (TRUE == AswErrHandle_CheckErrExit(port, eErr_EmergencyStop))
+        {
+            Common_SetBitFlag(pBuf, 1);
+        }
+        else if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCommErr))
+        {
+            Common_SetBitFlag(pBuf, 7);
+        }
+        else if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ReaderCommErr))
+        {
+            Common_SetBitFlag(pBuf, 8);
+        }
+        else
+        {}
+    }
+}
+
 static uint16_t IotYKC16_SendRealData(uint8_t port, uint8_t *pBuf)
 {
     AswMonitorChargeData_Struct *pChargeData = AswMonitor_GetChargeDataPtr(port);
@@ -547,8 +640,17 @@ static uint16_t IotYKC16_SendRealData(uint8_t port, uint8_t *pBuf)
 
     /* 硬件故障 */
     memset(&pBuf[dataLen], 0x00, 2);
-    IotYKC16_SetRealDataErrBit(port, &pBuf[dataLen]);
-    dataLen += 2;
+    if (AswPlatM_GetPlatType() == eAswPlatType_TT24)
+    {
+       IotTT24_SetRealDataErrBit(port, &pBuf[dataLen]);
+       dataLen += 3;
+    }
+    else
+    {
+        IotYKC16_SetRealDataErrBit(port, &pBuf[dataLen]);
+        dataLen += 2;
+    }
+
     return dataLen;
 }
 
@@ -730,9 +832,6 @@ static uint16_t IotYKC16_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf,  uin
     uint16_t crc16Len = totalLen + 2;
     uint16_t crc16 = 0;
     uint8_t head = IOT_YKC16_HEAD; 
-    uint16_t crctest = 0;
-    uint8_t crct1 = 0;
-    uint8_t crct2 = 0;
 
     pFrameHead->head = head;
     pFrameHead->dataLen = (uint8_t)totalLen;
@@ -807,8 +906,10 @@ void IotYKC16_UpCtrlSendDeal(void)
 
                     if (dataLen > 0)
                     {
+                        /* 整包长度 */
                         dataLen = IotYKC16_PackHead(pCmdSendCtrl->cmd, reqSeq, txBuf, dataLen);
 
+                        /* 发送到队列 */
                         if (eGlobalRet_OK != FrameQueue_PushTx(pIotYKC16Ctx->frameQueueChannelID, NULL, 0, txBuf, dataLen))
                         {
                             if (pCmdSendCtrl->cmdType == IOT_YKC16_CMDTYPE_REQUSET)
@@ -830,6 +931,7 @@ void IotYKC16_UpCtrlSendDeal(void)
                         Common_SetSendImmdFlag(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdSendCtrl->cmd, FALSE);
                         Common_SetSendTick(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdSendCtrl->cmd, Common_GetSystick());
                                             
+                        /* 事件型上送 */
                         if (pCmdSendCtrl->sendCycle == 0)
                         {
                             Common_SetSendEnable(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdSendCtrl->cmd, FALSE);
@@ -839,6 +941,7 @@ void IotYKC16_UpCtrlSendDeal(void)
                         {
                             if (pCmdSendCtrl->matchCmd != IOT_YKC16_CMD_NULL)
                             {
+                                /* 启动接收超时计时器 */
                                 Common_SetRecvTimerEnable(pIotYKC16Ctx->pFuncRecvCtrl, port, pCmdSendCtrl->matchCmd, TRUE);
                                 Common_SetRecvTick(pIotYKC16Ctx->pFuncRecvCtrl, port, pCmdSendCtrl->matchCmd, Common_GetSystick());
                             }
@@ -847,6 +950,7 @@ void IotYKC16_UpCtrlSendDeal(void)
                 }
             }
 
+            /* 轮询上送 */
 			pIotYKC16Ctx->sendIndex++;
 
 			if (pIotYKC16Ctx->sendIndex >= ARRAY_SIZE(c_stIotYKC16SendctrlTable))

@@ -101,7 +101,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .maxTimeout = 10 * 1000,
         .maxTryCnt = 3,
         .matchCmd = IOT_YKC16_CMD_HEARTBEAT_REQ,
-        .printFlag = FALSE,  //jxy 心跳暂时打开
+        .printFlag = FALSE,
         .cMeaning = "心跳应答",
     },
 
@@ -330,6 +330,7 @@ static IotYKC16FrameHead_Struct *IotYKC16_FindValidFrameLen(uint8_t *pData, uint
         pStart++;
         remainLen--;
         dealLen[0]++;
+        pHead = NULL;
     }
 
     return pHead;
@@ -949,6 +950,7 @@ void IotYKC16_TimeoutDetect(void)
     {
         pCmdRecvCtrl = &c_stIotYKC16RecvctrlTable[index];
 
+        /* 针对应答帧处理接收超时 */
         if (pCmdRecvCtrl->cmdType != IOT_YKC16_CMDTYPE_RESPONSE)
         {
             continue;
@@ -956,6 +958,7 @@ void IotYKC16_TimeoutDetect(void)
 
         for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
         {
+            /* 应答超时检测未使能 */
             if (Common_GetRecvTimerEnable(pIotYKC16Ctx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd) != TRUE)
             {
                 continue;
@@ -964,12 +967,13 @@ void IotYKC16_TimeoutDetect(void)
             if (Common_JudgeTimeoutMs(Common_GetRecvTick(pIotYKC16Ctx->pFuncRecvCtrl, port, 
                 pCmdRecvCtrl->cmd), pCmdRecvCtrl->maxTimeout) == TRUE)
             {
+                /* 接收超时次数加1 */
                 Common_SetRptCount(pIotYKC16Ctx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
                 timeoutCount = Common_GetRptCount(pIotYKC16Ctx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
 
                 IOTYKC16_CFG_InfoPrint("[cmd:0x%02X %s] 接收超时第 %d 次, 超时时间：%d ms\r\n", pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, timeoutCount, pCmdRecvCtrl->maxTimeout);
 
-                /* 是否达到最大重试次数 */
+                /* 达到最大重试次数 */
                 if (timeoutCount >= pCmdRecvCtrl->maxTryCnt)
                 {
                     if (pCmdRecvCtrl->cmd == IOT_YKC16_CMD_HEARTBEAT_RSP || pCmdRecvCtrl->cmd == IOT_YKC16_CMD_LOGIN_RSP)
@@ -980,36 +984,21 @@ void IotYKC16_TimeoutDetect(void)
                     {
                         Common_ClearRptCount(pIotYKC16Ctx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
                         Common_SetRecvTimerEnable(pIotYKC16Ctx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd, FALSE);
+                        Common_SetSendFlag(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, FALSE);
                         
                         if (pCmdRecvCtrl->cmd == IOT_YKC16_CMD_ORDER_RECORD_RSP)
                         {
-                            Common_SetSendFlag(pIotYKC16Ctx->pFuncSendCtrl, port, IOT_YKC16_CMD_ORDER_RECORD_REQ, FALSE);
-
                             MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotYKC16Ctx->time);
                             IOTYKC16_CFG_InfoPrint("交易记录上报失败, 强行置为成功!\r\n");
-                        }
-                        else
-                        {
-                            Common_SetSendFlag(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, FALSE);
                         }
                     }
                 }
                 else
                 {
                     Common_SetRecvTimerEnable(pIotYKC16Ctx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd, FALSE);
-
-                    if (pCmdRecvCtrl->cmd == IOT_YKC16_CMD_ORDER_RECORD_RSP)
-                    {
-                        Common_SetSendEnable(pIotYKC16Ctx->pFuncSendCtrl, port, IOT_YKC16_CMD_ORDER_RECORD_REQ, TRUE);
-                        Common_SetSendImmdFlag(pIotYKC16Ctx->pFuncSendCtrl, port, IOT_YKC16_CMD_ORDER_RECORD_REQ, TRUE);
-                        Common_SetSendFlag(pIotYKC16Ctx->pFuncSendCtrl, port, IOT_YKC16_CMD_ORDER_RECORD_REQ, FALSE);
-                    }
-                    else
-                    {
-                        Common_SetSendEnable(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, TRUE);
-                        Common_SetSendImmdFlag(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, TRUE);
-                        Common_SetSendFlag(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, FALSE);
-                    }
+                    Common_SetSendEnable(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, TRUE);
+                    Common_SetSendImmdFlag(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, TRUE);
+                    Common_SetSendFlag(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdRecvCtrl->matchCmd, FALSE);
                 }
             }
         }

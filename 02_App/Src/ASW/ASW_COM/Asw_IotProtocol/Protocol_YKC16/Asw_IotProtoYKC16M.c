@@ -86,7 +86,7 @@ static CommonSendCtrl_Struct* IotYKC16_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_YKC16_CMD_REMOTE_START_CHARGE_RSP:    pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][6];   break;
         case IOT_YKC16_CMD_REMOTE_STOP_CHARGE_RSP:     pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][7];   break;
         case IOT_YKC16_CMD_ORDER_RECORD_REQ:           pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][8];   break;
-        case IOT_YKC16_CMD_PILE_START_CHARGE_REQ:      pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][9];  break;
+        case IOT_YKC16_CMD_PILE_START_CHARGE_REQ:      pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][9];   break;
         case IOT_YKC16_CMD_UPDATE_ACCOUNT_MONEY_RSP:   pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][10];  break;
         case IOT_YKC16_CMD_Para_RSP:                   pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][11];  break;
         case IOT_YKC16_CMD_SYNC_TIME_RSP:              pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][12];  break;
@@ -134,6 +134,7 @@ static void IotYKC16_CycleReportRealData(void)
     uint8_t curGunState = 0;
     uint8_t curGunConnectState = 0;
     uint8_t realDataReportFlag = FALSE;
+    uint8_t billMmodelReportFlag = FALSE;
 
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
@@ -147,6 +148,15 @@ static void IotYKC16_CycleReportRealData(void)
 
         if (pIotYKC16Ctx->lastGunConnectState[port] != curGunConnectState)
         {
+            /* tt2.4插枪请求计费 */
+            if (AswPlatM_GetPlatType() == eAswPlatType_TT24)
+            {
+                if (curGunConnectState == TRUE)
+                {
+                    billMmodelReportFlag = TRUE;
+                }
+            }
+
             realDataReportFlag = TRUE;
         }
 
@@ -165,18 +175,27 @@ static void IotYKC16_CycleReportRealData(void)
             pIotYKC16Ctx->realDataReportTick[port] = Common_GetSystick();
             Common_SetSendEnable(pIotYKC16Ctx->pFuncSendCtrl, port, IOT_YKC16_CMD_REPORT_REALDATA, TRUE);
         }
+
+        if (billMmodelReportFlag == TRUE)
+        {
+            billMmodelReportFlag = FALSE;
+            Common_SetSendEnable(pIotYKC16Ctx->pFuncSendCtrl, port, IOT_YKC16_CMD_BILLMODE_REQ, TRUE);
+        }
     }
 }
 
+/* 未上报交易记录补发轮询 */
 static void IotYKC16_CycleDetectUnreporteRecord(void)
 {
     uint8_t port = 0;
     uint8_t recordSendFlag = FALSE;
 
+    /* 存在未上报的记录 */
     if (MSNvm_QueryUnreportedRecordCount(eMSNvmBlockID_OrderRecord) > 0)
     {
         for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
         {
+            /* 有枪正在发送/等待应答 */
             if (Common_GetSendEnable(pIotYKC16Ctx->pFuncSendCtrl, port, IOT_YKC16_CMD_ORDER_RECORD_REQ) ||
                 Common_GetRecvTimerEnable(pIotYKC16Ctx->pFuncRecvCtrl, port, IOT_YKC16_CMD_ORDER_RECORD_RSP))
             {
@@ -334,7 +353,16 @@ static IotYKC16StopReason_Enum IotYKC16_ConverStopReason(AswErrorType_Enum errTy
     {
         if (errType == stopReasonMap[index].errType)
         {
-            eStopReason = stopReasonMap[index].stopReason;
+            /* 铁塔2.4刷卡停止码*/
+            if (AswPlatM_GetPlatType() == eAswPlatType_TT24 && errType == eSrc_CardStop)
+            {
+                eStopReason = eIotTT24StopReason_CardStop;
+            }
+            else
+            {
+                eStopReason = stopReasonMap[index].stopReason;
+            }
+            
             findFlag = TRUE;
             break;
         }
