@@ -68,6 +68,9 @@
 
 #define MSNVM_XDT_BILLMODE_PERIOD_COUNT       16
 
+/************************* AP（安培） *************************************/
+#define MSNVM_AP_BILLMODE_PERIOD_COUNT        12
+
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -184,6 +187,36 @@ typedef struct
 
 typedef struct
 {
+    uint8_t timeSerialNumber;                  /* 时段序号 */
+    uint8_t timeKind;                          /* 时段类型 */
+    uint8_t chargeEnergy[3];                   /* 电量，0.001kWh，小端 */
+    uint8_t chargeElecFee[3];                  /* 电费，0.01元，小端 */
+    uint8_t chargeServeFee[3];                 /* 服务费，0.01元，小端 */
+}MSNvmAPPeriodTradeInfo_Struct;
+
+typedef struct
+{
+    uint8_t port;                             /* 枪号 */
+    uint8_t orderTransactionNum[16];           /* 交易流水号 */
+    uint8_t periodCount;                       /* 时段个数 */
+    MSNvmAPPeriodTradeInfo_Struct periodInfo[MSNVM_AP_BILLMODE_PERIOD_COUNT];
+    uint8_t startTime[7];                      /* 充电开始时间 CP56Time2a */
+    uint8_t stopTime[7];                       /* 充电结束时间 CP56Time2a */
+    uint8_t chargeTimeMin[2];                  /* 累计充电时间，min，小端 */
+    uint8_t totalElecFee[3];                   /* 充电费，0.01元，小端 */
+    uint8_t totalServeFee[3];                  /* 服务费，0.01元，小端 */
+    uint8_t totalEnergy[3];                    /* 总电量，0.001kWh，小端 */
+    uint8_t startMeterVal[4];                  /* 总起示值，0.001kWh，小端 */
+    uint8_t stopMeterVal[4];                   /* 总止示值，0.001kWh，小端 */
+    uint8_t startSoc[2];                       /* 充电前SOC */
+    uint8_t stopSoc[2];                        /* 结束后SOC */
+    uint8_t logicCardNum[8];                   /* 物理卡号 */
+    uint8_t vin[32];                           /* 电动汽车唯一标识 */
+    uint8_t stopReason[2];                     /* 停止原因，BCD */
+}MSNvmAPOrderInfo_Struct;
+
+typedef struct
+{
 	uint8_t valid;
 	uint8_t sn;
 	uint8_t pq[4];
@@ -224,6 +257,7 @@ typedef union
     MSNvmXDTOrderInfo_Struct stXDTOrderInfo;
     MSNvmGNOrderInfo_Struct stGNOrderInfo;
     MSNvmYKC21OrderInfo_Struct stYKC21OrderInfo;
+    MSNvmAPOrderInfo_Struct stAPOrderInfo;
     uint8_t userData[MSNVM_ORDER_MAX_LEN];
 }MSNvmPlatOrderInfo_Union;
 
@@ -356,11 +390,45 @@ typedef struct
     MSNvmXDTPlatInfo_Struct platinfo;
 }MSNvmXDTParam_Struct;
 
+/*********************************** AP */
+typedef struct
+{
+    uint8_t periodSerial;
+    uint8_t periodRate;
+    uint8_t startTime[2];
+    uint8_t stopTime[2];
+    uint32_t elecPrice;
+    uint32_t servePrice;
+}MSNvmAPParamBillPeriod_Struct;
+
+typedef struct
+{
+    uint8_t billModeID[8];
+    uint8_t switchTime[7];
+    uint8_t invalidTime[7];
+    uint8_t workState[2];
+    uint8_t periodCount;
+    MSNvmAPParamBillPeriod_Struct period[MSNVM_AP_BILLMODE_PERIOD_COUNT];
+}MSNvmAPParamBillMode_Struct;
+
+/* B47双缓冲计费模型存储结构(每枪独立一套A/B) */
+typedef struct
+{
+    uint8_t recentUpdateIndex;                                     /* 最近更新的A/B组索引(0=A组, 1=B组) */
+    MSNvmAPParamBillMode_Struct billModeData[2];                   /* A/B双缓冲计费模型数据 [0]=A组 [1]=B组 */
+}IotAPBillModeSave_Struct;
+
+typedef struct
+{
+    IotAPBillModeSave_Struct stBillModeSave[SYSCFG_CFG_GUN_NUM];
+}MSNvmAPParam_Struct;
+
 typedef union 
 {
     MSNvmXDTParam_Struct   stXDTParam;
     MSNvmGNParam_Struct    stGNParam;
     MSNvmYKC21Param_Struct stYKC21Param;
+    MSNvmAPParam_Struct    stAPParam;
     uint8_t paramArr[MSNVM_PLAT_PRIVATE_PARAM_LEN];
 }MSNvmPlatPrivateParam_Union;
 /******************************************************************************

@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 *------------    --------     -------   ----------------------------------------
-*2026/05/21     V1.0.0       AI        初版创建 - 骨架代码
+*2026/05/21     V1.0.0       WDY        初版创建 - 骨架代码
 *
 ******************************************************************************/
 #ifndef ASW_IOT_PROTO_AP_SEND_H_
@@ -28,9 +28,11 @@
 /******************************************************************************
 *    Global Function Prototypes
 ******************************************************************************/
+extern const IotAPSendCtrl_Struct c_stIotAPSendctrlTable[IOT_AP_CMD_SEND_COUNT];
 
 /* F帧发送函数 */
 uint16_t IotAP_SendLoginReq(uint8_t port, uint8_t *pBuf);
+uint16_t IotAP_SendUFrameAuth(uint8_t port, uint8_t *pBuf);
 uint16_t IotAP_SendHeartbeatReq(uint8_t port, uint8_t *pBuf);
 uint16_t IotAP_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf);
 
@@ -39,6 +41,8 @@ uint16_t IotAP_SendRealtimeData(uint8_t port, uint8_t *pBuf);
 uint16_t IotAP_SendChgCtrlResult(uint8_t port, uint8_t *pBuf);
 
 /* B帧发送函数 - 鉴权 */
+uint16_t IotAP_SendCardAuthUp(uint8_t port, uint8_t *pBuf);
+uint16_t IotAP_SendStartNotifyUp(uint8_t port, uint8_t *pBuf);
 
 /* B帧发送函数 - 交易 */
 uint16_t IotAP_SendOnlineDetailUp(uint8_t port, uint8_t *pBuf);

@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 *------------    --------     -------   ----------------------------------------
-*2026/05/21     V1.0.0       AI        初版创建 - 骨架代码
+*2026/05/21     V1.0.0       WDY        初版创建 - 骨架代码
 *
 ******************************************************************************/
 #ifndef ASW_IOT_PROTO_AP_TYPES_H_
@@ -27,15 +27,29 @@
 #define IOT_AP_PROTOCOL_VERSION                 (10141U)
 
 /* 通信协议头定义 */
-#define IOT_AP_HEAD1                            (0x68U)
-#define IOT_AP_HEAD2                            (0x68U)
+#define IOT_AP_HEAD                            (0x68U)
 
 /* 通信buff缓存定义 */
 #define IOT_AP_TXRX_BUFFER_SIZE                 (4096U)
 
+/* 协议CMD类型定义 */
+#define IOT_AP_CMDTYPE_REQUSET                  (0x00U)
+#define IOT_AP_CMDTYPE_RESPONSE                 (0x01U)
+#define IOT_AP_CMD_NULL                         (0xFFFFU)
+
+/* 信息帧固定字段定义 */
+#define IOT_AP_CTRL_UP_REQ                      (130U)
+#define IOT_AP_CTRL_DOWN_REQ                    (133U)
+#define IOT_AP_TYPE_CLOCK_SYNC                  (103U)
+#define IOT_AP_TYPE_UP_DATA                     (130U)
+#define IOT_AP_TYPE_DOWN_DATA                   (133U)
+#define IOT_AP_VSQ_DEFAULT                      (0x00U)
+#define IOT_AP_COT_ACT                          (0x06U)
+#define IOT_AP_COT_ACTCON                       (0x07U)
+
 /* 实时数据上报周期定义 */
-#define IOTAP_CFG_IDLE_REALDATA_CYCLE           (5 * 60 * 1000)
-#define IOTAP_CFG_CHARGING_REALDATA_CYCLE       (15 * 1000)
+#define IOTAP_CFG_IDLE_REALDATA_CYCLE           (2 * 60 * 1000)
+#define IOTAP_CFG_CHARGING_REALDATA_CYCLE       (30 * 1000)
 
 /* 日志接口函数定义 */
 #define IOTAP_CFG_DebugPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_Proto, fmt, ##__VA_ARGS__)
@@ -123,11 +137,11 @@
 #define IOT_AP_CMD_B60_METER_ENC_UP             (0x60U)  /* 电表加密数据上报上行（扩展） */
 #define IOT_AP_CMD_B61_METER_ENC_DOWN           (0x61U)  /* 电表加密数据下行（扩展） */
 
-/* 发送CMD计数 (实际有效帧数: F1/F5/F8/B1/B5/B6/B10/B14/B53/B48/B49/B52/B34/B46/B57/B31/B38/B40/B24) */
+/* 发送CMD计数 (实际有效帧数: F1/F3/F5/F8/B1/B5/B6/B10/B24/B31/B34/B38/B40/B46/B48/B49/B52/B53/B57) */
 #define IOT_AP_CMD_SEND_COUNT                  (19U)
 
-/* 接收CMD计数 (实际有效帧数: F2/F6/F7/B4/B7/B11/B54/B14/B47/B50/B51/B33/B45/B32/B39/B23) */
-#define IOT_AP_CMD_RECV_COUNT                  (16U)
+/* 接收CMD计数 (实际有效帧数: F2/F4/F6/F7/B4/B7/B11/B14/B23/B32/B33/B39/B45/B47/B50/B51/B54) */
+#define IOT_AP_CMD_RECV_COUNT                  (17U)
 
 /******************************************************************************
 *    Enum Definition
@@ -135,50 +149,26 @@
 
 typedef enum
 {
-    eIotAPStopReason_Null = 0,
-
-    /* 故障类原因 */
-    eIotAPStopReason_CpVoltAbnor = 0x01,       /* CP电压异常 */
-    eIotAPStopReason_CpGroundFault = 0x02,     /* CP对地短路 */
-    eIotAPStopReason_PEBreakFault = 0x03,      /* PE接地故障 */
-    eIotAPStopReason_LeakageCurrErr = 0x07,    /* 漏电流故障 */
-    eIotAPStopReason_JcqMaloperation = 0x13,   /* 继电器误动拒动故障 */
-    eIotAPStopReason_JcqSynechiaFault = 0x14,  /* 继电器粘连故障 */
-    eIotAPStopReason_GunTempErr = 0x1B,        /* 枪过温故障 */
-    eIotAPStopReason_ShortCut = 0x1E,          /* 输出短路 */
-    eIotAPStopReason_MeterCalcErr = 0x0B,      /* 电能计量故障 */
-    eIotAPStopReason_AmountFault = 0x0C,       /* 充电中金额异常 */
-    eIotAPStopReason_BillModeErr = 0x21,       /* 计费模型异常 */
-    eIotAPStopReason_StartTimeout = 0x20,      /* 启动超时 */
-    eIotAPStopReason_DiodeStop = 0x25,         /* 车辆无二极管 */
-
-    /* 用户主动停止 */
-    eIotAPStopReason_KeyStop = 0x27,           /* 按键停止 */
-    eIotAPStopReason_AppStop = 0x40,           /* APP停止 */
-    eIotAPStopReason_ManualStop = 0x45,        /* 手动停止 */
-    eIotAPStopReason_CarStop = 0x46,           /* 车辆停止 */
-
-    /* 条件停止 */
-    eIotAPStopReason_StopByEnergy = 0x42,      /* 按电量停止 */
-    eIotAPStopReason_StopByMoney = 0x43,       /* 按金额停止 */
-    eIotAPStopReason_StopByTime = 0x44,        /* 按时间停止 */
-
-    /* 异常断开 */
-    eIotAPStopReason_GunDisconnect = 0x6B,     /* 控制导引断开 */
-    eIotAPStopReason_MeterCommErr = 0x6D,      /* 电表通信中断 */
-    eIotAPStopReason_SumNoEnough = 0x6E,       /* 余额不足 */
-    eIotAPStopReason_EmergencyStop = 0x72,     /* 急停按下 */
-    eIotAPStopReason_TempErr = 0x74,           /* 温度异常 */
-    eIotAPStopReason_OverCurr = 0x75,          /* 输出过流 */
-    eIotAPStopReason_LittleCurr = 0x76,        /* 小电流 */
-    eIotAPStopReason_VoltageErr = 0x79,        /* 电压异常 */
-    eIotAPStopReason_CurrentErr = 0x7A,        /* 电流异常 */
-    eIotAPStopReason_PowerOff = 0x83,          /* 掉电故障 */
-    eIotAPStopReason_DataBaseErr = 0x1D,       /* 数据库错误 */
-
-    /* 其他 */
-    eIotAPStopReason_OtherErr = 0x65,          /* 其它原因 */
-    eIotAPStopReason_NoExpectedErr = 0x90,     /* 未知原因 */
+    eIotAPStopReason_Null = 0,                 /* 无停止原因 */
+    eIotAPStopReason_Full = 1,                 /* 充满/车辆停止/异常拔枪 */
+    eIotAPStopReason_KeyStop = 2,              /* 主动停止(按键) */
+    eIotAPStopReason_AppStop = 3,              /* 主动停止(远程) */
+    eIotAPStopReason_CpFault = 14,             /* 充电中控制导引故障 */
+    eIotAPStopReason_EmergencyStop = 17,       /* 急停按钮动作故障 */
+    eIotAPStopReason_LeakageCurrErr = 21,      /* 交流输入断路器故障/漏电 */
+    eIotAPStopReason_JcqMaloperation = 22,     /* 接触器拒动/误动 */
+    eIotAPStopReason_JcqSynechiaFault = 23,    /* 接触器粘连 */
+    eIotAPStopReason_InputFault = 24,          /* 过压/欠压/过流 */
+    eIotAPStopReason_TempErr = 25,             /* 充电桩/接口过温 */
+    eIotAPStopReason_DiodeStop = 50,           /* BSM连接器连接状态异常/二极管 */
+    eIotAPStopReason_OtherErr = 54,            /* 其他故障 */
+    eIotAPStopReason_PEBreakFault = 113,       /* PE接地/绝缘监测 */
+    eIotAPStopReason_SumNoEnough = 301,        /* 达到设定金额/金额不足 */
+    eIotAPStopReason_PowerOff = 312,           /* 系统掉电 */
+    eIotAPStopReason_StartTimeout = 320,       /* 启动超时停止 */
+    eIotAPStopReason_MeterCalcErr = 321,       /* 电表读数异常 */
+    eIotAPStopReason_MeterCommErr = 326,       /* 电表通信故障 */
+    eIotAPStopReason_NoExpectedErr = 54,       /* 未知原因按其他故障上报 */
 }IotAPStopReason_Enum;
 
 /******************************************************************************
@@ -210,19 +200,19 @@ typedef struct
     char *cMeaning;
 }IotAPRecvCtrl_Struct;
 
-/* 帧头结构 */
+/* 安培信息帧头结构，线格式参考示例报文和旧项目 ANPEI_HEAD_T */
 typedef struct
 {
-    uint8_t head[2];        /* 帧头标识 0x68 0x68 */
-    uint8_t length[2];      /* 数据长度 */
-    uint8_t ctrlCode;       /* 控制码 */
-    uint8_t address[4];     /* 地址域 */
-    uint8_t cif[2];         /* CIF */
-    uint8_t seq[2];         /* 序列号 */
-    uint8_t dataLen[2];     /* 数据长度 */
-    uint8_t cs;             /* 校验码 */
-    uint8_t tail[2];        /* 帧尾标识 0x16 */
-}IotAPFrameHead_Struct;
+    uint8_t head;           /* 帧头标识 0x68 */
+    uint8_t len;            /* 从控制域到数据域末尾的长度 */
+    uint8_t control[4];     /* 控制域 */
+    uint8_t typeId;         /* 类型标识 */
+    uint8_t vsq;            /* 可变结构限定词 */
+    uint8_t cot;            /* 传送原因 */
+    uint8_t appSerAddr[2];  /* 应用服务数据单元公共地址 */
+    uint8_t infAddr[3];     /* 信息对象地址 */
+    uint8_t recordKind;     /* 记录类型 */
+}IotAPInfoFrameHead_Struct;
 
 
 #endif /* ASW_IOT_PROTO_AP_TYPES_H_ */
