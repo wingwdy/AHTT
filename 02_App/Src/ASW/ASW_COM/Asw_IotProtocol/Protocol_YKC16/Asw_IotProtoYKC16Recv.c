@@ -688,7 +688,7 @@ static uint8_t IotYKC16_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, u
             /* 订单号 */
             memcpy(pIotYKC16Ctx->stProtoData[port[0]].curUsedOrderTransactionNum, pOrderNum, 16);
             /* 卡号 */
-            memcpy(pIotYKC16Ctx->stProtoData[port[0]].authCardID, pCardNum, 8);
+            
             /* 账户余额 */
             pChargeCtrl->accountMoney = accountMoney;
 

@@ -177,7 +177,7 @@ typedef struct
     uint8_t dealFlag;                         /* 交易标识 */
     uint8_t dealDate[7];                      /* 交易日期 CP56Time2a 格式*/
     uint8_t stopReason;                       /* 停止原因 */
-    uint8_t logicCardNum[8];                  /* 逻辑卡号 */
+    uint8_t physCardNum[8];                   /* 物理卡号 */
 }MSNvmYKC16OrderInfo_Struct;
 
 typedef struct 

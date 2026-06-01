@@ -448,15 +448,15 @@ static void IotYKC16_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
     {
         if (TRUE == AswErrHandle_CheckErrExit(port, eErr_EmergencyStop))
         {
-            Common_SetBitFlag(pBuf, 1);
+            Common_SetBitFlag(pBuf, 0);
         }
-        else if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCommErr))
+        if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCommErr))
+        {
+            Common_SetBitFlag(pBuf, 6);
+        }
+        if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ReaderCommErr))
         {
             Common_SetBitFlag(pBuf, 7);
-        }
-        else if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ReaderCommErr))
-        {
-            Common_SetBitFlag(pBuf, 8);
         }
         else
         {}
@@ -467,7 +467,7 @@ static void IotTT24_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
 {
     uint8_t dataLen = 0;
 
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_LeakageCurrErr))
+    if (TRUE != AswErrHandle_CheckErrExit(port, eErr_LeakageCurrErr))
     {
         Common_SetBitFlag(pBuf, 0);
         Common_SetBitFlag(pBuf, 23);
@@ -537,15 +537,15 @@ static void IotTT24_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
     {
         if (TRUE == AswErrHandle_CheckErrExit(port, eErr_EmergencyStop))
         {
-            Common_SetBitFlag(pBuf, 1);
+            Common_SetBitFlag(pBuf, 0);
         }
-        else if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCommErr))
+        if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCommErr))
+        {
+            Common_SetBitFlag(pBuf, 6);
+        }
+        if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ReaderCommErr))
         {
             Common_SetBitFlag(pBuf, 7);
-        }
-        else if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ReaderCommErr))
-        {
-            Common_SetBitFlag(pBuf, 8);
         }
         else
         {}
@@ -718,10 +718,11 @@ static uint16_t IotYKC16_SendPileStartChargeReq(uint8_t port, uint8_t *pBuf)
     pBuf[dataLen++] = 0x01;
     /* 是否需要密码 */
     pBuf[dataLen++] = 0x00;
-    /* 卡号（逆序） */
+    /* 物理卡号（逆序） */
     for (uint8_t i = 0; i < 8; i++)
     {
         pBuf[dataLen + i] = pstChargeCtrl->authCardID[7 - i];
+        pIotYKC16Ctx->stProtoData[port].authCardID[i] = pstChargeCtrl->authCardID[7 - i];
     }
     dataLen += 8;
     /* 是否输入密码 */

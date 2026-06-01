@@ -494,8 +494,8 @@ void IotYKC16_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint
         dataLen += 7;
         /*  停止原因 */
         pBuf[dataLen++] = pOrderData->stopReason;
-        /* 逻辑卡号 */
-        memcpy(&pBuf[dataLen], pOrderData->logicCardNum, 8);
+        /* 物理卡号 */
+        memcpy(&pBuf[dataLen], pOrderData->physCardNum, 8);
         dataLen += 8;
     }
 
@@ -602,7 +602,7 @@ void IotYKC16_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
         else
         {
             pYKC16Order->dealFlag = 0x02;
-            memcpy(pYKC16Order->logicCardNum, pIotYKC16Ctx->stProtoData[port].authCardID, 8);
+            memcpy(pYKC16Order->physCardNum, pIotYKC16Ctx->stProtoData[port].authCardID, 8);
         }
 
         pOrderData->port = port;
