@@ -2302,13 +2302,8 @@ static void IotXDT_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLe
                     {
                         if (pRecvTopicTable->cmdType == IOT_XDT_CMDTYPE_RESPONSE)
                         {
-                            Common_SetRecvEnable(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd, TRUE);
+							Common_ClearRptCount(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd);
                             Common_SetRecvTimerEnable(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd, FALSE);
-
-                            if (IotXDT_GetSendCmdSendCycle(pRecvCtrl->matchCmd) == 0)
-                            {
-                                Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, pRecvCtrl->matchCmd, FALSE);
-                            }
                         }
                         else
                         {	
@@ -2343,9 +2338,7 @@ static void IotXDT_CmdTimeoutHandle3Times(uint8_t port, IotXDTRecvCtrl_Struct *p
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmXDTParamBillMode_Struct *pBillMode = &pPrivateParam->stXDTParam.stBillMode;
 
-	switch (pRecvCtrl->cmd)
-	{
-	case IOT_XDT_CMD_REQUEST_RATEMODE_RSP:
+	if (pRecvCtrl->cmd == IOT_XDT_CMD_REQUEST_RATEMODE_RSP)
 	{
 		/* 如果本地有计费模型，那么只请求3次，如果本地无计费模型，那么需要持续请求 */
 		if (Common_FourUint8ToUint32(pBillMode->validFlag) == IOT_XDT_MAGIC_NUM)
@@ -2353,24 +2346,14 @@ static void IotXDT_CmdTimeoutHandle3Times(uint8_t port, IotXDTRecvCtrl_Struct *p
             Common_SetRecvTimerEnable(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd, FALSE);
             Common_SetSendFlag(pIotXDTCtx->pFuncSendCtrl, port, pRecvCtrl->matchCmd, FALSE);
 		}
-		else
-		{
-            Common_ClearRptCount(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd);
-			Common_SetRecvTimerEnable(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd, FALSE);
-			Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, pRecvCtrl->matchCmd, TRUE);
-			Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, port, pRecvCtrl->matchCmd, TRUE);
-			Common_SetSendFlag(pIotXDTCtx->pFuncSendCtrl, port, pRecvCtrl->matchCmd, FALSE);
-		}
-
-		break;
 	}
-	default:
+	else
 	{
-        Common_SetRecvTimerEnable(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd, FALSE);
-        Common_SetSendFlag(pIotXDTCtx->pFuncSendCtrl, port, pRecvCtrl->matchCmd, FALSE);
-		break;
+		Common_SetRecvTimerEnable(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd, FALSE);
+		Common_SetSendFlag(pIotXDTCtx->pFuncSendCtrl, port, pRecvCtrl->matchCmd, FALSE);
 	}
-	}
+
+	Common_ClearRptCount(pIotXDTCtx->pFuncRecvCtrl, port, pRecvCtrl->cmd);
 }
 
 static void IotXDT_CmdTimeoutHandle(uint8_t port, uint16_t cmd)

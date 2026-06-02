@@ -304,7 +304,6 @@ GlobalRet_Enum MSNvm_SetDefaultParaBlock(MSNvmBlockID_Enum eBlockID)
     xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
     
     MSNvm_WriteFlashData(eBlockID);
-
     return eGlobalRet_OK;
 }
 

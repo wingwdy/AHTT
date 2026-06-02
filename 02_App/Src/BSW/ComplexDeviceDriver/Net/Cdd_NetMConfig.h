@@ -47,6 +47,7 @@ typedef struct
 	void (*delAllSocket)(void);
 	void (*delSingleSocket)(uint8_t socketIndex);
 	void (*getIccid)(char *pICCID);
+	void (*getImei)(char *pIMEI);
 	uint8_t (*getCsq)(void);
 	CddNetMOperator_Enum (*getOperator)(void);
 	void (*getModuleTypeInfo)(char *ModuleType, uint16_t readLen);

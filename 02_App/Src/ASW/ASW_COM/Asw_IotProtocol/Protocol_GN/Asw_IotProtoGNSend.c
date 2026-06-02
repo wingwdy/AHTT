@@ -833,6 +833,9 @@ void IotGN_UpCtrlSendDeal(void)
 
                     if (dataLen > 0)
                     {
+                        pIotGNCtx->queueBusyFlag = TRUE;
+						pIotGNCtx->waitQueueIdleTick = Common_GetSystick();
+                        
                         dataLen = IotGN_PackHead(pCmdSendCtrl->cmd, reqSeq, txBuf, dataLen);
 
                         if (eGlobalRet_OK != FrameQueue_PushTx(pIotGNCtx->frameQueueChannelID, NULL, 0, txBuf, dataLen))

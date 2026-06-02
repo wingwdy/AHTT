@@ -34,6 +34,7 @@ typedef enum
     eATModuleCmd_QueryModule,                       /* 识别模块 */
     eATModuleCmd_QuerySimRecognizeStatus,           /* sim识别状态查询 */
     eATModuleCmd_QueryIccid,                        /* sim卡iccid查询 */
+    eATModuleCmd_QueryImei,                         /* 模块IMEI查询 */
     eATModuleCmd_QueryCsq,                          /* 信号强度查询 */
     eATModuleCmd_QueryNtpClk,                       /* 查询NTP时间 */
     eATModuleCmd_QueryCGREG,                        /* PS服务网络连接状态查询 */

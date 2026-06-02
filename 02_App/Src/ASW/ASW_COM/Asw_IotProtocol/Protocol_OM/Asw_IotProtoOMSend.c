@@ -966,6 +966,9 @@ void IotOM_UpCtrlSendDeal(void)
 
                     if (dataLen > 0)
                     {
+                        pIotOMCtx->queueBusyFlag = TRUE;
+						pIotOMCtx->waitQueueIdleTick = Common_GetSystick();
+
                         dataLen = IotOM_PackHead(pCmdSendCtrl->cmd, reqSeq, txBuf, dataLen);
 
                         if (eGlobalRet_OK != FrameQueue_PushTx(pIotOMCtx->frameQueueChannelID, NULL, 0, txBuf, dataLen))

@@ -231,6 +231,14 @@ void CddNetM_GetIccid(uint8_t *pICCID)
     }
 }
 
+void CddNetM_GetIMEI(uint8_t *pIMEI)
+{
+    if (c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].getImei != NULL)
+    {
+        c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].getImei((char *)pIMEI);
+    }
+}
+
 void CddNetM_UpdateMqttUserNamePassword(CddNetMPlatType_Enum ePlatType, char *pUserName, char *pPassword)
 {
 	CddNetMLinkPara_Struct *pChannelDCB = NULL;

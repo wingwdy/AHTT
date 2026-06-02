@@ -503,6 +503,18 @@ uint16_t Common_CalcCRC16(uint8_t *pData, uint16_t dataLen)
     return  (crcHi << 8) | crcLo;
 }
 
+uint32_t Common_CalcCS32(uint8_t *pData, uint16_t dataLen)
+{
+    uint32_t cs = 0;
+
+    while(dataLen--)
+    {
+        cs += pData[dataLen];
+    }
+
+    return cs;
+}
+
 /* 插入排序,从小到大 */
 void Common_InsertSort(uint16_t *pData, uint16_t n)
 {
@@ -888,6 +900,34 @@ void Common_ConvertStringToHex(char *pString,  uint8_t *pHex,  uint16_t len)
 			pHex[index / 2] = temp;
 		}
 	}
+}
+
+uint16_t Common_ConvertUtf8ToIso(uint8_t* in, uint16_t inLen,uint8_t *out)
+{
+    uint8_t *ptr_iso = out;
+    uint8_t *ptr_utf8 = in;
+
+    while (ptr_utf8 -in < inLen)
+    {
+        if (*ptr_utf8 >= 0x80)
+        {
+            if(*ptr_utf8 == 0xc2)
+            {
+                *(ptr_iso++) = *(ptr_utf8 + 1);
+            } 
+            else if(*ptr_utf8 == 0xc3)
+            {
+                *(ptr_iso++) = *(ptr_utf8 + 1) + 0x40;
+            }
+
+            ptr_utf8 += 2;
+        }
+        else
+        {
+            *(ptr_iso++) = *(ptr_utf8++);
+        }
+    }
+    return (ptr_iso - out);
 }
 
 /*

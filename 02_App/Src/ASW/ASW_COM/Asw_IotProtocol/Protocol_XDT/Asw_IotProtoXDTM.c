@@ -229,15 +229,17 @@ static void IotXDT_WSInitHandle(void)
 
     pIotXDTCtx->eWorkState = eIotXDTWorkState_Offline;
 
-    if (pPlatInfo->pileDataReportCycle == 0)
-    {
-        pPlatInfo->pileDataReportCycle = 60;
-        pPlatInfo->pileDataCycleReportEnable = TRUE;
-    }
-
     if (pPlatInfo->amountChangeThreshold == 0)
     {
         memcpy(&pPlatInfo->amountChangeThreshold, &amountChangeThreshold, 4);
+    }
+
+    if (pPlatInfo->pileDataCycleReportEnable == TRUE)
+    {
+        if (pPlatInfo->pileDataReportCycle == 0)
+        {
+            pPlatInfo->pileDataReportCycle = 60;
+        }
     }
 
     pPlatInfo->resetCount++;
@@ -475,7 +477,6 @@ static void IotXDT_CycleDetectUnreporteRecord(void)
                 else
                 {
                     Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, IOT_XDT_CHARGE_RECORD, TRUE);
-                    Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CHARGE_RECORD, TRUE);
                 }
             }
         }

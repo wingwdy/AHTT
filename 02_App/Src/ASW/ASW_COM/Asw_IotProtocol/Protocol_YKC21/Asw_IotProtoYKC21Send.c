@@ -1108,6 +1108,9 @@ void IotYKC21_UpCtrlSendDeal(void)
 
                     if (dataLen > 0)
                     {
+                        pIotYKC21Ctx->queueBusyFlag = TRUE;
+                        pIotYKC21Ctx->waitQueueIdleTick = Common_GetSystick();
+                        
                         dataLen = IotYKC21_PackHead(port,pCmdSendCtrl->cmd, pCmdSendCtrl->encryptionFlag, pCmdSendCtrl->printFlag, reqSeq, txBuf, dataLen);
 
                         if (eGlobalRet_OK != FrameQueue_PushTx(pIotYKC21Ctx->frameQueueChannelID, NULL, 0, txBuf, dataLen))
