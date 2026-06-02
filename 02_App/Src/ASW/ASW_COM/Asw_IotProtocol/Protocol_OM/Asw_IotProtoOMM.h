@@ -85,6 +85,8 @@ typedef struct
     uint32_t realDataReportTick[SYSCFG_CFG_GUN_NUM];
     uint8_t lastGunState[SYSCFG_CFG_GUN_NUM];            /* 用于变位上送*/
     uint8_t lastGunConnectState[SYSCFG_CFG_GUN_NUM];     /* 用于变位上送*/
+    uint32_t errVersion[SYSCFG_CFG_GUN_NUM];
+    uint8_t lastErrInfo[SYSCFG_CFG_GUN_NUM][32];         /* 用于变位上送*/
 
     CommonSendCtrl_Struct stSendCtrl[SYSCFG_CFG_GUN_NUM][IOT_OM_CMD_SEND_COUNT];
     CommonRecvCtrl_Struct stRecvCtrl[SYSCFG_CFG_GUN_NUM][IOT_OM_CMD_RECV_COUNT];

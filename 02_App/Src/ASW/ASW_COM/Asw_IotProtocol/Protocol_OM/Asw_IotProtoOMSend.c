@@ -63,8 +63,8 @@ static uint16_t IotOM_SendSetForbidState(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendUpdateResponse(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendOrderRecord(uint8_t port, uint8_t *pBuf);
 static uint16_t IotOM_SendRemoteQuerySetParamRsp(uint8_t port, uint8_t *pBuf);
+static uint16_t IotOM_GetPlatNo(void);
 static uint16_t IotOM_SendReadLocalFileRsp(uint8_t port, uint8_t *pBuf);
-static void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf);   
 static uint16_t IotOM_PackHead(uint8_t cmd, uint16_t seq, uint8_t *pBuf, uint16_t dataLen);
 /*******************************************************************************
 *    Global variables Declaration
@@ -263,9 +263,37 @@ static uint8_t IotOM_ReportCycleCheck(uint8_t port, uint32_t cmd, uint32_t	sendC
 	return retFlag;
 }
 
+static uint16_t IotOM_GetPlatNo(void)
+{
+    AswPlatType_Enum platType = AswPlatM_GetPlatType();
+    uint16_t platNo = 0;
+
+    switch (platType)
+    {
+        case eAswPlatType_GN:
+            platNo = 1;
+            break;
+        case eAswPlatType_GNP:
+            platNo = 2;
+            break;
+        case eAswPlatType_XDT:
+            platNo = 14;
+            break;
+        case eAswPlatType_YKC21:
+            platNo = 22;
+            break;
+        default:
+            platNo = 0;
+            break;
+    }
+
+    return platNo;
+}
+
 static uint16_t IotOM_SendLoginReq(uint8_t port, uint8_t *pBuf)
 {
     uint16_t dataLen = 0;
+    uint16_t platNo = IotOM_GetPlatNo();
 
     /* 运维平台桩号 */
     memcpy(&pBuf[dataLen], pIotOMCtx->pileFixDnAsc, 32);
@@ -304,6 +332,13 @@ static uint16_t IotOM_SendLoginReq(uint8_t port, uint8_t *pBuf)
     /* 签名算法 */
     memset(&pBuf[dataLen], 0x00, 16);
     dataLen += 16;
+    /* 平台名称编码 */
+    memcpy(&pBuf[dataLen], &platNo, 2);
+    dataLen += 2;
+    /* 设备型号 */
+    memset(&pBuf[dataLen], 0x00, 16);
+    strcpy((char *)&pBuf[dataLen], SYSCFG_CFG_PRODUCT_CODE);
+    dataLen += 16;
     return dataLen;
 }
 
@@ -317,8 +352,21 @@ static uint16_t IotOM_SendHeartBeat(uint8_t port, uint8_t *pBuf)
     dataLen += 32;
     /* 终端号 */
     pBuf[dataLen++] = port + 1;
+
     /* 设备状态 */
-    pBuf[dataLen++] = AswErrHandle_IsExsistError(port);
+    if (AswErrHandle_IsExsistError(port) == TRUE)
+    {
+        pBuf[dataLen++] = 0x01;
+    }
+    else if (AswMonitor_CheckForbidState() == TRUE)
+    {
+        pBuf[dataLen++] = 0x02;
+    }
+    else
+    {
+        pBuf[dataLen++] = 0x00;
+    }
+
     return dataLen;
 }
 
@@ -351,120 +399,10 @@ static uint16_t IotOM_SendNetModuleInfo(uint8_t port, uint8_t *pBuf)
     /* mac地址 */
     memset(&pBuf[dataLen], 0x00, 20);
     dataLen += 20;
+    /* 4G路由器sim卡卡号 */
+    memset(&pBuf[dataLen], 0x00, 20);
+    dataLen += 20;
     return dataLen;
-}
-
-static void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
-{
-    /* CP电压异常 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpVoltAbnor))
-    {
-        Common_SetBitFlag(pBuf, 1);
-    }
-
-    /* CP接地 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpGroundFault))
-    {
-        Common_SetBitFlag(pBuf, 2);
-    }
-
-    /* PE故障 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_PEBreakFault))
-    {
-        Common_SetBitFlag(pBuf, 3);
-    }
-
-    /* 缺相 */
-    /* 急停 */
-
-    /* 火零反接 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_InputLineReversed))
-    {
-        Common_SetBitFlag(pBuf, 6);
-    }
-
-    /* 漏电故障 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_LeakageCurrErr))
-    {
-        Common_SetBitFlag(pBuf, 7);
-    }
-
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_RCDSelfcheckErr))
-    {
-        Common_SetBitFlag(pBuf, 7);
-    }
-
-    /* 二极管不存在故障 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_DiodeStop))
-    {
-        Common_SetBitFlag(pBuf, 8);
-    }
-
-    /* 短路故障 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ShortCircleErr))
-    {
-        Common_SetBitFlag(pBuf, 9);
-    }
-
-    /* 过压 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_AphaseInputOverVol))
-    {
-        Common_SetBitFlag(pBuf, 10);
-    }    
-
-    /* 欠压 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_AphaseInputLessVol))
-    {
-        Common_SetBitFlag(pBuf, 11);
-    } 
-
-    /* 过流 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_OutputOverCurr))
-    {
-        Common_SetBitFlag(pBuf, 12);
-    }
-
-    /* 继电器粘连 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqSynechiaFault))
-    {
-        Common_SetBitFlag(pBuf, 13);
-    }
-    
-    /* 继电器拒动 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqMaloperation))
-    {
-        Common_SetBitFlag(pBuf, 14);
-    }
-
-    /* 环境过温 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_EnvOverTempErr))
-    {
-        Common_SetBitFlag(pBuf, 15);
-    }
-
-    /* 枪过温 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_GunOverTempErr))
-    {
-        Common_SetBitFlag(pBuf, 16);
-    }
-
-    /* 插头过温故障 */
-    /* 电表通信异常故障 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCommErr))
-    {
-        Common_SetBitFlag(pBuf, 24);
-    }
-    /* 读卡器通信异常 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ReaderCommErr))
-    {
-        Common_SetBitFlag(pBuf, 25);
-    }
-    /* CCU通信异常 */
-    /* 存储异常 */
-    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_DatabaseErr))
-    {
-        Common_SetBitFlag(pBuf, 27);
-    }
 }
 
 static uint16_t IotOM_SendRealData(uint8_t port, uint8_t *pBuf)
@@ -520,13 +458,13 @@ static uint16_t IotOM_SendRealData(uint8_t port, uint8_t *pBuf)
     memset(&pBuf[dataLen], 0x00, 2);
     dataLen += 2;
 
-    /* 硬件故障 */
+    /* 模块故障 */
     memset(&pBuf[dataLen], 0x00, 4);
     dataLen += 4;
 
     /* 故障码 */
     memset(&pBuf[dataLen], 0x00, 32);
-    IotOM_SetRealDataErrBit(port, &pBuf[dataLen]);
+    memcpy(&pBuf[dataLen], pIotOMCtx->lastErrInfo[port], 32);
     dataLen += 32;
     return dataLen;
 }
