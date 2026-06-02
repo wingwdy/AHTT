@@ -69,6 +69,7 @@ const CddNetMModuleOps_Struct c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_COUNT] = {
         .getModuleTypeInfo = CddDrvEG800AK_GetModuleTypeInfo,
         .updateMqttUserNamePassword = CddDrvEG800AK_UpdateMqttUserNamePassword,
         .updateIpPort = CddDrvEG800AK_UpdateIpPort,
+        .setSimNet = CddDrvEG800AK_SetSimNet,
     },
 };
 

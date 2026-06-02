@@ -188,6 +188,7 @@ CddNetMOperator_Enum CddNetM_GetOperatorType(void);
 void CddNetM_GetModuleTypeInfo(char *ModuleTypeInfo, uint16_t readLen);
 void CddNetM_UpdateMqttUserNamePassword(CddNetMPlatType_Enum ePlatType, char *pUserName, char *pPassword);
 void CddNetM_UpdateIpPort(CddNetMPlatType_Enum ePlatType, char *pIp, uint16_t port);
+void CddNetM_SetSimNet(uint8_t simNet);
 #endif /* CDD_NETM_H_ */
 
 

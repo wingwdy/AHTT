@@ -694,6 +694,12 @@ static void CddDrvEG800AK_StartModuleCfg(void)
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryIccid);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryImei);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryCsq);
+
+    if (g_stCddDrvEG800AKCtrl.simNetFlag == 0)
+    {
+        CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryNtpClk);
+    }
+
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryNtpClk);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryCGREG);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryCOPS);
@@ -723,6 +729,11 @@ static uint8_t CddDrvEG800AK_FindFreeSocket(uint8_t *pSocketIndex)
 	}
 
 	return ret;
+}
+
+void CddDrvEG800AK_SetSimNet(uint8_t simNet)
+{
+    g_stCddDrvEG800AKCtrl.simNetFlag = simNet;
 }
 
 void CddDrvEG800AK_EnterTransparentMode(uint8_t socketIndex, CddDrvEG800AKDirection_Enum eTransparentDirection)

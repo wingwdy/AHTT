@@ -751,6 +751,9 @@ void AswPlatM_InitMemory(void)
         MSNvm_SetDefaultParaBlock(eMSNvmBlockID_PlatPrivateParam);
     }
 
+    /* 设置SIM卡 */
+    CddNetM_SetSimNet(pParam->dedicatedNetSimFlag);
+
     pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
 
     /* 注册运营平台链接 */

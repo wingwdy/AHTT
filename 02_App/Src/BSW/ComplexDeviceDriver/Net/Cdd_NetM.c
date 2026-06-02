@@ -70,8 +70,7 @@ typedef struct
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-static CddNetMCtx_Struct g_stCddNetMCtx;
-
+static CddNetMCtx_Struct g_stCddNetMCtx = {0};
 
 /*******************************************************************************
 *    Static Local Functions Declaration
@@ -401,6 +400,14 @@ GlobalRet_Enum CddNetM_CreatLink(CddNetMSocketType_Enum eSocketType, CddNetMSock
     }
 
     return retVal;
+}
+
+void CddNetM_SetSimNet(uint8_t simNet)
+{
+    if (c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].setSimNet != NULL)
+    {
+        c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_4G].setSimNet(simNet);
+    }
 }
 
 uint8_t CddNetM_CheckFileLinkExsit(void)
