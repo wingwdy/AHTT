@@ -69,6 +69,8 @@ uint8_t AswPlatM_SetPlatMainIpPort(char *pIp, uint8_t ipLen, uint16_t port);
 uint8_t AswPlatM_SetPlatMainPort(uint16_t port);
 uint8_t AswPlatM_SetPlatAuxiliaryIpPort(char *pIp, uint8_t ipLen, uint16_t port);
 uint8_t AswPlatM_SetPlatAuxiliaryPort(uint16_t port);
+uint8_t AswPlatM_SetOmPlatEnable(uint8_t enable);
+uint8_t AswPlatM_SetSimNet(uint8_t simNet);
 uint8_t AswPlatM_SetPlatType(char *platName, uint8_t platNameLen);
 uint8_t AswPlatM_SetPlatCardType(char *platCardName, uint8_t cardNameLen);
 AswPlatType_Enum AswPlatM_GetPlatType(void);

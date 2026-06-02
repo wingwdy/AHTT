@@ -176,6 +176,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
     int32_t port = 0;
     uint8_t *pTemp = NULL;
     uint8_t setResult = FALSE;
+    uint8_t enable = 0;
 
     if (argc == 3)
     {
@@ -408,6 +409,36 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                 }
 
             }
+        }
+        else if (0 == strcmp(argv[1], "omPlat"))
+        {
+            enable = atoi(argv[2]);
+
+            if (TRUE == AswPlatM_SetOmPlatEnable(enable))
+            {
+                DSCONSOLE_CFG_InfoPrint("Set omPlat enable= %d ok!\r\n", enable);
+            }
+            else
+            {
+                DSCONSOLE_CFG_InfoPrint("Set omPlat enable= %d failed!\r\n", enable);
+            }
+        }
+        else if (0 == strcmp(argv[1], "simNet"))
+        {
+            enable = atoi(argv[2]);
+
+            if (TRUE == AswPlatM_SetSimNet(enable))
+            {
+                DSCONSOLE_CFG_InfoPrint("Set simNet flag= %d ok!, %s\r\n", enable, enable == 0 ? "公网卡" : "专网卡");
+            }
+            else
+            {
+                DSCONSOLE_CFG_InfoPrint("Set simNet flag= %d failed!\r\n", enable);
+            }
+        }
+        else
+        {
+            DSCONSOLE_CFG_InfoPrint("Invalid command!\r\n");
         }
     }
 

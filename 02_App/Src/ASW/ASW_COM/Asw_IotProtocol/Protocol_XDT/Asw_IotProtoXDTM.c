@@ -597,6 +597,20 @@ void IotXDT_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_
     }
 }
 
+void IotXDT_SetPrivateParam(MSNvmPlatPrivateParam_Union *pPrivateParam)
+{
+    float amountChangeThreshold = 0.5;
+
+    pPrivateParam->stXDTParam.platinfo.pileDataCycleReportEnable = TRUE;
+    pPrivateParam->stXDTParam.platinfo.pileDataReportCycle = 60;
+    memcpy(&pPrivateParam->stXDTParam.platinfo.amountChangeThreshold, &amountChangeThreshold, 4);
+    strcpy(pPrivateParam->stXDTParam.platinfo.cOperator, "XDT");
+    strcpy(pPrivateParam->stXDTParam.platinfo.cProductKey, "7X9A2KQ6M8N4P1R5T7W3");
+    strcpy(pPrivateParam->stXDTParam.platinfo.cProductSecret, "B5N8V2M9K4X7Q1T6C3L9R");
+    pPrivateParam->stXDTParam.platinfo.credentialSaveFlag = FALSE;
+    pPrivateParam->stXDTParam.platinfo.credentialValidFlag = FALSE;
+}
+
 
 uint8_t IotXDT_CheckPileErrInfoReport(uint8_t port)
 {

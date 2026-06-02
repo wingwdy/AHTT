@@ -60,6 +60,7 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncPackChargeRecord = IotGN_PackChargeRecord,
         .pFuncSwipCardCharge = IotGN_SwipCardCharge,
         .pFuncTransformChargeRecord = IotGN_TransformChargeRecord,
+        .pFuncSetPrivateParam = NULL,
     },
 
     [eAswPlatType_YKC21] =
@@ -74,6 +75,7 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncPackChargeRecord = IotYKC21_PackChargeRecord,
         .pFuncSwipCardCharge = IotYKC21_SwipCardCharge,
         .pFuncTransformChargeRecord = IotYKC21_TransformChargeRecord,
+        .pFuncSetPrivateParam = IotYKC21_SetPrivateParam,
         
         .pFuncSetToken = IotYKC21_SetToken,
         .pFuncSetCipherKey = IotYKC21_SetRsaPublicKey,
@@ -93,6 +95,7 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncPackChargeRecord = IotXDT_PackChargeRecord,
         .pFuncSwipCardCharge = IotXDT_SwipCardCharge,
         .pFuncTransformChargeRecord = IotXDT_TransformChargeRecord,
+        .pFuncSetPrivateParam = IotXDT_SetPrivateParam,
 
         .pFuncSetProductKey = IotXDT_SetProductKey,
         .pFuncSetProductSecret = IotXDT_SetProductSecret,
@@ -114,6 +117,7 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncPackChargeRecord = IotGN_PackChargeRecord,
         .pFuncSwipCardCharge = IotGN_SwipCardCharge,
         .pFuncTransformChargeRecord = IotGN_TransformChargeRecord,
+        .pFuncSetPrivateParam = NULL,
     },
 };
 

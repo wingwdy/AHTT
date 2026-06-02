@@ -24,7 +24,6 @@
 #include "Asw_IotProtoYKC21Send.h"
 #include "Asw_IotProtoYKC21Recv.h"
 #include "Asw_ChargeIf.h"
-#include "MS_Nvm.h"
 #include "SS_Tm.h"
 #include "Asw_VoltCurHandle.h"
 #include "Asw_ChargeIf.h"
@@ -657,6 +656,12 @@ void IotYKC21_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStanda
             pStandardBillMode->validFlag = TRUE;
         }
     }
+}
+
+void IotYKC21_SetPrivateParam(MSNvmPlatPrivateParam_Union *pPrivateParam)
+{
+
+
 }
 
 void IotYKC21_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t *pProtocolRecord, uint16_t *pRecordLen)
