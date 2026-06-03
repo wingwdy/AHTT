@@ -411,17 +411,17 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
 
             }
         }
-        else if (0 == strcmp(argv[1], "omPlat"))
+        else if (0 == strcmp(argv[1], "omPlatDisable"))
         {
             temp = atoi(argv[2]);
 
             if (TRUE == AswPlatM_SetOmPlatEnable(temp))
             {
-                DSCONSOLE_CFG_InfoPrint("Set omPlat enable= %d ok!\r\n", temp);
+                DSCONSOLE_CFG_InfoPrint("Set omPlat Disable= %d ok!\r\n", temp);
             }
             else
             {
-                DSCONSOLE_CFG_InfoPrint("Set omPlat enable= %d failed!\r\n", temp);
+                DSCONSOLE_CFG_InfoPrint("Set omPlat Disable= %d failed!\r\n", temp);
             }
         }
         else if (0 == strcmp(argv[1], "simNet"))

@@ -124,9 +124,11 @@ void AswPlatM_PrintAllConfigInfo(void)
     ASWPLATM_CFG_DebugPrint("是否厂内模式：%s\r\n", (TRUE == CddModeM_IsFactoryMode()) ? "是" : "否");
     ASWPLATM_CFG_DebugPrint("是否国标模式：%s\r\n", (TRUE == CddModeM_IsGBMode()) ? "是" : "否");
     ASWPLATM_CFG_DebugPrint("平台类型：%s\r\n", pProtocolDescriptor->pName);
-    ASWPLATM_CFG_DebugPrint("卡类型：%s\r\n", pCardDescriptor->pName);
+    ASWPLATM_CFG_DebugPrint("充电卡类型：%s\r\n", pCardDescriptor->pName);
+    ASWPLATM_CFG_DebugPrint("sim卡类型：%s\r\n", (pParam->dedicatedNetSimFlag == 0) ? "公网卡" : "专网卡");
     ASWPLATM_CFG_DebugPrint("运营平台IP端口：%s, %d\r\n", pParam->platMainIp, pParam->platMainPort);
-    ASWPLATM_CFG_DebugPrint("运维平台IP端口：%s, %d\r\n", pParam->platAuxiliaryIp, pParam->platAuxiliaryPort);
+    ASWPLATM_CFG_DebugPrint("运维平台IP端口：%s, %d， 使能状态：%s\r\n", pParam->platAuxiliaryIp, pParam->platAuxiliaryPort, 
+        pParam->AuxiliaryPlatDisableFlag == 0 ? "使能" : "禁用");
 
     if (pProtocolDescriptor->pFuncGetDevOperator != NULL )
     {
@@ -316,7 +318,7 @@ uint8_t AswPlatM_SetOmPlatEnable(uint8_t enable)
     {
         if (g_stAswPlatMCtx.stPlatParam.AuxiliaryPlatDisableFlag != enable)
         {
-            ASWPLATM_CFG_DebugPrint("运维平台使能变化：[%d]-->[%d]\r\n", g_stAswPlatMCtx.stPlatParam.AuxiliaryPlatDisableFlag, enable);
+            ASWPLATM_CFG_DebugPrint("运维平台禁用状态变化：[%d]-->[%d]\r\n", g_stAswPlatMCtx.stPlatParam.AuxiliaryPlatDisableFlag, enable);
             g_stAswPlatMCtx.stPlatParam.AuxiliaryPlatDisableFlag = enable;
             MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));
         }
