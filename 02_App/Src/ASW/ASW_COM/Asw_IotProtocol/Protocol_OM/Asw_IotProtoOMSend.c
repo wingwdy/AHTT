@@ -485,23 +485,23 @@ static uint16_t IotOM_SendMeterVal(uint8_t port, uint8_t *pBuf)
     Common_Uint32ToFourUint8(&pBuf[dataLen], AswChargeIf_GetMeterEnergyVal(port) / 10);
     dataLen += 4;
     /* 充电设备输出电压 */
-    Common_Uint16ToTwoUint8(&pBuf[dataLen], AswChargeIf_GetOutputVoltage(port));
-    dataLen += 2;
+    Common_Uint32ToFourUint8(&pBuf[dataLen], AswChargeIf_GetOutputVoltage(port));
+    dataLen += 4;
     /* 充电设备输出电流 */
-    Common_Uint16ToTwoUint8(&pBuf[dataLen], AswChargeIf_GetOutputCurrent(port) / 10);
-    dataLen += 2;
+    Common_Uint32ToFourUint8(&pBuf[dataLen], AswChargeIf_GetOutputCurrent(port) / 10);
+    dataLen += 4;
     /* 充电设备输入电压 */
-    Common_Uint16ToTwoUint8(&pBuf[dataLen], AswChargeIf_GetInputVoltage(port));
-    dataLen += 2;
+    Common_Uint32ToFourUint8(&pBuf[dataLen], AswChargeIf_GetInputVoltage(port));
+    dataLen += 4;
     /* 充电设备输入电流 */
-    Common_Uint16ToTwoUint8(&pBuf[dataLen], AswChargeIf_GetOutputCurrent(port) / 10);
-    dataLen += 2;
+    Common_Uint32ToFourUint8(&pBuf[dataLen], AswChargeIf_GetOutputCurrent(port) / 10);
+    dataLen += 4;
     /* 充电设备需求电压 */
-    memset(&pBuf[dataLen], 0x00, 2);
-    dataLen += 2;
+    memset(&pBuf[dataLen], 0x00, 4);
+    dataLen += 4;
     /* 充电设备需求电流 */
-    memset(&pBuf[dataLen], 0x00, 2);
-    dataLen += 2;
+    memset(&pBuf[dataLen], 0x00, 4);
+    dataLen += 4;
 
     return dataLen;
 }

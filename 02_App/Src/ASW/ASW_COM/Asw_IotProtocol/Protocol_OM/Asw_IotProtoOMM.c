@@ -134,17 +134,11 @@ static void IotOM_WSOfflineHandle(void)
     uint8_t copyLen = 0;
     uint8_t offset = 0;
 
-    copyLen = strlen(pParam->fixPileDn);
-    copyLen = copyLen > 32 ? 32 : copyLen;
-    offset = 32 - copyLen;
-    memset(pIotOMCtx->pileFixDnAsc, 0x30, 32);
-    memcpy(pIotOMCtx->pileFixDnAsc + offset, pParam->fixPileDn, copyLen);
+    memset(pIotOMCtx->pileFixDnAsc, 0, 32);
+    memcpy(pIotOMCtx->pileFixDnAsc, pParam->fixPileDn, 32);
 
-    copyLen = strlen(pParam->platPileDn);
-    copyLen = copyLen > 32 ? 32 : copyLen;
-    offset = 32 - copyLen;
-    memset(pIotOMCtx->platDn, 0x30, 32);
-    memcpy(pIotOMCtx->platDn + offset, pParam->platPileDn, copyLen);
+    memset(pIotOMCtx->platDn, 0, 32);
+    memcpy(pIotOMCtx->platDn, pParam->platPileDn, 32);
 
     pIotOMCtx->loginSucc = FALSE;
     pIotOMCtx->queueBusyFlag = FALSE;
