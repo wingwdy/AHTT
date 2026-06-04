@@ -775,21 +775,24 @@ void AswPlatM_InitMemory(void)
     }
 
     /* 注册运维平台链接 */
-    if (pOMProtocolDescriptor != NULL)
+    if (pParam->AuxiliaryPlatDisableFlag == FALSE)
     {
-        if (pOMProtocolDescriptor->pFuncInit != NULL)
+        if (pOMProtocolDescriptor != NULL)
         {
-            pOMProtocolDescriptor->pFuncInit();
-        }
+            if (pOMProtocolDescriptor->pFuncInit != NULL)
+            {
+                pOMProtocolDescriptor->pFuncInit();
+            }
 
-        if (pOMProtocolDescriptor->pFuncFillLinkPara != NULL)
-        {
-            pOMProtocolDescriptor->pFuncFillLinkPara(&stSocketPara);
-        }
+            if (pOMProtocolDescriptor->pFuncFillLinkPara != NULL)
+            {
+                pOMProtocolDescriptor->pFuncFillLinkPara(&stSocketPara);
+            }
 
-        CddNetM_CreatLink(pOMProtocolDescriptor->eSocketType, stSocketPara, eCddNetMPlatType_OM);
+            CddNetM_CreatLink(pOMProtocolDescriptor->eSocketType, stSocketPara, eCddNetMPlatType_OM);
+        }
     }
-
+    
     /* 设置卡类型 */
     pCardDescriptor = AswPlatM_GetCardDescriptor();
     CddCardM_SetCardType(pCardDescriptor->cardType);

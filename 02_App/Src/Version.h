@@ -20,10 +20,10 @@
 #define  APP_SW_MAJOR_VERSION                           (1u)
 #define  APP_SW_MINOR_VERSION                           (1u)
 #define  APP_SW_CUSTORM_VERSION                         (0u)
-#define  APP_SW_PATCH_VERSION                           (3u)
+#define  APP_SW_PATCH_VERSION                           (4u)
 
-#define  APP_SW_VERSION_STRING                          "V1.1.0.3"
-#define  APP_SW_VERSION_DATE                            "2026/04/30"
+#define  APP_SW_VERSION_STRING                          "V1.1.0.4"
+#define  APP_SW_VERSION_DATE                            "2026/06/04"
 
 #define  APP_SW_VERSION_TYPE                            "标品"
 
