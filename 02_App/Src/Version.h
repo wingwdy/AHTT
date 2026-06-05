@@ -23,7 +23,7 @@
 #define  APP_SW_PATCH_VERSION                           (4u)
 
 #define  APP_SW_VERSION_STRING                          "V1.1.0.4"
-#define  APP_SW_VERSION_DATE                            "2026/06/04"
+#define  APP_SW_VERSION_DATE                            "2026/06/05"
 
 #define  APP_SW_VERSION_TYPE                            "标品"
 
