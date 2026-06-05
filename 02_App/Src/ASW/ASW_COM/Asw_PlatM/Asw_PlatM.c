@@ -58,6 +58,9 @@ static AswPlatMCtx_Struct g_stAswPlatMCtx = { 0 };
 *    Static Local Functions Declaration
 *******************************************************************************/
 static const AswPlatMProtocolDescriptor_Struct *AswPlatM_GetProtocolDescriptor(void);
+static const AswPlatMProtocolDescriptor_Struct *AswPlatM_GetOMProtocolDescriptor(void);
+static const AswPlatCardDescriptor_Struct *AswPlatM_GetCardDescriptor(void);
+static void AswPlatM_PlatPrivateParamDefaultHandle(MSNvmPlatPrivateParam_Union *pPrivateParam);
 
 
 
@@ -95,6 +98,16 @@ static const AswPlatCardDescriptor_Struct *AswPlatM_GetCardDescriptor(void)
     return &c_stAswPlatMCardDescriptorTable[ePlatCardType];
 }
 
+static void AswPlatM_PlatPrivateParamDefaultHandle(MSNvmPlatPrivateParam_Union *pPrivateParam)
+{
+    uint8_t currentPlatType = g_stAswPlatMCtx.stPlatParam.platMainType;
+
+    if (c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetPrivateParam != NULL)
+    {
+        c_stAswPlatMProtocolDescriptorTable[currentPlatType].pFuncSetPrivateParam(pPrivateParam);
+    }
+}
+
 void AswPlatM_PrintAllConfigInfo(void)
 {
     const AswPlatCardDescriptor_Struct * pCardDescriptor = AswPlatM_GetCardDescriptor();
@@ -111,9 +124,11 @@ void AswPlatM_PrintAllConfigInfo(void)
     ASWPLATM_CFG_DebugPrint("是否厂内模式：%s\r\n", (TRUE == CddModeM_IsFactoryMode()) ? "是" : "否");
     ASWPLATM_CFG_DebugPrint("是否国标模式：%s\r\n", (TRUE == CddModeM_IsGBMode()) ? "是" : "否");
     ASWPLATM_CFG_DebugPrint("平台类型：%s\r\n", pProtocolDescriptor->pName);
-    ASWPLATM_CFG_DebugPrint("卡类型：%s\r\n", pCardDescriptor->pName);
+    ASWPLATM_CFG_DebugPrint("充电卡类型：%s\r\n", pCardDescriptor->pName);
+    ASWPLATM_CFG_DebugPrint("sim卡类型：%s\r\n", (pParam->dedicatedNetSimFlag == 0) ? "公网卡" : "专网卡");
     ASWPLATM_CFG_DebugPrint("运营平台IP端口：%s, %d\r\n", pParam->platMainIp, pParam->platMainPort);
-    ASWPLATM_CFG_DebugPrint("运维平台IP端口：%s, %d\r\n", pParam->platAuxiliaryIp, pParam->platAuxiliaryPort);
+    ASWPLATM_CFG_DebugPrint("运维平台IP端口：%s, %d， 使能状态：%s\r\n", pParam->platAuxiliaryIp, pParam->platAuxiliaryPort, 
+        pParam->AuxiliaryPlatDisableFlag == 0 ? "使能" : "禁用");
 
     if (pProtocolDescriptor->pFuncGetDevOperator != NULL )
     {
@@ -293,6 +308,44 @@ uint8_t AswPlatM_SetPlatAuxiliaryPort(uint16_t port)
     }
 
     return TRUE;
+}
+
+uint8_t AswPlatM_SetOmPlatDisable(uint8_t disable)
+{
+    uint8_t ret = FALSE;
+
+    if (disable == 0 || disable == 1)
+    {
+        if (g_stAswPlatMCtx.stPlatParam.AuxiliaryPlatDisableFlag != disable)
+        {
+            ASWPLATM_CFG_DebugPrint("运维平台禁用状态变化：[%d]-->[%d]\r\n", g_stAswPlatMCtx.stPlatParam.AuxiliaryPlatDisableFlag, disable);
+            g_stAswPlatMCtx.stPlatParam.AuxiliaryPlatDisableFlag = disable;
+            MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));
+        }
+
+        ret = TRUE;
+    }
+
+    return ret;
+}
+
+uint8_t AswPlatM_SetSimNet(uint8_t simNet)
+{
+    uint8_t ret = FALSE;
+
+    if (simNet == 0 || simNet == 1)
+    {
+        if (g_stAswPlatMCtx.stPlatParam.dedicatedNetSimFlag != simNet)
+        {
+            ASWPLATM_CFG_DebugPrint("sim卡：[%d]-->[%d]\r\n", g_stAswPlatMCtx.stPlatParam.dedicatedNetSimFlag, simNet);
+            g_stAswPlatMCtx.stPlatParam.dedicatedNetSimFlag = simNet;
+            MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));
+        }
+
+        ret = TRUE;
+    }
+
+    return ret;
 }
 
 
@@ -670,10 +723,12 @@ void AswPlatM_DefaultPlatParam(void *param)
 void AswPlatM_DefaultPlatPrivateParam(void *param)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = (MSNvmPlatPrivateParam_Union *)param;
-    MSNvmXDTParam_Struct *pXDTParam = &pPrivateParam->stXDTParam;
     MSNvmPlatPrivateParam_Union *pAswPlatMPrivateParam = &g_stAswPlatMCtx.stPrivateParam;
 
     memset(pPrivateParam, 0x00, sizeof(MSNvmPlatPrivateParam_Union));
+
+    AswPlatM_PlatPrivateParamDefaultHandle(pPrivateParam);
+
     memcpy(pAswPlatMPrivateParam, pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
 }
 
@@ -690,13 +745,16 @@ void AswPlatM_InitMemory(void)
     if ((MSNvm_ReadParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)pParam, sizeof(MSNvmPlatParam_Struct)) != eGlobalRet_OK) ||
         (pParam->platMainType >= eAswPlatType_Count))
     {
-        AswPlatM_DefaultPlatParam(pParam);
+        MSNvm_SetDefaultParaBlock(eMSNvmBlockID_PlatParam);
     }
 
     if (MSNvm_ReadParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union)) != eGlobalRet_OK)
     {
-        AswPlatM_DefaultPlatPrivateParam(pPrivateParam);
+        MSNvm_SetDefaultParaBlock(eMSNvmBlockID_PlatPrivateParam);
     }
+
+    /* 设置SIM卡 */
+    CddNetM_SetSimNet(pParam->dedicatedNetSimFlag);
 
     pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
 
@@ -717,19 +775,22 @@ void AswPlatM_InitMemory(void)
     }
 
     /* 注册运维平台链接 */
-    if (pOMProtocolDescriptor != NULL)
+    if (pParam->AuxiliaryPlatDisableFlag == FALSE)
     {
-        if (pOMProtocolDescriptor->pFuncInit != NULL)
+        if (pOMProtocolDescriptor != NULL)
         {
-            pOMProtocolDescriptor->pFuncInit();
-        }
+            if (pOMProtocolDescriptor->pFuncInit != NULL)
+            {
+                pOMProtocolDescriptor->pFuncInit();
+            }
 
-        if (pOMProtocolDescriptor->pFuncFillLinkPara != NULL)
-        {
-            pOMProtocolDescriptor->pFuncFillLinkPara(&stSocketPara);
-        }
+            if (pOMProtocolDescriptor->pFuncFillLinkPara != NULL)
+            {
+                pOMProtocolDescriptor->pFuncFillLinkPara(&stSocketPara);
+            }
 
-        CddNetM_CreatLink(pOMProtocolDescriptor->eSocketType, stSocketPara, eCddNetMPlatType_OM);
+            CddNetM_CreatLink(pOMProtocolDescriptor->eSocketType, stSocketPara, eCddNetMPlatType_OM);
+        }
     }
 
     /* 设置卡类型 */
@@ -741,6 +802,7 @@ void AswPlatM_InitMemory(void)
 
 void AswPlatM_MainFunction(void)
 {
+    MSNvmPlatParam_Struct *pParam = &g_stAswPlatMCtx.stPlatParam;
     const AswPlatMProtocolDescriptor_Struct *pProtocolDescriptor = AswPlatM_GetProtocolDescriptor();
     const AswPlatMProtocolDescriptor_Struct *pOMProtocolDescriptor = AswPlatM_GetOMProtocolDescriptor();
 
@@ -752,9 +814,12 @@ void AswPlatM_MainFunction(void)
         }
     }
 
-    if (pOMProtocolDescriptor->pMainFunction != NULL)
+    if (pParam->AuxiliaryPlatDisableFlag == FALSE)
     {
-        pOMProtocolDescriptor->pMainFunction();
+        if (pOMProtocolDescriptor->pMainFunction != NULL)
+        {
+            pOMProtocolDescriptor->pMainFunction();
+        }
     }
 }
 

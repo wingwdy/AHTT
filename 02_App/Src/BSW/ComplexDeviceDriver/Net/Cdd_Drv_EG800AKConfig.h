@@ -71,6 +71,7 @@
 #define CDDDRV_EG800AK_CFG_BUFF_SIZE                    3072
 
 #define CDDDRV_EG800AK_CFG_ICCID_LEN                    20
+#define CDDDRV_EG800AK_CFG_IMEI_LEN                     15
 
 #define CDDDRV_EG800AK_CFG_RECONECT_TIMEOUT(x, reconnectInterval)  do\
                                                         {\

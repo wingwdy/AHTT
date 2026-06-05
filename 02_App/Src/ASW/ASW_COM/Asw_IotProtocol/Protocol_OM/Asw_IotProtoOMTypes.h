@@ -23,7 +23,7 @@
 *    Macro Definition
 ******************************************************************************/
 /* 通信协议版本 */
-#define IOT_OM_PROTOCOL_VERSION                 (10008U)
+#define IOT_OM_PROTOCOL_VERSION                 (10021U)
 
 /* 通信协议头定义--GN协议 */
 #define IOT_OM_HEAD1                            (0xEBU)                

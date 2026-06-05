@@ -565,10 +565,6 @@ static uint16_t CddDrvEg800AK_UrcDecode(uint8_t *pData, void * modulePara, uint1
     if (findFlag == TRUE)
     {
         pUrcDescribtor = &c_stATUrcDescribtor[matchIndex];
-        if (printEnable == TRUE && pUrcDescribtor->printFlag == TRUE)
-        {                                                            
-            CDDDRV_EG800AK_CFG_DebugPrint("[4G-->Rx]URC:\r\n%s\r\n", &pData[minMatchPos]);                                               
-        }
 
         /* 如果函数内部会计算dealLen, 不需要配置cSuffix */
         if (pUrcDescribtor->cSuffix != NULL)
@@ -696,8 +692,14 @@ static void CddDrvEG800AK_StartModuleCfg(void)
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryModule);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QuerySimRecognizeStatus);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryIccid);
+    CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryImei);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryCsq);
-    CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryNtpClk);
+
+    if (g_stCddDrvEG800AKCtrl.simNetFlag == 0)
+    {
+        CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryNtpClk);
+    }
+
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryCGREG);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryCOPS);
     CddDrvEG800AK_AddCmd(CDDDRV_EG800AK_MODULE_SOCKET, eATModuleCmd_QueryNetWorkInfo);
@@ -726,6 +728,11 @@ static uint8_t CddDrvEG800AK_FindFreeSocket(uint8_t *pSocketIndex)
 	}
 
 	return ret;
+}
+
+void CddDrvEG800AK_SetSimNet(uint8_t simNet)
+{
+    g_stCddDrvEG800AKCtrl.simNetFlag = simNet;
 }
 
 void CddDrvEG800AK_EnterTransparentMode(uint8_t socketIndex, CddDrvEG800AKDirection_Enum eTransparentDirection)
@@ -899,6 +906,14 @@ void CddDrvEG800AK_GetIccid(char *pICCID)
     if (pICCID != NULL)
     {
         memcpy(pICCID, g_stCddDrvEG800AKCtrl.stModuleInfo.iccid, CDDDRV_EG800AK_CFG_ICCID_LEN);
+    }
+}
+
+void CddDrvEG800AK_GetImei(char *pIMEI)
+{
+    if (pIMEI != NULL)
+    {
+        memcpy(pIMEI, g_stCddDrvEG800AKCtrl.stModuleInfo.imei, CDDDRV_EG800AK_CFG_IMEI_LEN);
     }
 }
 

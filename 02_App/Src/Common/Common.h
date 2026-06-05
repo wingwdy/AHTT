@@ -120,6 +120,7 @@ void Common_SetRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint16_t cmd);
 void Common_ClearRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint16_t cmd);
 uint8_t Common_GetRptCount(typeFuncRecvCtrl pFunc, uint8_t port, uint16_t cmd);
 
+uint32_t Common_CalcCS32(uint8_t *pData, uint16_t dataLen);
 uint16_t Common_CalcCRC16(uint8_t *pData, uint16_t dataLen);
 void Common_InsertSort(uint16_t *pData, uint16_t n);
 void Common_BubbleSort(uint16_t *pData, uint16_t size);
@@ -146,6 +147,7 @@ void Common_BCDToBIN(uint8_t *pBCD, uint8_t *pBIN, uint16_t length);
 void Common_BINToBCD(uint8_t *pBIN, uint8_t *pBCD, uint16_t length);
 uint64_t Common_uintBINToBCD(uint32_t bin);
 void Common_ConvertStringToHex(char *pString,  uint8_t *pHex,  uint16_t len);
+uint16_t Common_ConvertUtf8ToIso(uint8_t* in, uint16_t inLen,uint8_t *out);
 
 void Common_SetBitFlag(void *pflag, uint16_t bitPos);
 void Common_ClrBitFlag(void *pflag, uint16_t bitPos);

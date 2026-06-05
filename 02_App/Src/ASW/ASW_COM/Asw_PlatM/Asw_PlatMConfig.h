@@ -22,6 +22,8 @@
 #include "DS_LogM.h"
 #include "Asw_Monitor.h"
 #include "Cdd_CardM.h"
+#include "Asw_PlatM.h"
+#include "MS_Nvm.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -49,6 +51,7 @@ typedef struct
     void (*pFuncTransformBillMode)(uint8_t port, AswMonitorBillMode_Struct *pBillMode);
     uint8_t (*pFuncSwipCardCharge)(uint8_t port);
     void (*pFuncTransformChargeRecord)(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t *pProtocolRecord, uint16_t *pRecordLen);
+    void (*pFuncSetPrivateParam)(MSNvmPlatPrivateParam_Union *pPrivateParam);
 
     uint8_t (*pFuncSetDevOperator)(char *pDevOperator, uint8_t len);
     uint8_t (*pFuncGetDevOperator)(char *pDevOperator, uint8_t *pOutLen);

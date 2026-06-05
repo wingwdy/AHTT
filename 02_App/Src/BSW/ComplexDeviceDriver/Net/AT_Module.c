@@ -57,6 +57,7 @@ static uint8_t ATModule_RecvCSQ(uint8_t socketID, void * modulePara, uint8_t *pD
 static uint8_t ATModule_RecvCOPS(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
 static uint8_t ATModule_RecvOKACK(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
 static uint8_t ATModule_RecvPDPState(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
+static uint8_t ATModule_RecvImei(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen);
 
 static uint8_t ATModule_FailHandle(uint8_t socketID, void * modulePara, uint8_t atTaskID);
 
@@ -81,6 +82,10 @@ const ATCmdDescribtor_Struct c_stModuleATCmdDescribtor[] =
     [eATModuleCmd_QueryIccid] =  
     { "AT+QCCID\r\n",                          "+QCCID:",         "OK\r\n",   3,          10000,    3000,  TRUE, "sim卡iccid查询",
     NULL,                                      ATModule_RecvIccid,            ATModule_FailHandle},
+
+    [eATModuleCmd_QueryImei] =  
+    { "AT+CGSN=1\r\n",                          "+CGSN:",          "OK\r\n",   3,          10000,    3000,  TRUE, "模块IMEI查询",
+    NULL,                                      ATModule_RecvImei,             ATModule_FailHandle},
 
     [eATModuleCmd_QueryCsq] =  
     { "AT+CSQ\r\n",                            "+CSQ:",           "OK\r\n",   3,          5000,     3000,  TRUE, "查询信号强度",
@@ -266,6 +271,32 @@ static uint8_t ATModule_RecvIccid(uint8_t socketID, void * modulePara, uint8_t *
             if (pStart[CDDDRV_EG800AK_CFG_ICCID_LEN] == '\r')
             {
                 memcpy(pModulePara->stModuleInfo.iccid, pStart, CDDDRV_EG800AK_CFG_ICCID_LEN);
+                ret = TRUE;
+            }
+        }
+    }
+
+    return ret;
+}
+
+static uint8_t ATModule_RecvImei(uint8_t socketID, void * modulePara, uint8_t *pData, uint16_t dataLen, uint16_t *pDealLen)
+{
+    CddDrvEG800AKCtrl_Struct *pModulePara = (CddDrvEG800AKCtrl_Struct *)modulePara;
+    uint8_t ret = FALSE;
+    uint8_t minLen = CDDDRV_EG800AK_CFG_IMEI_LEN + strlen("+CGSN: ") + 2;
+    uint8_t *pStart = NULL;
+
+    if (dataLen >= minLen && pModulePara != NULL)
+    {
+        pStart = Common_SearchData(pData, dataLen, "+CGSN: ", strlen("+CGSN: "));
+
+        if (pStart != NULL)
+        {
+            pStart += strlen("+CGSN: \"");
+
+            if (pStart[CDDDRV_EG800AK_CFG_IMEI_LEN] == '\"')
+            {
+                memcpy(pModulePara->stModuleInfo.imei, pStart, CDDDRV_EG800AK_CFG_IMEI_LEN);
                 ret = TRUE;
             }
         }

@@ -253,18 +253,25 @@ static uint8_t SSUcm_CheckFileHead(uint8_t *headData, uint32_t dataLen)
     calcCrc = SSUcm_Crc16(pFileHead->flagUp1, STRUCT_POS(SSUcmFileHead_Struct, crc_16));
     recvCrc = Common_TwoUint8ToUint16(pFileHead->crc_16);
 
-    if (calcCrc == recvCrc)
+    if (memcmp(pFileHead->rtuType, SYSCFG_CFG_PRODUCT_CODE, strlen(SYSCFG_CFG_PRODUCT_CODE)) != 0)
     {
-        fileLen = Common_FourUint8ToUint32(pFileHead->binFileLen);
-
-        if (fileLen >= SSUCM_CONFIG_SINGLE_FRAME_LEN)
-        {
-            ret = TRUE;
-        }
+        SSUCM_CFG_InfoPrint("设备类型错误，正确设备类型：%s, 接收设备类型：%s !\r\n", SYSCFG_CFG_PRODUCT_CODE, pFileHead->rtuType);
     }
     else
     {
-        SSUCM_CFG_DebugPrint("文件头校验CRC错误, recvCrc: 0x%04X, calcCrc: 0x%04X!\r\n", recvCrc, calcCrc);
+        if (calcCrc == recvCrc)
+        {
+            fileLen = Common_FourUint8ToUint32(pFileHead->binFileLen);
+
+            if (fileLen >= SSUCM_CONFIG_SINGLE_FRAME_LEN)
+            {
+                ret = TRUE;
+            }
+        }
+        else
+        {
+            SSUCM_CFG_DebugPrint("文件头校验CRC错误, recvCrc: 0x%04X, calcCrc: 0x%04X!\r\n", recvCrc, calcCrc);
+        }
     }
 
     return ret;

@@ -63,11 +63,13 @@ const CddNetMModuleOps_Struct c_NetMModuleOpsTable[CDD_NETM_CFG_DEV_COUNT] = {
         .delAllSocket = CddDrvEG800AK_DelAllSocket,
         .delSingleSocket = CddDrvEG800AK_DelSingleSocket,
         .getIccid = CddDrvEG800AK_GetIccid,
+        .getImei = CddDrvEG800AK_GetImei,
         .getCsq = CddDrvEG800AK_GetCsq,
         .getOperator = CddDrvEG800AK_GetOperatorType,
         .getModuleTypeInfo = CddDrvEG800AK_GetModuleTypeInfo,
         .updateMqttUserNamePassword = CddDrvEG800AK_UpdateMqttUserNamePassword,
         .updateIpPort = CddDrvEG800AK_UpdateIpPort,
+        .setSimNet = CddDrvEG800AK_SetSimNet,
     },
 };
 

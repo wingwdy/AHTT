@@ -106,6 +106,7 @@ uint8_t AswErrHandle_IsExsistError(uint8_t port);
 char *AswErrHandle_GetErrdesc(AswErrorType_Enum errType);
 AswErrorType_Enum AswErrHandle_GetExsistError(uint8_t port);
 uint32_t AswErrHandle_GetErrStatusVersion(uint8_t port);
+void AswErrHandle_SetErrStateForTest(uint8_t port, uint32_t errState);
 #endif /* ASW_ERRORHANDLE_H_ */
 
 

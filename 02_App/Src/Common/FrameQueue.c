@@ -777,8 +777,11 @@ GlobalRet_Enum FrameQueue_ProcessRxData(uint8_t channelID, typeFuncDecode pDecod
                     pFrameData = &pDCB->pRXBuf[readIdx];
                     while (dataLen > processedLen)
                     {
+                        dealLen = 0;
                         pDecodeFunc(&pFrameData[processedLen], dataLen - processedLen, 0, NULL, &dealLen);
+                        if (dealLen == 0)  { break; }
                         processedLen += dealLen;
+
                     }
                 }
                 else
@@ -792,9 +795,12 @@ GlobalRet_Enum FrameQueue_ProcessRxData(uint8_t channelID, typeFuncDecode pDecod
                         memcpy(&pFrameData[firstPart], &pDCB->pRXBuf[0], dataLen - firstPart);
                         while (dataLen > processedLen)
                         {
+                            dealLen = 0;
                             pDecodeFunc(&pFrameData[processedLen], dataLen - processedLen, 0, NULL, &dealLen);
+                            if (dealLen == 0)  { break; }
                             processedLen += dealLen;
                         }
+
                         myFree(pFrameData);
                     }
                 }

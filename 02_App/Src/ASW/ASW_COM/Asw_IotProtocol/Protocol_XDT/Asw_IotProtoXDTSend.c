@@ -1866,26 +1866,6 @@ static void IotXDT_PackTopic(char *pInTopic, char *pOutTopic, uint32_t rpcSeq)
 	}
 }
 
-uint32_t IotXDT_GetSendCmdSendCycle(uint32_t cmd)
-{
-	IotXDTSendCtrl_Struct *pSendCtrl = NULL;
-	uint32_t retCycle = 0;
-	uint8_t index = 0;
-
-	for (index = 0; index < ARRAY_SIZE(c_IotXDTSendCtrlTable); index++)
-	{
-		pSendCtrl = &c_IotXDTSendCtrlTable[index];
-		
-		if (pSendCtrl->cmd == cmd)
-		{
-			retCycle = pSendCtrl->sendCycle;
-			break;
-		}
-	}
-
-	return retCycle;
-}
-
 void IotXDT_UpCtrlSendDeal(void)
 {
 	IotXDTSendCtrl_Struct *pSendCtrl = NULL;
