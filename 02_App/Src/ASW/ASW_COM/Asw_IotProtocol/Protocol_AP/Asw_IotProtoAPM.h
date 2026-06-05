@@ -65,6 +65,11 @@ typedef struct
 
     uint8_t timeBillModelId[8];              /* B47 time bill model ID for B48 response */
     uint8_t timeBillResult;                  /* B48 response result: 0 success, 1 error */
+    uint8_t timeBillSwitchModelId[8];        /* B49 switch bill model ID */
+    uint8_t timeBillSwitchTime[7];           /* B49 switch time */
+    uint8_t timeBillSwitchIndex;             /* B49 switch bill model index */
+    uint8_t timeBillSwitchResult;            /* B49 switch result: 0 success, 1 error */
+    uint8_t timeBillPollTime[7];             /* B51 poll CP56Time2a timestamp */
     uint8_t onlineDetailResult;              /* B54 online detail result: 0 success */
 
     /* B33/B34 功率控制 */
@@ -84,7 +89,7 @@ typedef struct
     typeFuncSendCtrl pFuncSendCtrl;
     typeFuncRecvCtrl pFuncRecvCtrl;
     uint8_t frameQueueChannelID;
-    uint8_t pileDnBCD[8];
+    uint8_t pileDnBCD[IOT_AP_PILE_DN_LEN];
     uint8_t syncTimeCp56[7];
     IotAPProtoData_Struct stProtoData[SYSCFG_CFG_GUN_NUM];
     MSNvmOrderInfo_Struct stOrderInfo;

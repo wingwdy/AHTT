@@ -32,6 +32,9 @@
 /* 通信buff缓存定义 */
 #define IOT_AP_TXRX_BUFFER_SIZE                 (4096U)
 
+/* 安培协议充电桩编号固定长度 */
+#define IOT_AP_PILE_DN_LEN                      (8U)
+
 /* 协议CMD类型定义 */
 #define IOT_AP_CMDTYPE_REQUSET                  (0x00U)
 #define IOT_AP_CMDTYPE_RESPONSE                 (0x01U)

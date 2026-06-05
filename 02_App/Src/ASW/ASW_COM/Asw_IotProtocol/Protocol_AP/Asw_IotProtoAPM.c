@@ -67,6 +67,7 @@ static void IotAP_WSLoginHandle(void);
 static void IotAP_WSNormalHandle(void);
 static IotAPStopReason_Enum IotAP_ConverStopReason(AswErrorType_Enum errType);
 static void IotAP_CycleDetectUnreportedRecord(void);
+static void IotAP_CycleCheckTimeBillSwitch(void);
 static void IotAP_Uint32ToThreeUint8(uint8_t *pData, uint32_t value);
 static void IotAP_StopReasonToBcd(uint8_t *pData, IotAPStopReason_Enum stopReason);
 static uint32_t IotAP_Cp56TimeToSeconds(const uint8_t *pCp56Time);  /* CP56Time2a转总秒数 */
@@ -240,6 +241,7 @@ static void IotAP_WSNormalHandle(void)
         {
             IotAP_CycleReportRealData();
             IotAP_CycleDetectUnreportedRecord();
+            IotAP_CycleCheckTimeBillSwitch();
         }
 
         /* 上行发送控制处理：遍历发送控制表，组帧并写入FrameQueue */
@@ -270,6 +272,72 @@ static void IotAP_StopReasonToBcd(uint8_t *pData, IotAPStopReason_Enum stopReaso
     {
         pData[0] = (uint8_t)((((reason / 10U) % 10U) << 4U) | (reason % 10U));
         pData[1] = (uint8_t)((((reason / 1000U) % 10U) << 4U) | ((reason / 100U) % 10U));
+    }
+}
+
+static void IotAP_CycleCheckTimeBillSwitch(void)
+{
+    MSNvmAPParamBillMode_Struct *pSwitchMode = NULL;
+    IotAPProtoData_Struct *pProtoData = NULL;
+    uint8_t port = 0U;
+    uint8_t switchIndex = IOTAP_B47_INDEX_INVALID;
+    uint8_t nowCp56[7] = {0};
+    uint32_t nowTimestamp = 0U;
+    uint32_t switchTimestamp = 0U;
+
+    if (pIotAPCtx != NULL)
+    {
+        nowTimestamp = SSTM_GetSecTimestamp();
+        Common_TimestampToCp56Time2a(nowTimestamp, nowCp56);
+
+        /* 系统时间尚未校准时不做切换判断，避免上电早期误触发B49。 */
+        if ((nowCp56[6] & 0x7FU) >= 20U)
+        {
+            for (port = 0U; port < SYSCFG_CFG_GUN_NUM; port++)
+            {
+                if (g_iotapB49SwitchFlag[port] == 1U)
+                {
+                    switchIndex = g_stIotAPBillModeSave[port].recentUpdateIndex;
+                    if ((switchIndex == IOTAP_B47_A) || (switchIndex == IOTAP_B47_B))
+                    {
+                        pSwitchMode = &g_stIotAPBillModeSave[port].billModeData[switchIndex];
+                        if (IotAP_IsFeeModelValid(pSwitchMode) == 1U)
+                        {
+                            switchTimestamp = IotAP_Cp56TimeToSeconds(pSwitchMode->switchTime);
+                            if ((switchTimestamp > 0U) && (nowTimestamp >= switchTimestamp))
+                            {
+                                if (AswMonitor_IsOrderIdle(port) == TRUE)
+                                {
+                                    IotAP_RefreshNowbillModel(port);
+                                }
+
+                                pProtoData = &pIotAPCtx->stProtoData[port];
+                                memcpy(pProtoData->timeBillSwitchModelId,
+                                       pSwitchMode->billModeID,
+                                       sizeof(pProtoData->timeBillSwitchModelId));
+                                memcpy(pProtoData->timeBillSwitchTime,
+                                       pSwitchMode->switchTime,
+                                       sizeof(pProtoData->timeBillSwitchTime));
+                                pProtoData->timeBillSwitchIndex = switchIndex;
+                                pProtoData->timeBillSwitchResult = 0U;
+
+                                if ((Common_GetSendEnable(pIotAPCtx->pFuncSendCtrl, port,
+                                                          IOT_AP_CMD_B49_TIMEBILL_SWITCH_UP) != TRUE) &&
+                                    (Common_GetRecvTimerEnable(pIotAPCtx->pFuncRecvCtrl, port,
+                                                               IOT_AP_CMD_B50_TIMEBILL_SWITCH_DOWN) != TRUE))
+                                {
+                                    Common_SetSendEnable(pIotAPCtx->pFuncSendCtrl, port,
+                                                         IOT_AP_CMD_B49_TIMEBILL_SWITCH_UP, TRUE);
+                                    Common_SetSendImmdFlag(pIotAPCtx->pFuncSendCtrl, port,
+                                                           IOT_AP_CMD_B49_TIMEBILL_SWITCH_UP, TRUE);
+                                    IOTAP_CFG_InfoPrint("AP,B49切换到达: port%d 组%d\r\n", port, switchIndex);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -503,7 +571,12 @@ void IotAP_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardB
         if (port < SYSCFG_CFG_GUN_NUM)
         {
             activeIndex = g_iotapBillActiveIndex[port];
-            if ((activeIndex != IOTAP_B47_A) && (activeIndex != IOTAP_B47_B))
+            if (AswMonitor_IsOrderIdle(port) == TRUE)
+            {
+                IotAP_RefreshNowbillModel(port);
+                activeIndex = g_iotapBillActiveIndex[port];
+            }
+            else if ((activeIndex != IOTAP_B47_A) && (activeIndex != IOTAP_B47_B))
             {
                 IotAP_RefreshNowbillModel(port);
                 activeIndex = g_iotapBillActiveIndex[port];
@@ -512,7 +585,7 @@ void IotAP_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardB
             if ((activeIndex == IOTAP_B47_A) || (activeIndex == IOTAP_B47_B))
             {
                 pAPBillMode = &g_stIotAPBillModeSave[port].billModeData[activeIndex];
-                if (((pAPBillMode->workState[0] == 0U) && (pAPBillMode->workState[1] == 1U)) ||
+                if (((pAPBillMode->workState[0] == 0U) && (pAPBillMode->workState[1] == 1U)) || //wdy确认是 01 00还是00 01
                     ((pAPBillMode->workState[0] == 1U) && (pAPBillMode->workState[1] == 0U)))
                 {
                     workStateValid = TRUE;
@@ -538,7 +611,7 @@ void IotAP_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardB
                     Common_BCDToBIN(pAPBillMode->period[index].startTime, startTime, sizeof(startTime));
                     Common_BCDToBIN(pAPBillMode->period[index].stopTime, stopTime, sizeof(stopTime));
 
-                    pStandardBillMode->periodRate[index] = rateIndex;
+                    pStandardBillMode->periodRate[index] = pAPBillMode->period[index].periodRate;
                     pStandardBillMode->startTime[index][0] = startTime[0];
                     pStandardBillMode->startTime[index][1] = startTime[1];
                     pStandardBillMode->stopTime[index][0] = stopTime[0];
@@ -547,7 +620,7 @@ void IotAP_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardB
                     pStandardBillMode->rateElecPrice[rateIndex] = pAPBillMode->period[index].elecPrice;
                     pStandardBillMode->rateSeverPrice[rateIndex] = pAPBillMode->period[index].servePrice;
                     pStandardBillMode->totalPrice[rateIndex] = pStandardBillMode->rateElecPrice[rateIndex] + 
-                        pStandardBillMode->rateSeverPrice[rateIndex];
+                                                               pStandardBillMode->rateSeverPrice[rateIndex];
                 }
             }
 

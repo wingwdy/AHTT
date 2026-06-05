@@ -30,6 +30,24 @@
 #define IOT_AP_CLOCK_SYNC_HEAD_LEN              (14U)
 #define IOT_AP_CLOCK_REALTIME_HEAD_LEN          (11U)
 #define IOT_AP_B53_MAX_SEND_COUNT               (10U)
+#define IOT_AP_B52_PORT_LEN                     (1U)
+#define IOT_AP_B52_TIME_LEN                     (7U)
+#define IOT_AP_B52_BILL_MODE_ID_LEN             (8U)
+#define IOT_AP_B52_SWITCH_TIME_LEN              (7U)
+#define IOT_AP_B52_INVALID_TIME_LEN             (7U)
+#define IOT_AP_B52_PERIOD_COUNT_LEN             (1U)
+#define IOT_AP_B52_PERIOD_LEN                   (14U)
+#define IOT_AP_B52_RESULT_LEN                   (1U)
+#define IOT_AP_B52_FAIL_MODEL_LEN               (IOT_AP_B52_BILL_MODE_ID_LEN + \
+                                                IOT_AP_B52_SWITCH_TIME_LEN + \
+                                                IOT_AP_B52_INVALID_TIME_LEN + \
+                                                IOT_AP_B52_PERIOD_COUNT_LEN)
+#define IOT_AP_B52_MAX_DATA_LEN                 (IOT_AP_PILE_DN_LEN + \
+                                                IOT_AP_B52_PORT_LEN + \
+                                                IOT_AP_B52_TIME_LEN + \
+                                                IOT_AP_B52_FAIL_MODEL_LEN + \
+                                                (IOT_AP_B52_PERIOD_LEN * MSNVM_AP_BILLMODE_PERIOD_COUNT) + \
+                                                IOT_AP_B52_RESULT_LEN)
 
 typedef struct
 {
@@ -586,6 +604,7 @@ uint16_t IotAP_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf)
 
 /* ====== B帧发送函数 - 基础 ====== */
 
+/* AP B1: 充电过程实时监测数据 */
 uint16_t IotAP_SendRealtimeData(uint8_t port, uint8_t *pBuf)
 {
     AswMonitorChargeData_Struct *pChargeData = NULL;
@@ -726,6 +745,7 @@ uint16_t IotAP_SendRealtimeData(uint8_t port, uint8_t *pBuf)
     return dataLen;
 }
 
+/* AP B5: 充电启停控制命令结果确认 */
 uint16_t IotAP_SendChgCtrlResult(uint8_t port, uint8_t *pBuf)
 {
     CommonDateTime_Struct dateTime = { 0 };
@@ -766,12 +786,14 @@ uint16_t IotAP_SendChgCtrlResult(uint8_t port, uint8_t *pBuf)
 
 /* ====== B帧发送函数 - 鉴权 ====== */
 
+/* AP B6: 刷卡鉴权上行 */
 uint16_t IotAP_SendCardAuthUp(uint8_t port, uint8_t *pBuf)
 {
     /* TODO: 组装刷卡鉴权上行 B6 */
     return 0;
 }
 
+/* AP B10: 启动通知上报 */
 uint16_t IotAP_SendStartNotifyUp(uint8_t port, uint8_t *pBuf)
 {
     /* TODO: 组装启动通知上报 B10 */
@@ -780,12 +802,14 @@ uint16_t IotAP_SendStartNotifyUp(uint8_t port, uint8_t *pBuf)
 
 /* ====== B帧发送函数 - 交易 ====== */
 
+/* AP B14: 充电扣款后下行数据 */
 uint16_t IotAP_SendDeductConfirmRsp(uint8_t port, uint8_t *pBuf)
 {
-    /* TODO: 组装充电扣款后下行数据应答 B14 */
+    /* B14 is a platform downlink settlement notice and has no AP upstream response. */
     return 0;
 }
 
+/* AP B53: 在线情况下停止充电上传分时交易明细数据 */
 uint16_t IotAP_SendOnlineDetailUp(uint8_t port, uint8_t *pBuf)
 {
     uint16_t dataLen = 0;
@@ -800,6 +824,7 @@ uint16_t IotAP_SendOnlineDetailUp(uint8_t port, uint8_t *pBuf)
 
 /* ====== B帧发送函数 - 计费 ====== */
 
+/* AP B48: 下发计费模型上行数据-分时服务费 */
 uint16_t IotAP_SendTimeBillUp(uint8_t port, uint8_t *pBuf)
 {
     uint8_t dataBuf[18] = { 0 };
@@ -821,20 +846,108 @@ uint16_t IotAP_SendTimeBillUp(uint8_t port, uint8_t *pBuf)
     return dataLen;
 }
 
+/* AP B49: 计费模型切换生效上行-分时服务费 */
 uint16_t IotAP_SendTimeBillSwitchUp(uint8_t port, uint8_t *pBuf)
 {
-    /* TODO: 组装计费模型切换生效上行-分时服务费 B49 */
-    return 0;
+    uint8_t dataBuf[25] = { 0 };
+    uint16_t dataLen = 0;
+
+    if ((pBuf != NULL) && (pIotAPCtx != NULL) && (port < SYSCFG_CFG_GUN_NUM))
+    {
+        IotAP_CopyPileDnReverse(dataBuf, &dataLen);
+        dataBuf[dataLen++] = port;
+        memcpy(&dataBuf[dataLen],
+               pIotAPCtx->stProtoData[port].timeBillSwitchModelId,
+               sizeof(pIotAPCtx->stProtoData[port].timeBillSwitchModelId));
+        dataLen += sizeof(pIotAPCtx->stProtoData[port].timeBillSwitchModelId);
+        memcpy(&dataBuf[dataLen],
+               pIotAPCtx->stProtoData[port].timeBillSwitchTime,
+               sizeof(pIotAPCtx->stProtoData[port].timeBillSwitchTime));
+        dataLen += sizeof(pIotAPCtx->stProtoData[port].timeBillSwitchTime);
+        dataBuf[dataLen++] = pIotAPCtx->stProtoData[port].timeBillSwitchResult;
+
+        memcpy(pBuf, dataBuf, dataLen);
+    }
+
+    return dataLen;
 }
 
+/* AP B52: 计费模型召测上行数据-分时服务费 */
 uint16_t IotAP_SendTimeBillPollUp(uint8_t port, uint8_t *pBuf)
 {
-    /* TODO: 组装计费模型召测上行数据-分时服务费 B52 */
-    return 0;
+    uint8_t dataBuf[IOT_AP_B52_MAX_DATA_LEN] = { 0 };
+    uint16_t dataLen = 0U;
+    uint8_t activeIndex = IOTAP_B47_INDEX_INVALID;
+    uint8_t result = 1U;
+    const MSNvmAPParamBillMode_Struct *pBillMode = NULL;
+    const MSNvmAPParamBillPeriod_Struct *pPeriod = NULL;
+
+    if ((pBuf != NULL) && (pIotAPCtx != NULL) && (port < SYSCFG_CFG_GUN_NUM))
+    {
+        if (AswMonitor_IsOrderIdle(port) == TRUE)
+        {
+            IotAP_RefreshNowbillModel(port);
+        }
+
+        activeIndex = g_iotapBillActiveIndex[port];
+        if ((activeIndex == IOTAP_B47_A) || (activeIndex == IOTAP_B47_B))
+        {
+            pBillMode = &g_stIotAPBillModeSave[port].billModeData[activeIndex];
+            if (IotAP_IsFeeModelValid(pBillMode) == 1U)
+            {
+                result = 0U;
+            }
+        }
+
+        IotAP_CopyPileDnReverse(dataBuf, &dataLen);
+        dataBuf[dataLen++] = port;
+        memcpy(&dataBuf[dataLen],
+               pIotAPCtx->stProtoData[port].timeBillPollTime,
+               sizeof(pIotAPCtx->stProtoData[port].timeBillPollTime));
+        dataLen += sizeof(pIotAPCtx->stProtoData[port].timeBillPollTime);
+
+        /*当前存在有效计费模型*/
+        if ((result == 0U) && (pBillMode != NULL))
+        {
+            memcpy(&dataBuf[dataLen], pBillMode->billModeID, sizeof(pBillMode->billModeID));
+            dataLen += sizeof(pBillMode->billModeID);
+            memcpy(&dataBuf[dataLen], pBillMode->switchTime, sizeof(pBillMode->switchTime));
+            dataLen += sizeof(pBillMode->switchTime);
+            memcpy(&dataBuf[dataLen], pBillMode->invalidTime, sizeof(pBillMode->invalidTime));
+            dataLen += sizeof(pBillMode->invalidTime);
+            dataBuf[dataLen++] = pBillMode->periodCount;
+
+            for (uint8_t index = 0U; index < pBillMode->periodCount; index++)
+            {
+                pPeriod = &pBillMode->period[index];
+                dataBuf[dataLen++] = pPeriod->periodSerial;
+                dataBuf[dataLen++] = pPeriod->periodRate;
+                memcpy(&dataBuf[dataLen], pPeriod->startTime, sizeof(pPeriod->startTime));
+                dataLen += sizeof(pPeriod->startTime);
+                memcpy(&dataBuf[dataLen], pPeriod->stopTime, sizeof(pPeriod->stopTime));
+                dataLen += sizeof(pPeriod->stopTime);
+                Common_Uint32ToFourUint8(&dataBuf[dataLen], pPeriod->elecPrice);
+                dataLen += 4U;
+                Common_Uint32ToFourUint8(&dataBuf[dataLen], pPeriod->servePrice);
+                dataLen += 4U;
+            }
+        }
+        else
+        {
+            memset(&dataBuf[dataLen], 0x00, IOT_AP_B52_FAIL_MODEL_LEN);
+            dataLen += IOT_AP_B52_FAIL_MODEL_LEN;
+        }
+
+        dataBuf[dataLen++] = result;
+        memcpy(pBuf, dataBuf, dataLen);
+    }
+
+    return dataLen;
 }
 
 /* ====== B帧发送函数 - 功率控制 ====== */
 
+/* AP B34: 充电功率控制上行 */
 uint16_t IotAP_SendPowerCtrlUp(uint8_t port, uint8_t *pBuf)
 {
     uint8_t dataBuf[17] = { 0 };
@@ -864,12 +977,14 @@ uint16_t IotAP_SendPowerCtrlUp(uint8_t port, uint8_t *pBuf)
     return dataLen;
 }
 
+/* AP B46: 充电功率召测上行 */
 uint16_t IotAP_SendPowerPollUp(uint8_t port, uint8_t *pBuf)
 {
     /* TODO: 组装充电功率召测上行 B46 */
     return 0;
 }
 
+/* AP B57: 充电功率控制过程中的扩展实时状态 */
 uint16_t IotAP_SendPowerStatusUp(uint8_t port, uint8_t *pBuf)
 {
     /* TODO: 组装充电功率控制过程中的扩展实时状态 B57 */
@@ -878,6 +993,7 @@ uint16_t IotAP_SendPowerStatusUp(uint8_t port, uint8_t *pBuf)
 
 /* ====== B帧发送函数 - 其他扩展 ====== */
 
+/* AP B31: SIM卡信息上行数据 */
 uint16_t IotAP_SendSimInfoUp(uint8_t port, uint8_t *pBuf)
 {
     uint8_t dataBuf[39] = { 0 };
@@ -901,12 +1017,14 @@ uint16_t IotAP_SendSimInfoUp(uint8_t port, uint8_t *pBuf)
     return dataLen;
 }
 
+/* AP B38: 零点示值上报 */
 uint16_t IotAP_SendZeroMeterValue(uint8_t port, uint8_t *pBuf)
 {
     /* TODO: 组装零点示值上报 B38 */
     return 0;
 }
 
+/* AP B40: 平台ftp服务器地址上行 */
 uint16_t IotAP_SendFtpAddrUp(uint8_t port, uint8_t *pBuf)
 {
     uint8_t dataBuf[9] = { 0 };
@@ -925,6 +1043,7 @@ uint16_t IotAP_SendFtpAddrUp(uint8_t port, uint8_t *pBuf)
     return dataLen;
 }
 
+/* AP B24: 远程升级启动命令接收结果 */
 uint16_t IotAP_SendUpgradeResult(uint8_t port, uint8_t *pBuf)
 {
     /* TODO: 组装远程升级启动命令接收结果 B24 */
