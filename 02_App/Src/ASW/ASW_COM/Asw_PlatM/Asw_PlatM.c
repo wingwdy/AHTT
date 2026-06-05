@@ -310,16 +310,16 @@ uint8_t AswPlatM_SetPlatAuxiliaryPort(uint16_t port)
     return TRUE;
 }
 
-uint8_t AswPlatM_SetOmPlatEnable(uint8_t enable)
+uint8_t AswPlatM_SetOmPlatDisable(uint8_t disable)
 {
     uint8_t ret = FALSE;
 
-    if (enable == 0 || enable == 1)
+    if (disable == 0 || disable == 1)
     {
-        if (g_stAswPlatMCtx.stPlatParam.AuxiliaryPlatDisableFlag != enable)
+        if (g_stAswPlatMCtx.stPlatParam.AuxiliaryPlatDisableFlag != disable)
         {
-            ASWPLATM_CFG_DebugPrint("运维平台禁用状态变化：[%d]-->[%d]\r\n", g_stAswPlatMCtx.stPlatParam.AuxiliaryPlatDisableFlag, enable);
-            g_stAswPlatMCtx.stPlatParam.AuxiliaryPlatDisableFlag = enable;
+            ASWPLATM_CFG_DebugPrint("运维平台禁用状态变化：[%d]-->[%d]\r\n", g_stAswPlatMCtx.stPlatParam.AuxiliaryPlatDisableFlag, disable);
+            g_stAswPlatMCtx.stPlatParam.AuxiliaryPlatDisableFlag = disable;
             MSNvm_WriteParaBlock(eMSNvmBlockID_PlatParam, (uint8_t *)&g_stAswPlatMCtx.stPlatParam, sizeof(MSNvmPlatParam_Struct));
         }
 
@@ -792,7 +792,7 @@ void AswPlatM_InitMemory(void)
             CddNetM_CreatLink(pOMProtocolDescriptor->eSocketType, stSocketPara, eCddNetMPlatType_OM);
         }
     }
-    
+
     /* 设置卡类型 */
     pCardDescriptor = AswPlatM_GetCardDescriptor();
     CddCardM_SetCardType(pCardDescriptor->cardType);

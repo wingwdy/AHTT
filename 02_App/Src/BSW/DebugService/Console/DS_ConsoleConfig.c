@@ -415,7 +415,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
         {
             temp = atoi(argv[2]);
 
-            if (TRUE == AswPlatM_SetOmPlatEnable(temp))
+            if (TRUE == AswPlatM_SetOmPlatDisable(temp))
             {
                 DSCONSOLE_CFG_InfoPrint("Set omPlat Disable= %d ok!\r\n", temp);
             }
