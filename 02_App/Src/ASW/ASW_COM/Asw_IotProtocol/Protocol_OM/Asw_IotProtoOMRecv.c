@@ -108,7 +108,7 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .cmdType = IOT_OM_CMDTYPE_REQUSET,
         .pRecvParse = IotOM_RecvCallNetModuleInfo,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_OM_CMD_CALL_NETMODULE_INFO_RSP,
         .printFlag = TRUE,
         .cMeaning = "请求网络模块信息",
@@ -120,7 +120,7 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .cmdType = IOT_OM_CMDTYPE_REQUSET,
         .pRecvParse = IotOM_RecvCallRealData,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_OM_CMD_CALL_REALDATA_ACK,
         .printFlag = TRUE,
         .cMeaning = "召测实时数据",
@@ -132,7 +132,7 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .cmdType = IOT_OM_CMDTYPE_REQUSET,
         .pRecvParse = IotOM_RecvSetQrcode,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_OM_CMD_SET_QRCODE_RSP,
         .printFlag = TRUE,
         .cMeaning = "设置二维码",
@@ -144,7 +144,7 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .cmdType = IOT_OM_CMDTYPE_REQUSET,
         .pRecvParse = IotOM_RecvSetReboot,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_OM_CMD_REBOOT_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程重启",
@@ -156,7 +156,7 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .cmdType = IOT_OM_CMDTYPE_REQUSET,
         .pRecvParse = IotOM_RecvSetForbid,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_OM_CMD_SET_FORBID_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程锁机",
@@ -180,7 +180,7 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .cmdType = IOT_OM_CMDTYPE_REQUSET,
         .pRecvParse = IotOM_RecvUpdate,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_OM_CMD_UPDATE_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程更新",
@@ -204,7 +204,7 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .cmdType = IOT_OM_CMDTYPE_REQUSET,
         .pRecvParse = IotOM_RecvRemoteQuerySetParam,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_OM_CMD_REMOTE_QUERY_SET_PARAM_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程设置查询参数",
@@ -216,7 +216,7 @@ static const IotOMRecvCtrl_Struct c_stIotOMRecvctrlTable[IOT_OM_CMD_RECV_COUNT] 
         .cmdType = IOT_OM_CMDTYPE_REQUSET,
         .pRecvParse = IotOM_RecvReadLocalFile,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_OM_CMD_CALL_READ_LOCALFILE_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程读取桩本地文件",
@@ -759,6 +759,7 @@ static IotOMFrameHead_Struct *IotOM_FindValidFrameLen(uint8_t *pData, uint16_t d
         pStart++;
         remainLen--;
         dealLen[0]++;
+        pHead = NULL;
     }
 
     return pHead;
@@ -784,7 +785,7 @@ static void IotOM_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTOM_CFG_DebugPrint("[枪：%d]接收[cmd: %02X, %s][%d]\r\n", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTOM_CFG_DebugPrint("[枪：%d]接收[cmd: %02X, %s][%d]：", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
 
@@ -811,7 +812,7 @@ static void IotOM_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTOM_CFG_InfoPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败!\r\n", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTOM_CFG_DebugPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败：", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
                 }

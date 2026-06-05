@@ -379,3 +379,23 @@ uint32_t AswErrHandle_GetErrStatusVersion(uint8_t port)
     return version;
 }
 
+void AswErrHandle_SetErrStateForTest(uint8_t port, uint32_t errState)
+{
+    AswErrorHandle_Struct *pErrorHandle = &g_stAswErrorHandle[port];
+    uint8_t index = 0;
+
+    if (port < SYSCFG_CFG_GUN_NUM)
+    {
+        for (index = 1; index < 32; index++)
+        {
+            if (errState & (1 << index))
+            {
+                AswErrhandle_SetErrExsitCallback(port, (AswErrorType_Enum)index);
+            }
+            else
+            {
+                AswErrhandle_ResetErrExsitCallback(port, (AswErrorType_Enum)index);
+            }
+        }
+    }
+}

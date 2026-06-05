@@ -21,7 +21,7 @@
 #include "SysCfg.h"
 #include "Cdd_NetM.h"
 #include "Asw_Monitor.h"
-
+#include "MS_Nvm.h"
 /******************************************************************************
 *    Macro Definition
 ******************************************************************************/
@@ -120,9 +120,9 @@ void IotXDT_OfflineHandle(void);
 IotXDTPileStatus_Enum IotXDT_GetPileStatus(void);
 IotXDTGunStatus_Enum IotXDT_GetGunStatus(uint8_t port);
 uint8_t IotXDT_IsPileOnCharging(void);
-void IotXDT_RefreshErrStatusForCall(void);
 uint8_t IotXDT_CompareRecordOrderNum(uint8_t *record, uint8_t *pCompara, uint16_t paraSize);
 void IotXDT_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t *pProtocolRecord, uint16_t *pRecordLen);
+void IotXDT_SetPrivateParam(MSNvmPlatPrivateParam_Union *pPrivateParam);
 
 uint8_t IotXDT_CheckErrInfoReportStatusFree(void);
 IotXDTErrDesc_Struct *IotXDT_CheckFirstErr(uint8_t port);

@@ -124,11 +124,11 @@ const ATCmdDescribtor_Struct c_stMQTTATCmdDescribtor[eATMQTTCmd_Count] =
     ATMQTT_PackPublish,                            ATMQTT_RecvPublish,                 ATMQTT_FailHandle },
 
     [eATMQTTCmd_QueryState] =
-    { "AT+QMTCONN?\r\n",                          "+QMTCONN",            "OK\r\n",    3,   5000,      3000,  TRUE,   "查询连接状态",
+    { "AT+QMTCONN?\r\n",                          "+QMTCONN",            "OK\r\n",     3,   5000,      3000,  TRUE,   "查询连接状态",
     NULL,                                         ATMQTT_RecvQueryState,               ATMQTT_FailHandle },
 
     [eATMQTTCmd_Close] =
-    { "AT+QMTCLOSE=[ID]\r\n",                     "OK\r\n",             NULL,          1,   5000,      3000,  TRUE,   "关闭客户端网络",
+    { "AT+QMTCLOSE=[ID]\r\n",                     "OK\r\n",             NULL,          3,   5000,      3000,  TRUE,   "关闭客户端网络",
     ATMQTT_PackConfig,                            ATMQTT_RecvClose,                    ATMQTT_FailHandle },
 };
 

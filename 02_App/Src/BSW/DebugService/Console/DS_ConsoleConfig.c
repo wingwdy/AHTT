@@ -21,6 +21,7 @@
 
 #include "Asw_PlatM.h"
 #include "Asw_Monitor.h"
+#include "Asw_ErrorHandle.h"
 
 #include "Cdd_ModeM.h"
 #include "Cdd_NetM.h"
@@ -176,6 +177,7 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
     int32_t port = 0;
     uint8_t *pTemp = NULL;
     uint8_t setResult = FALSE;
+    uint32_t temp = 0;
 
     if (argc == 3)
     {
@@ -408,6 +410,42 @@ static int32_t DSConsoleCfg_SetPara(int32_t argc, char *argv[])
                 }
 
             }
+        }
+        else if (0 == strcmp(argv[1], "omPlatDisable"))
+        {
+            temp = atoi(argv[2]);
+
+            if (TRUE == AswPlatM_SetOmPlatDisable(temp))
+            {
+                DSCONSOLE_CFG_InfoPrint("Set omPlat Disable= %d ok!\r\n", temp);
+            }
+            else
+            {
+                DSCONSOLE_CFG_InfoPrint("Set omPlat Disable= %d failed!\r\n", temp);
+            }
+        }
+        else if (0 == strcmp(argv[1], "simNet"))
+        {
+            temp = atoi(argv[2]);
+
+            if (TRUE == AswPlatM_SetSimNet(temp))
+            {
+                DSCONSOLE_CFG_InfoPrint("Set simNet flag= %d ok!, %s\r\n", temp, temp == 0 ? "公网卡" : "专网卡");
+            }
+            else
+            {
+                DSCONSOLE_CFG_InfoPrint("Set simNet flag= %d failed!\r\n", temp);
+            }
+        }
+        /* 用于测试故障 */
+        else if (0 == strcmp(argv[1], "errState"))
+        {
+            temp = atoi(argv[2]);
+            AswErrHandle_SetErrStateForTest(0, temp);
+        }
+        else
+        {
+            DSCONSOLE_CFG_InfoPrint("Invalid command!\r\n");
         }
     }
 

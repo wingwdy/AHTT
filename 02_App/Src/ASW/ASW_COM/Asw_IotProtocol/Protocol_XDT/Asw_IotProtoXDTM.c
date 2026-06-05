@@ -229,15 +229,17 @@ static void IotXDT_WSInitHandle(void)
 
     pIotXDTCtx->eWorkState = eIotXDTWorkState_Offline;
 
-    if (pPlatInfo->pileDataReportCycle == 0)
-    {
-        pPlatInfo->pileDataReportCycle = 60;
-        pPlatInfo->pileDataCycleReportEnable = TRUE;
-    }
-
     if (pPlatInfo->amountChangeThreshold == 0)
     {
         memcpy(&pPlatInfo->amountChangeThreshold, &amountChangeThreshold, 4);
+    }
+
+    if (pPlatInfo->pileDataCycleReportEnable == TRUE)
+    {
+        if (pPlatInfo->pileDataReportCycle == 0)
+        {
+            pPlatInfo->pileDataReportCycle = 60;
+        }
     }
 
     pPlatInfo->resetCount++;
@@ -475,7 +477,6 @@ static void IotXDT_CycleDetectUnreporteRecord(void)
                 else
                 {
                     Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, port, IOT_XDT_CHARGE_RECORD, TRUE);
-                    Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, 0, IOT_XDT_CHARGE_RECORD, TRUE);
                 }
             }
         }
@@ -594,6 +595,20 @@ void IotXDT_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_
         memcpy(pProtocolRecord, pOrderData, sizeof(MSNvmXDTOrderInfo_Struct));
         pRecordLen[0] = sizeof(MSNvmXDTOrderInfo_Struct);
     }
+}
+
+void IotXDT_SetPrivateParam(MSNvmPlatPrivateParam_Union *pPrivateParam)
+{
+    float amountChangeThreshold = 0.5;
+
+    pPrivateParam->stXDTParam.platinfo.pileDataCycleReportEnable = TRUE;
+    pPrivateParam->stXDTParam.platinfo.pileDataReportCycle = 60;
+    memcpy(&pPrivateParam->stXDTParam.platinfo.amountChangeThreshold, &amountChangeThreshold, 4);
+    strcpy(pPrivateParam->stXDTParam.platinfo.cOperator, "XDT");
+    strcpy(pPrivateParam->stXDTParam.platinfo.cProductKey, "7X9A2KQ6M8N4P1R5T7W3");
+    strcpy(pPrivateParam->stXDTParam.platinfo.cProductSecret, "B5N8V2M9K4X7Q1T6C3L9R");
+    pPrivateParam->stXDTParam.platinfo.credentialSaveFlag = FALSE;
+    pPrivateParam->stXDTParam.platinfo.credentialValidFlag = FALSE;
 }
 
 

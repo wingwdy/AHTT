@@ -147,7 +147,7 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
         .pRecvParse = IotGN_RecvCallRealData,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_GN_CMD_CALL_REALDATA_ACK,
         .printFlag = TRUE,
         .cMeaning = "召测实时数据",
@@ -159,7 +159,7 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
         .pRecvParse = IotGN_RecvRemoteStartCharge,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_GN_CMD_REMOTE_START_CHARGE_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程启动充电",
@@ -171,7 +171,7 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
         .pRecvParse = IotGN_RecvRemoteStopCharge,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_GN_CMD_REMOTE_STOP_CHARGE_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程停止充电",
@@ -207,7 +207,7 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
         .pRecvParse = IotGN_RecvUpdateAccountMoney,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_GN_CMD_UPDATE_ACCOUNT_MONEY_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程更新账户余额",
@@ -219,7 +219,7 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
         .pRecvParse = IotGN_RecvSyncTime,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_GN_CMD_SYNC_TIME_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程对时",
@@ -231,7 +231,7 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
         .pRecvParse = IotGN_RecvSetBillMode4Rate,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_GN_CMD_SET_BILLMODE_4RATE_RSP,
         .printFlag = TRUE,
         .cMeaning = "设置四类电价计费模型",
@@ -243,7 +243,7 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
         .pRecvParse = IotGN_RecvSetBillModeMultiRate,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_GN_CMD_SET_BILLMODE_MULTIRATE_RSP,
         .printFlag = TRUE,
         .cMeaning = "设置多类电价计费模型",
@@ -255,7 +255,7 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
         .pRecvParse = IotGN_RecvSetQRCode,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_GN_CMD_SET_QRCODE_RSP,
         .printFlag = TRUE,
         .cMeaning = "设置二维码",
@@ -267,7 +267,7 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
         .pRecvParse = IotGN_RecvSetReboot,
         .maxTimeout = 0, 
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_GN_CMD_REBOOT_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程重启",
@@ -279,7 +279,7 @@ static const IotGNRecvCtrl_Struct c_stIotGNRecvctrlTable[IOT_GN_CMD_RECV_COUNT] 
         .cmdType = IOT_GN_CMDTYPE_REQUSET,
         .pRecvParse = IotGN_RecvSetUpdate,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_GN_CMD_UPDATE_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程更新",
@@ -345,6 +345,7 @@ static IotGNFrameHead_Struct *IotGN_FindValidFrameLen(uint8_t *pData, uint16_t d
         pStart++;
         remainLen--;
         dealLen[0]++;
+		pHead = NULL;
     }
 
     return pHead;
@@ -370,7 +371,7 @@ static void IotGN_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTGN_CFG_DebugPrint("[枪：%d]接收[cmd: 0x%02X, %s][%d]\r\n", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTGN_CFG_DebugPrint("[枪：%d]接收[cmd: 0x%02X, %s][%d]：", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
 
@@ -397,7 +398,7 @@ static void IotGN_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topicLen
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTGN_CFG_DebugPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败!\r\n", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTGN_CFG_DebugPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败!：", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
                 }

@@ -134,7 +134,10 @@ typedef struct
 
     uint8_t platMainType;                      /* 运营平台类型 gn, ykc...*/
     uint8_t platMainCardType;                  /* 运营卡类型 gn, ykc...*/
-    uint8_t reverse[64];
+
+    uint8_t AuxiliaryPlatDisableFlag;          /* 运维平台失能标记 0-表示不禁用, 1-表示禁用 */
+    uint8_t dedicatedNetSimFlag;               /* 是否为专网SIM卡 0-表示不是, 1-表示是 */
+    uint8_t reverse[62];
 }MSNvmPlatParam_Struct;
 
 /*********************************************************************************************** */

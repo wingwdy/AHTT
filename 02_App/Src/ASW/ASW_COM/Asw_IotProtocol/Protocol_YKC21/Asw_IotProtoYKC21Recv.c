@@ -156,7 +156,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvCallRealData,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_CALL_REALDATA_ACK,
         .printFlag = TRUE,
         .cMeaning = "召测实时数据",
@@ -169,7 +169,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvRemoteStopCharge,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_REMOTE_STOP_CHARGE_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程停止充电",
@@ -195,13 +195,12 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvUpdateAccountMoney,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_UPDATE_ACCOUNT_MONEY_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程更新账户余额",
     },
 
-     
     [8] = 
     {
         .cmd = IOT_YKC21_CMD_FAULT_RSP,
@@ -235,7 +234,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvCallRecord,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_RECORD_RSP,
         .printFlag = TRUE,
         .cMeaning = "交易记录召唤",
@@ -248,7 +247,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvSetPowerChange,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_POWERCHANG_RSP,
         .printFlag = TRUE,
         .cMeaning = "功率修改",
@@ -261,7 +260,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvSyncTime,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_SYNC_TIME_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程对时",
@@ -274,7 +273,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvSetBillModeMultiRate,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_SET_BILLMODE_MULTIRATE_RSP,
         .printFlag = TRUE,
         .cMeaning = "设置多类电价计费模型",
@@ -287,7 +286,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvSetQRCode,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_SET_QRCODE_RSP,
         .printFlag = TRUE,
         .cMeaning = "设置二维码",
@@ -300,7 +299,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvSetParam,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_SET_PARAM_RSP,
         .printFlag = TRUE,
         .cMeaning = "参数设置",
@@ -313,7 +312,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvSetDefaultMaxPower,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_POWERDEFAULT_MAX_RSP,
         .printFlag = TRUE,
         .cMeaning = "最大功率下发",
@@ -326,7 +325,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvSetReboot,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_REBOOT_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程重启",
@@ -339,13 +338,12 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvSetFTP,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_SET_FTP_RSP,
         .printFlag = TRUE,
         .cMeaning = "平台设远程升级程序",
     },
 
-    
     [19] = 
     {
         .cmd = IOT_YKC21_CMD_SET_KEY,
@@ -353,7 +351,7 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvSetKey,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_SET_KEY_RSP,
         .printFlag = TRUE,
         .cMeaning = "密钥更新",
@@ -372,7 +370,6 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cMeaning = "充电桩主动启动充电应答",
     },
 
-
     [21] = 
     {
         .cmd = IOT_YKC21_CMD_REMOTE_START_CHARGE,
@@ -380,13 +377,11 @@ static const IotYKC21RecvCtrl_Struct c_stIotYKC21RecvctrlTable[IOT_YKC21_CMD_REC
         .cmdType = IOT_YKC21_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC21_RecvRemoteStartCharge,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC21_CMD_REMOTE_START_CHARGE_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程启动充电",
     },
-
-
 };
 
 
@@ -460,6 +455,7 @@ static IotYKC21FrameHead_Struct *IotYKC21_FindValidFrameLen(uint8_t *pData, uint
         pStart++;
         remainLen--;
         dealLen[0]++;
+        pHead = NULL;
     }
 
     return pHead;   
@@ -532,7 +528,7 @@ static void IotYKC21_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTYKC21_CFG_InfoPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败!\r\n", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
+                        IOTYKC21_CFG_DebugPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败：", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen);
                     }
                 }

@@ -67,7 +67,7 @@ static void IotOM_CycleDetectUnreportedUcmResult(void);
 static void IotOM_CycleDetectReportForbidState(void);
 static void IotOM_CycleReportMeterVal(void);
 static void IotOM_CycleDetect(void);
-
+static void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf);
 
 /*******************************************************************************
 *    Function Source Code
@@ -134,17 +134,11 @@ static void IotOM_WSOfflineHandle(void)
     uint8_t copyLen = 0;
     uint8_t offset = 0;
 
-    copyLen = strlen(pParam->fixPileDn);
-    copyLen = copyLen > 32 ? 32 : copyLen;
-    offset = 32 - copyLen;
-    memset(pIotOMCtx->pileFixDnAsc, 0x30, 32);
-    memcpy(pIotOMCtx->pileFixDnAsc + offset, pParam->fixPileDn, copyLen);
+    memset(pIotOMCtx->pileFixDnAsc, 0, 32);
+    memcpy(pIotOMCtx->pileFixDnAsc, pParam->fixPileDn, 32);
 
-    copyLen = strlen(pParam->platPileDn);
-    copyLen = copyLen > 32 ? 32 : copyLen;
-    offset = 32 - copyLen;
-    memset(pIotOMCtx->platDn, 0x30, 32);
-    memcpy(pIotOMCtx->platDn + offset, pParam->platPileDn, copyLen);
+    memset(pIotOMCtx->platDn, 0, 32);
+    memcpy(pIotOMCtx->platDn, pParam->platPileDn, 32);
 
     pIotOMCtx->loginSucc = FALSE;
     pIotOMCtx->queueBusyFlag = FALSE;
@@ -152,13 +146,15 @@ static void IotOM_WSOfflineHandle(void)
     pIotOMCtx->reportForBidStateTick = 0;
 
     pIotOMCtx->sendIndex = 0;
-    pIotOMCtx->sendPort = 0;    
+    pIotOMCtx->sendPort = 0;
     pIotOMCtx->reqSeq = 0;
 
     memset(pIotOMCtx->meterValReportTick, 0x00, sizeof(pIotOMCtx->meterValReportTick));
     memset(pIotOMCtx->realDataReportTick, 0x00, sizeof(pIotOMCtx->realDataReportTick));
     memset(pIotOMCtx->lastGunState, 0x00, sizeof(pIotOMCtx->lastGunState));
     memset(pIotOMCtx->lastGunConnectState, 0x00, sizeof(pIotOMCtx->lastGunConnectState));
+    memset(pIotOMCtx->lastErrInfo, 0x00, sizeof(pIotOMCtx->lastErrInfo));
+    memset(pIotOMCtx->errVersion, 0x00, sizeof(pIotOMCtx->errVersion));
 
     memset(pIotOMCtx->stSendCtrl, 0x00, sizeof(pIotOMCtx->stSendCtrl));
     memset(pIotOMCtx->stRecvCtrl, 0x00, sizeof(pIotOMCtx->stRecvCtrl));
@@ -182,27 +178,45 @@ static void IotOM_CycleReportRealData(void)
     uint8_t curGunState = 0;
     uint8_t curGunConnectState = 0;
     uint8_t realDataReportFlag = FALSE;
+    uint8_t curErrInfo[32] = {0};
 
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
         curGunState = IotOM_GetGunState(port);
         curGunConnectState = AswChargeIf_CheckGunConnected(port);
 
+        /* 故障变位上报 */
+        if (pIotOMCtx->errVersion[port] != AswErrHandle_GetErrStatusVersion(port))
+        {
+            pIotOMCtx->errVersion[port] = AswErrHandle_GetErrStatusVersion(port);
+            IotOM_SetRealDataErrBit(port, curErrInfo);
+
+            if (0 != memcmp(curErrInfo, pIotOMCtx->lastErrInfo[port], 32))
+            {
+                realDataReportFlag = TRUE;
+            }
+        }
+
+        /* 枪状态变位上报 */
         if (pIotOMCtx->lastGunState[port] != curGunState)
         {
             realDataReportFlag = TRUE;
         }
 
+        /* 枪连接状态变位上报 */
         if (pIotOMCtx->lastGunConnectState[port] != curGunConnectState)
         {
             realDataReportFlag = TRUE;
         }
 
-        realDataReportCycle = (AswMonitor_IsOrderIdle(port) != TRUE) ? IOTOM_CFG_CHARGING_REALDATA_CYCLE : IOTOM_CFG_IDLE_REALDATA_CYCLE;
-       
-        if (Common_JudgeTimeoutMs(pIotOMCtx->realDataReportTick[port], realDataReportCycle) == TRUE)
+        if (realDataReportFlag == FALSE)
         {
-            realDataReportFlag = TRUE;
+            realDataReportCycle = (AswMonitor_IsOrderIdle(port) != TRUE) ? IOTOM_CFG_CHARGING_REALDATA_CYCLE : IOTOM_CFG_IDLE_REALDATA_CYCLE;
+        
+            if (Common_JudgeTimeoutMs(pIotOMCtx->realDataReportTick[port], realDataReportCycle) == TRUE)
+            {
+                realDataReportFlag = TRUE;
+            }
         }
 
         if (realDataReportFlag == TRUE)
@@ -211,6 +225,8 @@ static void IotOM_CycleReportRealData(void)
             pIotOMCtx->lastGunState[port] = curGunState;
             pIotOMCtx->lastGunConnectState[port] = curGunConnectState;
             pIotOMCtx->realDataReportTick[port] = Common_GetSystick();
+            memcpy(pIotOMCtx->lastErrInfo[port], curErrInfo, 32);
+            memset(curErrInfo, 0x00, 32);
             Common_SetSendEnable(pIotOMCtx->pFuncSendCtrl, port, IOT_OM_CMD_REPORT_REALDATA, TRUE);
         }
     }
@@ -321,6 +337,123 @@ static void IotOM_CycleReportMeterVal(void)
         }
     }
 }
+
+static void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
+{
+    /* CP电压异常 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpVoltAbnor))
+    {
+        Common_SetBitFlag(pBuf, 1);
+    }
+
+    /* CP接地 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpGroundFault))
+    {
+        Common_SetBitFlag(pBuf, 2);
+    }
+
+    /* PE故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_PEBreakFault))
+    {
+        Common_SetBitFlag(pBuf, 3);
+    }
+
+    /* 缺相 */
+    /* 急停 */
+
+    /* 火零反接 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_InputLineReversed))
+    {
+        Common_SetBitFlag(pBuf, 6);
+    }
+
+    /* 漏电故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_LeakageCurrErr))
+    {
+        Common_SetBitFlag(pBuf, 7);
+    }
+
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_RCDSelfcheckErr))
+    {
+        Common_SetBitFlag(pBuf, 7);
+    }
+
+    /* 二极管不存在故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_DiodeStop))
+    {
+        Common_SetBitFlag(pBuf, 8);
+    }
+
+    /* 短路故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ShortCircleErr))
+    {
+        Common_SetBitFlag(pBuf, 9);
+    }
+
+    /* 过压 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_AphaseInputOverVol))
+    {
+        Common_SetBitFlag(pBuf, 10);
+    }    
+
+    /* 欠压 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_AphaseInputLessVol))
+    {
+        Common_SetBitFlag(pBuf, 11);
+    } 
+
+    /* 过流 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_OutputOverCurr))
+    {
+        Common_SetBitFlag(pBuf, 12);
+    }
+
+    /* 继电器粘连 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqSynechiaFault))
+    {
+        Common_SetBitFlag(pBuf, 13);
+    }
+    
+    /* 继电器拒动 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_JcqMaloperation))
+    {
+        Common_SetBitFlag(pBuf, 14);
+    }
+
+    /* 环境过温 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_EnvOverTempErr))
+    {
+        Common_SetBitFlag(pBuf, 15);
+    }
+
+    /* 枪过温 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_GunOverTempErr))
+    {
+        Common_SetBitFlag(pBuf, 16);
+    }
+
+    /* 插头过温故障 */
+
+    /* 电表通信异常故障 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_MeterCommErr))
+    {
+        Common_SetBitFlag(pBuf, 24);
+    }
+
+    /* 读卡器通信异常 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_ReaderCommErr))
+    {
+        Common_SetBitFlag(pBuf, 25);
+    }
+    /* CCU通信异常 */
+
+    /* 存储异常 */
+    if (TRUE == AswErrHandle_CheckErrExit(port, eErr_DatabaseErr))
+    {
+        Common_SetBitFlag(pBuf, 27);
+    }
+}
+
 
 static void IotOM_CycleDetect(void)
 { 

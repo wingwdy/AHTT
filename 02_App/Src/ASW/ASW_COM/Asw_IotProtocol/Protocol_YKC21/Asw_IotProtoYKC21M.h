@@ -139,6 +139,7 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
 uint8_t IotYKC21_SwipCardCharge(uint8_t port);
 void IotYKC21_PrintfYKC21KeyAndToken(void);
 void IotYKC21_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t *pProtocolRecord, uint16_t *pRecordLen);
+void IotYKC21_SetPrivateParam(MSNvmPlatPrivateParam_Union *pPrivateParam);
 
 uint8_t IotYKC21_SetToken(char *pToken, uint8_t len);
 uint8_t IotYKC21_GetToken(char *pToken, uint8_t *pOutLen);

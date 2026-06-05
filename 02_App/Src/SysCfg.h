@@ -22,7 +22,7 @@
 *    Macro Definition
 ******************************************************************************/
 
-#define   SYSCFG_CFG_PRODUCT_CODE               "D3_A32FB"
+#define   SYSCFG_CFG_PRODUCT_CODE               "D3-A32FB"
 
 #define   SYSCFG_CFG_MAX_OUTPUT_POWER           (7000U)
 #define   SYSCFG_CFG_MAX_OUTPUT_CURRENT         (32000U)

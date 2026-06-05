@@ -34,8 +34,6 @@
 #define CDD_NETM_CFG_DEV_COUNT                   1
 
 
-#define CDD_NETM_CFG_LINKPARA_LEN                256
-
 #define CDD_NETM_CFG_IP_LEN						 72
 
 /* config for FTP */
@@ -49,8 +47,8 @@
 #define CDD_NETM_CFG_MQTT_TOPIC_LEN              32
 #define CDD_NETM_CFG_MQTT_DEVICE_NAME_LEN        32
 #define CDD_NETM_CFG_MQTT_USER_NAME_LEN          64
-#define CDD_NETM_CFG_MQTT_PASSWORD_LEN           64
-#define CDD_NETM_CFG_MQTT_PID_LEN                20
+#define CDD_NETM_CFG_MQTT_PASSWORD_LEN           256
+#define CDD_NETM_CFG_MQTT_PID_LEN                32
 
 /******************************************************************************
 *    Enum Definition
@@ -88,7 +86,7 @@ typedef enum
 	eCddNetMSocketState_Init,
 	eCddNetMSocketState_Connecting,
 	eCddNetMSocketState_ConnectOK,
-	eCddNetMSocketState_Abnormal, 
+	eCddNetMSocketState_Abnormal,
     eCddNetMSocketState_WaitReconnect,
 }CddNetMSocketState_Enum;
 
@@ -162,7 +160,6 @@ typedef union
     CddNetMMqttPara_Struct stMqttPara;
     CddNetMFtpPara_Struct stFtpPara;
     CddNetMTcpPara_Struct stTcpPara;
-    uint8_t socketParaBuf[CDD_NETM_CFG_LINKPARA_LEN];
 }CddNetMSocketPara_Union;
 
 
@@ -184,12 +181,14 @@ void CddNetM_DeleteLink(CddNetMPlatType_Enum ePlatType);
 void CddNetM_SetLinkDisconnect(CddNetMPlatType_Enum ePlatType);
 void CddNetM_MainFunction(void);
 uint16_t CddNetM_GetCsq(void);
+void CddNetM_GetIMEI(uint8_t *pIMEI);
 uint8_t CddNetM_CheckFileLinkExsit(void);
 void CddNetM_GetIccid(uint8_t *pICCID);
 CddNetMOperator_Enum CddNetM_GetOperatorType(void);
 void CddNetM_GetModuleTypeInfo(char *ModuleTypeInfo, uint16_t readLen);
 void CddNetM_UpdateMqttUserNamePassword(CddNetMPlatType_Enum ePlatType, char *pUserName, char *pPassword);
 void CddNetM_UpdateIpPort(CddNetMPlatType_Enum ePlatType, char *pIp, uint16_t port);
+void CddNetM_SetSimNet(uint8_t simNet);
 #endif /* CDD_NETM_H_ */
 
 

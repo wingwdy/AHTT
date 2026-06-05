@@ -88,6 +88,7 @@ typedef struct
 typedef struct
 {
     char iccid[CDDDRV_EG800AK_CFG_ICCID_LEN + 1];
+    char imei[CDDDRV_EG800AK_CFG_IMEI_LEN + 1];
     uint8_t csq;
     CddNetMOperator_Enum eOperatorType;
 }CddDrvEG800AKInfo_Struct;
@@ -121,7 +122,8 @@ typedef struct
     const ATCmdDescribtor_Struct *currentTaskATDescribtor;
 
     CddDrvEG800AKATCtrl_Struct stModuleAtCtrl;
-    
+
+    uint8_t simNetFlag;                    /*: sim卡标志: 0-公网卡, 1-专网卡 */
     CddDrvEG800AKSocketCtrl_Struct stSocketCtrl[CDDDRV_EG800AK_CFG_SOCKET_COUNT];
 }CddDrvEG800AKCtrl_Struct;
 
@@ -143,9 +145,11 @@ void CddDrvEG800AK_SetSocketDisconnect(uint8_t socketIndex);
 CddNetMSocketState_Enum CddDrvEG800AK_GetSocketState(uint8_t socketIndex);
 void CddDrvEG800AK_DelSingleSocket(uint8_t socketIndex);
 void CddDrvEG800AK_GetIccid(char *pICCID);
+void CddDrvEG800AK_GetImei(char *pIMEI);
 uint8_t CddDrvEG800AK_GetCsq(void);
 CddNetMOperator_Enum CddDrvEG800AK_GetOperatorType(void);
 void CddDrvEG800AK_GetModuleTypeInfo(char *pModuleType, uint16_t readLen);
+void CddDrvEG800AK_SetSimNet(uint8_t simNet);
 /* 模块内使用 */
 void CddDrvEG800AK_SetModuleState(CddNetMModuleState_Enum eModuleState);
 void CddDrvEG800AK_EnterTransparentMode(uint8_t socketIndex, CddDrvEG800AKDirection_Enum eTransparentDirection);
