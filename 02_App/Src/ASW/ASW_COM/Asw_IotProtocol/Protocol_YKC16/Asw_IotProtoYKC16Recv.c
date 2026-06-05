@@ -135,7 +135,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC16_RecvCallRealData,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC16_CMD_CALL_REALDATA_ACK,
         .printFlag = TRUE,
         .cMeaning = "召测实时数据",
@@ -147,7 +147,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC16_RecvRemoteStartCharge,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC16_CMD_REMOTE_START_CHARGE_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程启动充电",
@@ -159,7 +159,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC16_RecvRemoteStopCharge,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC16_CMD_REMOTE_STOP_CHARGE_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程停止充电",
@@ -195,7 +195,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC16_RecvUpdateAccountMoney,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC16_CMD_UPDATE_ACCOUNT_MONEY_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程更新账户余额",
@@ -207,7 +207,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC16_RecvParaSet,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC16_CMD_Para_RSP,
         .printFlag = TRUE,
         .cMeaning = "工作参数设置",
@@ -219,7 +219,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC16_RecvSyncTime,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC16_CMD_SYNC_TIME_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程对时",
@@ -231,7 +231,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC16_RecvSetBillMode4Rate,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC16_CMD_SET_BILLMODE_4RATE_RSP,
         .printFlag = TRUE,
         .cMeaning = "设置四类电价计费模型",
@@ -243,7 +243,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC16_RecvSetQRCode,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC16_CMD_SET_QRCODE_RSP,
         .printFlag = TRUE,
         .cMeaning = "设置二维码",
@@ -255,7 +255,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC16_RecvSetReboot,
         .maxTimeout = 0, 
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC16_CMD_REBOOT_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程重启",
@@ -267,7 +267,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC16_RecvSetUpdate,
         .maxTimeout = 0,
-        .maxTryCnt = 1,
+        .maxTryCnt = 0,
         .matchCmd = IOT_YKC16_CMD_UPDATE_RSP,
         .printFlag = TRUE,
         .cMeaning = "远程更新",
@@ -313,6 +313,7 @@ static IotYKC16FrameHead_Struct *IotYKC16_FindValidFrameLen(uint8_t *pData, uint
         { 
             frameLen = pHead->dataLen;
 
+            /* 数据域不为空 */
             if (frameLen > (sizeof(IotYKC16FrameHead_Struct) - 2))
             {
                 calcCrc16 = Common_CalcCRC16((uint8_t *)pHead->seq, frameLen);
@@ -321,12 +322,13 @@ static IotYKC16FrameHead_Struct *IotYKC16_FindValidFrameLen(uint8_t *pData, uint
 
                 if (calcCrc16 == recvCrc16)
                 {
+                    /* 跳过帧头前无效字节 */
                     dealLen[0] = ((uint32_t)pHead - (uint32_t)pData) + frameLen + 1 + 1 + 2;
                     break;
                 }
             }
         }
-
+        /* 未找到帧头 */
         pStart++;
         remainLen--;
         dealLen[0]++;
@@ -355,19 +357,23 @@ static void IotYKC16_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
             {
                 /* 序列域到数据域总长度 */
                 frameLen = pFrameHead->dataLen;
+                /* 跳过包头 从数据域开始*/
                 if (TRUE == pCmdRecvCtrl->pRecvParse(&port, (uint8_t *)pFrameHead + sizeof(IotYKC16FrameHead_Struct), frameLen - 4))
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTYKC16_CFG_DebugPrint("[枪：%d]接收[cmd: 0x%02X, %s][%d]", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen + 4);
+                        IOTYKC16_CFG_DebugPrint("[枪：%d]接收[cmd: 0x%02X, %s][%d]: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen + 4);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen + 4);
                     }
 
+                    /* 接收到的为响应帧 */
                     if (pCmdRecvCtrl->cmdType == IOT_YKC16_CMDTYPE_RESPONSE)
                     {
+                        /* 关闭接收超时计时 */
                         Common_SetRecvTimerEnable(pIotYKC16Ctx->pFuncRecvCtrl, port, pFrameHead->cmd, FALSE);
                         Common_ClearRptCount(pIotYKC16Ctx->pFuncRecvCtrl, port, pCmdRecvCtrl->cmd);
                     }
+                    /* 请求 */
                     else
                     {
                         if (pCmdRecvCtrl->matchCmd != IOT_YKC16_CMD_NULL)
@@ -386,7 +392,7 @@ static void IotYKC16_DecodeData(uint8_t *pData, uint16_t dataLen, uint16_t topic
                 {
                     if (pCmdRecvCtrl->printFlag)
                     {
-                        IOTYKC16_CFG_DebugPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败!\r\n", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen + 4);
+                        IOTYKC16_CFG_DebugPrint("[枪：%d]接收[cmd: %02X, %s][%d] 处理失败!: ", port, pCmdRecvCtrl->cmd, pCmdRecvCtrl->cMeaning, frameLen + 4);
                         DSLogM_HexOutput((uint8_t *)pFrameHead, frameLen + 4);
                     }
                 }

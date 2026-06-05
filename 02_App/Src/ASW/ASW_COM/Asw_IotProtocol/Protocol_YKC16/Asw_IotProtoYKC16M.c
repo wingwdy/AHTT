@@ -115,7 +115,7 @@ static CommonRecvCtrl_Struct* IotYKC16_GetRecvCtrl(uint8_t port, uint16_t cmd)
         case IOT_YKC16_CMD_REMOTE_STOP_CHARGE:         pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][6];   break;
         case IOT_YKC16_CMD_ORDER_RECORD_RSP:           pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][7];   break;
         case IOT_YKC16_CMD_PILE_START_CHARGE_RSP:      pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][8];   break;
-        case IOT_YKC16_CMD_UPDATE_ACCOUNT_MONEY:       pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][9];  break;
+        case IOT_YKC16_CMD_UPDATE_ACCOUNT_MONEY:       pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][9];   break;
         case IOT_YKC16_CMD_Para_REQ:                   pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][10];  break;
         case IOT_YKC16_CMD_SYNC_TIME:                  pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][11];  break;
         case IOT_YKC16_CMD_SET_BILLMODE_4RATE:         pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][12];  break;
@@ -193,6 +193,7 @@ static void IotYKC16_CycleDetectUnreporteRecord(void)
     /* 存在未上报的记录 */
     if (MSNvm_QueryUnreportedRecordCount(eMSNvmBlockID_OrderRecord) > 0)
     {
+        /* 是否有正在处理上报的枪 */
         for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
         {
             /* 有枪正在发送/等待应答 */
@@ -203,7 +204,7 @@ static void IotYKC16_CycleDetectUnreporteRecord(void)
                 break;
             }
         }
-
+        /* 没有枪正在发送/等待响应 */
         if (recordSendFlag == FALSE)
         {
             if (eGlobalRet_OK == MSNvm_QueryLatestUnreportedRecord(eMSNvmBlockID_OrderRecord, (uint8_t *)&pIotYKC16Ctx->stOrderInfo, 
@@ -216,10 +217,12 @@ static void IotYKC16_CycleDetectUnreporteRecord(void)
                     pIotYKC16Ctx->stOrderInfo.protocolType != eAswPlatCardType_YKC16 ||
                     pIotYKC16Ctx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)
                 {
+                    /* 脏数据直接标记为已上报 */
                     MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotYKC16Ctx->time);
                 }
                 else
                 {
+                    /* 数据合法发送订单上报请求 */
                     Common_SetSendEnable(pIotYKC16Ctx->pFuncSendCtrl, port, IOT_YKC16_CMD_ORDER_RECORD_REQ, TRUE);
                 }
             }

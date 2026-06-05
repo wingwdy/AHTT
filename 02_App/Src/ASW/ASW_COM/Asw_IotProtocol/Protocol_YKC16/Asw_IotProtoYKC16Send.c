@@ -905,12 +905,15 @@ void IotYKC16_UpCtrlSendDeal(void)
                         dataLen = pCmdSendCtrl->pSendFunc(port, &txBuf[dataLen]);
                     }
 
+                    /* 数据域不为空 */
                     if (dataLen > 0)
                     {
+                        pIotYKC16Ctx->queueBusyFlag = TRUE;
+ 						pIotYKC16Ctx->waitQueueIdleTick = Common_GetSystick();
                         /* 整包长度 */
                         dataLen = IotYKC16_PackHead(pCmdSendCtrl->cmd, reqSeq, txBuf, dataLen);
 
-                        /* 发送到队列 */
+                        /* 发送到队列失败 */
                         if (eGlobalRet_OK != FrameQueue_PushTx(pIotYKC16Ctx->frameQueueChannelID, NULL, 0, txBuf, dataLen))
                         {
                             if (pCmdSendCtrl->cmdType == IOT_YKC16_CMDTYPE_REQUSET)
@@ -928,8 +931,11 @@ void IotYKC16_UpCtrlSendDeal(void)
                             DSLogM_HexOutput(txBuf, dataLen);
                         }
 
+                        /* 已发送标记置位 */
                         Common_SetSendFlag(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdSendCtrl->cmd, TRUE);
+                        /* 关闭立即发送 */
                         Common_SetSendImmdFlag(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdSendCtrl->cmd, FALSE);
+                        /* 记录发送时的时间戳 */
                         Common_SetSendTick(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdSendCtrl->cmd, Common_GetSystick());
                                             
                         /* 事件型上送 */
@@ -937,7 +943,7 @@ void IotYKC16_UpCtrlSendDeal(void)
                         {
                             Common_SetSendEnable(pIotYKC16Ctx->pFuncSendCtrl, port, pCmdSendCtrl->cmd, FALSE);
                         }
-
+                        /* 请求 */
                         if (pCmdSendCtrl->cmdType == IOT_YKC16_CMDTYPE_REQUSET)
                         {
                             if (pCmdSendCtrl->matchCmd != IOT_YKC16_CMD_NULL)

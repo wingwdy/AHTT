@@ -120,11 +120,11 @@ typedef enum
 
 
     eIotYKC16StopReason_AppStop = 0x40,              /* App停止 */
+    eIotYKC16StopReason_CarStop = 0x41,              /* 充满停止(车辆停止) */
     eIotYKC16StopReason_StopByEnergy = 0x42,         /* 按电量停止 */
     eIotYKC16StopReason_StopByMoney = 0x43,          /* 按金额停止 */
     eIotYKC16StopReason_StopByTime = 0x44,           /* 按时间停止 */
     eIotYKC16StopReason_ManualStop = 0x45,           /* 手动停止 */
-    eIotYKC16StopReason_CarStop = 0x46,              /* 车辆停止 */
 
     eIotYKC16StopReason_OtherErr = 0x65,             /* 其它原因 */
 
