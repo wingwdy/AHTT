@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 *------------    --------     -------   ----------------------------------------
-*2026/05/21     V1.0.0       WDY        初版创建 - 骨架代码
+*2026/05/21     V1.0.0       WDY        初版创建
 *
 ******************************************************************************/
 #ifndef ASW_IOT_PROTO_AP_M_H_
@@ -29,11 +29,11 @@
 ******************************************************************************/
 
 /* B47双缓冲计费模型A/B组索引 */
-#define IOTAP_B47_A    (0U)  /* B47计费模型 A组(第0套) */
-#define IOTAP_B47_B    (1U)  /* B47计费模型 B组(第1套) */
+#define IOTAP_B47_A    (0)  /* B47计费模型 A组(第0套) */
+#define IOTAP_B47_B    (1)  /* B47计费模型 B组(第1套) */
 
 /* B47无效索引标记(表示无活跃计费模型) */
-#define IOTAP_B47_INDEX_INVALID  (0xFFU)
+#define IOTAP_B47_INDEX_INVALID  (0xFF)
 
 
 /******************************************************************************
@@ -72,13 +72,26 @@ typedef struct
     uint8_t timeBillPollTime[7];             /* B51 poll CP56Time2a timestamp */
     uint8_t onlineDetailResult;              /* B54 online detail result: 0 success */
 
+    uint8_t cardAuthResult;                  /* B7刷卡鉴权结果: 1成功, 0失败 */
+    uint8_t cardAuthFailReason[2];           /* B7刷卡鉴权失败原因 */
+    uint32_t cardAccountBalance;             /* B7账户余额, 精确到0.01元 */
+    uint8_t cardVin[32];                     /* B7下发VIN */
+    uint8_t startNotifyResult;               /* B11启动通知结果: 1成功, 0失败 */
+    uint8_t startNotifyFailReason[2];        /* B11启动通知失败原因 */
+
     /* B33/B34 功率控制 */
     uint8_t powerCtrlTimepower[7];           /* B33下发的CP56时间戳 */
     uint8_t powerCtrlKind;                   /* 功率控制类型: 1-平台下发功率值, 2-恢复默认功率值 */
-    uint32_t powerCtrlValue;                 /* 功率值 W */
+    uint32_t powerCtrlValue;                 /* 功率值 0.01kW */
     uint8_t powerCtrlDefaultFlag;            /* 是否默认值标志: 0-非默认, 1-默认值 */
     uint16_t powerCtrlReportCycle;           /* 上报周期 分钟 */
     uint8_t powerCtrlResult;                 /* B34应答结果: 0成功 1失败 */
+    uint32_t powerCtrlDefaultValue;           /* 默认功率值 0.01kW */
+    uint32_t powerCtrlDynamicValue;           /* 动态功率值 0.01kW */
+    uint32_t powerCtrlControlValue;           /* 控制功率值 0.01kW */
+    uint32_t powerCtrlActiveValue;            /* 当前生效功率值 0.01kW */
+    uint8_t powerCtrlActiveKind;              /* 当前生效功率类型 */
+    uint32_t powerCtrlStatusTick;             /* B57实时状态上报节拍 */
 
 }IotAPProtoData_Struct;
 

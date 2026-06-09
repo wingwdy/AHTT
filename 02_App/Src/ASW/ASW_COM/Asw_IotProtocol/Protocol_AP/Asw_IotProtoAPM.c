@@ -8,8 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 *------------    --------     -------   ----------------------------------------
-*2026/05/21     V1.0.0       WDY        初版创建 - 骨架代码
-*2026/05/22     V1.1.0       WDY        实现FillLinkPara/InitMemory/MainFunction FSM骨架
+*2026/05/21     V1.0.0       WDY        初版创建
 *
 ******************************************************************************/
 
@@ -31,7 +30,7 @@
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
-#define IOT_AP_B53_MAX_SEND_COUNT               (10U)
+#define IOT_AP_B53_MAX_SEND_COUNT               (10)
 
 
 /*******************************************************************************
@@ -67,10 +66,12 @@ static void IotAP_WSLoginHandle(void);
 static void IotAP_WSNormalHandle(void);
 static IotAPStopReason_Enum IotAP_ConverStopReason(AswErrorType_Enum errType);
 static void IotAP_CycleDetectUnreportedRecord(void);
+static void IotAP_CycleReportPowerStatus(void);
 static void IotAP_CycleCheckTimeBillSwitch(void);
 static void IotAP_Uint32ToThreeUint8(uint8_t *pData, uint32_t value);
 static void IotAP_StopReasonToBcd(uint8_t *pData, IotAPStopReason_Enum stopReason);
 static uint32_t IotAP_Cp56TimeToSeconds(const uint8_t *pCp56Time);  /* CP56Time2a转总秒数 */
+static void IotAP_ClearSwipCardCtrl(uint8_t port);
 
 /*******************************************************************************
 *    Function Source Code
@@ -240,6 +241,7 @@ static void IotAP_WSNormalHandle(void)
         if (pIotAPCtx->loginSucc == TRUE)
         {
             IotAP_CycleReportRealData();
+            IotAP_CycleReportPowerStatus();
             IotAP_CycleDetectUnreportedRecord();
             IotAP_CycleCheckTimeBillSwitch();
         }
@@ -258,9 +260,9 @@ static void IotAP_Uint32ToThreeUint8(uint8_t *pData, uint32_t value)
 {
     if (pData != NULL)
     {
-        pData[0] = (uint8_t)(value & 0xFFU);
-        pData[1] = (uint8_t)((value >> 8U) & 0xFFU);
-        pData[2] = (uint8_t)((value >> 16U) & 0xFFU);
+        pData[0] = (uint8_t)(value & 0xFF);
+        pData[1] = (uint8_t)((value >> 8) & 0xFF);
+        pData[2] = (uint8_t)((value >> 16) & 0xFF);
     }
 }
 
@@ -270,8 +272,8 @@ static void IotAP_StopReasonToBcd(uint8_t *pData, IotAPStopReason_Enum stopReaso
 
     if (pData != NULL)
     {
-        pData[0] = (uint8_t)((((reason / 10U) % 10U) << 4U) | (reason % 10U));
-        pData[1] = (uint8_t)((((reason / 1000U) % 10U) << 4U) | ((reason / 100U) % 10U));
+        pData[0] = (uint8_t)((((reason / 10) % 10) << 4) | (reason % 10));
+        pData[1] = (uint8_t)((((reason / 1000) % 10) << 4) | ((reason / 100) % 10));
     }
 }
 
@@ -279,11 +281,11 @@ static void IotAP_CycleCheckTimeBillSwitch(void)
 {
     MSNvmAPParamBillMode_Struct *pSwitchMode = NULL;
     IotAPProtoData_Struct *pProtoData = NULL;
-    uint8_t port = 0U;
+    uint8_t port = 0;
     uint8_t switchIndex = IOTAP_B47_INDEX_INVALID;
     uint8_t nowCp56[7] = {0};
-    uint32_t nowTimestamp = 0U;
-    uint32_t switchTimestamp = 0U;
+    uint32_t nowTimestamp = 0;
+    uint32_t switchTimestamp = 0;
 
     if (pIotAPCtx != NULL)
     {
@@ -291,20 +293,20 @@ static void IotAP_CycleCheckTimeBillSwitch(void)
         Common_TimestampToCp56Time2a(nowTimestamp, nowCp56);
 
         /* 系统时间尚未校准时不做切换判断，避免上电早期误触发B49。 */
-        if ((nowCp56[6] & 0x7FU) >= 20U)
+        if ((nowCp56[6] & 0x7F) >= 20)
         {
-            for (port = 0U; port < SYSCFG_CFG_GUN_NUM; port++)
+            for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
             {
-                if (g_iotapB49SwitchFlag[port] == 1U)
+                if (g_iotapB49SwitchFlag[port] == 1)
                 {
                     switchIndex = g_stIotAPBillModeSave[port].recentUpdateIndex;
                     if ((switchIndex == IOTAP_B47_A) || (switchIndex == IOTAP_B47_B))
                     {
                         pSwitchMode = &g_stIotAPBillModeSave[port].billModeData[switchIndex];
-                        if (IotAP_IsFeeModelValid(pSwitchMode) == 1U)
+                        if (IotAP_IsFeeModelValid(pSwitchMode) == 1)
                         {
                             switchTimestamp = IotAP_Cp56TimeToSeconds(pSwitchMode->switchTime);
-                            if ((switchTimestamp > 0U) && (nowTimestamp >= switchTimestamp))
+                            if ((switchTimestamp > 0) && (nowTimestamp >= switchTimestamp))
                             {
                                 if (AswMonitor_IsOrderIdle(port) == TRUE)
                                 {
@@ -319,7 +321,7 @@ static void IotAP_CycleCheckTimeBillSwitch(void)
                                        pSwitchMode->switchTime,
                                        sizeof(pProtoData->timeBillSwitchTime));
                                 pProtoData->timeBillSwitchIndex = switchIndex;
-                                pProtoData->timeBillSwitchResult = 0U;
+                                pProtoData->timeBillSwitchResult = 0;
 
                                 if ((Common_GetSendEnable(pIotAPCtx->pFuncSendCtrl, port,
                                                           IOT_AP_CMD_B49_TIMEBILL_SWITCH_UP) != TRUE) &&
@@ -346,7 +348,7 @@ static void IotAP_CycleDetectUnreportedRecord(void)
     uint8_t port = 0;
     uint8_t recordSendFlag = FALSE;
 
-    if ((pIotAPCtx != NULL) && (MSNvm_QueryUnreportedRecordCount(eMSNvmBlockID_OrderRecord) > 0U))
+    if ((pIotAPCtx != NULL) && (MSNvm_QueryUnreportedRecordCount(eMSNvmBlockID_OrderRecord) > 0))
     {
         for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
         {
@@ -585,8 +587,8 @@ void IotAP_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardB
             if ((activeIndex == IOTAP_B47_A) || (activeIndex == IOTAP_B47_B))
             {
                 pAPBillMode = &g_stIotAPBillModeSave[port].billModeData[activeIndex];
-                if (((pAPBillMode->workState[0] == 0U) && (pAPBillMode->workState[1] == 1U)) || //wdy确认是 01 00还是00 01
-                    ((pAPBillMode->workState[0] == 1U) && (pAPBillMode->workState[1] == 0U)))
+                if (((pAPBillMode->workState[0] == 0) && (pAPBillMode->workState[1] == 1)) || //wdy确认是 01 00还是00 01
+                    ((pAPBillMode->workState[0] == 1) && (pAPBillMode->workState[1] == 0)))
                 {
                     workStateValid = TRUE;
                 }
@@ -594,7 +596,7 @@ void IotAP_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStandardB
         }
 
         if ((pAPBillMode != NULL) &&
-            (pAPBillMode->periodCount > 0U) &&
+            (pAPBillMode->periodCount > 0) &&
             (pAPBillMode->periodCount <= MSNVM_AP_BILLMODE_PERIOD_COUNT) &&
             (workStateValid == TRUE))
         {
@@ -691,8 +693,8 @@ void IotAP_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
                        sizeof(pAPOrder->orderTransactionNum));
                 Common_TimestampToCp56Time2a(pChargeData->chargeStartTime, pAPOrder->startTime);
                 Common_TimestampToCp56Time2a(pChargeData->chargeStopTime, pAPOrder->stopTime);
-                Common_Uint32ToFourUint8(pAPOrder->startMeterVal, pChargeData->startMeterVal / 10U);
-                Common_Uint32ToFourUint8(pAPOrder->stopMeterVal, pChargeData->stopMeterVal / 10U);
+                Common_Uint32ToFourUint8(pAPOrder->startMeterVal, pChargeData->startMeterVal / 10);
+                Common_Uint32ToFourUint8(pAPOrder->stopMeterVal, pChargeData->stopMeterVal / 10);
 
                 if (pChargeCtrl->startSrc == ASWMONITOR_ORDER_START_SRC_CARD)
                 {
@@ -713,27 +715,27 @@ void IotAP_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
 
             pAPOrder->periodCount = periodCount;
             Common_TimestampToCp56Time2a(pChargeData->chargeStopTime, pAPOrder->stopTime);
-            Common_Uint16ToTwoUint8(pAPOrder->chargeTimeMin, (uint16_t)(pChargeData->chargeTime / 60U));
+            Common_Uint16ToTwoUint8(pAPOrder->chargeTimeMin, (uint16_t)(pChargeData->chargeTime / 60));
 
             for (index = 0; index < MSNVM_AP_BILLMODE_PERIOD_COUNT; index++)
             {
                 if (index < periodCount)
                 {
-                    pAPOrder->periodInfo[index].timeSerialNumber = (uint8_t)(index + 1U);
+                    pAPOrder->periodInfo[index].timeSerialNumber = (uint8_t)(index + 1);
                     if ((pAPBillMode != NULL) && (index < pAPBillMode->periodCount))
                     {
                         pAPOrder->periodInfo[index].timeKind = pAPBillMode->period[index].periodRate;
                     }
                     else
                     {
-                        pAPOrder->periodInfo[index].timeKind = (uint8_t)(pBillMode->periodRate[index] + 1U);
+                        pAPOrder->periodInfo[index].timeKind = (uint8_t)(pBillMode->periodRate[index] + 1);
                     }
 
-                    tempVal = pChargeData->periodElePower[index] / 10U;
+                    tempVal = pChargeData->periodElePower[index] / 10;
                     IotAP_Uint32ToThreeUint8(pAPOrder->periodInfo[index].chargeEnergy, tempVal);
-                    tempVal = pChargeData->periodEleMoney[index] / 100U;
+                    tempVal = pChargeData->periodEleMoney[index] / 100;
                     IotAP_Uint32ToThreeUint8(pAPOrder->periodInfo[index].chargeElecFee, tempVal);
-                    tempVal = pChargeData->periodSerMoney[index] / 100U;
+                    tempVal = pChargeData->periodSerMoney[index] / 100;
                     IotAP_Uint32ToThreeUint8(pAPOrder->periodInfo[index].chargeServeFee, tempVal);
                 }
                 else
@@ -742,11 +744,11 @@ void IotAP_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
                 }
             }
 
-            IotAP_Uint32ToThreeUint8(pAPOrder->totalElecFee, pChargeData->totalElecMoney / 100U);
-            IotAP_Uint32ToThreeUint8(pAPOrder->totalServeFee, pChargeData->totalServeMoney / 100U);
-            IotAP_Uint32ToThreeUint8(pAPOrder->totalEnergy, pChargeData->totalEnergy / 10U);
-            Common_Uint32ToFourUint8(pAPOrder->startMeterVal, pChargeData->startMeterVal / 10U);
-            Common_Uint32ToFourUint8(pAPOrder->stopMeterVal, pChargeData->stopMeterVal / 10U);
+            IotAP_Uint32ToThreeUint8(pAPOrder->totalElecFee, pChargeData->totalElecMoney / 100);
+            IotAP_Uint32ToThreeUint8(pAPOrder->totalServeFee, pChargeData->totalServeMoney / 100);
+            IotAP_Uint32ToThreeUint8(pAPOrder->totalEnergy, pChargeData->totalEnergy / 10);
+            Common_Uint32ToFourUint8(pAPOrder->startMeterVal, pChargeData->startMeterVal / 10);
+            Common_Uint32ToFourUint8(pAPOrder->stopMeterVal, pChargeData->stopMeterVal / 10);
 
             if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
             {
@@ -775,7 +777,7 @@ void IotAP_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t
 
         for (index = 0; index < sizeof(pIotAPCtx->pileDnBCD); index++)
         {
-            pBuf[dataLen++] = pIotAPCtx->pileDnBCD[sizeof(pIotAPCtx->pileDnBCD) - 1U - index];
+            pBuf[dataLen++] = pIotAPCtx->pileDnBCD[sizeof(pIotAPCtx->pileDnBCD) - 1 - index];
         }
 
         pBuf[dataLen++] = pOrderData->port;
@@ -828,8 +830,50 @@ void IotAP_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t
 
 uint8_t IotAP_SwipCardCharge(uint8_t port)
 {
-    /* TODO: 刷卡启动充电处理 */
-    return 0;
+    uint8_t ret = FALSE;
+
+    if ((pIotAPCtx != NULL) && (pIotAPCtx->loginSucc == TRUE) && (port < SYSCFG_CFG_GUN_NUM))
+    {
+        if ((Common_GetSendEnable(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B06_CARD_AUTH_UP) != TRUE) &&
+            (Common_GetRecvTimerEnable(pIotAPCtx->pFuncRecvCtrl, port, IOT_AP_CMD_B07_CARD_AUTH_DOWN) != TRUE) &&
+            (Common_GetSendEnable(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B10_START_NOTIFY_UP) != TRUE) &&
+            (Common_GetRecvTimerEnable(pIotAPCtx->pFuncRecvCtrl, port, IOT_AP_CMD_B11_START_NOTIFY_DOWN) != TRUE))
+        {
+            IotAP_ClearSwipCardCtrl(port);
+            pIotAPCtx->stProtoData[port].cardAuthResult = 0;
+            memset(pIotAPCtx->stProtoData[port].cardAuthFailReason, 0x00,
+                   sizeof(pIotAPCtx->stProtoData[port].cardAuthFailReason));
+            pIotAPCtx->stProtoData[port].cardAccountBalance = 0;
+            memset(pIotAPCtx->stProtoData[port].cardVin, 0x00,
+                   sizeof(pIotAPCtx->stProtoData[port].cardVin));
+            pIotAPCtx->stProtoData[port].startNotifyResult = 0;
+            memset(pIotAPCtx->stProtoData[port].startNotifyFailReason, 0x00,
+                   sizeof(pIotAPCtx->stProtoData[port].startNotifyFailReason));
+            Common_SetSendEnable(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B06_CARD_AUTH_UP, TRUE);
+            Common_SetSendImmdFlag(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B06_CARD_AUTH_UP, TRUE);
+            ret = TRUE;
+        }
+    }
+
+    return ret;
+}
+
+static void IotAP_ClearSwipCardCtrl(uint8_t port)
+{
+    if ((pIotAPCtx != NULL) && (port < SYSCFG_CFG_GUN_NUM))
+    {
+        Common_SetSendEnable(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B06_CARD_AUTH_UP, FALSE);
+        Common_SetSendImmdFlag(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B06_CARD_AUTH_UP, FALSE);
+        Common_SetSendFlag(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B06_CARD_AUTH_UP, FALSE);
+        Common_SetRecvTimerEnable(pIotAPCtx->pFuncRecvCtrl, port, IOT_AP_CMD_B07_CARD_AUTH_DOWN, FALSE);
+        Common_ClearRptCount(pIotAPCtx->pFuncRecvCtrl, port, IOT_AP_CMD_B07_CARD_AUTH_DOWN);
+
+        Common_SetSendEnable(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B10_START_NOTIFY_UP, FALSE);
+        Common_SetSendImmdFlag(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B10_START_NOTIFY_UP, FALSE);
+        Common_SetSendFlag(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B10_START_NOTIFY_UP, FALSE);
+        Common_SetRecvTimerEnable(pIotAPCtx->pFuncRecvCtrl, port, IOT_AP_CMD_B11_START_NOTIFY_DOWN, FALSE);
+        Common_ClearRptCount(pIotAPCtx->pFuncRecvCtrl, port, IOT_AP_CMD_B11_START_NOTIFY_DOWN);
+    }
 }
 
 /* ====== 实时数据周期上报检测 ====== */
@@ -903,6 +947,41 @@ static void IotAP_CycleReportRealData(void)
     }
 }
 
+static void IotAP_CycleReportPowerStatus(void)
+{
+    IotAPProtoData_Struct *pProtoData = NULL;
+    uint32_t reportCycle = 0;
+    uint8_t port = 0;
+
+    if (pIotAPCtx != NULL)
+    {
+        for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
+        {
+            pProtoData = &pIotAPCtx->stProtoData[port];
+
+            if ((pProtoData->powerCtrlActiveKind == 3) &&
+                (IotAP_GetGunState(port) == 0x03))
+            {
+                reportCycle = (pProtoData->powerCtrlReportCycle == 0) ? IOTAP_CFG_CHARGING_REALDATA_CYCLE :
+                              ((uint32_t)pProtoData->powerCtrlReportCycle * 1000);
+
+                if (Common_JudgeTimeoutMs(pProtoData->powerCtrlStatusTick, reportCycle) == TRUE)
+                {
+                    pProtoData->powerCtrlStatusTick = Common_GetSystick();
+                    Common_SetSendEnable(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B57_POWER_STATUS_UP, TRUE);
+                    Common_SetSendImmdFlag(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B57_POWER_STATUS_UP, TRUE);
+                }
+            }
+            else
+            {
+                Common_SetSendEnable(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B57_POWER_STATUS_UP, FALSE);
+                Common_SetSendImmdFlag(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B57_POWER_STATUS_UP, FALSE);
+                Common_SetSendFlag(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B57_POWER_STATUS_UP, FALSE);
+            }
+        }
+    }
+}
+
 /******************************************************************************
 *    B47双缓冲计费模型管理函数实现
 ******************************************************************************/
@@ -914,7 +993,7 @@ static void IotAP_CycleReportRealData(void)
  */
 static uint32_t IotAP_Cp56TimeToSeconds(const uint8_t *pCp56Time)
 {
-    uint32_t ret = 0U;
+    uint32_t ret = 0;
 
     if (pCp56Time != NULL)
     {
@@ -935,7 +1014,7 @@ static uint32_t IotAP_Cp56TimeToSeconds(const uint8_t *pCp56Time)
  */
 uint16_t IotAP_SearchBillModeID(uint8_t port, const uint8_t *pSearchID)
 {
-    uint16_t ret = (uint16_t)(0x4700U + IOTAP_B47_A);  /* 默认先假设是A组 */
+    uint16_t ret = (uint16_t)(0x4700 + IOTAP_B47_A);  /* 默认先假设是A组 */
 
     if ((port < SYSCFG_CFG_GUN_NUM) && (pSearchID != NULL))
     {
@@ -944,7 +1023,7 @@ uint16_t IotAP_SearchBillModeID(uint8_t port, const uint8_t *pSearchID)
         {
             if (pSearchID[i] != g_stIotAPBillModeSave[port].billModeData[IOTAP_B47_A].billModeID[i])
             {
-                ret = (uint16_t)(0x4700U + IOTAP_B47_B);  /* A不匹配 → 尝试B */
+                ret = (uint16_t)(0x4700 + IOTAP_B47_B);  /* A不匹配 → 尝试B */
 
                 /* 逐字节比对B组的billModeID[8] */
                 for (uint8_t k = 0; k < 8; k++)
@@ -979,7 +1058,7 @@ uint16_t IotAP_SearchBillModeID(uint8_t port, const uint8_t *pSearchID)
 uint8_t IotAP_CompareContentBillMode(const MSNvmAPParamBillMode_Struct *pA,
                                      const MSNvmAPParamBillMode_Struct *pB)
 {
-    uint8_t ret = 0U;  /* 默认不同 */
+    uint8_t ret = 0;  /* 默认不同 */
 
     if ((pA != NULL) && (pB != NULL))
     {
@@ -990,7 +1069,7 @@ uint8_t IotAP_CompareContentBillMode(const MSNvmAPParamBillMode_Struct *pA,
             (memcmp(pA->workState, pB->workState, sizeof(pA->workState)) == 0) &&
             (pA->periodCount == pB->periodCount))
         {
-            uint8_t allPeriodMatch = 1U;
+            uint8_t allPeriodMatch = 1;
 
             /* 逐个时段深度比对 */
             for (uint8_t i = 0; i < pA->periodCount; i++)
@@ -1005,7 +1084,7 @@ uint8_t IotAP_CompareContentBillMode(const MSNvmAPParamBillMode_Struct *pA,
                     (pPeriodA->elecPrice != pPeriodB->elecPrice) ||
                     (pPeriodA->servePrice != pPeriodB->servePrice))
                 {
-                    allPeriodMatch = 0U;
+                    allPeriodMatch = 0;
                     break;
                 }
             }
@@ -1026,52 +1105,52 @@ uint8_t IotAP_CompareContentBillMode(const MSNvmAPParamBillMode_Struct *pA,
  */
 uint8_t IotAP_IsFeeModelValid(const MSNvmAPParamBillMode_Struct *pBillMode)
 {
-    uint8_t ret = 0U;  /* 默认无效 */
-    uint8_t minute = 0U;
-    uint8_t hour = 0U;
-    uint8_t day = 0U;
-    uint8_t month = 0U;
-    uint8_t year = 0U;
+    uint8_t ret = 0;  /* 默认无效 */
+    uint8_t minute = 0;
+    uint8_t hour = 0;
+    uint8_t day = 0;
+    uint8_t month = 0;
+    uint8_t year = 0;
 
     if (pBillMode != NULL)
     {
-        minute = pBillMode->switchTime[2] & 0x3FU;
-        hour = pBillMode->switchTime[3] & 0x1FU;
-        day = pBillMode->switchTime[4] & 0x1FU;
-        month = pBillMode->switchTime[5] & 0x0FU;
-        year = pBillMode->switchTime[6] & 0x7FU;
+        minute = pBillMode->switchTime[2] & 0x3F;
+        hour = pBillMode->switchTime[3] & 0x1F;
+        day = pBillMode->switchTime[4] & 0x1F;
+        month = pBillMode->switchTime[5] & 0x0F;
+        year = pBillMode->switchTime[6] & 0x7F;
 
         /* 校验时段数量: 必须在[1, 12]范围内 */
-        if ((pBillMode->periodCount < 1U) || (pBillMode->periodCount > MSNVM_AP_BILLMODE_PERIOD_COUNT))
+        if ((pBillMode->periodCount < 1) || (pBillMode->periodCount > MSNVM_AP_BILLMODE_PERIOD_COUNT))
         {
             /* ret保持0 → 无效 */
         }
         /* 校验切换时间各字段的合理性(CP56Time2a格式: msL msH 分 时 日 月 年) */
-        else if (year > 99U)                              /* 年份上限2099 */
+        else if (year > 99)                              /* 年份上限2099 */
         {
             /* ret保持0 → 无效 */
         }
-        else if ((month > 12U) ||                         /* 月: 1~12 */
-                 (month == 0U))
+        else if ((month > 12) ||                         /* 月: 1~12 */
+                 (month == 0))
         {
             /* ret保持0 → 无效 */
         }
-        else if ((day > 31U) ||                           /* 日: 1~31 */
-                 (day == 0U))
+        else if ((day > 31) ||                           /* 日: 1~31 */
+                 (day == 0))
         {
             /* ret保持0 → 无效 */
         }
-        else if (hour > 23U)                              /* 时: 0~23 */
+        else if (hour > 23)                              /* 时: 0~23 */
         {
             /* ret保持0 → 无效 */
         }
-        else if (minute > 59U)                            /* 分: 0~59 */
+        else if (minute > 59)                            /* 分: 0~59 */
         {
             /* ret保持0 → 无效 */
         }
         else
         {
-            ret = 1U;  /* 所有检查通过 → 有效 */
+            ret = 1;  /* 所有检查通过 → 有效 */
         }
     }
 
@@ -1092,19 +1171,19 @@ uint8_t IotAP_IsFeeModelValid(const MSNvmAPParamBillMode_Struct *pBillMode)
  */
 void IotAP_SaveRateB47Model(const MSNvmAPParamBillMode_Struct *pNewMode, uint8_t port)
 {
-    uint8_t needSkip = 0U;  /* 0=正常执行, 1=提前退出(参数无效/内容相同) */
+    uint8_t needSkip = 0;  /* 0=正常执行, 1=提前退出(参数无效/内容相同) */
 
     if ((port < SYSCFG_CFG_GUN_NUM) && (pNewMode != NULL))
     {
         uint8_t nowActiveIndex = g_iotapBillActiveIndex[port];       /* 当前活跃索引 */
         uint16_t hitGroup = IotAP_SearchBillModeID(port, pNewMode->billModeID);  /* 搜索同ID */
-        uint8_t hitIndex = (uint8_t)(hitGroup & 0xFFU);
+        uint8_t hitIndex = (uint8_t)(hitGroup & 0xFF);
 
         if ((hitIndex == IOTAP_B47_A) || (hitIndex == IOTAP_B47_B))
         {
             /* ====== 场景1: 已存在同ID → 深比较内容 ====== */
             if (IotAP_CompareContentBillMode(pNewMode,
-                    &g_stIotAPBillModeSave[port].billModeData[hitIndex]) == 0U)
+                    &g_stIotAPBillModeSave[port].billModeData[hitIndex]) == 0)
             {
                 /* 同ID但内容不同 → 覆盖该组数据 */
                 memset(&g_stIotAPBillModeSave[port].billModeData[hitIndex],
@@ -1118,7 +1197,7 @@ void IotAP_SaveRateB47Model(const MSNvmAPParamBillMode_Struct *pNewMode, uint8_t
             {
                 /* 同ID且内容完全相同 → 跳过,避免不必要的Flash擦写 */
                 IOTAP_CFG_InfoPrint("AP,B47保存: 内容相同,跳过Flash写入\r\n");
-                needSkip = 1U;  /* 标记跳过后续Flash写入和刷新 */
+                needSkip = 1;  /* 标记跳过后续Flash写入和刷新 */
             }
         }
         else
@@ -1154,7 +1233,7 @@ void IotAP_SaveRateB47Model(const MSNvmAPParamBillMode_Struct *pNewMode, uint8_t
         }
 
         /* ====== 将双缓冲数据同步到NVM平台私有参数区域 ====== */
-        if (needSkip == 0U)
+        if (needSkip == 0)
         {
             MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
             if (pPrivateParam != NULL)
@@ -1203,7 +1282,7 @@ void IotAP_SaveRateB47Model(const MSNvmAPParamBillMode_Struct *pNewMode, uint8_t
  */
 void IotAP_RefreshNowbillModel(uint8_t port)
 {
-    uint8_t validExec = 0U;   /* 0=跳过Step3(参数无效/双无效), 1=正常执行 */
+    uint8_t validExec = 0;   /* 0=跳过Step3(参数无效/双无效), 1=正常执行 */
 
     if (port < SYSCFG_CFG_GUN_NUM)
     {
@@ -1218,23 +1297,23 @@ void IotAP_RefreshNowbillModel(uint8_t port)
         uint8_t selectedIdx = 0;  /* 最终选择的组索引 */
 
         /* ====== Step2: 根据有效性组合进行决策 ====== */
-        if ((validFlag[IOTAP_B47_A] == 0U) && (validFlag[IOTAP_B47_B] == 0U))
+        if ((validFlag[IOTAP_B47_A] == 0) && (validFlag[IOTAP_B47_B] == 0))
         {
             /* 两组均无效 → 无可用费率表 */
             IOTAP_CFG_InfoPrint("AP,B47刷新: port%d 无有效费率表\r\n", port);
             /* validExec保持0 → 跳过Step3 */
         }
-        else if ((validFlag[IOTAP_B47_A] == 1U) && (validFlag[IOTAP_B47_B] == 0U))
+        else if ((validFlag[IOTAP_B47_A] == 1) && (validFlag[IOTAP_B47_B] == 0))
         {
             /* 仅A有效 → 选A */
             selectedIdx = IOTAP_B47_A;
-            validExec = 1U;
+            validExec = 1;
         }
-        else if ((validFlag[IOTAP_B47_A] == 0U) && (validFlag[IOTAP_B47_B] == 1U))
+        else if ((validFlag[IOTAP_B47_A] == 0) && (validFlag[IOTAP_B47_B] == 1))
         {
             /* 仅B有效 → 选B */
             selectedIdx = IOTAP_B47_B;
-            validExec = 1U;
+            validExec = 1;
         }
         else
         {
@@ -1308,11 +1387,11 @@ void IotAP_RefreshNowbillModel(uint8_t port)
                 }
             }
 
-            validExec = 1U;  /* 双有效分支必然选中一组 → 执行Step3 */
+            validExec = 1;  /* 双有效分支必然选中一组 → 执行Step3 */
         }
 
         /* ====== Step3: 更新全局活跃索引 ====== */
-        if (validExec == 1U)
+        if (validExec == 1)
         {
             g_iotapBillActiveIndex[port] = selectedIdx;
 
@@ -1345,7 +1424,7 @@ void IotAP_RefreshNowbillModel(uint8_t port)
 void IotAP_ReadRateB47ModelFromNVM(void)
 {
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    uint8_t port = 0U;
+    uint8_t port = 0;
 
     /* ====== Step 1: 全局RAM变量防御性清零 ====== */
     /* 无论NVM读取是否成功,先清零确保无脏数据 */
@@ -1356,7 +1435,7 @@ void IotAP_ReadRateB47ModelFromNVM(void)
     /* ====== Step 2~4: 逐枪从NVM恢复并触发决策 ====== */
     if (pPrivateParam != NULL)
     {
-        for (port = 0U; port < SYSCFG_CFG_GUN_NUM; port++)
+        for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
         {
             /* Step 2: 从NVM读取该枪的IotAPBillModeSave_Struct到RAM */
             memcpy(&g_stIotAPBillModeSave[port],

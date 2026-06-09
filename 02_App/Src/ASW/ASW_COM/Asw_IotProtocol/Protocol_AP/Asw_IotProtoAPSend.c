@@ -8,7 +8,7 @@
 -------------------------------------------------------------------------------
 * Date          Version      Author    Description
 *------------    --------     -------   ----------------------------------------
-*2026/05/21     V1.0.0       WDY        初版创建 - 骨架代码
+*2026/05/21     V1.0.0       WDY        初版创建
 *
 ******************************************************************************/
 
@@ -27,17 +27,22 @@
 /*******************************************************************************
 *    Global variables Declaration
 *******************************************************************************/
-#define IOT_AP_CLOCK_SYNC_HEAD_LEN              (14U)
-#define IOT_AP_CLOCK_REALTIME_HEAD_LEN          (11U)
-#define IOT_AP_B53_MAX_SEND_COUNT               (10U)
-#define IOT_AP_B52_PORT_LEN                     (1U)
-#define IOT_AP_B52_TIME_LEN                     (7U)
-#define IOT_AP_B52_BILL_MODE_ID_LEN             (8U)
-#define IOT_AP_B52_SWITCH_TIME_LEN              (7U)
-#define IOT_AP_B52_INVALID_TIME_LEN             (7U)
-#define IOT_AP_B52_PERIOD_COUNT_LEN             (1U)
-#define IOT_AP_B52_PERIOD_LEN                   (14U)
-#define IOT_AP_B52_RESULT_LEN                   (1U)
+#define IOT_AP_CLOCK_SYNC_HEAD_LEN              (14)
+#define IOT_AP_CLOCK_REALTIME_HEAD_LEN          (11)
+#define IOT_AP_B53_MAX_SEND_COUNT               (10)
+#define IOT_AP_CARD_NO_LEN                      (8)
+#define IOT_AP_CARD_PASSWORD_LEN                (16)
+#define IOT_AP_CARD_BALANCE_LEN                 (4)
+#define IOT_AP_CARD_VIN_LEN                     (32)
+#define IOT_AP_START_WAY_FULL                   (4)
+#define IOT_AP_B52_PORT_LEN                     (1)
+#define IOT_AP_B52_TIME_LEN                     (7)
+#define IOT_AP_B52_BILL_MODE_ID_LEN             (8)
+#define IOT_AP_B52_SWITCH_TIME_LEN              (7)
+#define IOT_AP_B52_INVALID_TIME_LEN             (7)
+#define IOT_AP_B52_PERIOD_COUNT_LEN             (1)
+#define IOT_AP_B52_PERIOD_LEN                   (14)
+#define IOT_AP_B52_RESULT_LEN                   (1)
 #define IOT_AP_B52_FAIL_MODEL_LEN               (IOT_AP_B52_BILL_MODE_ID_LEN + \
                                                 IOT_AP_B52_SWITCH_TIME_LEN + \
                                                 IOT_AP_B52_INVALID_TIME_LEN + \
@@ -59,55 +64,55 @@ typedef struct
 
 static const IotAPCmdHeadInfo_Struct c_stIotAPCmdHeadInfoTable[] =
 {
-    { IOT_AP_CMD_B01_REALTIME_DATA,         134U, 6U,  0U  },
-    { IOT_AP_CMD_B02_BILLMODEL_DOWN,        133U, 6U,  5U  },
-    { IOT_AP_CMD_B03_BILLMODEL_RESULT,      130U, 7U,  6U  },
-    { IOT_AP_CMD_B04_CHG_CTRL_DOWN,         133U, 6U,  21U },
-    { IOT_AP_CMD_B05_CHG_CTRL_RESULT,       133U, 7U,  21U },
-    { IOT_AP_CMD_B06_CARD_AUTH_UP,          130U, 6U,  1U  },
-    { IOT_AP_CMD_B07_CARD_AUTH_DOWN,        133U, 7U,  2U  },
-    { IOT_AP_CMD_B10_START_NOTIFY_UP,       130U, 6U,  14U },
-    { IOT_AP_CMD_B11_START_NOTIFY_DOWN,     133U, 7U,  12U },
-    { IOT_AP_CMD_B12_ONLINE_ORDER_UP,       130U, 6U,  2U  },
-    { IOT_AP_CMD_B13_ONLINE_ORDER_DOWN,     130U, 7U,  2U  },
-    { IOT_AP_CMD_B14_DEDUCT_CONFIRM,        133U, 6U,  3U  },
-    { IOT_AP_CMD_B15_OFFLINE_ORDER_UP,      130U, 6U,  3U  },
-    { IOT_AP_CMD_B16_OFFLINE_ORDER_DOWN,    130U, 7U,  3U  },
-    { IOT_AP_CMD_B23_UPGRADE_START,         133U, 6U,  15U },
-    { IOT_AP_CMD_B24_UPGRADE_RESULT,        130U, 7U,  14U },
-    { IOT_AP_CMD_B25_RESERVE_CMD_DOWN,      133U, 6U,  54U },
-    { IOT_AP_CMD_B26_RESERVE_RESULT_UP,     130U, 7U,  24U },
-    { IOT_AP_CMD_B31_SIM_INFO_UP,           130U, 7U,  27U },
-    { IOT_AP_CMD_B32_TERMINAL_REQ_DOWN,     133U, 6U,  57U },
-    { IOT_AP_CMD_B33_POWER_CTRL_DOWN,       133U, 7U,  58U },
-    { IOT_AP_CMD_B34_POWER_CTRL_UP,         130U, 6U,  28U },
-    { IOT_AP_CMD_B35_BILLMODEL_POLL_DOWN,   133U, 6U,  59U },
-    { IOT_AP_CMD_B36_BILLMODEL_POLL_UP,     130U, 7U,  29U },
-    { IOT_AP_CMD_B37_VEHICLE_MONITOR,       130U, 6U,  30U },
-    { IOT_AP_CMD_B38_ZERO_METER_VALUE,      130U, 7U,  31U },
-    { IOT_AP_CMD_B39_FTP_ADDR_DOWN,         133U, 6U,  60U },
-    { IOT_AP_CMD_B40_FTP_ADDR_UP,           130U, 7U,  32U },
-    { IOT_AP_CMD_B45_POWER_POLL_DOWN,       133U, 6U,  63U },
-    { IOT_AP_CMD_B46_POWER_POLL_UP,         130U, 7U,  35U },
-    { IOT_AP_CMD_B47_TIMEBILL_DOWN,         133U, 6U,  64U },
-    { IOT_AP_CMD_B48_TIMEBILL_UP,           130U, 6U,  36U },
-    { IOT_AP_CMD_B49_TIMEBILL_SWITCH_UP,    130U, 7U,  37U },
-    { IOT_AP_CMD_B50_TIMEBILL_SWITCH_DOWN,  133U, 6U,  65U },
-    { IOT_AP_CMD_B51_TIMEBILL_POLL_DOWN,    133U, 6U,  66U },
-    { IOT_AP_CMD_B52_TIMEBILL_POLL_UP,      130U, 7U,  38U },
-    { IOT_AP_CMD_B53_ONLINE_DETAIL_UP,      130U, 6U,  39U },
-    { IOT_AP_CMD_B54_ONLINE_DETAIL_DOWN,    133U, 6U,  67U },
-    { IOT_AP_CMD_B55_OFFLINE_DETAIL_UP,     130U, 6U,  40U },
-    { IOT_AP_CMD_B56_OFFLINE_DETAIL_DOWN,   133U, 6U,  68U },
-    { IOT_AP_CMD_B57_POWER_STATUS_UP,       130U, 6U,  41U },
-    { IOT_AP_CMD_SYNC_TIME_REQ,             103U, 6U,  0U  },
-    { IOT_AP_CMD_SYNC_TIME_RSP,             103U, 7U,  0U  },
-    { IOT_AP_CMD_LOGIN_REQ,                 0U,   0U,  0U  },
-    { IOT_AP_CMD_LOGIN_RSP,                 0U,   0U,  0U  },
-    { IOT_AP_CMD_UFRAME_AUTH,               0U,   0U,  0U  },
-    { IOT_AP_CMD_UFRAME_ACK,                0U,   0U,  0U  },
-    { IOT_AP_CMD_HEARTBEAT_REQ,             0U,   0U,  0U  },
-    { IOT_AP_CMD_HEARTBEAT_RSP,             0U,   0U,  0U  },
+    { IOT_AP_CMD_B01_REALTIME_DATA,         134, 6,  0  },
+    { IOT_AP_CMD_B02_BILLMODEL_DOWN,        133, 6,  5  },
+    { IOT_AP_CMD_B03_BILLMODEL_RESULT,      130, 7,  6  },
+    { IOT_AP_CMD_B04_CHG_CTRL_DOWN,         133, 6,  21 },
+    { IOT_AP_CMD_B05_CHG_CTRL_RESULT,       133, 7,  21 },
+    { IOT_AP_CMD_B06_CARD_AUTH_UP,          130, 6,  1  },
+    { IOT_AP_CMD_B07_CARD_AUTH_DOWN,        133, 7,  2  },
+    { IOT_AP_CMD_B10_START_NOTIFY_UP,       130, 6,  14 },
+    { IOT_AP_CMD_B11_START_NOTIFY_DOWN,     133, 7,  12 },
+    { IOT_AP_CMD_B12_ONLINE_ORDER_UP,       130, 6,  2  },
+    { IOT_AP_CMD_B13_ONLINE_ORDER_DOWN,     130, 7,  2  },
+    { IOT_AP_CMD_B14_DEDUCT_CONFIRM,        133, 6,  3  },
+    { IOT_AP_CMD_B15_OFFLINE_ORDER_UP,      130, 6,  3  },
+    { IOT_AP_CMD_B16_OFFLINE_ORDER_DOWN,    130, 7,  3  },
+    { IOT_AP_CMD_B23_UPGRADE_START,         133, 6,  15 },
+    { IOT_AP_CMD_B24_UPGRADE_RESULT,        130, 7,  14 },
+    { IOT_AP_CMD_B25_RESERVE_CMD_DOWN,      133, 6,  54 },
+    { IOT_AP_CMD_B26_RESERVE_RESULT_UP,     130, 7,  24 },
+    { IOT_AP_CMD_B31_SIM_INFO_UP,           130, 7,  27 },
+    { IOT_AP_CMD_B32_TERMINAL_REQ_DOWN,     133, 6,  57 },
+    { IOT_AP_CMD_B33_POWER_CTRL_DOWN,       133, 7,  58 },
+    { IOT_AP_CMD_B34_POWER_CTRL_UP,         130, 6,  28 },
+    { IOT_AP_CMD_B35_BILLMODEL_POLL_DOWN,   133, 6,  59 },
+    { IOT_AP_CMD_B36_BILLMODEL_POLL_UP,     130, 7,  29 },
+    { IOT_AP_CMD_B37_VEHICLE_MONITOR,       130, 6,  30 },
+    { IOT_AP_CMD_B38_ZERO_METER_VALUE,      130, 7,  31 },
+    { IOT_AP_CMD_B39_FTP_ADDR_DOWN,         133, 6,  60 },
+    { IOT_AP_CMD_B40_FTP_ADDR_UP,           130, 7,  32 },
+    { IOT_AP_CMD_B45_POWER_POLL_DOWN,       133, 6,  63 },
+    { IOT_AP_CMD_B46_POWER_POLL_UP,         130, 7,  35 },
+    { IOT_AP_CMD_B47_TIMEBILL_DOWN,         133, 6,  64 },
+    { IOT_AP_CMD_B48_TIMEBILL_UP,           130, 6,  36 },
+    { IOT_AP_CMD_B49_TIMEBILL_SWITCH_UP,    130, 7,  37 },
+    { IOT_AP_CMD_B50_TIMEBILL_SWITCH_DOWN,  133, 6,  65 },
+    { IOT_AP_CMD_B51_TIMEBILL_POLL_DOWN,    133, 6,  66 },
+    { IOT_AP_CMD_B52_TIMEBILL_POLL_UP,      130, 7,  38 },
+    { IOT_AP_CMD_B53_ONLINE_DETAIL_UP,      130, 6,  39 },
+    { IOT_AP_CMD_B54_ONLINE_DETAIL_DOWN,    133, 6,  67 },
+    { IOT_AP_CMD_B55_OFFLINE_DETAIL_UP,     130, 6,  40 },
+    { IOT_AP_CMD_B56_OFFLINE_DETAIL_DOWN,   133, 6,  68 },
+    { IOT_AP_CMD_B57_POWER_STATUS_UP,       130, 6,  41 },
+    { IOT_AP_CMD_SYNC_TIME_REQ,             103, 6,  0  },
+    { IOT_AP_CMD_SYNC_TIME_RSP,             103, 7,  0  },
+    { IOT_AP_CMD_LOGIN_REQ,                 0,   0,  0  },
+    { IOT_AP_CMD_LOGIN_RSP,                 0,   0,  0  },
+    { IOT_AP_CMD_UFRAME_AUTH,               0,   0,  0  },
+    { IOT_AP_CMD_UFRAME_ACK,                0,   0,  0  },
+    { IOT_AP_CMD_HEARTBEAT_REQ,             0,   0,  0  },
+    { IOT_AP_CMD_HEARTBEAT_RSP,             0,   0,  0  },
 };
 
 const IotAPSendCtrl_Struct c_stIotAPSendctrlTable[IOT_AP_CMD_SEND_COUNT] =
@@ -379,13 +384,13 @@ static uint16_t IotAP_PackHead(uint16_t cmd, uint8_t *pBuf, uint16_t dataLen)
     if ((pBuf != NULL) && (pHeadInfo != NULL))  /* 前置校验通过才继续 */
     {
         totalLen = dataLen + sizeof(IotAPInfoFrameHead_Struct);
-        lenField = totalLen - 2U;
+        lenField = totalLen - 2;
 
-        if ((pHeadInfo->type == 0U) && (pHeadInfo->cot == 0U))
+        if ((pHeadInfo->type == 0) && (pHeadInfo->cot == 0))
         { 
             /* 登录帧和U帧 → ret=0 */ 
         }
-        else if (lenField > 0xFFU)
+        else if (lenField > 0xFF)
         { 
             /* 长度溢出 → ret=0 */ 
         }
@@ -393,8 +398,8 @@ static uint16_t IotAP_PackHead(uint16_t cmd, uint8_t *pBuf, uint16_t dataLen)
         {   /* 短帧头分支：时间同步，无recordKind */
             uint16_t headLen = IOT_AP_CLOCK_SYNC_HEAD_LEN;
             totalLen = dataLen + headLen;
-            lenField = totalLen - 2U;
-            if (lenField <= 0xFFU)
+            lenField = totalLen - 2;
+            if (lenField <= 0xFF)
             {
                 memmove(&pBuf[headLen], pBuf, dataLen);
                 memset(pBuf, 0x00, headLen);
@@ -410,8 +415,8 @@ static uint16_t IotAP_PackHead(uint16_t cmd, uint8_t *pBuf, uint16_t dataLen)
         {   /* 短帧头分支：B1实时监测数据，无infAddr和recordKind */
             uint16_t headLen = IOT_AP_CLOCK_REALTIME_HEAD_LEN;
             totalLen = dataLen + headLen;
-            lenField = totalLen - 2U;
-            if (lenField <= 0xFFU)
+            lenField = totalLen - 2;
+            if (lenField <= 0xFF)
             {
                 memmove(&pBuf[headLen], pBuf, dataLen);
                 memset(pBuf, 0x00, headLen);
@@ -430,7 +435,7 @@ static uint16_t IotAP_PackHead(uint16_t cmd, uint8_t *pBuf, uint16_t dataLen)
             pFrameHead->head = IOT_AP_HEAD;
             pFrameHead->len = (uint8_t)lenField;
             pFrameHead->typeId = pHeadInfo->type;
-            pFrameHead->vsq = 0U;
+            pFrameHead->vsq = 0;
             pFrameHead->cot = pHeadInfo->cot;
             pFrameHead->recordKind = pHeadInfo->recordKind;
             ret = totalLen;
@@ -452,14 +457,12 @@ static void IotAP_CopyPileDnReverse(uint8_t *pBuf, uint16_t *pDataLen)
 {
     uint8_t index = 0;
 
-    if ((pBuf == NULL) || (pDataLen == NULL) || (pIotAPCtx == NULL))
+    if ((pBuf != NULL) && (pDataLen != NULL) && (pIotAPCtx != NULL))
     {
-        return;
-    }
-
-    for (index = 0; index < sizeof(pIotAPCtx->pileDnBCD); index++)
-    {
-        pBuf[(*pDataLen)++] = pIotAPCtx->pileDnBCD[sizeof(pIotAPCtx->pileDnBCD) - 1U - index];
+        for (index = 0; index < sizeof(pIotAPCtx->pileDnBCD); index++)
+        {
+            pBuf[(*pDataLen)++] = pIotAPCtx->pileDnBCD[sizeof(pIotAPCtx->pileDnBCD) - 1 - index];
+        }
     }
 }
 
@@ -476,15 +479,15 @@ static void IotAP_CopyPileDnReverse(uint8_t *pBuf, uint16_t *pDataLen)
 static uint16_t IotAP_GetRealtimeState(uint8_t port)
 {
     uint8_t chargeState = AswChargeIf_GetChargeState(port);
-    uint16_t retState = 0x0000U;
+    uint16_t retState = 0x0000;
 
     if (AswErrHandle_IsExsistError(port) == TRUE)
     {
-        retState = 0x0001U;
+        retState = 0x0001;
     }
     else if (chargeState == ASWCHARGEIF_WORKSTATE_IDLE || chargeState == ASWCHARGEIF_WORKSTATE_READY)
     {
-        retState = 0x0002U;
+        retState = 0x0002;
     }
     else if ((chargeState == ASWCHARGEIF_WORKSTATE_STARTING) ||
              (chargeState == ASWCHARGEIF_WORKSTATE_WAKEUP) ||
@@ -492,17 +495,17 @@ static uint16_t IotAP_GetRealtimeState(uint8_t port)
              (chargeState == ASWCHARGE_WORKSTATE_PAUSEA) ||
              (chargeState == ASWCHARGE_WORKSTATE_PAUSEB))
     {
-        retState = 0x0003U;
+        retState = 0x0003;
     }
 
     else if ((chargeState == ASWCHARGE_WORKSTATE_STOPPING) ||
              (chargeState == ASWCHARGE_WORKSTATE_FINISH))
     {
-        retState = 0x0009U;
+        retState = 0x0009;
     }
     else
     {
-        retState = 0x0000U;
+        retState = 0x0000;
     }   
 
     return retState;
@@ -525,7 +528,7 @@ uint16_t IotAP_SendLoginReq(uint8_t port, uint8_t *pBuf)
 
     for (index = 0; index < sizeof(pIotAPCtx->pileDnBCD); index++)
     {
-        pBuf[dataLen++] = pIotAPCtx->pileDnBCD[sizeof(pIotAPCtx->pileDnBCD) - 1U - index];
+        pBuf[dataLen++] = pIotAPCtx->pileDnBCD[sizeof(pIotAPCtx->pileDnBCD) - 1 - index];
     }
 
     pBuf[dataLen++] = 0x00;
@@ -579,13 +582,13 @@ uint16_t IotAP_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf)
         return 0;
     }
 
-    if ((pIotAPCtx->syncTimeCp56[0] == 0U) &&
-        (pIotAPCtx->syncTimeCp56[1] == 0U) &&
-        (pIotAPCtx->syncTimeCp56[2] == 0U) &&
-        (pIotAPCtx->syncTimeCp56[3] == 0U) &&
-        (pIotAPCtx->syncTimeCp56[4] == 0U) &&
-        (pIotAPCtx->syncTimeCp56[5] == 0U) &&
-        (pIotAPCtx->syncTimeCp56[6] == 0U))
+    if ((pIotAPCtx->syncTimeCp56[0] == 0) &&
+        (pIotAPCtx->syncTimeCp56[1] == 0) &&
+        (pIotAPCtx->syncTimeCp56[2] == 0) &&
+        (pIotAPCtx->syncTimeCp56[3] == 0) &&
+        (pIotAPCtx->syncTimeCp56[4] == 0) &&
+        (pIotAPCtx->syncTimeCp56[5] == 0) &&
+        (pIotAPCtx->syncTimeCp56[6] == 0))
     {
         SSTM_GetDateTime(&dateTime);
         Common_TimestampToCp56Time2a(Common_DateTimeToTimestamp(&dateTime), cp56Time);
@@ -628,29 +631,29 @@ uint16_t IotAP_SendRealtimeData(uint8_t port, uint8_t *pBuf)
     IotAP_CopyPileDnReverse(pBuf, &dataLen);
 
     pBuf[dataLen++] = port;
-    pBuf[dataLen++] = (AswChargeIf_CheckGunConnected(port) == TRUE) ? 0x01U : 0x00U;
+    pBuf[dataLen++] = (AswChargeIf_CheckGunConnected(port) == TRUE) ? 0x01 : 0x00;
     Common_Uint16ToTwoUint8(&pBuf[dataLen], IotAP_GetRealtimeState(port));
     dataLen += 2;
 
     memset(&pBuf[dataLen], 0x00, 21);
     dataLen += 21; /* 序号5-16当前无来源，填0 */
 
-    tempVal = AswChargeIf_GetOutputVoltage(port) / 10U;
+    tempVal = AswChargeIf_GetOutputVoltage(port) / 100;
     Common_Uint16ToTwoUint8(&pBuf[dataLen], (uint16_t)tempVal);
     dataLen += 2;
-    tempVal = AswChargeIf_GetOutputCurrent(port) / 100U;
+    tempVal = AswChargeIf_GetOutputCurrent(port) / 10;
     Common_Uint16ToTwoUint8(&pBuf[dataLen], (uint16_t)tempVal);
     dataLen += 2;
 
-    pBuf[dataLen++] = (AswChargeIf_GetRelayState(port) == ASWCHARGEIF_RELAYSTATE_ON) ? 0x01U : 0x00U;
-    pBuf[dataLen++] = 0x00U; /* BMS 通信状态，当前无独立来源，填0 */
-    pBuf[dataLen++] = 0x00U; /* 是否连接电池，当前无来源，填0 */
+    pBuf[dataLen++] = (AswChargeIf_GetRelayState(port) == ASWCHARGEIF_RELAYSTATE_ON) ? 0x01 : 0x00;
+    pBuf[dataLen++] = 0x00; /* BMS 通信状态，当前无独立来源，填0 */
+    pBuf[dataLen++] = 0x00; /* 是否连接电池，当前无来源，填0 */
     memset(&pBuf[dataLen], 0x00, 4);
     dataLen += 4; /* 单体电池最高/最低电压当前交流桩无来源，填0 */
 
     Common_Uint32ToFourUint8(&pBuf[dataLen], pChargeData->totalEnergy); /* 总电量 */
     dataLen += 4;
-    for (index = 0; index < 4U; index++)    /* 尖峰平谷电量 */
+    for (index = 0; index < 4; index++)    /* 尖峰平谷电量 */
     {
         Common_Uint32ToFourUint8(&pBuf[dataLen], pChargeData->rateTotalEnergy[index]);
         dataLen += 4;
@@ -658,7 +661,7 @@ uint16_t IotAP_SendRealtimeData(uint8_t port, uint8_t *pBuf)
 
     memset(&pBuf[dataLen], 0x00, 2);
     dataLen += 2; /* SOC当前交流桩无来源，填0 */
-    Common_Uint16ToTwoUint8(&pBuf[dataLen], (uint16_t)(pChargeData->chargeTime / 60U));
+    Common_Uint16ToTwoUint8(&pBuf[dataLen], (uint16_t)(pChargeData->chargeTime / 60));
     dataLen += 2;
 
     memset(&pBuf[dataLen], 0x00, 32);
@@ -666,25 +669,25 @@ uint16_t IotAP_SendRealtimeData(uint8_t port, uint8_t *pBuf)
     memset(&pBuf[dataLen], 0x00, 3);
     dataLen += 3; /* BMS相关，当前无来源，填0 */
 
-    pBuf[dataLen++] = (AswErrHandle_CheckErrExit(port, eErr_EmergencyStop) == TRUE) ? 0x01U : 0x00U;
-    pBuf[dataLen++] = 0x00U; /* 直流侧开关跳闸/熔断器熔断，交流桩无来源，填0 */
-    pBuf[dataLen++] = 0x00U; /* 充电机过温告警当前无来源，填0 */
-    pBuf[dataLen++] = 0x00U; /* 交流输入异常当前无独立来源，填0 */
-    pBuf[dataLen++] = (AswErrHandle_CheckErrExit(port, eErr_MeterCommErr) == TRUE) ? 0x01U : 0x00U;
-    pBuf[dataLen++] = 0x00U; /* 缺相保护当前无来源，填0 */
-    pBuf[dataLen++] = 0x00U; /* 反接保护当前无来源，填0 */
-    pBuf[dataLen++] = (AswErrHandle_CheckErrExit(port, eErr_AphaseInputOverVol) == TRUE) ? 0x01U : 0x00U;
-    pBuf[dataLen++] = (AswErrHandle_CheckErrExit(port, eErr_OutputOverCurr) == TRUE) ? 0x01U : 0x00U;
-    pBuf[dataLen++] = 0x00U; /* 风扇故障当前无来源，填0 */
-    pBuf[dataLen++] = 0x00U; /* 温度传感器故障当前无来源，填0 */
+    pBuf[dataLen++] = (AswErrHandle_CheckErrExit(port, eErr_EmergencyStop) == TRUE) ? 0x01 : 0x00;
+    pBuf[dataLen++] = 0x00; /* 直流侧开关跳闸/熔断器熔断，交流桩无来源，填0 */
+    pBuf[dataLen++] = 0x00; /* 充电机过温告警当前无来源，填0 */
+    pBuf[dataLen++] = 0x00; /* 交流输入异常当前无独立来源，填0 */
+    pBuf[dataLen++] = (AswErrHandle_CheckErrExit(port, eErr_MeterCommErr) == TRUE) ? 0x01 : 0x00;
+    pBuf[dataLen++] = 0x00; /* 缺相保护当前无来源，填0 */
+    pBuf[dataLen++] = 0x00; /* 反接保护当前无来源，填0 */
+    pBuf[dataLen++] = (AswErrHandle_CheckErrExit(port, eErr_AphaseInputOverVol) == TRUE) ? 0x01 : 0x00;
+    pBuf[dataLen++] = (AswErrHandle_CheckErrExit(port, eErr_OutputOverCurr) == TRUE) ? 0x01 : 0x00;
+    pBuf[dataLen++] = 0x00; /* 风扇故障当前无来源，填0 */
+    pBuf[dataLen++] = 0x00; /* 温度传感器故障当前无来源，填0 */
     memset(&pBuf[dataLen], 0x00, 5);
     dataLen += 5; /* 电池组/单体故障字段当前交流桩无来源，填0 */
-    pBuf[dataLen++] = 0x00U; /* 集中器与桩通信故障当前无来源，填0 */
-    pBuf[dataLen++] = 0x00U; /* 充电监控单元故障当前无来源，填0 */
+    pBuf[dataLen++] = 0x00; /* 集中器与桩通信故障当前无来源，填0 */
+    pBuf[dataLen++] = 0x00; /* 充电监控单元故障当前无来源，填0 */
 
-    Common_Uint32ToFourUint8(&pBuf[dataLen], pChargeData->totalElecMoney / 100U);
+    Common_Uint32ToFourUint8(&pBuf[dataLen], pChargeData->totalElecMoney / 100);
     dataLen += 4;
-    Common_Uint32ToFourUint8(&pBuf[dataLen], pChargeData->totalServeMoney / 100U);
+    Common_Uint32ToFourUint8(&pBuf[dataLen], pChargeData->totalServeMoney / 100);
     dataLen += 4;
     memset(&pBuf[dataLen], 0x00, 4);
     dataLen += 4; /* 剩余时长当前无来源，填0 */
@@ -703,40 +706,40 @@ uint16_t IotAP_SendRealtimeData(uint8_t port, uint8_t *pBuf)
     {
         if (AswErrHandle_CheckErrExit(port, eErr_ReaderCommErr) == TRUE)
         {
-            errBytes[0] = 0x02U;
+            errBytes[0] = 0x02;
         }
         if (AswErrHandle_CheckErrExit(port, eErr_ShortCircleErr) == TRUE)
         {
-            errBytes[2] |= (1U << 1);
+            errBytes[2] |= (1 << 1);
         }
         if (AswErrHandle_CheckErrExit(port, eErr_OutputOverCurr) == TRUE)
         {
-            errBytes[2] |= (1U << 2);
+            errBytes[2] |= (1 << 2);
         }
         if ((AswErrHandle_CheckErrExit(port, eErr_CpVoltAbnor) == TRUE) ||
             (AswErrHandle_CheckErrExit(port, eErr_CpGroundFault) == TRUE))
         {
-            errBytes[2] |= (1U << 6);
+            errBytes[2] |= (1 << 6);
         }
         if (AswErrHandle_CheckErrExit(port, eErr_GunOverTempErr) == TRUE)
         {
-            errBytes[3] |= (1U << 3);
+            errBytes[3] |= (1 << 3);
         }
         if (AswErrHandle_CheckErrExit(port, eErr_EnvOverTempErr) == TRUE)
         {
-            errBytes[4] |= (1U << 1);
+            errBytes[4] |= (1 << 1);
         }
         if (AswErrHandle_CheckErrExit(port, eErr_GunOverTempErr) == TRUE)
         {
-            errBytes[4] |= (1U << 2);
+            errBytes[4] |= (1 << 2);
         }
         if (AswErrHandle_CheckErrExit(port, eErr_JcqMaloperation) == TRUE)
         {
-            errBytes[4] |= (1U << 4);
+            errBytes[4] |= (1 << 4);
         }
         if (AswErrHandle_CheckErrExit(port, eErr_JcqSynechiaFault) == TRUE)
         {
-            errBytes[4] |= (1U << 5);
+            errBytes[4] |= (1 << 5);
         }
     }
     memcpy(&pBuf[dataLen], errBytes, sizeof(errBytes));
@@ -750,15 +753,15 @@ uint16_t IotAP_SendChgCtrlResult(uint8_t port, uint8_t *pBuf)
 {
     CommonDateTime_Struct dateTime = { 0 };
     IotAPProtoData_Struct *pProtoData = NULL;
-    uint8_t result = 1U;
-    uint8_t failReason = 0x03U;
+    uint8_t result = 1;
+    uint8_t failReason = 0x03;
     uint16_t dataLen = 0;
 
     if ((pBuf != NULL) && (pIotAPCtx != NULL) && (port < SYSCFG_CFG_GUN_NUM))
     {
         pProtoData = &pIotAPCtx->stProtoData[port];
 
-        if (pProtoData->remoteCtrlCmd == 0U)
+        if (pProtoData->remoteCtrlCmd == 0)
         {
             result = pProtoData->remoteStopResult;
             failReason = pProtoData->remoteStopFailReason;
@@ -772,13 +775,13 @@ uint16_t IotAP_SendChgCtrlResult(uint8_t port, uint8_t *pBuf)
         IotAP_CopyPileDnReverse(pBuf, &dataLen);
         pBuf[dataLen++] = port;
         pBuf[dataLen++] = result;
-        pBuf[dataLen++] = 0x00U;
-        pBuf[dataLen++] = (uint8_t)(((failReason / 10U) << 4U) | (failReason % 10U));
+        pBuf[dataLen++] = 0x00;
+        pBuf[dataLen++] = (uint8_t)(((failReason / 10) << 4) | (failReason % 10));
         pBuf[dataLen++] = pProtoData->remoteCtrlCmd;
 
         SSTM_GetDateTime(&dateTime);
         Common_TimestampToCp56Time2a(Common_DateTimeToTimestamp(&dateTime), &pBuf[dataLen]);
-        dataLen += 7U;
+        dataLen += 7;
     }
 
     return dataLen;
@@ -789,15 +792,62 @@ uint16_t IotAP_SendChgCtrlResult(uint8_t port, uint8_t *pBuf)
 /* AP B6: 刷卡鉴权上行 */
 uint16_t IotAP_SendCardAuthUp(uint8_t port, uint8_t *pBuf)
 {
-    /* TODO: 组装刷卡鉴权上行 B6 */
-    return 0;
+    AswMonitorChargeCtrl_Struct *pChargeCtrl = NULL;
+    uint16_t dataLen = 0;
+
+    if ((pBuf != NULL) && (pIotAPCtx != NULL) && (port < SYSCFG_CFG_GUN_NUM))
+    {
+        pChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
+
+        if (pChargeCtrl != NULL)
+        {
+            IotAP_CopyPileDnReverse(pBuf, &dataLen);
+            pBuf[dataLen++] = port;
+            memcpy(&pBuf[dataLen], pChargeCtrl->authCardID, IOT_AP_CARD_NO_LEN);
+            dataLen += IOT_AP_CARD_NO_LEN;
+            memset(&pBuf[dataLen], 0x00, IOT_AP_CARD_PASSWORD_LEN);
+            dataLen += IOT_AP_CARD_PASSWORD_LEN;
+            memset(&pBuf[dataLen], 0x00, IOT_AP_CARD_BALANCE_LEN);
+            dataLen += IOT_AP_CARD_BALANCE_LEN;
+            memset(&pBuf[dataLen], 0x00, IOT_AP_CARD_VIN_LEN);
+            dataLen += IOT_AP_CARD_VIN_LEN;
+        }
+    }
+
+    return dataLen;
 }
 
 /* AP B10: 启动通知上报 */
 uint16_t IotAP_SendStartNotifyUp(uint8_t port, uint8_t *pBuf)
 {
-    /* TODO: 组装启动通知上报 B10 */
-    return 0;
+    AswMonitorChargeCtrl_Struct *pChargeCtrl = NULL;
+    IotAPProtoData_Struct *pProtoData = NULL;
+    uint16_t dataLen = 0;
+
+    if ((pBuf != NULL) && (pIotAPCtx != NULL) && (port < SYSCFG_CFG_GUN_NUM))
+    {
+        pChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
+        pProtoData = &pIotAPCtx->stProtoData[port];
+
+        if (pChargeCtrl != NULL)
+        {
+            IotAP_CopyPileDnReverse(pBuf, &dataLen);
+            pBuf[dataLen++] = port;
+            memcpy(&pBuf[dataLen], pChargeCtrl->authCardID, IOT_AP_CARD_NO_LEN);
+            dataLen += IOT_AP_CARD_NO_LEN;
+            memset(&pBuf[dataLen], 0x00, IOT_AP_CARD_PASSWORD_LEN);
+            dataLen += IOT_AP_CARD_PASSWORD_LEN;
+            Common_Uint32ToFourUint8(&pBuf[dataLen], pProtoData->cardAccountBalance);
+            dataLen += IOT_AP_CARD_BALANCE_LEN;
+            memcpy(&pBuf[dataLen], pProtoData->cardVin, IOT_AP_CARD_VIN_LEN);
+            dataLen += IOT_AP_CARD_VIN_LEN;
+            pBuf[dataLen++] = IOT_AP_START_WAY_FULL;
+            Common_Uint32ToFourUint8(&pBuf[dataLen], 0);
+            dataLen += 4;
+        }
+    }
+
+    return dataLen;
 }
 
 /* ====== B帧发送函数 - 交易 ====== */
@@ -876,9 +926,9 @@ uint16_t IotAP_SendTimeBillSwitchUp(uint8_t port, uint8_t *pBuf)
 uint16_t IotAP_SendTimeBillPollUp(uint8_t port, uint8_t *pBuf)
 {
     uint8_t dataBuf[IOT_AP_B52_MAX_DATA_LEN] = { 0 };
-    uint16_t dataLen = 0U;
+    uint16_t dataLen = 0;
     uint8_t activeIndex = IOTAP_B47_INDEX_INVALID;
-    uint8_t result = 1U;
+    uint8_t result = 1;
     const MSNvmAPParamBillMode_Struct *pBillMode = NULL;
     const MSNvmAPParamBillPeriod_Struct *pPeriod = NULL;
 
@@ -893,9 +943,9 @@ uint16_t IotAP_SendTimeBillPollUp(uint8_t port, uint8_t *pBuf)
         if ((activeIndex == IOTAP_B47_A) || (activeIndex == IOTAP_B47_B))
         {
             pBillMode = &g_stIotAPBillModeSave[port].billModeData[activeIndex];
-            if (IotAP_IsFeeModelValid(pBillMode) == 1U)
+            if (IotAP_IsFeeModelValid(pBillMode) == 1)
             {
-                result = 0U;
+                result = 0;
             }
         }
 
@@ -907,7 +957,7 @@ uint16_t IotAP_SendTimeBillPollUp(uint8_t port, uint8_t *pBuf)
         dataLen += sizeof(pIotAPCtx->stProtoData[port].timeBillPollTime);
 
         /*当前存在有效计费模型*/
-        if ((result == 0U) && (pBillMode != NULL))
+        if ((result == 0) && (pBillMode != NULL))
         {
             memcpy(&dataBuf[dataLen], pBillMode->billModeID, sizeof(pBillMode->billModeID));
             dataLen += sizeof(pBillMode->billModeID);
@@ -917,7 +967,7 @@ uint16_t IotAP_SendTimeBillPollUp(uint8_t port, uint8_t *pBuf)
             dataLen += sizeof(pBillMode->invalidTime);
             dataBuf[dataLen++] = pBillMode->periodCount;
 
-            for (uint8_t index = 0U; index < pBillMode->periodCount; index++)
+            for (uint8_t index = 0; index < pBillMode->periodCount; index++)
             {
                 pPeriod = &pBillMode->period[index];
                 dataBuf[dataLen++] = pPeriod->periodSerial;
@@ -927,9 +977,9 @@ uint16_t IotAP_SendTimeBillPollUp(uint8_t port, uint8_t *pBuf)
                 memcpy(&dataBuf[dataLen], pPeriod->stopTime, sizeof(pPeriod->stopTime));
                 dataLen += sizeof(pPeriod->stopTime);
                 Common_Uint32ToFourUint8(&dataBuf[dataLen], pPeriod->elecPrice);
-                dataLen += 4U;
+                dataLen += 4;
                 Common_Uint32ToFourUint8(&dataBuf[dataLen], pPeriod->servePrice);
-                dataLen += 4U;
+                dataLen += 4;
             }
         }
         else
@@ -953,42 +1003,90 @@ uint16_t IotAP_SendPowerCtrlUp(uint8_t port, uint8_t *pBuf)
     uint8_t dataBuf[17] = { 0 };
     uint16_t dataLen = 0;
 
-    if ((pBuf == NULL) || (pIotAPCtx == NULL) || (port >= SYSCFG_CFG_GUN_NUM))
+    if ((pBuf != NULL) && (pIotAPCtx != NULL) && (port < SYSCFG_CFG_GUN_NUM))
     {
-        return 0;
+        /* 桩号BCD逆序 */
+        IotAP_CopyPileDnReverse(dataBuf, &dataLen);
+ 
+        /* 充电接口标识(枪号) */
+        dataBuf[dataLen++] = port;
+
+        /* 时间戳原样回传 */
+        memcpy(&dataBuf[dataLen],
+               pIotAPCtx->stProtoData[port].powerCtrlTimepower,
+               sizeof(pIotAPCtx->stProtoData[port].powerCtrlTimepower));
+        dataLen += 7;
+
+        /* 成功标志: 0成功 1失败 */
+        dataBuf[dataLen++] = pIotAPCtx->stProtoData[port].powerCtrlResult;
+
+        memcpy(pBuf, dataBuf, dataLen);
     }
 
-    /* 桩号BCD逆序 */
-    IotAP_CopyPileDnReverse(dataBuf, &dataLen);
-
-    /* 充电接口标识(枪号) */
-    dataBuf[dataLen++] = port;
-
-    /* 时间戳原样回传 */
-    memcpy(&dataBuf[dataLen],
-           pIotAPCtx->stProtoData[port].powerCtrlTimepower,
-           sizeof(pIotAPCtx->stProtoData[port].powerCtrlTimepower));
-    dataLen += 7;
-
-    /* 成功标志: 0成功 1失败 */
-    dataBuf[dataLen++] = pIotAPCtx->stProtoData[port].powerCtrlResult;
-
-    memcpy(pBuf, dataBuf, dataLen);
     return dataLen;
 }
 
 /* AP B46: 充电功率召测上行 */
 uint16_t IotAP_SendPowerPollUp(uint8_t port, uint8_t *pBuf)
 {
-    /* TODO: 组装充电功率召测上行 B46 */
-    return 0;
+    uint8_t dataBuf[22] = { 0 };
+    uint16_t dataLen = 0;
+    uint32_t defaultValue = 0;
+    IotAPProtoData_Struct *pProtoData = NULL;
+
+    if ((pBuf != NULL) && (pIotAPCtx != NULL) && (port < SYSCFG_CFG_GUN_NUM))
+    {
+        pProtoData = &pIotAPCtx->stProtoData[port];
+        defaultValue = (pProtoData->powerCtrlDefaultValue == 0) ?
+                       (SYSCFG_CFG_MAX_OUTPUT_POWER / 10) : pProtoData->powerCtrlDefaultValue;
+        IotAP_CopyPileDnReverse(dataBuf, &dataLen);
+        dataBuf[dataLen++] = port;
+        Common_Uint32ToFourUint8(&dataBuf[dataLen], pProtoData->powerCtrlControlValue);
+        dataLen += 4;
+        Common_Uint32ToFourUint8(&dataBuf[dataLen], defaultValue);
+        dataLen += 4;
+        Common_Uint32ToFourUint8(&dataBuf[dataLen], pProtoData->powerCtrlDynamicValue);
+        dataLen += 4;
+        dataBuf[dataLen++] = 0x00;
+
+        memcpy(pBuf, dataBuf, dataLen);
+    }
+
+    return dataLen;
 }
 
 /* AP B57: 充电功率控制过程中的扩展实时状态 */
 uint16_t IotAP_SendPowerStatusUp(uint8_t port, uint8_t *pBuf)
 {
-    /* TODO: 组装充电功率控制过程中的扩展实时状态 B57 */
-    return 0;
+    uint8_t dataBuf[26] = { 0 };
+    uint16_t dataLen = 0;
+    uint32_t tempVal = 0;
+    IotAPProtoData_Struct *pProtoData = NULL;
+
+    if ((pBuf != NULL) && (pIotAPCtx != NULL) && (port < SYSCFG_CFG_GUN_NUM))
+    {
+        pProtoData = &pIotAPCtx->stProtoData[port];
+        IotAP_CopyPileDnReverse(dataBuf, &dataLen);
+        dataBuf[dataLen++] = port;
+        Common_TimestampToCp56Time2a(SSTM_GetSecTimestamp(), &dataBuf[dataLen]);
+        dataLen += 7;
+
+        tempVal = AswChargeIf_GetOutputVoltage(port) / 100;
+        Common_Uint16ToTwoUint8(&dataBuf[dataLen], (uint16_t)tempVal);
+        dataLen += 2;
+        tempVal = AswChargeIf_GetOutputCurrent(port) / 10;
+        Common_Uint16ToTwoUint8(&dataBuf[dataLen], (uint16_t)tempVal);
+        dataLen += 2;
+        dataBuf[dataLen++] = 0;
+        Common_Uint16ToTwoUint8(&dataBuf[dataLen], (uint16_t)pProtoData->powerCtrlActiveValue);
+        dataLen += 2;
+        memset(&dataBuf[dataLen], 0x00, 6);
+        dataLen += 6;
+
+        memcpy(pBuf, dataBuf, dataLen);
+    }
+
+    return dataLen;
 }
 
 /* ====== B帧发送函数 - 其他扩展 ====== */
@@ -1036,7 +1134,7 @@ uint16_t IotAP_SendFtpAddrUp(uint8_t port, uint8_t *pBuf)
     }
 
     IotAP_CopyPileDnReverse(dataBuf, &dataLen);
-    dataBuf[dataLen++] = 0x00U;
+    dataBuf[dataLen++] = 0x00;
 
     memcpy(pBuf, dataBuf, dataLen);
 
@@ -1164,8 +1262,8 @@ void IotAP_UpCtrlSendDeal(void)
                         if ((pCmdSendCtrl->cmd == IOT_AP_CMD_B40_FTP_ADDR_UP) ||
                             (pCmdSendCtrl->cmd == IOT_AP_CMD_B48_TIMEBILL_UP))
                         {
-                            if ((Common_GetSendFlag(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B40_FTP_ADDR_UP) == TRUE) &&
-                                (Common_GetSendFlag(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B48_TIMEBILL_UP) == TRUE))
+                            if ((Common_GetSendFlag(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B40_FTP_ADDR_UP) == TRUE) )
+                            // && (Common_GetSendFlag(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_B48_TIMEBILL_UP) == TRUE)) /*测试发现平台现在不会在B40后主动下发B48*/
                             {
                                 Common_SetSendEnable(pIotAPCtx->pFuncSendCtrl, port, IOT_AP_CMD_UFRAME_AUTH, TRUE);
                             }
