@@ -929,7 +929,7 @@ CddNetMOperator_Enum CddDrvEG800AK_GetOperatorType(void)
 
 void CddDrvEG800AK_GetModuleTypeInfo(char *pModuleType, uint16_t readLen)
 {
-    uint16_t copyLen = strlen(CDDDRV_EG800AK_CFG_MODULE_TYPE);
+    uint16_t copyLen = (strlen(CDDDRV_EG800AK_CFG_MODULE_TYPE) + 1);
 
     if (pModuleType != NULL && readLen != 0)
     {
