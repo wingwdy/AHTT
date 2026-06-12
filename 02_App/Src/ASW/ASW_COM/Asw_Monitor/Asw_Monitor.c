@@ -183,6 +183,8 @@ static void AswMonitor_ProcessCostData(uint8_t port, AswMonitorData_Struct *pstA
         memset(pChargeData->rateEleMoney, 0x00, sizeof(pChargeData->rateEleMoney));
         memset(pChargeData->rateSerMoney, 0x00, sizeof(pChargeData->rateSerMoney));
         memset(pChargeData->rateTotalMoney, 0x00, sizeof(pChargeData->rateTotalMoney));
+        pChargeData->totalElecMoney = 0;
+        pChargeData->totalServeMoney = 0;
 
         for (tempPeriod = 0; tempPeriod < pBillMode->periodCount; tempPeriod++)
         {
@@ -191,15 +193,8 @@ static void AswMonitor_ProcessCostData(uint8_t port, AswMonitorData_Struct *pstA
             pChargeData->rateEleMoney[tempRateNum] += pChargeData->periodEleMoney[tempPeriod];
             pChargeData->rateSerMoney[tempRateNum] += pChargeData->periodSerMoney[tempPeriod];
             pChargeData->rateTotalMoney[tempRateNum] += pChargeData->periodTotalMoney[tempPeriod];
-        }
-
-        pChargeData->totalElecMoney = 0;
-        pChargeData->totalServeMoney = 0;
-
-        for (tempRateNum = 0; tempRateNum < pBillMode->rateCount; tempRateNum++)
-        {
-            pChargeData->totalElecMoney += pChargeData->rateEleMoney[tempRateNum];
-            pChargeData->totalServeMoney += pChargeData->rateSerMoney[tempRateNum];
+            pChargeData->totalElecMoney += pChargeData->periodEleMoney[tempPeriod];
+            pChargeData->totalServeMoney += pChargeData->periodSerMoney[tempPeriod];
         }
 
         pChargeData->totalMoney = pChargeData->totalElecMoney + pChargeData->totalServeMoney;

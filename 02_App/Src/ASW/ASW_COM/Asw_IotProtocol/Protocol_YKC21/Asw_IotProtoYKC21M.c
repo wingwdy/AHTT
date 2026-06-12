@@ -95,7 +95,6 @@ static const IotYKC21errMap_Struct Iot_Ykc21Error_map[] =
     {eSrc_StopbyTime,         eIotYKC21ErrorState_Null,	0x0},
     {eSrc_StopbyEnergy,       eIotYKC21ErrorState_Null,	0x0},
     {eErr_GunDisConn,         eIotYKC21ErrorState_Null,	0x0},
-   
     {eErr_CPBreakOff,         eIotYKC21ErrorState_Null,	0x0},
 
     {eErr_NetNoSIMErr,        eIotYKC21ErrorState_Null,	0x0},  
@@ -575,9 +574,10 @@ static IotYKC21StopReason_Enum IotYKC21_ConverStopReason(AswErrorType_Enum errTy
         {eSrc_CardStop,           eIotYKC21StopReason_ManualStop},   
         {eSrc_InsuffBalance,      eIotYKC21StopReason_SumNoEnough},  
         {eSrc_StopbyMoney,        eIotYKC21StopReason_StopByMoney},  
-        {eSrc_StopbyTime,         eIotYKC21StopReason_StopByTime},  
+        {eSrc_StopbyTime,         eIotYKC21StopReason_StopByTime},
         {eSrc_StopbyEnergy,       eIotYKC21StopReason_RechargEnergy}, 
         {eErr_GunDisConn,         eIotYKC21StopReason_GunDisconnect}, 
+        {eErr_CPBreakOff,         eIotYKC21StopReason_GunDisconnect},
     };  
 
     for (index = 0; index < ARRAY_SIZE(stopReasonMap); index++)
