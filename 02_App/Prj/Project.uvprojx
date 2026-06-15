@@ -439,11 +439,6 @@
               <FilePath>..\Src\ASW\ASW_COM\Asw_PlatM\Asw_PlatM.c</FilePath>
             </File>
             <File>
-              <FileName>Asw_PlatMConfig.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_COM\Asw_PlatM\Asw_PlatMConfig.c</FilePath>
-            </File>
-            <File>
               <FileName>Asw_IotProtoGNM.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_GN\Asw_IotProtoGNM.c</FilePath>
@@ -527,6 +522,26 @@
               <FileName>Asw_ChargeIf.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\ASW\ASW_COM\Asw_ChargeIf\Asw_ChargeIf.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoYKC16M.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC16\Asw_IotProtoYKC16M.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoYKC16Recv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC16\Asw_IotProtoYKC16Recv.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_IotProtoYKC16Send.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_YKC16\Asw_IotProtoYKC16Send.c</FilePath>
+            </File>
+            <File>
+              <FileName>Asw_PlatMConfig.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ASW\ASW_COM\Asw_PlatM\Asw_PlatMConfig.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1745,8 +1760,8 @@
   <RTE>
     <apis/>
     <components>
-      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="5.4.0" condition="ARMv6_7_8-M Device">
-        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.7.0"/>
+      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="5.5.0" condition="ARMv6_7_8-M Device">
+        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.8.0"/>
         <targetInfos>
           <targetInfo name="D3_A32FB_GD32E503RE"/>
         </targetInfos>

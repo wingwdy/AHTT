@@ -67,6 +67,11 @@
 #define MSNVM_XDT_VERSION_LEN                 32
 
 #define MSNVM_XDT_BILLMODE_PERIOD_COUNT       16
+
+/************************* YKC16(云快充1.6) ****************************************/
+/* 计费模型 */
+#define MSNVM_YKC16_BILLMODE_4RATE_COUNT         4
+#define MSNVM_YKC16_BILLMIDE_PERIOD_COUNT        48
 /******************************************************************************
 *    Enum Definition
 ******************************************************************************/
@@ -160,6 +165,26 @@ typedef struct
 
 typedef struct 
 {
+    uint8_t orderTransactionNum[16];          /* 交易流水号 BCD*/
+    uint8_t pileDnBCD[7];                     /* 设备编号 BCD*/
+    uint8_t port;                             /* 枪号 BCD*/
+    uint8_t startTime[7];                     /* 充电开始时间 CP56Time2a 格式*/
+    uint8_t stopTime[7];                      /* 充电结束时间 CP56Time2a 格式*/
+    uint32_t billInfo[4][4];                  /* 4个费率对应的 单价(5位小数)、电量(4位小数)、计损电量(4位小数)、金额(4位小数) */
+    uint8_t startMeterVal[5];                 /* 充电开始电表值 ，小数点后4位*/
+    uint8_t stopMeterVal[5];                  /* 充电结束电表值 ，小数点后4位*/
+    uint32_t totalEnergy;                     /* 总电能 ，小数点后4位*/
+    uint32_t totalLossEnergy;                 /* 总计损电能 ，小数点后4位*/
+    uint32_t totalMoney;                      /* 总金额 ，小数点后4位*/
+    uint8_t vin[17];                          /* 电动汽车唯一标识 */
+    uint8_t dealFlag;                         /* 交易标识 */
+    uint8_t dealDate[7];                      /* 交易日期 CP56Time2a 格式*/
+    uint8_t stopReason;                       /* 停止原因 */
+    uint8_t physCardNum[8];                   /* 物理卡号 */
+}MSNvmYKC16OrderInfo_Struct;
+
+typedef struct 
+{
     /* 根据协议2.1.1全部存储有 330 字节 */
     uint8_t orderTransactionNum[16];          /* 交易流水号 */
     uint8_t pileDnBCD[7];                     /* 设备编号 */
@@ -225,6 +250,7 @@ typedef union
 {
     MSNvmXDTOrderInfo_Struct stXDTOrderInfo;
     MSNvmGNOrderInfo_Struct stGNOrderInfo;
+    MSNvmYKC16OrderInfo_Struct stYKC16OrderInfo;
     MSNvmYKC21OrderInfo_Struct stYKC21OrderInfo;
     uint8_t userData[MSNVM_ORDER_MAX_LEN];
 }MSNvmPlatOrderInfo_Union;
@@ -358,11 +384,38 @@ typedef struct
     MSNvmXDTPlatInfo_Struct platinfo;
 }MSNvmXDTParam_Struct;
 
-/*********************************** AP */
+typedef struct 
+{
+    uint8_t device_number[7];                                   /* 桩编码*/
+    uint8_t billModeID[2];                                      /* 计费模型编号 */
+    uint8_t sharp_ele_fee[4];        	
+    uint8_t sharp_ser_fee[4];
+    uint8_t peak_ele_fee[4];
+    uint8_t peak_ser_fee[4];
+	uint8_t flat_ele_fee[4];
+    uint8_t flat_ser_fee[4];
+	uint8_t valley_ele_fee[4];
+    uint8_t valley_ser_fee[4];
+    uint8_t elecLossRate;                                       /* 计量损耗费率 */         
+    uint8_t period_rate[MSNVM_YKC16_BILLMIDE_PERIOD_COUNT];     /* 48个30分钟，每个30分钟对应的费率号 */
+}MSNvmYKC16ParamBillMode_Struct;
+
+typedef struct YKC16platinfo
+{
+    uint8_t  MaxPowerRate;                                      /* 充电桩最大允许输出功率百分比 1BIN 表示1%，最大 100%，最小30%*/
+} MSNvmYKC16PlatInfo_Struct;
+
+typedef struct 
+{
+    MSNvmYKC16ParamBillMode_Struct stBillMode;
+    MSNvmYKC16PlatInfo_Struct platInfo;
+}MSNvmYKC16Param_Struct;
+
 typedef union 
 {
     MSNvmXDTParam_Struct   stXDTParam;
     MSNvmGNParam_Struct    stGNParam;
+    MSNvmYKC16Param_Struct stYKC16Param;
     MSNvmYKC21Param_Struct stYKC21Param;
     uint8_t paramArr[MSNVM_PLAT_PRIVATE_PARAM_LEN];
 }MSNvmPlatPrivateParam_Union;

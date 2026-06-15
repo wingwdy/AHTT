@@ -276,6 +276,12 @@ static uint16_t IotOM_GetPlatNo(void)
         case eAswPlatType_GNP:
             platNo = 2;
             break;
+        case eAswPlatType_YKC16:
+            platNo = 3;
+            break;
+        case eAswPlatType_TT24:
+            platNo = 10;
+            break;
         case eAswPlatType_XDT:
             platNo = 14;
             break;
