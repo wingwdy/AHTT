@@ -161,13 +161,6 @@ const AswPlatCardDescriptor_Struct c_stAswPlatMCardDescriptorTable[eAswPlatCardT
         .cMeaning = "通用卡",
         .cardType = eCddCardType_UUID,
     },
-
-    [eAswPlatCardType_AP] =
-    {
-        .pName = "ap",
-        .cMeaning = "安培卡",
-        .cardType = eCddCardType_UUID,
-    },
 };
 
 

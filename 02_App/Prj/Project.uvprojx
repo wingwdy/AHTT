@@ -528,21 +528,6 @@
               <FileType>1</FileType>
               <FilePath>..\Src\ASW\ASW_COM\Asw_ChargeIf\Asw_ChargeIf.c</FilePath>
             </File>
-            <File>
-              <FileName>Asw_IotProtoAPM.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_AP\Asw_IotProtoAPM.c</FilePath>
-            </File>
-            <File>
-              <FileName>Asw_IotProtoAPRecv.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_AP\Asw_IotProtoAPRecv.c</FilePath>
-            </File>
-            <File>
-              <FileName>Asw_IotProtoAPSend.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_AP\Asw_IotProtoAPSend.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
