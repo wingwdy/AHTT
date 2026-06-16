@@ -58,9 +58,7 @@ typedef struct
     uint8_t updateAccountMoneyResult;       /* 更新账户余额结果 */
 
     uint8_t setQrCodeResult;                /* 设置二维码结果 */
-    uint8_t setUpdateResult;                /* 升级结果 */
-
-    uint8_t setPowerChangeResult;            /* 设置功率修改结果 */  
+    uint8_t setUpdateResult;                /* 升级结果 */ 
 }IotYKC16ProtoData_Struct;
 
 
@@ -87,6 +85,9 @@ typedef struct
     uint32_t realDataReportTick[SYSCFG_CFG_GUN_NUM];     /* 实际数据上报Tick */
     uint8_t lastGunState[SYSCFG_CFG_GUN_NUM];            /* 用于变位上送*/
     uint8_t lastGunConnectState[SYSCFG_CFG_GUN_NUM];     /* 用于变位上送*/
+    uint32_t errVersion[SYSCFG_CFG_GUN_NUM];
+    uint8_t lastErrInfo[SYSCFG_CFG_GUN_NUM][32];         /* 用于变位上送*/
+    
 
     CommonSendCtrl_Struct stSendCtrl[SYSCFG_CFG_GUN_NUM][IOT_YKC16_CMD_SEND_COUNT]; /* 发送控制 */
     CommonRecvCtrl_Struct stRecvCtrl[SYSCFG_CFG_GUN_NUM][IOT_YKC16_CMD_RECV_COUNT]; /* 接收控制 */

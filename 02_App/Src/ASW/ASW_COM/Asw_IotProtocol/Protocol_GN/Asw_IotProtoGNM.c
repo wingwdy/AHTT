@@ -26,6 +26,7 @@
 #include "Asw_ChargeIf.h"
 #include "MS_Nvm.h"
 #include "myMalloc.h"
+#include "Asw_IotProtoOMM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -137,12 +138,25 @@ static void IotGN_CycleReportRealData(void)
     uint8_t curGunState = 0;
     uint8_t curGunConnectState = 0;
     uint8_t realDataReportFlag = FALSE;
+    uint8_t curErrInfo[32] = {0};
 
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
         curGunState = IotGN_GetGunState(port);
         curGunConnectState = AswChargeIf_CheckGunConnected(port);
 
+        /* 故障变位上报 */
+        if (pIotGNCtx->errVersion[port] != AswErrHandle_GetErrStatusVersion(port))
+        {
+            pIotGNCtx->errVersion[port] = AswErrHandle_GetErrStatusVersion(port);
+            IotOM_SetRealDataErrBit(port, curErrInfo);
+
+            if (0 != memcmp(curErrInfo, pIotGNCtx->lastErrInfo[port], 32))
+            {
+                realDataReportFlag = TRUE;
+            }
+        }
+        
         if (pIotGNCtx->lastGunState[port] != curGunState)
         {
             realDataReportFlag = TRUE;
@@ -159,13 +173,15 @@ static void IotGN_CycleReportRealData(void)
         {
             realDataReportFlag = TRUE;
         }
-
+            
         if (realDataReportFlag == TRUE)
         {
             realDataReportFlag = FALSE;
             pIotGNCtx->lastGunState[port] = curGunState;
             pIotGNCtx->lastGunConnectState[port] = curGunConnectState;
             pIotGNCtx->realDataReportTick[port] = Common_GetSystick();
+            memcpy(pIotGNCtx->lastErrInfo[port], curErrInfo, 32);
+            memset(curErrInfo, 0x00, 32);
             Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_REPORT_REALDATA, TRUE);
         }
     }
@@ -175,6 +191,9 @@ static void IotGN_CycleDetectUnreporteRecord(void)
 {
     uint8_t port = 0;
     uint8_t recordSendFlag = FALSE;
+    uint8_t currentPlatType = 0;
+    currentPlatType = (AswPlatM_GetPlatType() == eAswPlatCardType_GNP) ? eAswPlatCardType_GNP : eAswPlatCardType_GN;
+
 
     if (MSNvm_QueryUnreportedRecordCount(eMSNvmBlockID_OrderRecord) > 0)
     {
@@ -198,7 +217,7 @@ static void IotGN_CycleDetectUnreporteRecord(void)
 
                 /* 避免当数据库存在脏数据时，脏数据有问题，持续进入到这边 */
                 if (port >= SYSCFG_CFG_GUN_NUM || 
-                    pIotGNCtx->stOrderInfo.protocolType != eAswPlatCardType_GN ||
+                    pIotGNCtx->stOrderInfo.protocolType != currentPlatType ||
                     pIotGNCtx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)
                 {
                     MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotGNCtx->time);
@@ -246,6 +265,9 @@ static void IotGN_WSOfflineHandle(void)
     memset(pIotGNCtx->realDataReportTick, 0x00, sizeof(pIotGNCtx->realDataReportTick));
     memset(pIotGNCtx->lastGunState, 0x00, sizeof(pIotGNCtx->lastGunState));
     memset(pIotGNCtx->lastGunConnectState, 0x00, sizeof(pIotGNCtx->lastGunConnectState));
+    memset(pIotGNCtx->lastErrInfo, 0x00, sizeof(pIotGNCtx->lastErrInfo));
+    memset(pIotGNCtx->errVersion, 0x00, sizeof(pIotGNCtx->errVersion));
+
 
     memset(pIotGNCtx->stSendCtrl, 0x00, sizeof(pIotGNCtx->stSendCtrl));
     memset(pIotGNCtx->stRecvCtrl, 0x00, sizeof(pIotGNCtx->stRecvCtrl));
@@ -689,9 +711,16 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
         }
 
         pOrderData->port = port;
-        pOrderData->protocolType = eAswPlatCardType_GN;
         pOrderData->orderLen = sizeof(MSNvmGNOrderInfo_Struct);
         pGnOrder->stopReason = eIotGNStopReason_PowerOff;
+        if (AswPlatM_GetPlatType() == eAswPlatType_GNP)
+        {
+            pOrderData->protocolType = eAswPlatType_GNP;
+        }
+        else
+        {
+            pOrderData->protocolType = eAswPlatCardType_GN;
+        }
     }
 
     pGnOrder->stopTime = pChargeData->chargeStopTime;

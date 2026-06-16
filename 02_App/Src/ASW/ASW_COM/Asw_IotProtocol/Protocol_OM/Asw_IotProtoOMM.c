@@ -67,7 +67,6 @@ static void IotOM_CycleDetectUnreportedUcmResult(void);
 static void IotOM_CycleDetectReportForbidState(void);
 static void IotOM_CycleReportMeterVal(void);
 static void IotOM_CycleDetect(void);
-static void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf);
 
 /*******************************************************************************
 *    Function Source Code
@@ -258,7 +257,7 @@ static void IotOM_CycleDetectUnreporteRecord(void)
 
                /* 避免当数据库存在脏数据时，脏数据有问题，持续进入到这边 */
                if (port >= SYSCFG_CFG_GUN_NUM || 
-                    pIotOMCtx->stOrderInfo.protocolType >= eAswPlatCardType_Count ||
+                    pIotOMCtx->stOrderInfo.protocolType >= eAswPlatType_Count ||
                     pIotOMCtx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)
                 {
                     MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotOMCtx->time);
@@ -338,7 +337,7 @@ static void IotOM_CycleReportMeterVal(void)
     }
 }
 
-static void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
+void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
 {
     /* CP电压异常 */
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpVoltAbnor))

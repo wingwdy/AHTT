@@ -27,7 +27,7 @@
 #include "SS_Tm.h"
 #include "Asw_VoltCurHandle.h"
 #include "Asw_ChargeIf.h"
-
+#include "Asw_IotProtoOMM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -205,11 +205,24 @@ static void IotYKC21_CycleReportRealData(void)
     uint8_t curGunState = 0;
     uint8_t curGunConnectState = 0;
     uint8_t realDataReportFlag = FALSE;
+    uint8_t curErrInfo[32] = {0};
 
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
         curGunState = IotYKC21_GetGunState(port);
         curGunConnectState = AswChargeIf_CheckGunConnected(port);
+
+        /* 故障变位上报 */
+        if (pIotYKC21Ctx->errVersion[port] != AswErrHandle_GetErrStatusVersion(port))
+        {
+            pIotYKC21Ctx->errVersion[port] = AswErrHandle_GetErrStatusVersion(port);
+            IotOM_SetRealDataErrBit(port, curErrInfo);
+
+            if (0 != memcmp(curErrInfo, pIotYKC21Ctx->lastErrInfo[port], 32))
+            {
+                realDataReportFlag = TRUE;
+            }
+        }
 
         if (pIotYKC21Ctx->lastGunState[port] != curGunState)
         {
@@ -234,9 +247,9 @@ static void IotYKC21_CycleReportRealData(void)
             pIotYKC21Ctx->lastGunState[port] = curGunState;
             pIotYKC21Ctx->lastGunConnectState[port] = curGunConnectState;
             pIotYKC21Ctx->realDataReportTick[port] = Common_GetSystick();
-
+            memcpy(pIotYKC21Ctx->lastErrInfo[port], curErrInfo, 32);
+            memset(curErrInfo, 0x00, 32);
             Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_REPORT_REALDATA, TRUE);
-        
         }
     }
 }
@@ -266,7 +279,7 @@ static void IotYKC21_CycleDetectUnreporteRecord(void)
                 port = pIotYKC21Ctx->stOrderInfo.port;
 
                if (port >= SYSCFG_CFG_GUN_NUM || 
-                    pIotYKC21Ctx->stOrderInfo.protocolType != eAswPlatCardType_YKC21 ||
+                    pIotYKC21Ctx->stOrderInfo.protocolType != eAswPlatType_YKC21 ||
                     pIotYKC21Ctx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)
                 {
                     MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotYKC21Ctx->time);
@@ -482,6 +495,8 @@ static void IotYKC21_WSOfflineHandle(void)
     memset(pIotYKC21Ctx->realDataReportTick, 0x00, sizeof(pIotYKC21Ctx->realDataReportTick));
     memset(pIotYKC21Ctx->lastGunState, 0x00, sizeof(pIotYKC21Ctx->lastGunState));
     memset(pIotYKC21Ctx->lastGunConnectState, 0x00, sizeof(pIotYKC21Ctx->lastGunConnectState));
+    memset(pIotYKC21Ctx->lastErrInfo, 0x00, sizeof(pIotYKC21Ctx->lastErrInfo));
+    memset(pIotYKC21Ctx->errVersion, 0x00, sizeof(pIotYKC21Ctx->errVersion));
 
     memset(pIotYKC21Ctx->stSendCtrl, 0x00, sizeof(pIotYKC21Ctx->stSendCtrl));
     memset(pIotYKC21Ctx->stRecvCtrl, 0x00, sizeof(pIotYKC21Ctx->stRecvCtrl));
@@ -902,7 +917,7 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
         pOrderData->orderLen = sizeof(MSNvmYKC21OrderInfo_Struct);
     
         pOrderData->port = port;
-        pOrderData->protocolType = eAswPlatCardType_YKC21;
+        pOrderData->protocolType = eAswPlatType_YKC21;
         pOrderData->orderLen = sizeof(MSNvmYKC21OrderInfo_Struct);
         pYkcOrder->stopReason = eIotYKC21StopReason_PowerOff;
     }

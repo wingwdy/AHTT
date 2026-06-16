@@ -109,5 +109,6 @@ void IotOM_FillLinkPara(CddNetMSocketPara_Union *pLinkPara);
 /* 内部适用 */
 void IotOM_OfflineHandle(void);
 uint8_t IotOM_GetGunState(uint8_t port);
+void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf);
 #endif
 

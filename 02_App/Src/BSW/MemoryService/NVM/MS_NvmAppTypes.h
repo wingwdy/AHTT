@@ -400,15 +400,9 @@ typedef struct
     uint8_t period_rate[MSNVM_YKC16_BILLMIDE_PERIOD_COUNT];     /* 48个30分钟，每个30分钟对应的费率号 */
 }MSNvmYKC16ParamBillMode_Struct;
 
-typedef struct YKC16platinfo
-{
-    uint8_t  MaxPowerRate;                                      /* 充电桩最大允许输出功率百分比 1BIN 表示1%，最大 100%，最小30%*/
-} MSNvmYKC16PlatInfo_Struct;
-
 typedef struct 
 {
     MSNvmYKC16ParamBillMode_Struct stBillMode;
-    MSNvmYKC16PlatInfo_Struct platInfo;
 }MSNvmYKC16Param_Struct;
 
 typedef union 

@@ -61,7 +61,6 @@ static uint16_t IotYKC16_SendChargeStopRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotYKC16_SendOrderRecordReq(uint8_t port, uint8_t *pBuf);
 static uint16_t IotYKC16_SendPileStartChargeReq(uint8_t port, uint8_t *pBuf);
 static uint16_t IotYKC16_SendUpdateAccountMoneyRsp(uint8_t port, uint8_t *pBuf);
-static uint16_t IotYKC16_SendParaSetRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotYKC16_SendSyncTimeRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotYKC16_SendSetBillMode4RateRsp(uint8_t port, uint8_t *pBuf);
 static uint16_t IotYKC16_SendSetQrcodeRsp(uint8_t port, uint8_t *pBuf);
@@ -197,17 +196,6 @@ static const IotYKC16SendCtrl_Struct c_stIotYKC16SendctrlTable[IOT_YKC16_CMD_SEN
 
     [11] = 
     {
-        .cmd = IOT_YKC16_CMD_Para_RSP,
-        .cmdType = IOT_YKC16_CMDTYPE_RESPONSE,
-        .matchCmd = IOT_YKC16_CMD_Para_REQ,
-        .pSendFunc = IotYKC16_SendParaSetRsp,
-        .sendCycle = 0,
-        .printFlag = TRUE,
-        .cMeaning = "工作参数设置应答"
-    },
-
-    [12] = 
-    {
         .cmd = IOT_YKC16_CMD_SYNC_TIME_RSP,
         .cmdType = IOT_YKC16_CMDTYPE_RESPONSE,
         .matchCmd = IOT_YKC16_CMD_SYNC_TIME,
@@ -217,7 +205,7 @@ static const IotYKC16SendCtrl_Struct c_stIotYKC16SendctrlTable[IOT_YKC16_CMD_SEN
         .cMeaning = "远程对时应答"
     },
 
-    [13] = 
+    [12] = 
     {
         .cmd = IOT_YKC16_CMD_SET_BILLMODE_4RATE_RSP,
         .cmdType = IOT_YKC16_CMDTYPE_RESPONSE,
@@ -228,7 +216,7 @@ static const IotYKC16SendCtrl_Struct c_stIotYKC16SendctrlTable[IOT_YKC16_CMD_SEN
         .cMeaning = "设置四类电价计费模型应答"
     },
 
-    [14] =
+    [13] =
     {
         .cmd = IOT_YKC16_CMD_SET_QRCODE_RSP,
         .cmdType = IOT_YKC16_CMDTYPE_RESPONSE,
@@ -239,7 +227,7 @@ static const IotYKC16SendCtrl_Struct c_stIotYKC16SendctrlTable[IOT_YKC16_CMD_SEN
         .cMeaning = "设置二维码应答"
     },
 
-    [15] =
+    [14] =
     {
         .cmd = IOT_YKC16_CMD_REBOOT_RSP,
         .cmdType = IOT_YKC16_CMDTYPE_RESPONSE,
@@ -250,7 +238,7 @@ static const IotYKC16SendCtrl_Struct c_stIotYKC16SendctrlTable[IOT_YKC16_CMD_SEN
         .cMeaning = "设置远程重启应答"
     },
 
-    [16] =
+    [15] =
     {
         .cmd = IOT_YKC16_CMD_UPDATE_RSP,
         .cmdType = IOT_YKC16_CMDTYPE_RESPONSE,
@@ -744,17 +732,6 @@ static uint16_t IotYKC16_SendUpdateAccountMoneyRsp(uint8_t port, uint8_t *pBuf)
     memcpy(&pBuf[dataLen], pIotYKC16Ctx->stProtoData[port].updateAccountMoneyCardID, 8);
     dataLen += 8;
     pBuf[dataLen++] = pIotYKC16Ctx->stProtoData[port].updateAccountMoneyResult;
-    return dataLen;
-}
-
-static uint16_t IotYKC16_SendParaSetRsp(uint8_t port, uint8_t *pBuf)
-{
-    uint16_t dataLen = 0;
-    /* 设备编码 */
-    memcpy(&pBuf[dataLen], pIotYKC16Ctx->pileDnBCD, 7);
-    dataLen += 7;
-    /* 设置结果 */
-    pBuf[dataLen++] = pIotYKC16Ctx->stProtoData[port].setPowerChangeResult;
     return dataLen;
 }
 

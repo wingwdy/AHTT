@@ -66,7 +66,6 @@ static uint8_t IotYKC16_RecvRemoteStopCharge(uint8_t *port, uint8_t *r_data, uin
 static uint8_t IotYKC16_RecvOrderRecordRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC16_RecvPileStartChargeRsp(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC16_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, uint16_t len);
-static uint8_t IotYKC16_RecvParaSet(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC16_RecvSyncTime(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC16_RecvSetBillMode4Rate(uint8_t *port, uint8_t *r_data, uint16_t len);
 static uint8_t IotYKC16_RecvSetBillModeMultiRate(uint8_t *port, uint8_t *r_data, uint16_t len);
@@ -203,18 +202,6 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
 
     [10] = 
     {
-        .cmd = IOT_YKC16_CMD_Para_REQ,
-        .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
-        .pRecvParse = IotYKC16_RecvParaSet,
-        .maxTimeout = 0,
-        .maxTryCnt = 0,
-        .matchCmd = IOT_YKC16_CMD_Para_RSP,
-        .printFlag = TRUE,
-        .cMeaning = "工作参数设置",
-    },
-
-    [11] = 
-    {
         .cmd = IOT_YKC16_CMD_SYNC_TIME,
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
         .pRecvParse = IotYKC16_RecvSyncTime,
@@ -225,7 +212,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cMeaning = "远程对时",
     },
 
-    [12] = 
+    [11] = 
     {
         .cmd = IOT_YKC16_CMD_SET_BILLMODE_4RATE,
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
@@ -237,7 +224,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cMeaning = "设置四类电价计费模型",
     },
 
-    [13] = 
+    [12] = 
     {
         .cmd = IOT_YKC16_CMD_SET_QRCODE,
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
@@ -249,7 +236,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cMeaning = "设置二维码",
     },
 
-    [14] = 
+    [13] = 
     {
         .cmd = IOT_YKC16_CMD_REBOOT,
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
@@ -261,7 +248,7 @@ static const IotYKC16RecvCtrl_Struct c_stIotYKC16RecvctrlTable[IOT_YKC16_CMD_REC
         .cMeaning = "远程重启",
     },
 
-    [15] = 
+    [14] = 
     {
         .cmd = IOT_YKC16_CMD_UPDATE,
         .cmdType = IOT_YKC16_CMDTYPE_REQUSET,
@@ -770,24 +757,6 @@ static uint8_t IotYKC16_RecvUpdateAccountMoney(uint8_t *port, uint8_t *r_data, u
             pIotYKC16Ctx->stProtoData[port[0]].updateAccountMoneyResult = 0x02;
         }
     }
-
-    return TRUE;
-}
-
-static uint8_t IotYKC16_RecvParaSet(uint8_t *port, uint8_t *r_data, uint16_t len)
-{
-    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    MSNvmYKC16PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC16Param.platInfo;
-    uint8_t index = 7;
-    uint8_t *pRecvData = r_data;
-
-    /* 是否允许工作 */
-    index++;
-    /* 充电桩最大允许输出功率 */
-    memcpy(&pPlatInfo->MaxPowerRate, &pRecvData[index], 1);
-    
-    /* 功率百分比调节 */
-    IotYKC16_SetPowerControl(0, pPlatInfo->MaxPowerRate);
 
     return TRUE;
 }
