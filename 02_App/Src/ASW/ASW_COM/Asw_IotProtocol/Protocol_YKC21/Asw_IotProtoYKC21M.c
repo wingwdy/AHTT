@@ -279,7 +279,7 @@ static void IotYKC21_CycleDetectUnreporteRecord(void)
                 port = pIotYKC21Ctx->stOrderInfo.port;
 
                if (port >= SYSCFG_CFG_GUN_NUM || 
-                    pIotYKC21Ctx->stOrderInfo.protocolType != eAswPlatCardType_YKC21 ||
+                    pIotYKC21Ctx->stOrderInfo.protocolType != eAswPlatType_YKC21 ||
                     pIotYKC21Ctx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)
                 {
                     MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotYKC21Ctx->time);
@@ -917,7 +917,7 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
         pOrderData->orderLen = sizeof(MSNvmYKC21OrderInfo_Struct);
     
         pOrderData->port = port;
-        pOrderData->protocolType = eAswPlatCardType_YKC21;
+        pOrderData->protocolType = eAswPlatType_YKC21;
         pOrderData->orderLen = sizeof(MSNvmYKC21OrderInfo_Struct);
         pYkcOrder->stopReason = eIotYKC21StopReason_PowerOff;
     }

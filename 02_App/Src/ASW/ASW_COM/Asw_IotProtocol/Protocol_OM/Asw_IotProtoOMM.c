@@ -257,7 +257,7 @@ static void IotOM_CycleDetectUnreporteRecord(void)
 
                /* 避免当数据库存在脏数据时，脏数据有问题，持续进入到这边 */
                if (port >= SYSCFG_CFG_GUN_NUM || 
-                    pIotOMCtx->stOrderInfo.protocolType >= eAswPlatCardType_Count ||
+                    pIotOMCtx->stOrderInfo.protocolType >= eAswPlatType_Count ||
                     pIotOMCtx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)
                 {
                     MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotOMCtx->time);

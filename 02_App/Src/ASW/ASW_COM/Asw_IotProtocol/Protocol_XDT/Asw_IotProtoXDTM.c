@@ -469,7 +469,7 @@ static void IotXDT_CycleDetectUnreporteRecord(void)
 
                 /* 避免当数据库存在脏数据时，脏数据有问题，持续进入到这边 */
                 if (port >= SYSCFG_CFG_GUN_NUM || 
-                    pIotXDTCtx->stOrderInfo.protocolType != eAswPlatCardType_XDT ||
+                    pIotXDTCtx->stOrderInfo.protocolType != eAswPlatType_XDT ||
                     pIotXDTCtx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)
                 {
                     MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotXDTCtx->time);
@@ -887,7 +887,7 @@ void IotXDT_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, ui
         Common_Uint32ToFourUint8(pXDTOrder->beginTs, pChargeData->chargeStartTime - SSTM_BASE_TIMESTAMP_1970_BJT);
         Common_Uint32ToFourUint8(pXDTOrder->beginMr, pChargeData->startMeterVal);
         pOrderData->port = port;
-        pOrderData->protocolType = eAswPlatCardType_XDT;
+        pOrderData->protocolType = eAswPlatType_XDT;
         pOrderData->orderLen = sizeof(MSNvmXDTOrderInfo_Struct);
         pXDTOrder->stopReason = eIotXDTStopReason_Other;
         pPlatInfo->orderCount++;

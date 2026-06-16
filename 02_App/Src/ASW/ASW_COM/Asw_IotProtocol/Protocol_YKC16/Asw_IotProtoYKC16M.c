@@ -203,6 +203,9 @@ static void IotYKC16_CycleDetectUnreporteRecord(void)
 {
     uint8_t port = 0;
     uint8_t recordSendFlag = FALSE;
+    uint8_t currentPlatType = 0;
+    currentPlatType = (AswPlatM_GetPlatType() == eAswPlatType_TT24) ? eAswPlatType_TT24 : eAswPlatType_YKC16;
+
 
     /* 存在未上报的记录 */
     if (MSNvm_QueryUnreportedRecordCount(eMSNvmBlockID_OrderRecord) > 0)
@@ -228,7 +231,7 @@ static void IotYKC16_CycleDetectUnreporteRecord(void)
 
                 /* 避免当数据库存在脏数据时，脏数据有问题，持续进入到这边 */
                 if (port >= SYSCFG_CFG_GUN_NUM || 
-                    pIotYKC16Ctx->stOrderInfo.protocolType != eAswPlatCardType_YKC16 ||
+                    pIotYKC16Ctx->stOrderInfo.protocolType != currentPlatType ||
                     pIotYKC16Ctx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)
                 {
                     /* 脏数据直接标记为已上报 */
@@ -625,9 +628,16 @@ void IotYKC16_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
         }
 
         pOrderData->port = port;
-        pOrderData->protocolType = eAswPlatCardType_YKC16;
         pOrderData->orderLen = sizeof(MSNvmYKC16OrderInfo_Struct);
         pYKC16Order->stopReason = eIotYKC16StopReason_PowerOff;
+        if (AswPlatM_GetPlatType() == eAswPlatType_TT24)
+        {
+            pOrderData->protocolType = eAswPlatType_TT24;
+        }
+        else
+        {
+            pOrderData->protocolType = eAswPlatCardType_YKC16;
+        }
     }
 
     Common_TimestampToCp56Time2a(pChargeData->chargeStopTime, &pYKC16Order->stopTime[0]);
