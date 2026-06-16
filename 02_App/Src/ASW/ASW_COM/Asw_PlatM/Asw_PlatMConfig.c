@@ -200,7 +200,7 @@ const AswPlatCardDescriptor_Struct c_stAswPlatMCardDescriptorTable[eAswPlatCardT
 
     [eAswPlatCardType_TT24] =
     {
-        .pName = "tt",
+        .pName = "tt2.4",
         .cMeaning = "通用卡",
         .cardType = eCddCardType_UUID,
     },

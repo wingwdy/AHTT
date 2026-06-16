@@ -150,6 +150,7 @@ static void IotYKC16_CycleReportRealData(void)
             if (0 != memcmp(curErrInfo, pIotYKC16Ctx->lastErrInfo[port], 32))
             {
                 realDataReportFlag = TRUE;
+                memcpy(pIotYKC16Ctx->lastErrInfo[port], curErrInfo, 32);
             }
         }
         
@@ -185,7 +186,6 @@ static void IotYKC16_CycleReportRealData(void)
             pIotYKC16Ctx->lastGunState[port] = curGunState;
             pIotYKC16Ctx->lastGunConnectState[port] = curGunConnectState;
             pIotYKC16Ctx->realDataReportTick[port] = Common_GetSystick();
-            memcpy(pIotYKC16Ctx->lastErrInfo[port], curErrInfo, 32);
             memset(curErrInfo, 0x00, 32);
             Common_SetSendEnable(pIotYKC16Ctx->pFuncSendCtrl, port, IOT_YKC16_CMD_REPORT_REALDATA, TRUE);
         }
@@ -636,7 +636,7 @@ void IotYKC16_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
         }
         else
         {
-            pOrderData->protocolType = eAswPlatCardType_YKC16;
+            pOrderData->protocolType = eAswPlatType_YKC16;
         }
     }
 

@@ -154,6 +154,7 @@ static void IotGN_CycleReportRealData(void)
             if (0 != memcmp(curErrInfo, pIotGNCtx->lastErrInfo[port], 32))
             {
                 realDataReportFlag = TRUE;
+                memcpy(pIotGNCtx->lastErrInfo[port], curErrInfo, 32);
             }
         }
         
@@ -180,7 +181,6 @@ static void IotGN_CycleReportRealData(void)
             pIotGNCtx->lastGunState[port] = curGunState;
             pIotGNCtx->lastGunConnectState[port] = curGunConnectState;
             pIotGNCtx->realDataReportTick[port] = Common_GetSystick();
-            memcpy(pIotGNCtx->lastErrInfo[port], curErrInfo, 32);
             memset(curErrInfo, 0x00, 32);
             Common_SetSendEnable(pIotGNCtx->pFuncSendCtrl, port, IOT_GN_CMD_REPORT_REALDATA, TRUE);
         }
@@ -192,7 +192,7 @@ static void IotGN_CycleDetectUnreporteRecord(void)
     uint8_t port = 0;
     uint8_t recordSendFlag = FALSE;
     uint8_t currentPlatType = 0;
-    currentPlatType = (AswPlatM_GetPlatType() == eAswPlatCardType_GNP) ? eAswPlatCardType_GNP : eAswPlatCardType_GN;
+    currentPlatType = (AswPlatM_GetPlatType() == eAswPlatType_GNP) ? eAswPlatType_GNP : eAswPlatType_GN;
 
 
     if (MSNvm_QueryUnreportedRecordCount(eMSNvmBlockID_OrderRecord) > 0)
@@ -719,7 +719,7 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
         }
         else
         {
-            pOrderData->protocolType = eAswPlatCardType_GN;
+            pOrderData->protocolType = eAswPlatType_GN;
         }
     }
 
