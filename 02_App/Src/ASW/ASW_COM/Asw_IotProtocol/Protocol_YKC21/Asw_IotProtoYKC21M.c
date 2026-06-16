@@ -221,6 +221,7 @@ static void IotYKC21_CycleReportRealData(void)
             if (0 != memcmp(curErrInfo, pIotYKC21Ctx->lastErrInfo[port], 32))
             {
                 realDataReportFlag = TRUE;
+                memcpy(pIotYKC21Ctx->lastErrInfo[port], curErrInfo, 32);
             }
         }
 
@@ -247,7 +248,6 @@ static void IotYKC21_CycleReportRealData(void)
             pIotYKC21Ctx->lastGunState[port] = curGunState;
             pIotYKC21Ctx->lastGunConnectState[port] = curGunConnectState;
             pIotYKC21Ctx->realDataReportTick[port] = Common_GetSystick();
-            memcpy(pIotYKC21Ctx->lastErrInfo[port], curErrInfo, 32);
             memset(curErrInfo, 0x00, 32);
             Common_SetSendEnable(pIotYKC21Ctx->pFuncSendCtrl, port, IOT_YKC21_CMD_REPORT_REALDATA, TRUE);
         }
