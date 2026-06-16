@@ -191,9 +191,6 @@ static void IotGN_CycleDetectUnreporteRecord(void)
 {
     uint8_t port = 0;
     uint8_t recordSendFlag = FALSE;
-    uint8_t currentPlatType = 0;
-    currentPlatType = (AswPlatM_GetPlatType() == eAswPlatType_GNP) ? eAswPlatType_GNP : eAswPlatType_GN;
-
 
     if (MSNvm_QueryUnreportedRecordCount(eMSNvmBlockID_OrderRecord) > 0)
     {
@@ -216,8 +213,8 @@ static void IotGN_CycleDetectUnreporteRecord(void)
                 port = pIotGNCtx->stOrderInfo.port;
 
                 /* 避免当数据库存在脏数据时，脏数据有问题，持续进入到这边 */
-                if (port >= SYSCFG_CFG_GUN_NUM || 
-                    pIotGNCtx->stOrderInfo.protocolType != currentPlatType ||
+                if (port >= SYSCFG_CFG_GUN_NUM ||
+                    (pIotGNCtx->stOrderInfo.protocolType != eAswPlatType_GN && pIotGNCtx->stOrderInfo.protocolType != eAswPlatType_GNP) ||
                     pIotGNCtx->stOrderInfo.orderSaveState != ASWMONITOR_ORDER_SAVE_STOP)
                 {
                     MSNvm_SetRecordReportSuccess(eMSNvmBlockID_OrderRecord, pIotGNCtx->time);
@@ -713,14 +710,7 @@ void IotGN_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uin
         pOrderData->port = port;
         pOrderData->orderLen = sizeof(MSNvmGNOrderInfo_Struct);
         pGnOrder->stopReason = eIotGNStopReason_PowerOff;
-        if (AswPlatM_GetPlatType() == eAswPlatType_GNP)
-        {
-            pOrderData->protocolType = eAswPlatType_GNP;
-        }
-        else
-        {
-            pOrderData->protocolType = eAswPlatType_GN;
-        }
+        pOrderData->protocolType = AswPlatM_GetPlatType();
     }
 
     pGnOrder->stopTime = pChargeData->chargeStopTime;
