@@ -338,7 +338,18 @@ GlobalRet_Enum MSNvm_SetDefaultParaBlock(MSNvmBlockID_Enum eBlockID)
     return eGlobalRet_OK;
 }
 
+uint8_t MSNvm_IsBusy(void)
+{
+    uint8_t ret = TRUE;
 
+    if (g_stMsNvmCtrlCtx.initFlag == TRUE && g_stMsNvmCtrlCtx.mutex != NULL)
+    {
+        if (xSemaphoreTake(g_stMsNvmCtrlCtx.mutex, 0) == pdTRUE)
+        {
+            xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
+            ret = FALSE;
+        }
+    }
 
-
-
+    return ret;
+}

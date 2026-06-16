@@ -441,7 +441,8 @@ static void AswMonitor_RebootManage(void)
             }
             case eAswMonitorRebootStep_LastDelay:
             {
-                if (Common_JudgeTimeoutMs(g_stAswMonitorCtx.rebootDelayTick, ASWMONITOR_CFG_REBOOT_DELAY_TIME))
+                if (Common_JudgeTimeoutMs(g_stAswMonitorCtx.rebootDelayTick, ASWMONITOR_CFG_REBOOT_DELAY_TIME) &&
+                     FALSE == MSNvm_IsBusy())
                 {
                     g_stAswMonitorCtx.eAswMonitorRebootStep = eAswMonitorRebootStep_Finish;
                 }
