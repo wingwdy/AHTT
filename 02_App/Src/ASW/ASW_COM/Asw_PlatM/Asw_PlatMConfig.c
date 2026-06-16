@@ -65,20 +65,6 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncSetPrivateParam = NULL,
     },
 
-    [eAswPlatType_YKC16] =
-    {
-        .pName = "ykc1.6",
-        .cProtoMeaning = "云快充1.6",
-        .eSocketType = eCddNetMSocketType_TCP,
-        .pFuncFillLinkPara = IotYKC16_FillLinkPara,
-        .pFuncInit = IotYKC16_InitMemory,
-        .pMainFunction = IotYKC16_MainFunction,
-        .pFuncTransformBillMode = IotYKC16_TransformBillMode,
-        .pFuncPackChargeRecord = IotYKC16_PackChargeRecord,
-        .pFuncSwipCardCharge = IotYKC16_SwipCardCharge,
-        .pFuncTransformChargeRecord = IotYKC16_TransformChargeRecord,
-    },
-
     [eAswPlatType_YKC21] =
     {
         .pName = "ykc2.1",
@@ -97,20 +83,6 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncSetCipherKey = IotYKC21_SetRsaPublicKey,
         .pFuncGetToken = IotYKC21_GetToken,
         .pFuncGetCipherKey = IotYKC21_GetRsaPublicKey,
-    },
-
-    [eAswPlatType_TT24] =
-    {
-        .pName = "tt2.4",
-        .cProtoMeaning = "甘肃铁塔2.4",
-        .eSocketType = eCddNetMSocketType_TCP,
-        .pFuncFillLinkPara = IotYKC16_FillLinkPara,
-        .pFuncInit = IotYKC16_InitMemory,
-        .pMainFunction = IotYKC16_MainFunction,
-        .pFuncTransformBillMode = IotYKC16_TransformBillMode,
-        .pFuncPackChargeRecord = IotYKC16_PackChargeRecord,
-        .pFuncSwipCardCharge = IotYKC16_SwipCardCharge,
-        .pFuncTransformChargeRecord = IotYKC16_TransformChargeRecord,
     },
 
     [eAswPlatType_XDT] =
@@ -149,6 +121,34 @@ const AswPlatMProtocolDescriptor_Struct c_stAswPlatMProtocolDescriptorTable[eAsw
         .pFuncTransformChargeRecord = IotGN_TransformChargeRecord,
         .pFuncSetPrivateParam = NULL,
     },
+
+    [eAswPlatType_YKC16] =
+    {
+        .pName = "ykc1.6",
+        .cProtoMeaning = "云快充1.6",
+        .eSocketType = eCddNetMSocketType_TCP,
+        .pFuncFillLinkPara = IotYKC16_FillLinkPara,
+        .pFuncInit = IotYKC16_InitMemory,
+        .pMainFunction = IotYKC16_MainFunction,
+        .pFuncTransformBillMode = IotYKC16_TransformBillMode,
+        .pFuncPackChargeRecord = IotYKC16_PackChargeRecord,
+        .pFuncSwipCardCharge = IotYKC16_SwipCardCharge,
+        .pFuncTransformChargeRecord = IotYKC16_TransformChargeRecord,
+    },
+
+    [eAswPlatType_TT24] =
+    {
+        .pName = "tt2.4",
+        .cProtoMeaning = "甘肃铁塔2.4",
+        .eSocketType = eCddNetMSocketType_TCP,
+        .pFuncFillLinkPara = IotYKC16_FillLinkPara,
+        .pFuncInit = IotYKC16_InitMemory,
+        .pMainFunction = IotYKC16_MainFunction,
+        .pFuncTransformBillMode = IotYKC16_TransformBillMode,
+        .pFuncPackChargeRecord = IotYKC16_PackChargeRecord,
+        .pFuncSwipCardCharge = IotYKC16_SwipCardCharge,
+        .pFuncTransformChargeRecord = IotYKC16_TransformChargeRecord,
+    },
 };
 
 const AswPlatMProtocolDescriptor_Struct c_stAswOMProtocolDescriptor = 
@@ -170,23 +170,9 @@ const AswPlatCardDescriptor_Struct c_stAswPlatMCardDescriptorTable[eAswPlatCardT
         .cardType = eCddCardType_BullCard,
     },
 
-    [eAswPlatCardType_YKC16] =
-    {
-        .pName = "ykc1.6",
-        .cMeaning = "通用卡",
-        .cardType = eCddCardType_UUID,
-    },
-
     [eAswPlatCardType_YKC21] =
     {
         .pName = "ykc2.1",
-        .cMeaning = "通用卡",
-        .cardType = eCddCardType_UUID,
-    },
-
-    [eAswPlatCardType_TT24] =
-    {
-        .pName = "tt",
         .cMeaning = "通用卡",
         .cardType = eCddCardType_UUID,
     },
@@ -201,6 +187,20 @@ const AswPlatCardDescriptor_Struct c_stAswPlatMCardDescriptorTable[eAswPlatCardT
     [eAswPlatCardType_GNP] =
     {
         .pName = "gn+",
+        .cMeaning = "通用卡",
+        .cardType = eCddCardType_UUID,
+    },
+
+    [eAswPlatCardType_YKC16] =
+    {
+        .pName = "ykc1.6",
+        .cMeaning = "通用卡",
+        .cardType = eCddCardType_UUID,
+    },
+
+    [eAswPlatCardType_TT24] =
+    {
+        .pName = "tt",
         .cMeaning = "通用卡",
         .cardType = eCddCardType_UUID,
     },

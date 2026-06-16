@@ -67,7 +67,6 @@ static void IotOM_CycleDetectUnreportedUcmResult(void);
 static void IotOM_CycleDetectReportForbidState(void);
 static void IotOM_CycleReportMeterVal(void);
 static void IotOM_CycleDetect(void);
-static void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf);
 
 /*******************************************************************************
 *    Function Source Code
@@ -338,7 +337,7 @@ static void IotOM_CycleReportMeterVal(void)
     }
 }
 
-static void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
+void IotOM_SetRealDataErrBit(uint8_t port, uint8_t *pBuf)
 {
     /* CP电压异常 */
     if (TRUE == AswErrHandle_CheckErrExit(port, eErr_CpVoltAbnor))

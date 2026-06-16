@@ -26,6 +26,7 @@
 #include "Asw_ChargeIf.h"
 #include "MS_Nvm.h"
 #include "myMalloc.h"
+#include "Asw_IotProtoOMM.h"
 /*******************************************************************************
 *    Macro Definition
 *******************************************************************************/
@@ -88,12 +89,11 @@ static CommonSendCtrl_Struct* IotYKC16_GetSendCtrl(uint8_t port, uint16_t cmd)
         case IOT_YKC16_CMD_ORDER_RECORD_REQ:           pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][8];   break;
         case IOT_YKC16_CMD_PILE_START_CHARGE_REQ:      pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][9];   break;
         case IOT_YKC16_CMD_UPDATE_ACCOUNT_MONEY_RSP:   pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][10];  break;
-        case IOT_YKC16_CMD_Para_RSP:                   pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][11];  break;
-        case IOT_YKC16_CMD_SYNC_TIME_RSP:              pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][12];  break;
-        case IOT_YKC16_CMD_SET_BILLMODE_4RATE_RSP:     pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][13];  break;
-        case IOT_YKC16_CMD_SET_QRCODE_RSP:             pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][14];  break;
-        case IOT_YKC16_CMD_REBOOT_RSP:                 pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][15];  break;
-        case IOT_YKC16_CMD_UPDATE_RSP:                 pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][16];  break;
+        case IOT_YKC16_CMD_SYNC_TIME_RSP:              pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][11];  break;
+        case IOT_YKC16_CMD_SET_BILLMODE_4RATE_RSP:     pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][12];  break;
+        case IOT_YKC16_CMD_SET_QRCODE_RSP:             pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][13];  break;
+        case IOT_YKC16_CMD_REBOOT_RSP:                 pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][14];  break;
+        case IOT_YKC16_CMD_UPDATE_RSP:                 pSendCtrl = &pIotYKC16Ctx->stSendCtrl[port][15];  break;
         default: break;
     }
 
@@ -116,12 +116,11 @@ static CommonRecvCtrl_Struct* IotYKC16_GetRecvCtrl(uint8_t port, uint16_t cmd)
         case IOT_YKC16_CMD_ORDER_RECORD_RSP:           pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][7];   break;
         case IOT_YKC16_CMD_PILE_START_CHARGE_RSP:      pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][8];   break;
         case IOT_YKC16_CMD_UPDATE_ACCOUNT_MONEY:       pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][9];   break;
-        case IOT_YKC16_CMD_Para_REQ:                   pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][10];  break;
-        case IOT_YKC16_CMD_SYNC_TIME:                  pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][11];  break;
-        case IOT_YKC16_CMD_SET_BILLMODE_4RATE:         pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][12];  break;
-        case IOT_YKC16_CMD_SET_QRCODE:                 pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][13];  break;
-        case IOT_YKC16_CMD_REBOOT:                     pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][14];  break;
-        case IOT_YKC16_CMD_UPDATE:                     pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][15];  break;
+        case IOT_YKC16_CMD_SYNC_TIME:                  pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][10];  break;
+        case IOT_YKC16_CMD_SET_BILLMODE_4RATE:         pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][11];  break;
+        case IOT_YKC16_CMD_SET_QRCODE:                 pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][12];  break;
+        case IOT_YKC16_CMD_REBOOT:                     pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][13];  break;
+        case IOT_YKC16_CMD_UPDATE:                     pRecvCtrl = &pIotYKC16Ctx->stRecvCtrl[port][14];  break;
         default: break;
     }
     return pRecvCtrl;
@@ -135,12 +134,25 @@ static void IotYKC16_CycleReportRealData(void)
     uint8_t curGunConnectState = 0;
     uint8_t realDataReportFlag = FALSE;
     uint8_t billMmodelReportFlag = FALSE;
+    uint8_t curErrInfo[32] = {0};
 
     for (port = 0; port < SYSCFG_CFG_GUN_NUM; port++)
     {
         curGunState = IotYKC16_GetGunState(port);
         curGunConnectState = AswChargeIf_CheckGunConnected(port);
 
+        /* 故障变位上报 */
+        if (pIotYKC16Ctx->errVersion[port] != AswErrHandle_GetErrStatusVersion(port))
+        {
+            pIotYKC16Ctx->errVersion[port] = AswErrHandle_GetErrStatusVersion(port);
+            IotOM_SetRealDataErrBit(port, curErrInfo);
+
+            if (0 != memcmp(curErrInfo, pIotYKC16Ctx->lastErrInfo[port], 32))
+            {
+                realDataReportFlag = TRUE;
+            }
+        }
+        
         if (pIotYKC16Ctx->lastGunState[port] != curGunState)
         {
             realDataReportFlag = TRUE;
@@ -173,6 +185,8 @@ static void IotYKC16_CycleReportRealData(void)
             pIotYKC16Ctx->lastGunState[port] = curGunState;
             pIotYKC16Ctx->lastGunConnectState[port] = curGunConnectState;
             pIotYKC16Ctx->realDataReportTick[port] = Common_GetSystick();
+            memcpy(pIotYKC16Ctx->lastErrInfo[port], curErrInfo, 32);
+            memset(curErrInfo, 0x00, 32);
             Common_SetSendEnable(pIotYKC16Ctx->pFuncSendCtrl, port, IOT_YKC16_CMD_REPORT_REALDATA, TRUE);
         }
 
@@ -258,6 +272,8 @@ static void IotYKC16_WSOfflineHandle(void)
     memset(pIotYKC16Ctx->realDataReportTick, 0x00, sizeof(pIotYKC16Ctx->realDataReportTick));
     memset(pIotYKC16Ctx->lastGunState, 0x00, sizeof(pIotYKC16Ctx->lastGunState));
     memset(pIotYKC16Ctx->lastGunConnectState, 0x00, sizeof(pIotYKC16Ctx->lastGunConnectState));
+    memset(pIotYKC16Ctx->lastErrInfo, 0x00, sizeof(pIotYKC16Ctx->lastErrInfo));
+    memset(pIotYKC16Ctx->errVersion, 0x00, sizeof(pIotYKC16Ctx->errVersion));
 
     memset(pIotYKC16Ctx->stSendCtrl, 0x00, sizeof(pIotYKC16Ctx->stSendCtrl));
     memset(pIotYKC16Ctx->stRecvCtrl, 0x00, sizeof(pIotYKC16Ctx->stRecvCtrl));
@@ -427,14 +443,14 @@ void IotYKC16_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStanda
             for (startIndex = 0; startIndex < MSNVM_YKC16_BILLMIDE_PERIOD_COUNT;startIndex++)
             {
 
-             pStandardBillMode->periodRate[startIndex] = pYKC16BillMode->period_rate[startIndex];
-             pStandardBillMode->startTime[startIndex][0] = startIndex / 2;
-             pStandardBillMode->startTime[startIndex][1] = (startIndex % 2) * 30;
+                pStandardBillMode->periodRate[startIndex] = pYKC16BillMode->period_rate[startIndex];
+                pStandardBillMode->startTime[startIndex][0] = startIndex / 2;
+                pStandardBillMode->startTime[startIndex][1] = (startIndex % 2) * 30;
 
-             stopIndex = startIndex + 1;
+                stopIndex = startIndex + 1;
 
-             pStandardBillMode->stopTime[startIndex][0] = stopIndex / 2;
-             pStandardBillMode->stopTime[startIndex][1] = (stopIndex % 2) * 30;
+                pStandardBillMode->stopTime[startIndex][0] = stopIndex / 2;
+                pStandardBillMode->stopTime[startIndex][1] = (stopIndex % 2) * 30;
 
             }
 

@@ -142,7 +142,6 @@ GlobalRet_Enum MSNvm_ReadParaBlock(MSNvmBlockID_Enum eBlockID, uint8_t *pOutBuf,
     copyLen = (dataLen >= pDescriptor->blockSize) ? pDescriptor->blockSize : dataLen;
     memcpy(pOutBuf, pDescriptor->ramBlockDataAddr, copyLen);
     xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
-
     return eGlobalRet_OK;
 }
 
@@ -167,10 +166,10 @@ GlobalRet_Enum MSNvm_WriteParaBlock(MSNvmBlockID_Enum eBlockID, uint8_t *pInBuf,
         xSemaphoreTake(g_stMsNvmCtrlCtx.mutex, portMAX_DELAY);
         memcpy(pDescriptor->ramBlockDataAddr, pInBuf, copyLen);
         memset(pDescriptor->ramBlockDataAddr + copyLen, 0x00, pDescriptor->blockSize - copyLen);
-        xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
         calcCrc16 = Common_CalcCRC16(pDescriptor->ramBlockDataAddr, pDescriptor->blockSize);
         Common_Uint16ToTwoUint8(pDescriptor->ramBlockDataAddr + pDescriptor->blockSize, calcCrc16);
         MSNvm_WriteFlashData(eBlockID);
+        xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
     }
 
     return eGlobalRet_OK;
@@ -185,38 +184,55 @@ GlobalRet_Enum MSNvm_ClearRecord(MSNvmBlockID_Enum eBlockID)
     PARA_ASSERT_RET(g_stMsNvmCtrlCtx.initFlag == TRUE, eGlobalRet_NotInit);
     PARA_ASSERT_RET(pDescriptor->deviceID == MSMEMIF_DEVICE_EA_TSDB, eGlobalRet_ParaInvalid);
 
+    xSemaphoreTake(g_stMsNvmCtrlCtx.mutex, portMAX_DELAY);
     eRet = MSMemIf_ClearRecord(pDescriptor->deviceID, pDescriptor->memIfID);
+    xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
     return eRet;
 }
 
 uint32_t MSNvm_QueryUnreportedRecordCount(MSNvmBlockID_Enum eBlockID)
 {
     const MSNvmBlockDescriptor_Struct *pDescriptor = &c_stMSNvmBlockDescriptorTable[eBlockID];
+    uint32_t recordCount = 0;
+
     PARA_ASSERT_RET(eBlockID < eMSNvmBlockID_Count, 0);
     PARA_ASSERT_RET(g_stMsNvmCtrlCtx.initFlag == TRUE, 0);
     PARA_ASSERT_RET(pDescriptor->deviceID == MSMEMIF_DEVICE_EA_TSDB, eGlobalRet_ParaInvalid);
 
-    return MSMemIf_QueryUnreportedRecordCount(pDescriptor->deviceID, pDescriptor->memIfID);
+    xSemaphoreTake(g_stMsNvmCtrlCtx.mutex, portMAX_DELAY);
+    recordCount = MSMemIf_QueryUnreportedRecordCount(pDescriptor->deviceID, pDescriptor->memIfID);
+    xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
+    return recordCount;
 }
 
 uint32_t MSNvm_QueryTotalRecordCount(MSNvmBlockID_Enum eBlockID)
 {
     const MSNvmBlockDescriptor_Struct *pDescriptor = &c_stMSNvmBlockDescriptorTable[eBlockID];
+    uint32_t recordCount = 0;
+
     PARA_ASSERT_RET(eBlockID < eMSNvmBlockID_Count, 0);
     PARA_ASSERT_RET(g_stMsNvmCtrlCtx.initFlag == TRUE, 0);
     PARA_ASSERT_RET(pDescriptor->deviceID == MSMEMIF_DEVICE_EA_TSDB, 0);
 
-    return MSMemIf_QueryTotalRecordCount(pDescriptor->deviceID, pDescriptor->memIfID);
+    xSemaphoreTake(g_stMsNvmCtrlCtx.mutex, portMAX_DELAY);
+    recordCount = MSMemIf_QueryTotalRecordCount(pDescriptor->deviceID, pDescriptor->memIfID);
+    xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
+    return recordCount;
 }
 
 GlobalRet_Enum MSNvm_InsertNewRecord(MSNvmBlockID_Enum eBlockID, uint8_t *pInRecord, uint16_t recordSize)
 {
     const MSNvmBlockDescriptor_Struct *pDescriptor = &c_stMSNvmBlockDescriptorTable[eBlockID];
+    GlobalRet_Enum eRet = eGlobalRet_OK;
+
     PARA_ASSERT_RET(eBlockID < eMSNvmBlockID_Count && pInRecord != NULL && recordSize != 0, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(g_stMsNvmCtrlCtx.initFlag == TRUE, eGlobalRet_NotInit);
     PARA_ASSERT_RET(pDescriptor->deviceID == MSMEMIF_DEVICE_EA_TSDB, eGlobalRet_ParaInvalid);
 
-    return MSMemIf_InsertRecord(pDescriptor->deviceID, pDescriptor->memIfID, pInRecord, recordSize);
+    xSemaphoreTake(g_stMsNvmCtrlCtx.mutex, portMAX_DELAY);
+    eRet = MSMemIf_InsertRecord(pDescriptor->deviceID, pDescriptor->memIfID, pInRecord, recordSize);
+    xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
+    return eRet;
 }
 
 GlobalRet_Enum MSNvm_SetRecordReportSuccess(MSNvmBlockID_Enum eBlockID, uint32_t time)
@@ -227,8 +243,11 @@ GlobalRet_Enum MSNvm_SetRecordReportSuccess(MSNvmBlockID_Enum eBlockID, uint32_t
     PARA_ASSERT_RET(eBlockID < eMSNvmBlockID_Count, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(g_stMsNvmCtrlCtx.initFlag == TRUE, eGlobalRet_NotInit);
     PARA_ASSERT_RET(pDescriptor->deviceID == MSMEMIF_DEVICE_EA_TSDB, eGlobalRet_ParaInvalid);
-    
-    return MSMemIf_SetReportSuccess(pDescriptor->deviceID, pDescriptor->memIfID, time);
+
+    xSemaphoreTake(g_stMsNvmCtrlCtx.mutex, portMAX_DELAY);   
+    eRet = MSMemIf_SetReportSuccess(pDescriptor->deviceID, pDescriptor->memIfID, time);
+    xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
+    return eRet;
 }
 
 GlobalRet_Enum MSNvm_QueryLatestUnreportedRecord(MSNvmBlockID_Enum eBlockID, uint8_t *pOutRecord, uint16_t recordSize, uint32_t *pTime)
@@ -241,7 +260,10 @@ GlobalRet_Enum MSNvm_QueryLatestUnreportedRecord(MSNvmBlockID_Enum eBlockID, uin
     PARA_ASSERT_RET(g_stMsNvmCtrlCtx.initFlag == TRUE, eGlobalRet_NotInit);
     PARA_ASSERT_RET(pDescriptor->deviceID == MSMEMIF_DEVICE_EA_TSDB, eGlobalRet_ParaInvalid);
 
-    return MSMemIf_QueryLatestUnreportedRecord(pDescriptor->deviceID, pDescriptor->memIfID, pOutRecord, recordSize, pTime);
+    xSemaphoreTake(g_stMsNvmCtrlCtx.mutex, portMAX_DELAY);   
+    eRet = MSMemIf_QueryLatestUnreportedRecord(pDescriptor->deviceID, pDescriptor->memIfID, pOutRecord, recordSize, pTime);
+    xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
+    return eRet;
 }
 
 uint32_t MSNvm_QueryRecordLatestTime(MSNvmBlockID_Enum eBlockID)
@@ -253,26 +275,33 @@ uint32_t MSNvm_QueryRecordLatestTime(MSNvmBlockID_Enum eBlockID)
     PARA_ASSERT_RET(g_stMsNvmCtrlCtx.initFlag == TRUE, eGlobalRet_NotInit);
     PARA_ASSERT_RET(pDescriptor->deviceID == MSMEMIF_DEVICE_EA_TSDB, eGlobalRet_ParaInvalid);
 
+    xSemaphoreTake(g_stMsNvmCtrlCtx.mutex, portMAX_DELAY);   
     MSMemIf_QueryLatestRecordTime(pDescriptor->deviceID, pDescriptor->memIfID, &time);
+    xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
     return time;
 }
 
 GlobalRet_Enum MSNvm_QueryRecordByTime(MSNvmBlockID_Enum eBlockID, uint8_t *pOutRecord, uint16_t recordSize, uint32_t time)
 {
     const MSNvmBlockDescriptor_Struct *pDescriptor = &c_stMSNvmBlockDescriptorTable[eBlockID];
+    GlobalRet_Enum eRet = eGlobalRet_OK;
 
     PARA_ASSERT_RET(eBlockID < eMSNvmBlockID_Count, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pOutRecord != NULL && recordSize <= pDescriptor->blockSize, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(g_stMsNvmCtrlCtx.initFlag == TRUE, eGlobalRet_NotInit);
     PARA_ASSERT_RET(pDescriptor->deviceID == MSMEMIF_DEVICE_EA_TSDB, eGlobalRet_ParaInvalid);
 
-    return MSMemIf_QueryRecordByTime(pDescriptor->deviceID, pDescriptor->memIfID, pOutRecord, recordSize, time);
+    xSemaphoreTake(g_stMsNvmCtrlCtx.mutex, portMAX_DELAY);   
+    eRet = MSMemIf_QueryRecordByTime(pDescriptor->deviceID, pDescriptor->memIfID, pOutRecord, recordSize, time);
+    xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
+    return eRet;
 }
 
 GlobalRet_Enum MSNvm_QueryRecordByExternal(MSNvmBlockID_Enum eBlockID, uint8_t *para, uint16_t paraSize, pNvmCmpFunc pCmpFunc, 
     uint8_t *pInRecord, uint16_t recordSize)
 {
     const MSNvmBlockDescriptor_Struct *pDescriptor = &c_stMSNvmBlockDescriptorTable[eBlockID];
+    GlobalRet_Enum eRet = eGlobalRet_OK;
 
     PARA_ASSERT_RET(eBlockID < eMSNvmBlockID_Count, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(pInRecord != NULL && recordSize <= pDescriptor->blockSize, eGlobalRet_ParaInvalid);
@@ -280,7 +309,10 @@ GlobalRet_Enum MSNvm_QueryRecordByExternal(MSNvmBlockID_Enum eBlockID, uint8_t *
     PARA_ASSERT_RET(pCmpFunc != NULL, eGlobalRet_ParaInvalid);
     PARA_ASSERT_RET(g_stMsNvmCtrlCtx.initFlag == TRUE, eGlobalRet_NotInit);
 
-    return MSMemIf_QueryRecordByExternal(pDescriptor->deviceID, pDescriptor->memIfID, para, paraSize, pCmpFunc, pInRecord, recordSize);
+    xSemaphoreTake(g_stMsNvmCtrlCtx.mutex, portMAX_DELAY);   
+    eRet = MSMemIf_QueryRecordByExternal(pDescriptor->deviceID, pDescriptor->memIfID, para, paraSize, pCmpFunc, pInRecord, recordSize);
+    xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
+    return eRet;
 }
 
 GlobalRet_Enum MSNvm_SetDefaultParaBlock(MSNvmBlockID_Enum eBlockID)
@@ -301,9 +333,8 @@ GlobalRet_Enum MSNvm_SetDefaultParaBlock(MSNvmBlockID_Enum eBlockID)
     pDescriptor->pFuncDefault(pDescriptor->ramBlockDataAddr, pDescriptor->blockSize);
     calcCrc16 = Common_CalcCRC16(pDescriptor->ramBlockDataAddr, pDescriptor->blockSize);
     Common_Uint16ToTwoUint8(pDescriptor->ramBlockDataAddr + pDescriptor->blockSize, calcCrc16);
-    xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
-    
     MSNvm_WriteFlashData(eBlockID);
+    xSemaphoreGive(g_stMsNvmCtrlCtx.mutex);
     return eGlobalRet_OK;
 }
 
