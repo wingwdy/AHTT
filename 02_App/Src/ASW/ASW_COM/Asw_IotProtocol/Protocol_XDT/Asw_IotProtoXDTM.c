@@ -423,12 +423,12 @@ static void IotXDT_CycleDetectPileData(void)
 				(chargeTotalMoney[index] - pRecvData->offlineClearData.chargeTotalMoney) > 
 				((uint32_t)(fAmountThreshold * 10000)))
 			{
-				pRecvData->offlineClearData.chargeTotalMoney = chargeTotalMoney[index];
 				item845Flag[index] = TRUE;
 			}
 
 			if (item845Flag[index] == TRUE)
 			{
+                pRecvData->offlineClearData.chargeTotalMoney = chargeTotalMoney[index];
                 Common_SetSendEnable(pIotXDTCtx->pFuncSendCtrl, index, IOT_XDT_CMD_PILE_DATA, TRUE);
                 Common_SetSendImmdFlag(pIotXDTCtx->pFuncSendCtrl, index, IOT_XDT_CMD_PILE_DATA, TRUE);
 				item845Flag[index] = FALSE;
