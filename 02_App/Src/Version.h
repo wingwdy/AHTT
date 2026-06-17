@@ -18,15 +18,14 @@
 ******************************************************************************/
 /* BCD码 */
 #define  APP_SW_MAJOR_VERSION                           (1u)
-#define  APP_SW_MINOR_VERSION                           (1u)
+#define  APP_SW_MINOR_VERSION                           (2u)
 #define  APP_SW_CUSTORM_VERSION                         (0u)
-#define  APP_SW_PATCH_VERSION                           (4u)
+#define  APP_SW_PATCH_VERSION                           (0u)
 
-#define  APP_SW_VERSION_STRING                          "V1.1.0.4"
-#define  APP_SW_VERSION_DATE                            "2026/06/05"
+#define  APP_SW_VERSION_STRING                          "V1.2.0.0"
+#define  APP_SW_VERSION_DATE                            "2026/06/17"
 
 #define  APP_SW_VERSION_TYPE                            "标品"
-
 #define  HW_VERSION_INFO                                "D3-A32FB-20260313"
 
 /******************************************************************************
