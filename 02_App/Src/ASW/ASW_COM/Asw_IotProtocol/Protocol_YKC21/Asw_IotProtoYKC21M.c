@@ -53,8 +53,12 @@
 *    Global variables Declaration
 *******************************************************************************/
 IotYKC21Ctx_Struct *pIotYKC21Ctx = NULL;
+/* 测试环境密钥和生产环境密钥都是一样的 */
 const char Default_RsaKey[]={"MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKaTP4eBWYBh3JDnYa7h2nuYACREgmV1o250/36ebYwaUswQDbUdMoeRvRIWxhCtXEzVkMYtH07ctmpzMo8uTvMCAwEAAQ=="};
-const char Default_TokenStr[] = {"54260225221003"};	
+/* 测试环境token */
+/* const char Default_TokenStr[] = {"54260225221003"};	*/ 
+/* 生产环境token*/
+const char Default_TokenStr[] = {"88260603251000"};
 
 static const IotYKC21errMap_Struct Iot_Ykc21Error_map[] = 
 {
@@ -105,9 +109,19 @@ static const IotYKC21errMap_Struct Iot_Ykc21Error_map[] =
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
-
- 
-
+static CommonSendCtrl_Struct* IotYKC21_GetSendCtrl(uint8_t port, uint16_t cmd);
+static CommonRecvCtrl_Struct* IotYKC21_GetRecvCtrl(uint8_t port, uint16_t cmd);
+static void IotYKC21_CycleReportRealData(void);
+static void IotYKC21_CycleDetectUnreporteRecord(void);
+static void IotYKC21_UpError(void);
+static void IotYKC21_DetectPowerLimit(void);
+static void IotYKC21_DelayRefreshRSAKey(void);
+static void IotYKC21_CycleDetect(void);
+static void IotYKC21_WSInitHandle(void);
+static void IotYKC21_WSOfflineHandle(void);
+static void IotYKC21_WSLoginHandle(void);
+static void IotYKC21_WSNormalHandle(void);
+static IotYKC21StopReason_Enum IotYKC21_ConverStopReason(AswErrorType_Enum errType);
 
 /*******************************************************************************
 *    Function Source Code
@@ -454,29 +468,10 @@ static void IotYKC21_CycleDetect(void)
     IotYKC21_DelayRefreshRSAKey(); 
 }
 
-static void IotYKC21_FunDeal(void)
-{
-    /* 功率调节 */
-    IotYKC21_DetectPowerLimit(); 
-}
-
 static void IotYKC21_WSInitHandle(void)
 {
-    uint8_t port = 0;
-    MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
-    MSNvmYKC21PlatInfo_Struct *pPlatInfo = &pPrivateParam->stYKC21Param.platinfo;
-    
-    // 检测长度超过128，默认数值
-    if (pPlatInfo->rsa_Keylength > 128)
-    {
-        pPlatInfo->rsa_Keylength = 128;
-        memcpy(pPlatInfo->rsa_Key, Default_RsaKey, 128);
-        memcpy(pPlatInfo->token, Default_TokenStr, 14);
-    }
-
     pIotYKC21Ctx->eWorkState = eIOTYKC21WorkState_Offline;
 }
-
 
 static void IotYKC21_WSOfflineHandle(void)
 {
@@ -675,8 +670,10 @@ void IotYKC21_TransformBillMode(uint8_t port, AswMonitorBillMode_Struct *pStanda
 
 void IotYKC21_SetPrivateParam(MSNvmPlatPrivateParam_Union *pPrivateParam)
 {
-
-
+    strncpy((char *)pPrivateParam->stYKC21Param.platinfo.rsa_Key, Default_RsaKey, sizeof(pPrivateParam->stYKC21Param.platinfo.rsa_Key) - 1);
+    pPrivateParam->stYKC21Param.platinfo.rsa_Keylength = strlen((char *)pPrivateParam->stYKC21Param.platinfo.rsa_Key);
+    strncpy((char *)pPrivateParam->stYKC21Param.platinfo.token, Default_TokenStr, sizeof(pPrivateParam->stYKC21Param.platinfo.token) - 1);
+    pPrivateParam->stYKC21Param.platinfo.tokenLen = strlen((char *)pPrivateParam->stYKC21Param.platinfo.token);
 }
 
 void IotYKC21_TransformChargeRecord(MSNvmPlatOrderInfo_Union *pFlashRecord, uint8_t *pProtocolRecord, uint16_t *pRecordLen)
@@ -878,7 +875,6 @@ void IotYKC21_PrintfYKC21KeyAndToken(void)
 
 void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, uint8_t orderSaveReason)
 { 
-    AswMonitorBillMode_Struct *pBillMode = AswMonitor_GetCurUsedBillModePtr(port);
     AswMonitorChargeCtrl_Struct *pstChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
     AswMonitorChargeData_Struct *pChargeData = AswMonitor_GetChargeDataPtr(port);
     MSNvmYKC21OrderInfo_Struct *pYkcOrder = &pOrderData->platOrderInfo.stYKC21OrderInfo;
@@ -914,12 +910,11 @@ void IotYKC21_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
             memcpy(pYkcOrder->logicCardNum, pIotYKC21Ctx->stProtoData[port].authCardID, 8);
         }
 
-        pOrderData->orderLen = sizeof(MSNvmYKC21OrderInfo_Struct);
+        pYkcOrder->stopReason = eIotYKC21StopReason_PowerOff;
     
         pOrderData->port = port;
-        pOrderData->protocolType = eAswPlatType_YKC21;
+        pOrderData->protocolType = AswPlatM_GetPlatType();
         pOrderData->orderLen = sizeof(MSNvmYKC21OrderInfo_Struct);
-        pYkcOrder->stopReason = eIotYKC21StopReason_PowerOff;
     }
  
     Common_TimestampToCp56Time2a(pChargeData->chargeStopTime, &pYkcOrder->stopTime[0]);

@@ -114,6 +114,23 @@ static IotXDTErrDesc_Struct c_IotXDTErrDescTable[] =
 /*******************************************************************************
 *    Static Local Functions Declaration
 *******************************************************************************/
+static CommonSendCtrl_Struct* IotXDT_GetSendCtrl(uint8_t port, uint16_t cmd);
+static CommonRecvCtrl_Struct* IotXDT_GetRecvCtrl(uint8_t port, uint16_t cmd);
+static eIotXDTStopReason_Enum IotXDT_ConvertStopReason(AswErrorType_Enum eChargeStopReason);
+static void IotXDT_WSInitHandle(void);
+static void IotXDT_WSOfflineHandle(void);
+static void IotXDT_WSLoginHandle(void);
+static void IotXDT_CycleDetectPileStatus(void);
+static void IotXDT_CycleDetectPileData(void);
+static void IotXDT_CycleDetectUnreporteRecord(void);
+static void IotXDT_CycleDetectErrInfo(void);
+static void IotXDT_CycleDetect(void);
+static void IotXDT_WSNormalHandle(void);
+static void IotXDT_MqttConnectCallback(uint8_t connectResult, uint8_t *pCredential);
+static uint8_t IotXDT_CheckErrInfoReportForCall(void);
+static void IotXDT_RebootCheck(void);
+static void IotXDT_OtaCheck(void);
+static void IotXDT_CalcStaticInfo(void);
 
 /*******************************************************************************
 *    Function Source Code
@@ -876,8 +893,6 @@ void IotXDT_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, ui
 { 
     MSNvmPlatPrivateParam_Union *pPrivateParam = AswPlatM_GetPlatPrivateParamPtr();
     MSNvmXDTPlatInfo_Struct *pPlatInfo = &pPrivateParam->stXDTParam.platinfo;
-    AswMonitorBillMode_Struct *pBillMode = AswMonitor_GetCurUsedBillModePtr(port);
-    AswMonitorChargeCtrl_Struct *pstChargeCtrl = AswMonitor_GetChargeCtrlPtr(port);
     AswMonitorChargeData_Struct *pChargeData = AswMonitor_GetChargeDataPtr(port);
     MSNvmXDTOrderInfo_Struct *pXDTOrder = &pOrderData->platOrderInfo.stXDTOrderInfo;
     uint8_t index = 0;
@@ -886,14 +901,15 @@ void IotXDT_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, ui
     {
         Common_Uint32ToFourUint8(pXDTOrder->beginTs, pChargeData->chargeStartTime - SSTM_BASE_TIMESTAMP_1970_BJT);
         Common_Uint32ToFourUint8(pXDTOrder->beginMr, pChargeData->startMeterVal);
-        pOrderData->port = port;
-        pOrderData->protocolType = eAswPlatType_XDT;
-        pOrderData->orderLen = sizeof(MSNvmXDTOrderInfo_Struct);
         pXDTOrder->stopReason = eIotXDTStopReason_Other;
         pPlatInfo->orderCount++;
         Common_Uint32ToFourUint8(pXDTOrder->indexRec, pPlatInfo->orderCount);
         MSNvm_WriteParaBlock(eMSNvmBlockID_PlatPrivateParam, (uint8_t *)pPrivateParam, sizeof(MSNvmPlatPrivateParam_Union));
         pXDTOrder->typeRec = 1;
+        
+        pOrderData->port = port;
+        pOrderData->protocolType = AswPlatM_GetPlatType();
+        pOrderData->orderLen = sizeof(MSNvmXDTOrderInfo_Struct);
     }
     else if (orderSaveReason == ASWMONITOR_ORDER_SAVE_STOP)
     {

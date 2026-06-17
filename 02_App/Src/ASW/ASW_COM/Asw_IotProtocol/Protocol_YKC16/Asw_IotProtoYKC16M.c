@@ -624,9 +624,10 @@ void IotYKC16_PackChargeRecord(uint8_t port, MSNvmOrderInfo_Struct *pOrderData, 
             memcpy(pYKC16Order->physCardNum, pIotYKC16Ctx->stProtoData[port].authCardID, 8);
         }
 
+        pYKC16Order->stopReason = eIotYKC16StopReason_PowerOff;
+
         pOrderData->port = port;
         pOrderData->orderLen = sizeof(MSNvmYKC16OrderInfo_Struct);
-        pYKC16Order->stopReason = eIotYKC16StopReason_PowerOff;
         pOrderData->protocolType = AswPlatM_GetPlatType();
     }
 
