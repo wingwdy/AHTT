@@ -18,11 +18,11 @@
 ******************************************************************************/
 /* BCD码 */
 #define  APP_SW_MAJOR_VERSION                           (1u)
-#define  APP_SW_MINOR_VERSION                           (2u)
+#define  APP_SW_MINOR_VERSION                           (1u)
 #define  APP_SW_CUSTORM_VERSION                         (0u)
-#define  APP_SW_PATCH_VERSION                           (0u)
+#define  APP_SW_PATCH_VERSION                           (5u)
 
-#define  APP_SW_VERSION_STRING                          "V1.2.0.0"
+#define  APP_SW_VERSION_STRING                          "V1.1.0.5"
 #define  APP_SW_VERSION_DATE                            "2026/06/17"
 
 #define  APP_SW_VERSION_TYPE                            "标品"

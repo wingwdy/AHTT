@@ -159,7 +159,7 @@ void SSWdgM_MainFunction(void)
         {
             if (c_SSWdgConfig.wdgObjs[wdgIndex].enable && c_SSWdgConfig.wdgObjs[wdgIndex].pWdgFeed != NULL)
             {
-                c_SSWdgConfig.wdgObjs[wdgIndex].pWdgFeed();
+//                c_SSWdgConfig.wdgObjs[wdgIndex].pWdgFeed();
             }
         }
     }

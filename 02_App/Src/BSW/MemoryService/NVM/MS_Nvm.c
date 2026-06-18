@@ -21,6 +21,7 @@
 #include "MS_NvmConfig.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
+#include "DS_LogM.h"
 
 /*******************************************************************************
 *    Macro Definition
@@ -60,6 +61,7 @@ static void MSNvm_WriteFlashData(MSNvmBlockID_Enum eBlockID);
 /*******************************************************************************
 *    Function Source Code
 *******************************************************************************/
+#define ASWNVM_CFG_DebugPrint(fmt, ...)          DSLOGM_Debug(DSLogMModule_Flash, fmt, ##__VA_ARGS__)
 static void MSNvm_LoadFlashData(MSNvmBlockID_Enum eBlockID)
 {
     const MSNvmBlockDescriptor_Struct *pDescriptor = &c_stMSNvmBlockDescriptorTable[eBlockID];
@@ -86,6 +88,7 @@ static void MSNvm_LoadFlashData(MSNvmBlockID_Enum eBlockID)
             calcCrc16 = Common_CalcCRC16(pDescriptor->ramBlockDataAddr, pDescriptor->blockSize);
             Common_Uint16ToTwoUint8(pDescriptor->ramBlockDataAddr + pDescriptor->blockSize, calcCrc16);
             MSNvm_WriteFlashData(eBlockID);
+            ASWNVM_CFG_DebugPrint("[blockID: %d] 参数校验失败，执行默认！！\n", eBlockID);
         }
     }
 }
