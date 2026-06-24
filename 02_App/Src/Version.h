@@ -26,7 +26,7 @@
 #define  APP_SW_VERSION_DATE                            "2026/06/17"
 
 #define  APP_SW_VERSION_TYPE                            "标品"
-#define  HW_VERSION_INFO                                "D3-A32FB-20260313"
+#define  HW_VERSION_INFO                                "D3-A32FB-20260313" 
 
 /******************************************************************************
 *    Macro Definition
