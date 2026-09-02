@@ -1,0 +1,4 @@
+interface:
+  display_name: "AHTT 开发"
+  short_description: "安徽铁塔 AHTT V3.12 固件开发导航与领域约束"
+  default_prompt: "使用 $ahtt-development 处理当前 AHTT 任务。如任务属于 Planner、Executor 或 Reviewer，先读取 docs/ai/AHTT_AI_Development_Prompts.md，并仅执行用户明确指定的一个角色。"

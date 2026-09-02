@@ -1,0 +1,32 @@
+./gd32e503/build/psa_crypto_client.o: \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\library\psa_crypto_client.c \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\library\common.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\mbedtls\config.h \
+  ..\Src\Common\myMalloc.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stddef.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdint.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\psa\crypto.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\psa\crypto_platform.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\mbedtls\config_psa.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\psa\crypto_types.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\psa\crypto_values.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\psa\crypto_sizes.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\psa\crypto_struct.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\mbedtls\cmac.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\mbedtls\cipher.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\mbedtls\platform_util.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\mbedtls\gcm.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\psa\crypto_driver_contexts_primitives.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\psa\crypto_driver_common.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\psa\crypto_builtin_primitives.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\mbedtls\md2.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\mbedtls\md4.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\mbedtls\md5.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\mbedtls\ripemd160.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\mbedtls\sha1.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\mbedtls\sha256.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\mbedtls\sha512.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\psa\crypto_driver_contexts_composites.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\psa\crypto_builtin_composites.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\psa\crypto_extra.h \
+  ..\Src\ThirdPartyLib\Mbedtls\mbedtls\include\psa\crypto_compat.h

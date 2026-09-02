@@ -1,0 +1,14 @@
+./gd32e503/build/freertos.o: ..\Src\Core\freertos.c \
+  ..\Src\BSW\SystemService\OS\FreeRTOS\Source\include\FreeRTOS.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stddef.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdint.h \
+  ..\Src\BSW\SystemService\OS\FreeRTOS\Source\include\FreeRTOSConfig.h \
+  ..\Src\SysCfg.h \
+  ..\Src\BSW\SystemService\OS\FreeRTOS\Source\include\projdefs.h \
+  ..\Src\BSW\SystemService\OS\FreeRTOS\Source\include\portable.h \
+  ..\Src\BSW\SystemService\OS\FreeRTOS\Source\include\deprecated_definitions.h \
+  ..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure\portmacro.h \
+  ..\Src\BSW\SystemService\OS\FreeRTOS\Source\portable\GCC\ARM_CM33_NTZ\non_secure\portmacrocommon.h \
+  ..\Src\BSW\SystemService\OS\FreeRTOS\Source\include\mpu_wrappers.h \
+  ..\Src\BSW\SystemService\OS\FreeRTOS\Source\include\task.h \
+  ..\Src\BSW\SystemService\OS\FreeRTOS\Source\include\list.h

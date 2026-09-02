@@ -1,0 +1,4 @@
+interface:
+  display_name: "AHTT Bore 联调"
+  short_description: "AHTT 模拟平台、Bore 与测试桩联调"
+  default_prompt: "使用 $ahtt-bore-sim-validation 处理当前 AHTT 板端联调任务。先读取 AGENTS.md、ahtt-development 和 docs/ai/AHTT_AI_Development_Prompts.md，并严格遵守当前角色、Host Gate 与设备授权边界。"

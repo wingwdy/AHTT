@@ -1,0 +1,133 @@
+/******************************************************************************
+* File Name          : Global.h
+* Description        : Code for Global Definition
+ ------------------------------------------------------------------------------
+* (c) This software is the proprietary of Bull. All rights are reserved by Bull.
+-------------------------------------------------------------------------------
+*             R E V I S I O N   H I S T O R Y
+-------------------------------------------------------------------------------
+* Date          Version      Author    Description
+------------    --------     -------   ----------------------------------------
+*2025/10/10      V1.0.0      chenls    初版创建
+*
+******************************************************************************/
+
+#ifndef Global_H_
+#define Global_H_
+/******************************************************************************
+*    Header File Inclusion
+******************************************************************************/
+#include "stdint.h"
+
+/******************************************************************************
+*    Macro Definition
+******************************************************************************/
+#define GLOBAL_OPT_STATE_IDLE                          (0U)
+#define GLOBAL_OPT_STATE_PROCESS                       (1U)
+#define GLOBAL_OPT_STATE_SUCCESS                       (2U)
+#define GLOBAL_OPT_STATE_FAIL                          (3U)
+
+#ifndef NULL
+#define NULL ((void *)0)
+#endif
+
+#ifndef TRUE
+#define TRUE  1U
+#endif
+
+#ifndef FALSE
+#define FALSE 0U
+#endif
+
+
+#define STRUCT_POS(type, field)    ((uint32_t) &(( type *) 0)-> field)
+
+#define ARRAY_SIZE(x)               sizeof(x) / sizeof(x[0])
+
+#define PARA_ASSERT(x)              do \
+                                    {}while((x) != TRUE)
+                                    
+#define PARA_ASSERT_RET(x, ret)     do \
+                                    {\
+                                        if ((x) != TRUE)\
+                                        {\
+                                            return ret;\
+                                        }\
+                                    }while(0)
+
+#define CHECK_MAX_EQU(a, b)         ((a >= b) ? TRUE : FALSE)
+#define CHECK_MAX(a, b)             ((a > b) ? TRUE : FALSE)
+#define CHECK_MIN_EQU(a, b)         ((a <= b) ? TRUE : FALSE)
+#define CHECK_MIN(a, b)             ((a < b) ? TRUE : FALSE)
+#define CHECK_EQU(a, b)             ((a == b) ? TRUE : FALSE)
+
+            
+/******************************************************************************
+*    Enum Definition
+******************************************************************************/
+typedef enum
+{
+    eGlobalRet_OK,
+
+    eGlobalRet_Error,
+    eGlobalRet_ParaInvalid,
+
+
+    eGlobalRet_Unsupported,
+    eGlobalRet_InitFail,
+    eGlobalRet_NotInit,
+    
+    eGlobalRet_NotEnoughChannel,
+
+    eGlobalRet_FIFONotFull,
+
+    eGlobalRet_NotEnoughBuf,
+    eGlobalRet_NotEnoughData,
+
+    eGlobalRet_DeviceBusy,
+
+    eGlobalRet_UnexpectedError,
+}GlobalRet_Enum;
+
+
+
+/******************************************************************************
+*    Typedef Definition
+******************************************************************************/
+
+
+/******************************************************************************
+*    Global variables Declaration
+******************************************************************************/
+
+
+/******************************************************************************
+*    Global Function Prototypes
+******************************************************************************/
+
+
+#endif /* Global_H_ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
