@@ -1,0 +1,4 @@
+interface:
+  display_name: "AHTT 开发"
+  short_description: "安徽铁塔 AHTT V3.12 固件开发导航与交付约束"
+  default_prompt: "使用 $ahtt-development 分析并推进当前 AHTT 开发任务。"

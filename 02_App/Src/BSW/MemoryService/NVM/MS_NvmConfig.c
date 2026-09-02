@@ -1,0 +1,255 @@
+/******************************************************************************
+* File Name          : MS_NvmConfig.c
+* Description        : Code for The core service layer for managing non-volatile data 
+                       storage of the ECU
+ -------------------------------------------------------------------------------
+* (c) This software is the proprietary of Bull. All rights are reserved by Bull.
+-------------------------------------------------------------------------------
+*             R E V I S I O N   H I S T O R Y
+-------------------------------------------------------------------------------
+* Date          Version      Author    Description
+------------    --------     -------   ----------------------------------------
+*2025/10/10      V1.0.0      chenls    初版创建
+*
+*******************************************************************************/
+
+
+/*******************************************************************************
+*    Header File Inclusion
+*******************************************************************************/
+#include "MS_NvmConfig.h"
+#include "MS_Nvm.h"                                 
+#include "MS_NvmAppTypes.h"
+#include "MS_MemIf.h"
+
+#include "Asw_PlatM.h"
+/*******************************************************************************
+*    Macro Definition
+*******************************************************************************/
+
+
+
+
+/*******************************************************************************
+*    Enum Definition
+*******************************************************************************/
+
+
+
+
+/*******************************************************************************
+*    Typedef Definition
+*******************************************************************************/ 
+
+
+
+/*******************************************************************************
+*    Static Local Functions Declaration
+*******************************************************************************/
+static void MSNvmConfig_DefaultGun0Qrcode(uint8_t *pIndata, uint16_t dataLen);
+static void MSNvmConfig_DefaultGun0MeterEnergy(uint8_t *pIndata, uint16_t dataLen);
+static void MSNvmConfig_DefaultGun0OrderInfo(uint8_t *pIndata, uint16_t dataLen);
+static void MSNvmConfig_DefaultModeParam(uint8_t *pIndata, uint16_t dataLen);
+static void MSNvmConfig_MeterCaliParam(uint8_t *pIndata, uint16_t dataLen);
+static void MSNvmConfig_PlatParam(uint8_t *pIndata, uint16_t dataLen);
+static void MSNvmConfig_PlatPrivateParam(uint8_t *pIndata, uint16_t dataLen);
+static void MSNvmConfig_ForbidState(uint8_t *pIndata, uint16_t dataLen);
+
+
+/*******************************************************************************
+*    Global variables Declaration
+*******************************************************************************/
+/* 以下变量地址必须强制4字节对齐！！！: 因为开了优化等级-O1时,结构体中含义连续uint32_t成员,访问时编译器采用STR或STM指令要求4字节对齐,否则出现hardfault */
+static uint8_t g_MSNvmQrcodeRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmDrcode_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN] __attribute__((aligned(4)));
+static uint8_t g_MSNvmOrderInfoRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmOrderInfo_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN] __attribute__((aligned(4)));
+static uint8_t g_MSNvmMeterEnergyRam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmMeterEnergy_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN] __attribute__((aligned(4)));
+static uint8_t g_MSNvmModeParamRam[sizeof(MSNvmModeParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN] __attribute__((aligned(4)));
+static uint8_t g_MSNvmMeterCaliParam[SYSCFG_CFG_GUN_NUM][sizeof(MSNvmMeterCaliParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN] __attribute__((aligned(4)));
+static uint8_t g_MSNvmPlatParam[sizeof(MSNvmPlatParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN] __attribute__((aligned(4)));
+static uint8_t g_MSNvmPlatParamBackup[sizeof(MSNvmPlatParam_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN] __attribute__((aligned(4)));
+static uint8_t g_MSNvmPlatPrivateParam[sizeof(MSNvmPlatPrivateParam_Union) + MSNVM_CFG_ADDTION_CRC16_LEN] __attribute__((aligned(4)));
+static uint8_t g_MSNvmForbidState[sizeof(MSNvmForbidState_Struct) + MSNVM_CFG_ADDTION_CRC16_LEN] __attribute__((aligned(4)));
+
+const MSNvmBlockDescriptor_Struct c_stMSNvmBlockDescriptorTable[eMSNvmBlockID_Count] = 
+{
+    /* KVDB */
+    [eMSNvmBlockID_Gun0Qrcode] = 
+    {
+        .blockSize = sizeof(MSNvmDrcode_Struct),
+        .ramBlockDataAddr = g_MSNvmQrcodeRam[0],
+        .deviceID = MSMEMIF_DEVICE_EA_KVDB,
+        .memIfID = eKVDBAdaptChannel_Gun0Qrcode,
+        .pFuncDefault = MSNvmConfig_DefaultGun0Qrcode,
+    },
+
+    [eMSNvmBlockID_Gun0OrderInfo] = 
+    {
+        .blockSize = sizeof(MSNvmOrderInfo_Struct),
+        .ramBlockDataAddr = g_MSNvmOrderInfoRam[0],
+        .deviceID = MSMEMIF_DEVICE_EA_KVDB,
+        .memIfID = eKVDBAdaptChannel_Gun0OrderInfo,
+        .pFuncDefault = MSNvmConfig_DefaultGun0MeterEnergy,
+    },
+
+    [eMSNvmBlockID_Gun0MeterEnergy] = 
+    {
+        .blockSize = sizeof(MSNvmMeterEnergy_Struct),
+        .ramBlockDataAddr = g_MSNvmMeterEnergyRam[0],
+        .deviceID = MSMEMIF_DEVICE_EA_KVDB,
+        .memIfID = eKVDBAdaptChannel_Gun0MeterEnergy,
+        .pFuncDefault = MSNvmConfig_DefaultGun0OrderInfo,
+    },
+
+    [eMSNvmBlockID_ModeParam] = 
+    {
+        .blockSize = sizeof(MSNvmModeParam_Struct),
+        .ramBlockDataAddr = g_MSNvmModeParamRam,
+        .deviceID = MSMEMIF_DEVICE_EA_KVDB,
+        .memIfID = eKVDBAdaptChannel_ModeParam,
+        .pFuncDefault = MSNvmConfig_DefaultModeParam,
+    },
+
+    [eMSNvmBlockID_Gun0MeterCaliParam] = 
+    {
+        .blockSize = sizeof(MSNvmMeterCaliParam_Struct),
+        .ramBlockDataAddr = g_MSNvmMeterCaliParam[0],
+        .deviceID = MSMEMIF_DEVICE_EA_KVDB,
+        .memIfID = eKVDBAdaptChannel_MeterCaliParam,
+        .pFuncDefault = MSNvmConfig_MeterCaliParam,
+    },
+
+    [eMSNvmBlockID_PlatParam] = 
+    {
+        .blockSize = sizeof(MSNvmPlatParam_Struct),
+        .ramBlockDataAddr = g_MSNvmPlatParam,
+        .deviceID = MSMEMIF_DEVICE_EA_KVDB,
+        .memIfID = eKVDBAdaptChannel_PlatParam,
+        .pFuncDefault = MSNvmConfig_PlatParam,
+        .backupEnable = TRUE,
+        .asyncWriteVerifyEnable = TRUE,
+        .asyncBackupEnable = TRUE,
+        .backupBlockID = eMSNvmBlockID_PlatParamBackup,
+    },
+
+    [eMSNvmBlockID_PlatParamBackup] =
+    {
+        .blockSize = sizeof(MSNvmPlatParam_Struct),
+        .ramBlockDataAddr = g_MSNvmPlatParamBackup,
+        .deviceID = MSMEMIF_DEVICE_EA_KVDB,
+        .memIfID = eKVDBAdaptChannel_PlatParamBackup,
+        .pFuncDefault = NULL,
+        .asyncWriteVerifyEnable = TRUE,
+    },
+
+    [eMSNvmBlockID_PlatPrivateParam] = 
+    {
+        .blockSize = sizeof(MSNvmPlatPrivateParam_Union),
+        .ramBlockDataAddr = g_MSNvmPlatPrivateParam,
+        .deviceID = MSMEMIF_DEVICE_EA_KVDB,
+        .memIfID = eKVDBAdaptChannel_PlatPrivateParam,
+        .pFuncDefault = MSNvmConfig_PlatPrivateParam,
+    },
+
+    [eMSNvmBlockID_ForbidState] = 
+    {
+        .blockSize = sizeof(MSNvmForbidState_Struct),
+        .ramBlockDataAddr = g_MSNvmForbidState,
+        .deviceID = MSMEMIF_DEVICE_EA_KVDB,
+        .memIfID = eKVDBAdaptChannel_ForbidState,
+        .pFuncDefault = MSNvmConfig_ForbidState,
+    },
+
+    /* TSDB */
+    [eMSNvmBlockID_OrderRecord] = 
+    {
+        .blockSize = sizeof(MSNvmOrderInfo_Struct),
+        .ramBlockDataAddr = NULL,
+        .deviceID = MSMEMIF_DEVICE_EA_TSDB,
+        .memIfID = eTSDBAdaptChannel_ChargeRecord,
+    },
+
+    [eMSNvmBlockID_ErrorRecord] = 
+    {
+        .blockSize = sizeof(MSNvmErrorInfo_Struct),
+        .ramBlockDataAddr = NULL,
+        .deviceID = MSMEMIF_DEVICE_EA_TSDB,
+        .memIfID = eTSDBAdaptChannel_ErrorRecord,
+    },
+
+    [eMSNvmBlockID_RunningLogRecord] = 
+    {
+        .blockSize = sizeof(MSNvmRunningLog_Struct),
+        .ramBlockDataAddr = NULL,
+        .deviceID = MSMEMIF_DEVICE_EA_TSDB,
+        .memIfID = eTSDBAdaptChannel_RunningLog,
+    },
+
+    [eMSNvmBlockID_OmOrderRecord] =
+    {
+        .blockSize = sizeof(MSNvmOrderInfo_Struct),
+        .ramBlockDataAddr = NULL,
+        .deviceID = MSMEMIF_DEVICE_EA_TSDB,
+        .memIfID = eTSDBAdaptChannel_OmChargeRecord,
+    },
+
+    [eMSNvmBlockID_MeterRecord] =
+    {
+        .blockSize = sizeof(MSNvmMeterRecord_Struct),
+        .ramBlockDataAddr = NULL,
+        .deviceID = MSMEMIF_DEVICE_EA_TSDB,
+        .memIfID = eTSDBAdaptChannel_MeterRecord,
+    },
+};
+
+
+/*******************************************************************************
+*    Function Source Code
+*******************************************************************************/
+static void MSNvmConfig_DefaultGun0Qrcode(uint8_t *pIndata, uint16_t dataLen)
+{
+    memset(pIndata, 0x00, dataLen);
+}
+
+static void MSNvmConfig_DefaultGun0MeterEnergy(uint8_t *pIndata, uint16_t dataLen)
+{
+    memset(pIndata, 0x00, dataLen);
+}
+
+static void MSNvmConfig_DefaultGun0OrderInfo(uint8_t *pIndata, uint16_t dataLen)
+{
+    memset(pIndata, 0x00, dataLen);
+}
+
+static void MSNvmConfig_DefaultModeParam(uint8_t *pIndata, uint16_t dataLen)
+{
+    memset(pIndata, 0x00, dataLen);
+}
+
+static void MSNvmConfig_MeterCaliParam(uint8_t *pIndata, uint16_t dataLen)
+{
+    memset(pIndata, 0x00, dataLen);
+}
+
+static void MSNvmConfig_PlatParam(uint8_t *pIndata, uint16_t dataLen)
+{
+    AswPlatM_DefaultPlatParam(pIndata);
+}
+
+static void MSNvmConfig_PlatPrivateParam(uint8_t *pIndata, uint16_t dataLen)
+{
+    AswPlatM_DefaultPlatPrivateParam(pIndata);
+}
+
+static void MSNvmConfig_ForbidState(uint8_t *pIndata, uint16_t dataLen)
+{
+    memset(pIndata, 0x00, dataLen);
+}
+
+
+
+
+
+
+
+
+

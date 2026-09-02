@@ -1,0 +1,7 @@
+2026-09-02T07:40:16.866757Z  INFO bore_cli::client: connected to server remote_port=43880
+2026-09-02T07:40:16.867250Z  INFO bore_cli::client: listening at bore.pub:43880
+2026-09-02T07:41:28.871071Z  INFO proxy{id=f53484ae-0721-439c-b149-77b412d77908}: bore_cli::client: new connection
+2026-09-02T07:42:00.172503Z  INFO proxy{id=f53484ae-0721-439c-b149-77b412d77908}: bore_cli::client: connection exited
+2026-09-02T07:42:05.756354Z  INFO proxy{id=16594c1e-cb96-4bd7-a7af-bba741f31976}: bore_cli::client: new connection
+2026-09-02T07:42:37.090603Z  INFO proxy{id=16594c1e-cb96-4bd7-a7af-bba741f31976}: bore_cli::client: connection exited
+2026-09-02T07:42:42.515986Z  INFO proxy{id=bf17add7-5eaf-4770-8390-3058fa64f61f}: bore_cli::client: new connection

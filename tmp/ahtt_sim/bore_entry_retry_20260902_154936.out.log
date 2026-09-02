@@ -1,0 +1,3 @@
+2026-09-02T07:49:37.373280Z  INFO bore_cli::client: connected to server remote_port=36904
+2026-09-02T07:49:37.374126Z  INFO bore_cli::client: listening at bore.pub:36904
+2026-09-02T07:50:16.912734Z  INFO proxy{id=e695e6be-86cc-4efe-8f3c-1a664691e99c}: bore_cli::client: new connection
