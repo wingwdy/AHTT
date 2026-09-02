@@ -268,7 +268,7 @@ powershell -ExecutionPolicy Bypass -File tools\ahtt\Validate-AHTTM3.ps1
 
 预期：M1、M2 全部保持通过；M3 中四命令相关用例全部通过。
 
-验证证据：2026-09-02 M1为9/9通过，M2为11项向量及17项源码一致性检查通过，M3为17/17通过。
+验证证据：2026-09-02 M1为9/9通过，M2为11项向量及17项源码一致性检查通过，M3为18/18通过。
 
 ### 任务 5：实现 `0x84/0x85`原子设置和查询
 
@@ -342,7 +342,7 @@ powershell -ExecutionPolicy Bypass -File tools\ahtt\Validate-AHTTM3.ps1
 
 验证 `TryingNew`掉电后从旧 NVM 地址启动；事务忙时新的 `0x04`不覆盖旧事务；同地址设置不写 NVM、不重建连接。
 
-验证证据：2026-09-02 `Validate-AHTTM3.ps1`新增M3-VEC-014至M3-VEC-017，覆盖固定长度ASCII字段、候选签到成功静默提交、TCP/NVM失败回滚及原流水号、同地址静默成功、事务忙和试连中掉电；Keil目标`D3_A32FB_GD32E503RE`为`0 Error(s), 0 Warning(s)`。候选TCP超时固定为60秒；连接后签到沿用现有3次×10秒机制。
+验证证据：2026-09-02 `Validate-AHTTM3.ps1`覆盖M3-VEC-014至M3-VEC-018，包括固定长度字段、候选签到成功静默提交、同步和异步NVM校验失败回滚及原流水号、同地址静默成功、事务忙和试连中掉电；Keil目标`D3_A32FB_GD32E503RE`为`0 Error(s), 0 Warning(s)`。候选TCP超时固定为60秒；连接后签到沿用现有3次×10秒机制；平台参数块异步校验成功前事务保持提交校验状态，最终失败会恢复旧地址。
 
 ### 任务 7：Keil 构建、静态影响面和资源验证
 
@@ -355,6 +355,8 @@ powershell -ExecutionPolicy Bypass -File tools\ahtt\Validate-AHTTM3.ps1
 
 预期所有脚本 0 失败；测试输出单独列出边界、原子性、写次数、升级迁移和域名状态模型。
 
+验证证据：2026-09-02 M1为9/9通过，M2为11项向量及17项源码一致性检查通过，M3为18/18通过。
+
 - [x] **步骤 2：执行 Keil 全量构建**
 
 ```powershell
@@ -362,6 +364,8 @@ powershell -ExecutionPolicy Bypass -File tools\ahtt\Validate-AHTTM3.ps1
 ```
 
 预期：0 Error(s)，AHTT 新增警告为 0；与 M2 基线比较 Flash、RAM 和任务栈变化。
+
+验证证据：2026-09-02 Keil目标`D3_A32FB_GD32E503RE`返回码为0，日志为`0 Error(s), 0 Warning(s)`；当前程序尺寸为Code=330112、RO-data=59076、RW-data=5236、ZI-data=115340。未取得M2构建产物尺寸基线，不作资源增量结论。
 
 - [x] **步骤 3：执行静态边界检查**
 
@@ -372,7 +376,7 @@ rg -n "0x05|CMD_SET_PORT" 02_App\Src\ASW\ASW_COM\Asw_IotProtocol\Protocol_AHTT
 
 确认 NVM 写入口集中、网络更新只在 M 层、未误实现 `0x05`、未修改其他协议行为。
 
-验证证据：2026-09-02确认`0x04/0x84/0x85`仍为NULL收发回调；AHTT新增/修改代码未出现数值字面量后缀；未创建`MSNvmPlatPrivateParam_Union`局部副本。
+验证证据：2026-09-02确认`0x04/0x84/0x85`已绑定收发回调；AHTT网络更新仅在M层，NVM写入口集中于AHTT M层和公共NVM API，`0x05`未实现；AHTT新增/修改代码未出现数值字面量后缀，未创建`MSNvmPlatPrivateParam_Union`局部副本。平台参数块异步校验状态仅由新增只读查询接口暴露，不改变既有写入、重试和备份机制。
 
 - [ ] **步骤 4：检查 20ms 任务实时性**
 

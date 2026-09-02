@@ -5,82 +5,509 @@ description: Use when 在 D3-A32FB_MCU 中分析、设计、实现、调试或�
 
 # AHTT 开发
 
-## 核心原则
+- ## 1. Skill 定位
 
-协议定义功能，当前项目定义架构，旧项目只提供经验。任何结论都必须能追溯到协议、当前代码、测试/抓包或用户决策之一。
+  本 Skill 只维护 **AHTT 领域知识、事实来源、架构导航和任务分析方法**。
 
-`Protocol_GN` 是 AHTT 的代码风格与平台架构模板。AHTT 在文件划分、状态机、函数、类型、变量、控制表和调用组织上默认与 GN 同构；仅协议语义造成的必要差异可以偏离，且必须在修改方案中逐项说明。
+  以下内容不在本 Skill 重复定义：
 
-## 开始任务
+  - C 编码规范。
+  - Git 安全规则。
+  - 代码修改前置确认。
+  - Planner / Executor / Reviewer 的角色门禁。
+  - 通用调试、测试驱动、代码评审方法论。
 
-1. 完整阅读 `docs/ahtt/AHTT项目开发总纲.md`。
-2. 使用文档读取能力定位 V3.12 的对应章节、表号、专节字段表、示例、修订记录和协议要求；页码只有在渲染核对后才能引用。
-3. 旧实现按“最小调用闭环”读取：命令常量、组包/解析、收发控制表、成功回调、超时、任务入口以及直接业务/NVM 依赖。不得把旧实现自动视为当前需求。
-4. 对照 `Protocol_GN`、`Asw_PlatM`、`FrameQueue`、`MS_Nvm` 和充电业务接口定位当前架构接入点。
-5. 写代码前建立当前切片的 GN→AHTT 对照表；具体规则见 [GN 同构与校验边界](references/GN同构与校验边界.md)。
+  上述规则分别由：
 
-涉及命令帧完成后的4G桩模拟平台、Bore内网穿透、串口临时域名配置、心跳静默、超时或重连板端联调时，必须加载 `ahtt-bore-sim-validation`。
+  ```text
+  AGENTS.md
+  AHTT AI Development Prompts.md
+  全局 Skills
+  ```
 
-## 事实优先级
+  负责。
 
-1. 用户确认的当前产品需求。
-2. `reference/安徽省铁塔充电平台设备交互协议V3.12（新协议）.docx`。
-3. 当前硬件、配置、代码、构建、测试、抓包和板端证据。
-4. `reference/参考项目/D3-A32EB_SCU` 旧实现。
-5. 工程经验。
+  执行 AHTT 任务时必须先遵守仓库根目录 `AGENTS.md`。
 
-存在不一致时标记 `[CONFLICT]`；缺少产品决策时标记 `[TBD]`；不得静默选择低优先级来源。
+  ---
 
-## 任务输出契约
+  ## 2. 何时使用
 
-| 任务 | 必须输出 |
-|---|---|
-| 分析/定位 | 协议依据、当前调用路径、旧实现差异、结论与未知项 |
-| 方案/设计 | 目标、文件边界、数据流、状态机、异常路径、资源和验证方案 |
-| 实现/修复 | 修改前方案与用户确认；报文向量或替代验证；最小范围代码改动 |
-| 评审 | 协议符合性、越界/端序/CRC、状态与幂等、持久化兼容、任务实时性、板端遗漏 |
-| 联调/调试 | 复现条件、原始报文/日志、数据流、根因证据、验证结果与未验证项 |
+  以下任务优先加载本 Skill：
 
-详细模板见 [任务交付模板](references/任务交付模板.md)。
+  - AHTT V3.12 协议分析。
+  - AHTT 命令帧新增、修改或排障。
+  - `Protocol_AHTT` Send / Recv / M 层开发。
+  - 登录、心跳、离线、重连和业务状态机分析。
+  - 平台命令与充电业务接口适配。
+  - AHTT 私有参数和 NVM 设计。
+  - AHTT 与 `Asw_PlatM`、`FrameQueue`、`Cdd_NetM` 等模块的集成。
+  - AHTT 协议代码 Review。
+  - 报文、流水号、CRC、端序、幂等、超时和重试问题。
+  - 板端联调前的 AHTT 代码与协议核对。
 
-## 架构边界
+  如果任务属于 Bore / TCP 模拟器 / 4G 桩联调，再加载：
 
-- `Asw_IotProtoAHTTTypes.h`：命令、字段、上下文和控制表。
-- `Asw_IotProtoAHTTSend.c/.h`：组包和发送调度。
-- `Asw_IotProtoAHTTRecv.c/.h`：帧查找、合法性校验、解析、应答匹配和超时。
-- `Asw_IotProtoAHTTM.c/.h`：平台状态机、周期业务和业务接口适配。
-- 集成点还必须检查 `AswPlatType_Enum`、`Asw_PlatMConfig` 描述符、NVM 类型/默认值和 Keil `Project.uvprojx`；这些修改只放在所属模块，不塞入协议收发文件。
+  ```text
+  ahtt-bore-sim-validation
+  ```
 
-若现有架构证据表明需要调整边界，先说明原因和影响，再提交设计确认。
+  ---
 
-## GN 同构约束
+  ## 3. 开始任务时的读取顺序
 
-- AHTT 主状态机固定采用 `Init → Offline → Login → Normal`，枚举、处理函数和分发结构按 GN 对应项仅替换协议标识。
-- 有 GN 对应项时，文件名、函数名、类型名、变量名和字段名原则上只做 `GN`→`AHTT`、`gn`→`ahtt` 替换。例如 `IotGN_SendLoginReq`→`IotAHTT_SendLoginReq`，`IotGNCtx_Struct`→`IotAHTTCtx_Struct`，`pIotGNCtx`→`pIotAHTTCtx`。
-- 不因个人偏好重命名、重新分层、增加包装函数或改变控制流。协议确有新增语义时，先找 GN 中同职责的最近命名模式，再命名新增项。
-- 方案和评审必须列出所有未能按 GN 一一映射的项目及原因。
+  ### 3.1 先读取规则和角色定义
 
-## 实施约束
+  首先读取：
 
-- 修改代码前必须展示完整方案并取得用户明确确认。
-- C 函数局部变量声明放在函数开头；运行期赋值保留在语义正确的位置。
-- 新增或修改AHTT C代码时，数值字面量不得使用`U`、`L`、`UL`、`ULL`等后缀，例如写`0xEA`而不是`0xEAU`、写`12`而不是`12U`。除非用户对具体位置另行明确允许，否则宏、枚举、赋值、比较和代码示例均执行此规则；不得借此批量改写无关既有代码。
-- 解析平台/网络输入前验证最小长度、声明长度、帧头、版本、设备号和 CRC；由外部报文派生的索引与端口必须检查边界。模块内部索引与端口是否重复检查按 GN 对应位置处理。
-- 明确 TCP 半包、粘包、多帧、异常帧恢复、流水号、单号幂等、应答匹配、超时和重试。
-- 设备级命令没有端口字段时，不得继承旧项目的固定枪口假设；内部控制表槽位与协议字段语义必须分开定义。
-- 防御性校验重点用于平台下发和网络输入：帧长、字段范围、命令、端口、设备号、CRC、枚举和业务前置状态。
-- 对已由初始化顺序、模块私有状态和内部调用契约保证的对象，不新增重复防御判断。使用 `pIotAHTTCtx` 前是否判空，逐处查找 GN 对应位置；GN 未判断则 AHTT 不判断。
-- GN 仅在初始化/资源创建等生命周期边界检查的条件，AHTT 也只在相同边界检查。没有 GN 对应位置而确需新增内部防御判断时，必须在方案中给出可达失败路径并等待用户确认。
-- 不以“编译通过”代替功能完成；明确区分本地已验证、板端待验证和平台待验证。
-- 每完成一个纵向切片，回写命令矩阵、测试向量或联调记录；目标文档尚未创建时，先在总纲“风险与待决策项/当前状态”记录落点，再在对应文档任务获确认后建立专门文档。
+  ```text
+  AGENTS.md
+  ```
 
-## 常见错误
+  如果当前任务明确处于 Planner / Executor / Reviewer 工作流，再读取：
 
-- 复制旧单文件后再拆分，导致旧版本行为和耦合一起进入新架构。
-- 只实现正常报文，不处理长度、CRC、设备号、重复单号和异常恢复。
-- 把协议建议、旧产品参数或当前代码现状直接写成强制需求。
-- 只创建协议四文件，漏掉平台枚举、描述符注册、NVM 默认值或工程文件。
-- 修改 NVM 联合体但未检查默认值、块长度、升级兼容和掉电恢复。
-- 为内部可信对象到处添加 NULL、端口或状态防御判断，偏离 GN 的同构控制流。
-- 在没有协议必要性的情况下重新设计 GN 已有的状态机、命名或文件职责。
-- 未经板端验证就宣称任务已完成。
+  ```text
+  AHTT AI Development Prompts.md
+  ```
+
+  并只执行当前角色允许的动作。
+
+  ### 3.2 再读取当前 AHTT 权威文档
+
+  从 `docs/ahtt/` 发现当前真实存在的相关文档。
+
+  当前核心文档如存在，应优先查看：
+
+  ```text
+  AHTT项目开发总纲.md
+  AHTT-软件架构设计.md
+  AHTT-V3.12-事实台账.md
+  AHTT-V3.12-命令追踪矩阵.md
+  ```
+
+  按任务需要继续读取：
+
+  ```text
+  AHTT-M*.md
+  AHTT-报文测试向量.md
+  AHTT-板端验证清单.md
+  AHTT-联调问题记录.md
+  ```
+
+  不得因为本 Skill 列出了历史文件名就假设其永久存在；新增的当前权威文档同样必须纳入。
+
+  ### 3.3 协议任务必须定位原始协议
+
+  涉及协议字段、命令、方向、长度、字节序、单位、取值范围、应答语义或超时时：
+
+  优先定位：
+
+  ```text
+  reference/安徽省铁塔充电平台设备交互协议V3.12（新协议）.docx
+  ```
+
+  读取对应：
+
+  - 章节。
+  - 表格。
+  - 字段定义。
+  - 示例。
+  - 修订说明。
+  - 专节约束。
+
+  页码只有在实际渲染核对后才能引用。
+
+  ### 3.4 最后读取真实目标代码
+
+  必须读取当前真实目标代码及最小调用闭环。
+
+  不得仅依据：
+
+  - 历史聊天。
+  - 旧 Plan。
+  - 旧文档摘要。
+  - Skill 中的历史基线。
+
+  推断当前实现。
+
+  ---
+
+  ## 4. 事实来源优先级
+
+  AHTT 任务按以下顺序判断事实：
+
+  ```text
+  1. 用户确认的当前产品需求
+  2. AHTT V3.12 原始协议
+  3. 当前硬件 / 配置 / 代码 / build / test / 抓包 / 板端证据
+  4. 当前 docs/ahtt 权威文档
+  5. 当前项目 GN 对照实现
+  6. reference/参考项目中的旧实现
+  7. 工程经验
+  ```
+
+  冲突时：
+
+  ```text
+  [CONFLICT]
+  ```
+
+  缺少产品决策时：
+
+  ```text
+  [TBD]
+  ```
+
+  仍需真实验证时：
+
+  ```text
+  [TBC]
+  ```
+
+  不得静默使用低优先级来源覆盖高优先级来源。
+
+  ---
+
+  ## 5. AHTT 架构导航
+
+  当前 AHTT 运行时代码的主要职责通常分布在：
+
+  ```text
+  Asw_IotProtoAHTTTypes.h
+  Asw_IotProtoAHTTSend.c/.h
+  Asw_IotProtoAHTTRecv.c/.h
+  Asw_IotProtoAHTTM.c/.h
+  ```
+
+  职责核对基线：
+
+  | 区域                        | 主要职责                                 |
+  | --------------------------- | ---------------------------------------- |
+  | `Asw_IotProtoAHTTTypes.h`   | 命令、字段、Context、控制表、协议类型    |
+  | `Asw_IotProtoAHTTSend.c/.h` | payload 组包、发送调度、发送控制         |
+  | `Asw_IotProtoAHTTRecv.c/.h` | 帧定位、合法性检查、解析、应答匹配、超时 |
+  | `Asw_IotProtoAHTTM.c/.h`    | 平台状态机、周期业务、业务接口适配       |
+
+  常见集成点还包括：
+
+  ```text
+  Asw_PlatM
+  FrameQueue
+  Cdd_NetM
+  MS_Nvm
+  充电业务模块
+  SysCfg / 平台配置
+  02_App/Prj/Project.uvprojx
+  ```
+
+  以上只是导航基线。
+
+  真正 owner、接口和调用路径必须以当前代码为准。
+
+  ---
+
+  ## 6. 最小调用闭环
+
+  分析一个 AHTT 功能时，不要只看单个函数。
+
+  ### 6.1 平台下行
+
+  至少追踪：
+
+  ```text
+  TCP / NetM
+  → FrameQueue
+  → frame validation
+  → command dispatch
+  → parser
+  → M layer / business adapter
+  → business / NVM
+  → response scheduling
+  ```
+
+  ### 6.2 主动上报
+
+  至少追踪：
+
+  ```text
+  M / state / business trigger
+  → SendCtrl
+  → payload pack
+  → frame pack
+  → FrameQueue
+  → NetM
+  ```
+
+  ### 6.3 请求 / 应答事务
+
+  如命令存在等待态，还要追踪：
+
+  ```text
+  request start
+  → sequence / transaction context
+  → waiting
+  → matching response
+  → success / failure / timeout
+  → cleanup
+  ```
+
+  ---
+
+  ## 7. GN → AHTT 对照
+
+  GN 的使用规则以根目录 `AGENTS.md` 为准。
+
+  本 Skill 只补充 AHTT 领域上的执行方法。
+
+  当当前任务存在合理 GN 同职责实现时：
+
+  1. 找到 GN 对应 symbol / path。
+  2. 找到 AHTT 目标 symbol / path。
+  3. 比较职责、调用层级、控制流和状态。
+  4. 明确哪些应保持同构。
+  5. 明确哪些因 AHTT 协议语义必须不同。
+  6. 将差异写入 Plan 或 Review 证据。
+
+  详细对照方法见：
+
+  ```text
+  references/GN同构与校验边界.md
+  ```
+
+  如果任务本身没有合理 GN 对应实现：
+
+  ```text
+  GN Mapping: N/A
+  ```
+
+  不得为了模板完整而制造虚假对应关系。
+
+  ---
+
+  ## 8. 状态与数据 owner 分析
+
+  任何涉及新状态、缓存、flag、Context 字段、transaction 状态或持久化数据的任务，都必须先回答：
+
+  ```text
+  谁产生这个状态？
+  谁拥有这个状态？
+  谁更新？
+  谁消费？
+  生命周期何时开始？
+  何时清理？
+  是否需要持久化？
+  是否已经存在同一事实的 owner？
+  ```
+
+  重点核对：
+
+  - AHTT runtime Context。
+  - 网络状态 owner。
+  - 充电业务 owner。
+  - NVM owner。
+  - FrameQueue。
+  - command / transaction runtime。
+
+  不得仅因为历史 Skill 中曾记录某个 owner，就跳过当前代码确认。
+
+  ---
+
+  ## 9. AHTT 命令分析模板
+
+  涉及具体协议命令时，至少建立：
+
+  ```text
+  Command:
+  Direction:
+  Request / Response:
+  Parameter layout:
+  Parameter length:
+  Endian:
+  Unit:
+  Range:
+  Sequence semantics:
+  Transaction / order id:
+  Retry:
+  Timeout:
+  Idempotency:
+  Business precondition:
+  NVM impact:
+  Failure response:
+  ```
+
+  如协议存在歧义：
+
+  ```text
+  [CONFLICT]
+  ```
+
+  如果产品仍需决策：
+
+  ```text
+  [TBD]
+  ```
+
+  不要用旧项目行为自动补齐协议缺口。
+
+  ---
+
+  ## 10. 设备级与端口级语义
+
+  分析命令时必须确认：
+
+  - 该命令是设备级还是端口级。
+  - 协议中是否真实存在端口字段。
+  - 内部控制表槽位是否只是实现细节。
+  - 旧项目中的固定枪口假设是否仍成立。
+
+  如果设备级命令没有端口字段：
+
+  - 不得因为旧项目曾固定使用某个枪口而把它当成协议字段。
+  - 内部索引和协议语义必须分开描述。
+
+  ---
+
+  ## 11. 流水号与事务关系
+
+  AHTT 下行、上行和应答逻辑必须区分：
+
+  ```text
+  设备流水号
+  平台流水号
+  请求流水号
+  应答流水号
+  transaction / order id
+  ```
+
+  分析一个命令时必须回答：
+
+  - 流水号由谁生成。
+  - 应答应复制哪一侧的流水号。
+  - 等待项按什么条件匹配。
+  - 重复报文是否幂等。
+  - 超时后旧应答如何处理。
+  - 断链 / 重连后等待态如何清理。
+
+  不得只按“数值相同”判断语义相同。
+
+  ---
+
+  ## 12. 旧实现的使用方式
+
+  `reference/参考项目` 仅提供历史经验。
+
+  读取旧实现时按最小调用闭环定位：
+
+  - 命令常量。
+  - 组包。
+  - 解析。
+  - 收发控制表。
+  - 成功回调。
+  - 超时。
+  - 状态入口。
+  - 业务接口。
+  - NVM 依赖。
+
+  旧实现可以帮助回答：
+
+  ```text
+  过去怎么做？
+  ```
+
+  不能自动回答：
+
+  ```text
+  当前 AHTT 必须怎么做？
+  ```
+
+  旧实现和当前协议 / 当前架构冲突时，不得直接移植。
+
+  ---
+
+  ## 13. 与全局 Skills 的协作
+
+  AHTT 领域上下文由本 Skill 提供。
+
+  按任务可组合全局 Skills：
+
+  | 场景                  | 建议的全局 Skill                             |
+  | --------------------- | -------------------------------------------- |
+  | Bug / 异常 / 测试失败 | `systematic-debugging`                       |
+  | RTOS 调用链与任务关系 | `rtos-code-navigation`                       |
+  | 板级配置              | `rtos-board-config-analysis`                 |
+  | Bootloader / OTA      | `mcu-bootloader-code-navigation`             |
+  | 新功能实施            | `test-driven-development`                    |
+  | 完成前证据核对        | `verification-before-completion`             |
+  | 高风险需求尚未收敛    | `grill-me-codex`                             |
+  | 通用变更评审          | 通用 review Skill，作为 AHTT Reviewer 的辅助 |
+
+  如果当前任务使用 AHTT Planner / Executor / Reviewer：
+
+  ```text
+  AHTT AI Development Prompts.md
+  ```
+
+  的角色边界和输出契约优先。
+
+  通用 `writing-plans`、`requesting-code-review` 等 Skill 不得覆盖 AHTT 专用角色 SOP。
+
+  ---
+
+  ## 14. Bore 联调路由
+
+  出现以下任务时加载：
+
+  ```text
+  ahtt-bore-sim-validation
+  ```
+
+  包括：
+
+  - AHTT 命令帧主机验证完成后进入真实 4G 桩联调。
+  - TCP 模拟平台验证。
+  - Bore 内网穿透。
+  - 心跳静默。
+  - Offline / reconnect。
+  - TCP backoff。
+  - 临时测试端点配置。
+  - 串口配置和测试后恢复。
+
+  本 Skill 不重复 Bore 运行命令和串口操作细节。
+
+  这些细节由 Bore Skill 及其运行手册维护。
+
+  ---
+
+  ## 15. 文档回写判断
+
+  AHTT 功能实现或验证完成后，需要判断当前任务是否影响：
+
+  - 命令追踪矩阵。
+  - 事实台账。
+  - 测试向量。
+  - 板端验证清单。
+  - 联调问题记录。
+  - 当前阶段 M* 文档。
+  - 软件架构设计。
+
+  只更新与当前任务真实变化有关的文档。
+
+  如果代码、测试和文档状态不一致，应明确记录 documentation drift，不得假装一致。
+
+  ---
+
+  ## 16. 常见错误
+
+  重点防止：
+
+  - 把旧项目行为当成 AHTT V3.12 当前需求。
+  - 只读一个函数，不追调用闭环。
+  - 只实现 happy path。
+  - 把设备级命令误当端口级命令。
+  - 混用设备流水号和平台流水号。
+  - 新增第二份业务、网络或持久化状态。
+  - 为了“更安全”无证据改变 GN 同构控制流。
+  - 只创建协议文件，遗漏 PlatM / NVM / 工程集成点。
+  - 修改持久化结构但不检查兼容和恢复路径。
+  - Host test 通过后直接宣称板端或真实平台完成。
+  - 使用历史 Skill / Plan 中的架构基线覆盖当前代码。
