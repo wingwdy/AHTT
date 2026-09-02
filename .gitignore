@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Runtime logs
+*.log
+
+# AHTT temporary runtime artifacts
+tmp/ahtt_sim/
+
+# Temporary generated files
+tmp/pdfs/
+
+# Local code-review cache/database
+.code-review-graph/
+
